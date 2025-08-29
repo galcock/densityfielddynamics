@@ -13,6 +13,7 @@
     .subscribe { margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap }
     .subscribe input[type="email"]{padding:12px 14px;border-radius:10px;border:1px solid var(--line,#1b2130);background:rgba(255,255,255,.03);color:inherit;min-width:260px}
     .subscribe button{padding:12px 16px;border-radius:10px;border:1px solid var(--line,#1b2130);background:linear-gradient(135deg,#17243f,#0d1528);color:inherit;cursor:pointer}
+
     .papers{display:grid; gap:16px; margin-top:18px}
     .paper{background:var(--panel,#10131a);border:1px solid var(--line,#1b2130);border-radius:16px;padding:18px}
     .paper h3{margin:0 0 6px}
@@ -22,6 +23,14 @@
     header.site{padding:64px 0 28px;border-bottom:1px solid var(--line,#1b2130)}
     .container{max-width:1100px;margin:0 auto;padding:0 20px}
     .claimlist{margin:10px 0 0; padding-left:18px}
+
+    /* DFD GPT panel */
+    .gpt-panel{margin-top:18px; padding:16px; border:1px solid var(--line,#1b2130); border-radius:16px; background:var(--panel,#10131a)}
+    .gpt-actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px}
+    .btn{display:inline-block; padding:12px 16px; border-radius:12px; border:1px solid var(--line,#1b2130); color:inherit; text-decoration:none; background:rgba(255,255,255,.03)}
+    .btn:hover{background:rgba(255,255,255,.06)}
+    .btn.primary{background:linear-gradient(135deg,#17243f,#0d1528); border-color:#1f2a42}
+    .small{font-size:.9em}
   </style>
 </head>
 <body>
@@ -45,6 +54,16 @@
         <input type="hidden" name="_subject" value="DFD updates subscription">
       </form>
       <p id="form-status" class="muted" style="margin-top:8px;"></p>
+
+      <!-- DFD GPT launcher (inline panel; secure-window open) -->
+      <div class="gpt-panel" aria-labelledby="askdfd">
+        <h2 id="askdfd" style="margin:0 0 6px">Ask DFD (Interactive)</h2>
+        <p class="muted small">Discuss the theory, derivations, experiments, and papers with the DFD GPT assistant. For security and privacy, the chat opens in a focused window.</p>
+        <div class="gpt-actions">
+          <a id="open-dfd-gpt" class="btn primary" href="https://chatgpt.com/g/g-68b0ed55ebb88191b5c12b6caeeaadd6-dfd-gpt" target="_blank" rel="noopener">Open DFD GPT</a>
+          <a class="btn" href="#papers">Skip to papers</a>
+        </div>
+      </div>
     </div>
   </header>
 
@@ -82,12 +101,12 @@
           </div>
         </article>
 
-        <!-- c-field PRD framework (local PDF name present in repo root) -->
+        <!-- c-field PRD framework -->
         <article class="paper">
           <h3>Density Field Dynamics and the c-Field: A Three-Dimensional, Time-Emergent Dynamics for Gravity and Cosmology</h3>
           <p>Framework: field equations, conservation laws, Newtonian and optical limits, and exact recovery of classical tests.</p>
           <div class="meta">
-            <a href="./Density_Field_Dynamics__Arxiv_.pdf">PDF</a>
+            <a href="./Density_Field_Dynamics_and_the_c_Field__A_Three_Dimensional__Time_Emergent_Dynamics_for_Gravity_and_Cosmology.pdf">PDF</a>
             <a href="https://zenodo.org/records/16900767" rel="noopener">Zenodo record</a>
           </div>
         </article>
@@ -101,21 +120,21 @@
           </div>
         </article>
 
+        <!-- Large-scale power suppression -->
+        <article class="paper">
+          <h3>Evidence for Large-Scale Power Suppression in Both Hubble-Bias Analyses and the Cosmic Microwave Background</h3>
+          <p>Correlated suppression at low-ℓ linking environmental bias with observed CMB anomalies in a unified optical-metric interpretation.</p>
+          <div class="meta">
+            <a href="./Evidence_for_Large_Scale_Power_Suppression_in_Both_Hubble_Bias_Analyses_and_the_Cosmic_Microwave_Background.pdf">PDF</a>
+          </div>
+        </article>
+
         <!-- Induced G -->
         <article class="paper">
           <h3>Induced Newton’s Constant within Density Field Dynamics</h3>
           <p>Induced-gravity derivation of the effective Planck scale from SM field content in the ψ-medium; identifies testable shifts.</p>
           <div class="meta">
             <a href="./Induced_Newtons_Constant_within_Density_Field_Dynamics.pdf">PDF</a>
-          </div>
-        </article>
-
-        <!-- Unified overview -->
-        <article class="paper">
-          <h3>Density Field Dynamics: The Unified Theory of Matter, Light, and Gravity</h3>
-          <p>Program-level synthesis connecting theory, computation, and experimental proposals; concise overview for broad readership.</p>
-          <div class="meta">
-            <a href="./Density_Field_Dynamics__The_Unified_Theory_of_Matter__Light__and_Gravity.pdf">PDF</a>
           </div>
         </article>
 
@@ -158,6 +177,14 @@
         status.textContent = "Network error. Please try again later.";
       }
     });
-  </script>
-</body>
-</html>
+
+    // GPT launcher: open in a focused window (embedding is blocked by security policy)
+    document.getElementById('open-dfd-gpt')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      const url = e.currentTarget.getAttribute('href');
+      const w = Math.min(980, window.innerWidth - 80);
+      const h = Math.min(820, window.innerHeight - 80);
+      const left = Math.max(20, (screen.width - w) / 2);
+      const top  = Math.max(20, (screen.height - h) / 2);
+      window.open(url, 'dfd_gpt',
+        `popup=yes,noopener,noreferrer,width=${w},height=${h},left=${left},
