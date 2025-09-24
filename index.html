@@ -8,12 +8,52 @@
   <link rel="icon" type="image/png" href="favicon.png" />
   <link rel="stylesheet" href="style.css" />
   <meta name="color-scheme" content="dark light">
+  <!-- Temporarily hide from search engines while gated -->
+  <meta name="robots" content="noindex,nofollow,noarchive">
+
   <style>
-    /* Minimal local styles to complement style.css */
+    /* ===== Password Gate (overlay) ===== */
+    #gate {
+      position: fixed; inset: 0; z-index: 99999;
+      display: grid; place-items: center;
+      background: radial-gradient(1200px 800px at 50% 0%, rgba(18,23,35,.96), rgba(8,10,15,.98));
+      color: #e6edf3; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    }
+    .gate-card {
+      width: min(520px, 92vw);
+      background: var(--panel, #0e1220);
+      border: 1px solid var(--line, #1b2130);
+      border-radius: 16px;
+      padding: 22px 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+    .gate-card h1 { margin: 0 0 6px; font-size: 20px; }
+    .gate-card p { margin: 8px 0 16px; opacity: .9; }
+    .gate-form { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
+    .gate-input {
+      padding: 12px 14px; border-radius: 10px;
+      border: 1px solid var(--line, #1b2130);
+      background: rgba(255,255,255,.04); color: inherit;
+    }
+    .gate-btn {
+      padding: 12px 16px; border-radius: 10px; cursor: pointer;
+      border: 1px solid #1f2a42; color: #e6edf3;
+      background: linear-gradient(135deg, #17243f, #0d1528);
+    }
+    .gate-row { display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap }
+    .gate-hint { font-size: 13px; opacity: .75; }
+    .gate-err { color: #ffb3b3; font-size: 13px; min-height: 1.2em; }
+    .gate-small { font-size: 12px; opacity:.7; margin-top:10px }
+    /* Respect user’s reduced motion */
+    @media (prefers-reduced-motion: no-preference) {
+      #gate { animation: fadeIn .2s ease-out }
+      @keyframes fadeIn { from { opacity:.001 } to { opacity:1 } }
+    }
+
+    /* ===== Your existing minimal local styles ===== */
     .subscribe { margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap }
     .subscribe input[type="email"]{padding:12px 14px;border-radius:10px;border:1px solid var(--line,#1b2130);background:rgba(255,255,255,.03);color:inherit;min-width:260px}
     .subscribe button{padding:12px 16px;border-radius:10px;border:1px solid var(--line,#1b2130);background:linear-gradient(135deg,#17243f,#0d1528);color:inherit;cursor:pointer}
-
     .papers{display:grid; gap:16px; margin-top:18px}
     .paper{background:var(--panel,#10131a);border:1px solid var(--line,#1b2130);border-radius:16px;padding:18px}
     .paper h3{margin:0 0 6px}
@@ -24,30 +64,83 @@
     header.site{padding:64px 0 28px;border-bottom:1px solid var(--line,#1b2130)}
     .container{max-width:1100px;margin:0 auto;padding:0 20px}
     .claimlist{margin:10px 0 0; padding-left:18px}
-
-    /* DFD GPT panel */
     .gpt-panel{margin-top:18px; padding:16px; border:1px solid var(--line,#1b2130); border-radius:16px; background:var(--panel,#10131a)}
     .gpt-actions{display:flex; gap:10px; flex-wrap:wrap; margin-top:10px}
     .btn{display:inline-block; padding:12px 16px; border-radius:12px; border:1px solid var(--line,#1b2130); color:inherit; text-decoration:none; background:rgba(255,255,255,.03)}
     .btn:hover{background:rgba(255,255,255,.06)}
     .btn.primary{background:linear-gradient(135deg,#17243f,#0d1528); border-color:#1f2a42}
     .small{font-size:.9em}
-
-    /* Disclaimer block */
-    .disclaimer {
-      background:#fff3cd;
-      border:1px solid #ffe08a;
-      padding:12px 16px;
-      border-radius:10px;
-      margin:18px 0;
-      font-size:15px;
-      text-align:center;
-      color:#2f2400;
-    }
+    .disclaimer { background:#fff3cd; border:1px solid #ffe08a; padding:12px 16px; border-radius:10px; margin:18px 0; font-size:15px; text-align:center; color:#2f2400; }
     .disclaimer strong{color:#1a1400}
   </style>
+
+  <script>
+    // ===== Simple client-side password gate =====
+    // Set PASSWORD_HASH to the SHA-256 of your chosen password.
+    // Current password: "dfdguest"  (hash computed)
+    const PASSWORD_HASH = "706b2ddeee8774f83f8e05cf218218d2245394eaeb5f777d6d1afc539faa7c38";
+    const STORAGE_KEY = "dfd_auth_ok_v1";
+
+    async function sha256Hex(text) {
+      const enc = new TextEncoder().encode(text);
+      const digest = await crypto.subtle.digest("SHA-256", enc);
+      return [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2,"0")).join("");
+    }
+
+    async function checkPass(pw) {
+      const h = await sha256Hex(pw);
+      return h === PASSWORD_HASH;
+    }
+
+    async function handleGate(e) {
+      e.preventDefault();
+      const pw = document.getElementById("gate-password").value || "";
+      const err = document.getElementById("gate-error");
+      err.textContent = "";
+      const ok = await checkPass(pw);
+      if (ok) {
+        sessionStorage.setItem(STORAGE_KEY, "1");
+        document.getElementById("gate").style.display = "none";
+        document.getElementById("protected").hidden = false;
+        // Optional: allow indexing again after successful unlock
+        // document.querySelector('meta[name="robots"]').setAttribute('content','all');
+      } else {
+        err.textContent = "Incorrect password.";
+      }
+    }
+
+    // Auto-unlock if already validated in this tab
+    document.addEventListener("DOMContentLoaded", () => {
+      if (sessionStorage.getItem(STORAGE_KEY) === "1") {
+        const gate = document.getElementById("gate");
+        if (gate) gate.style.display = "none";
+        const content = document.getElementById("protected");
+        if (content) content.hidden = false;
+      }
+    });
+  </script>
 </head>
+
 <body>
+  <!-- Password overlay -->
+  <div id="gate" role="dialog" aria-modal="true" aria-labelledby="gate-title">
+    <div class="gate-card">
+      <h1 id="gate-title">Private Archive</h1>
+      <p>Enter the access password to view the DFD research archive.</p>
+      <form class="gate-form" onsubmit="handleGate(event)">
+        <input id="gate-password" class="gate-input" type="password" placeholder="Password" aria-label="Password" autocomplete="current-password" required>
+        <button class="gate-btn" type="submit">Unlock</button>
+      </form>
+      <div class="gate-row" style="margin-top:10px">
+        <div class="gate-hint">Hint: shared privately for LPI collaborators.</div>
+        <div id="gate-error" class="gate-err" aria-live="polite"></div>
+      </div>
+      <div class="gate-small">If you reached this page in error, please contact the owner.</div>
+    </div>
+  </div>
+
+  <!-- Everything below is your original site content, wrapped so it's hidden until unlocked -->
+  <div id="protected" hidden>
    <header class="site" role="banner">
     <div class="container">
       <h1 style="margin:0 0 8px">Density Field Dynamics (DFD)</h1>
@@ -224,6 +317,7 @@
       </p>
     </div>
   </footer>
+  </div> <!-- /#protected -->
 
   <script>
     document.getElementById('y').textContent = new Date().getFullYear();
