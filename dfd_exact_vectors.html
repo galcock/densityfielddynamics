@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>DFD — ψ Field Optics & Matter (Exact + Vectors)</title>
+<style>
+  :root { --bg:#05070d; --fg:#eaf2ff; --muted:#a9b9ff; --cyan:#48d4ff; --green:#4ef07a; --amber:#ffd24d; }
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font:15px/1.45 system-ui,Segoe UI,Roboto,Helvetica,Arial}
+  .layout{display:flex;height:100%}
+  #view{flex:1;position:relative;background:radial-gradient(1200px 700px at 60% 40%, #0c1f3f 0%, #07132a 60%, #040a18 100%)}
+  canvas{width:100%;height:100%;display:block}
+  .panel{width:460px;background:linear-gradient(180deg,#07132a,#0b1938);border-left:1px solid #ffffff18;padding:14px 16px;overflow:auto}
+  h1{font-size:16px;margin:0 0 8px 0}
+  h2{font-size:13px;margin:14px 0 6px 0;color:#d9e6ff}
+  label{display:block;margin:8px 0 4px 0}
+  input[type=range]{width:100%}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  button{background:#0d2747;border:1px solid #315a86;color:#eaf2ff;border-radius:8px;padding:8px 10px;cursor:pointer}
+  button.primary{background:#143b6d;border-color:#3d77b1}
+  .pill{display:inline-block;padding:4px 10px;border-radius:999px;background:#ffffff12;border:1px solid #ffffff22;font-size:12px;margin-right:6px}
+  .legend{position:absolute;right:12px;bottom:12px;background:#0009;border:1px solid #ffffff25;border-radius:10px;padding:8px 10px;font-size:12px}
+  .legend i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;box-shadow:0 0 8px #fff2}
+  .hud{position:absolute;left:12px;top:12px;background:#0009;border:1px solid #ffffff25;border-radius:12px;padding:10px 12px;backdrop-filter:blur(3px);max-width:560px}
+  .kpi{font-weight:800}
+  .note{font-size:12px;color:#b7c6ff}
+</style>
+</head>
+<body>
+<div class="layout">
+  <div id="view">
+    <canvas id="cv"></canvas>
+    <div class="hud">
+      <div class="row">
+        <span class="pill">n=e<sup>ψ</sup></span>
+        <span class="pill">c<sub>1</sub>=e<sup>−ψ</sup></span>
+        <span class="pill">ṙ=c<sub>1</sub>v</span>
+        <span class="pill">ṽ=c<sub>1</sub>(I−vvᵀ)∇ψ</span>
+        <span class="pill">a=(c²/2)∇ψ</span>
+      </div>
+      <div class="note" style="margin-top:6px">Exact DFD ray law. Yellow=ψ contours; cyan=photons; green=tests. Toggle ∇ψ vectors to see inward gradient.</div>
+    </div>
+    <div class="legend">
+      <div><i style="background:var(--amber)"></i> ψ contour</div>
+      <div><i style="background:var(--cyan)"></i> photon</div>
+      <div><i style="background:var(--green)"></i> test mass</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h1>DFD Controls</h1>
+    <div class="note">Point mass outside a finite core (optional). ψ=2GM/r with inward ∇ψ. Numerics use c=1.</div>
+
+    <h2>Presets</h2>
+    <div class="row">
+      <button id="p0" class="primary">Baseline</button>
+      <button id="p1">Stronger</button>
+      <button id="p2">Zoom-in</button>
+    </div>
+
+    <h2>Field</h2>
+    <label>GM (strength) <span id="gmVal" class="kpi"></span></label>
+    <input id="gm" type="range" min="0.5" max="12" step="0.1" value="3"/>
+    <label>Contours</label>
+    <input id="iso" type="range" min="6" max="64" step="1" value="20"/>
+    <div class="row">
+      <label><input id="showIso" type="checkbox" checked/> show ψ‑contours</label>
+      <label><input id="showGrad" type="checkbox"/> show ∇ψ vectors</label>
+      <label><input id="finiteCore" type="checkbox" checked/> finite radius core</label>
+      <label>R<sub>core</sub> <input id="rcore" type="range" min="0.2" max="3.0" step="0.05" value="0.8"/></label>
+    </div>
+
+    <h2>Launch</h2>
+    <div class="row">
+      <button id="ph" class="primary">Photon →</button>
+      <button id="ms">Test mass →</button>
+      <button id="burst">Burst</button>
+      <button id="clear">Clear</button>
+    </div>
+    <div class="row"><label><input id="autoPh" type="checkbox" checked/> stream photons</label><label><input id="autoMs" type="checkbox"/> periodic masses</label></div>
+
+    <h2>Integrator</h2>
+    <label>Ray time step (dt)</label>
+    <input id="raydt" type="range" min="0.05" max="2.0" step="0.05" value="0.6"/>
+    <label>Matter time step (dt)</label>
+    <input id="mtdt" type="range" min="0.05" max="1.5" step="0.01" value="0.45"/>
+  </div>
+</div>
+
+<script>
+// ---------- Canvas ----------
+const cv = document.getElementById('cv');
+const cx = cv.getContext('2d');
+let W=0,H=0,dpr=1;
+function resize(){ dpr=window.devicePixelRatio||1; W=cv.clientWidth|0; H=cv.clientHeight|0; cv.width=W*dpr; cv.height=H*dpr; cx.setTransform(dpr,0,0,dpr,0,0); }
+addEventListener('resize',resize); resize();
+
+// ---------- Camera & interaction ----------
+let cam={x:0,y:0,z:250};
+function S([x,y]){return[(x-cam.x)*cam.z+W/2,(y-cam.y)*cam.z+H/2]}
+function Wc([sx,sy]){return[(sx-W/2)/cam.z+cam.x,(sy-H/2)/cam.z+cam.y]}
+let drag=false,last=[0,0];
+cv.addEventListener('mousedown',e=>{drag=true; last=[e.clientX,e.clientY]});
+addEventListener('mouseup',()=>drag=false);
+addEventListener('mousemove',e=>{if(drag){cam.x-=(e.clientX-last[0])/cam.z; cam.y-=(e.clientY-last[1])/cam.z; last=[e.clientX,e.clientY]}});
+cv.addEventListener('wheel',e=>{const k=Math.exp(-e.deltaY*0.0013); const m=Wc([e.clientX,e.clientY]); cam.z*=k; const m2=Wc([e.clientX,e.clientY]); cam.x+=m[0]-m2[0]; cam.y+=m[1]-m2[1]});
+
+// ---------- Field (DFD) ----------
+const P={GM:3, iso:20, showIso:true, showGrad:false, raydt:0.6, mtdt:0.45, finiteCore:true, rcore:0.8};
+const C={x:0,y:0}; const eps=1e-9;
+function psi_raw(x,y){
+  const dx=x-C.x, dy=y-C.y; const r=Math.hypot(dx,dy)+eps; return 2*P.GM/r;
+}
+function psi_core(x,y){
+  // finite-radius body: outside r>=rc -> same as point; inside r<rc -> constant ψ(rc)
+  const dx=x-C.x, dy=y-C.y; const r=Math.hypot(dx,dy)+eps;
+  const rc=P.rcore;
+  const psi_rc = 2*P.GM/rc;
+  return (r>=rc)? 2*P.GM/r : psi_rc;
+}
+function grad_core(x,y){
+  const dx=x-C.x, dy=y-C.y; const r=Math.hypot(dx,dy)+eps; const rc=P.rcore;
+  if(r<rc){ return [0,0]; } // inside uniform core we freeze gradient for demo (outside is exact)
+  const r2=dx*dx+dy*dy+eps*eps; const R=Math.sqrt(r2); const k=-2*P.GM/(r2*R);
+  return [k*dx,k*dy];
+}
+function psi(x,y){ return P.finiteCore ? psi_core(x,y) : psi_raw(x,y); }
+function gradPsi(x,y){
+  if(P.finiteCore) return grad_core(x,y);
+  const dx=x-C.x, dy=y-C.y; const r2=dx*dx+dy*dy+eps*eps; const R=Math.sqrt(r2); const k=-2*P.GM/(r2*R); return [k*dx,k*dy];
+}
+
+// ---------- Entities ----------
+const photons=[], masses=[];
+function addPhoton(){ const y=(Math.random()*0.6-0.3)*(H/cam.z)*0.8; photons.push({x:-W*0.55/cam.z+cam.x, y:y+cam.y, vx:1, vy:0, path:[], alive:true}); }
+function addMass(){ const y=(Math.random()*0.6-0.3)*(H/cam.z)*0.6; masses.push({x:-W*0.45/cam.z+cam.x, y:y+cam.y, vx:0.6, vy:0, path:[], alive:true}); }
+
+// ---------- DFD Integrators ----------
+function stepPhoton(p){
+  const dt=P.raydt*(1/cam.z)*40;
+  let vx=p.vx, vy=p.vy; const vL=Math.hypot(vx,vy)||1; vx/=vL; vy/=vL;
+  const g=gradPsi(p.x,p.y);
+  const c1=Math.exp(-psi(p.x,p.y)); // e^{-ψ}
+  const dot=g[0]*vx+g[1]*vy; // perpendicular curvature
+  const ax=c1*(g[0]-dot*vx), ay=c1*(g[1]-dot*vy);
+  vx+=ax*dt; vy+=ay*dt; const L=Math.hypot(vx,vy)||1; vx/=L; vy/=L;
+  p.x+=c1*vx*dt; p.y+=c1*vy*dt;
+  p.vx=vx; p.vy=vy; p.path.push([p.x,p.y]);
+  const s=S([p.x,p.y]); p.alive = s[0]>-160 && s[0]<W+160 && s[1]>-160 && s[1]<H+160 && p.path.length<12000;
+}
+function stepMass(m){
+  const dt=P.mtdt*(1/cam.z)*40; const g=gradPsi(m.x,m.y);
+  const ax=0.5*g[0], ay=0.5*g[1]; m.vx+=ax*dt; m.vy+=ay*dt; m.x+=m.vx*dt; m.y+=m.vy*dt;
+  m.path.push([m.x,m.y]); const s=S([m.x,m.y]); m.alive = s[0]>-160 && s[0]<W+160 && s[1]>-160 && s[1]<H+160 && m.path.length<12000;
+}
+
+// ---------- Drawing ----------
+function drawIso(target){
+  const step=Math.max(12,80/cam.z); cx.beginPath();
+  for(let sy=-H/2; sy<=H/2; sy+=step){
+    for(let sx=-W/2; sx<=W/2; sx+=step){
+      const A=Wc([sx+W/2,sy+H/2]), B=Wc([sx+step+W/2,sy+H/2]), Cw=Wc([sx+W/2,sy+step+H/2]), D=Wc([sx+step+W/2,sy+step+H/2]);
+      const s=[psi(A[0],A[1])>target, psi(B[0],B[1])>target, psi(D[0],D[1])>target, psi(Cw[0],Cw[1])>target];
+      function seg(P,Q,a,b){ if(a===b) return; const t=(target-psi(P[0],P[1]))/(psi(Q[0],Q[1])-psi(P[0],P[1])); const p=S([P[0]+t*(Q[0]-P[0]), P[1]+t*(Q[1]-P[1])]); cx.moveTo(p[0],p[1]); cx.lineTo(p[0],p[1]); }
+      seg(A,B,s[0],s[1]); seg(B,D,s[1],s[2]); seg(D,Cw,s[2],s[3]); seg(Cw,A,s[3],s[0]);
+    }
+  }
+  cx.stroke();
+}
+function drawGrad(){
+  if(!P.showGrad) return;
+  cx.save(); cx.strokeStyle='rgba(120,220,255,0.55)'; const step=Math.max(22,140/cam.z);
+  for(let y=-H;y<=H;y+=step){ for(let x=-W;x<=W;x+=step){
+    const w=Wc([x+W/2,y+H/2]); const g=gradPsi(w[0],w[1]);
+    const p1=S([w[0],w[1]]); const p2=S([w[0]+g[0]*140/cam.z, w[1]+g[1]*140/cam.z]);
+    cx.beginPath(); cx.moveTo(p1[0],p1[1]); cx.lineTo(p2[0],p2[1]); cx.stroke();
+  }} cx.restore();
+}
+function draw(){
+  cx.clearRect(0,0,W,H);
+  if(P.showIso){ cx.save(); cx.strokeStyle='rgba(255,210,80,0.36)'; cx.lineWidth=1; for(let i=1;i<=P.iso;i++){ drawIso(0.08*i); } cx.restore(); }
+  drawGrad();
+  const c=S([C.x,C.y]); cx.fillStyle='#fff'; cx.beginPath(); cx.arc(c[0],c[1],5,0,6.283); cx.fill();
+  function trails(list,col){ cx.save(); cx.strokeStyle=col; cx.lineWidth=1.6; cx.globalAlpha=0.97; for(const p of list){ if(p.path.length<2) continue; cx.beginPath(); const a=S(p.path[0]); cx.moveTo(a[0],a[1]); for(let i=1;i<p.path.length;i++){ const s=S(p.path[i]); cx.lineTo(s[0],s[1]); } cx.stroke(); } cx.restore(); }
+  trails(photons,'#48d4ff'); trails(masses,'#4ef07a');
+  // draw core radius if enabled
+  if(P.finiteCore){ const c0=S([C.x,C.y]); cx.save(); cx.strokeStyle='rgba(255,255,255,0.3)'; cx.setLineDash([6,6]); cx.beginPath(); cx.arc(c0[0],c0[1], P.rcore*cam.z, 0, 6.283); cx.stroke(); cx.restore(); }
+}
+
+// ---------- UI ----------
+const gm=document.getElementById('gm'), gmVal=document.getElementById('gmVal');
+function syncGM(){ P.GM=parseFloat(gm.value); gmVal.textContent=P.GM.toFixed(2); } gm.addEventListener('input',syncGM); syncGM();
+document.getElementById('iso').addEventListener('input',e=>P.iso=parseInt(e.target.value,10));
+document.getElementById('showIso').addEventListener('change',e=>P.showIso=e.target.checked);
+document.getElementById('showGrad').addEventListener('change',e=>P.showGrad=e.target.checked);
+document.getElementById('finiteCore').addEventListener('change',e=>P.finiteCore=e.target.checked);
+document.getElementById('rcore').addEventListener('input',e=>P.rcore=parseFloat(e.target.value));
+
+document.getElementById('ph').addEventListener('click',addPhoton);
+document.getElementById('ms').addEventListener('click',addMass);
+document.getElementById('burst').addEventListener('click',()=>{for(let i=0;i<120;i++) addPhoton();});
+document.getElementById('clear').addEventListener('click',()=>{photons.length=0; masses.length=0;});
+
+document.getElementById('p0').addEventListener('click',()=>{ gm.value=3; syncGM(); cam.x=0; cam.y=0; cam.z=250; });
+document.getElementById('p1').addEventListener('click',()=>{ gm.value=8; syncGM(); cam.z=360; });
+document.getElementById('p2').addEventListener('click',()=>{ cam.z=520; });
+
+const raydt=document.getElementById('raydt'), mtdt=document.getElementById('mtdt');
+raydt.addEventListener('input',e=>P.raydt=parseFloat(e.target.value));
+mtdt.addEventListener('input',e=>P.mtdt=parseFloat(e.target.value));
+
+// ---------- Main loop ----------
+let acc=0;
+function loop(){
+  requestAnimationFrame(loop);
+  acc+=1/60;
+  if(document.getElementById('autoPh').checked && acc>0.06){ addPhoton(); acc=0; }
+  if(document.getElementById('autoMs').checked && Math.random()<0.02){ addMass(); }
+  for(const p of photons) if(p.alive) stepPhoton(p);
+  for(const m of masses) if(m.alive) stepMass(m);
+  for(let i=photons.length-1;i>=0;i--) if(!photons[i].alive) photons.splice(i,1);
+  for(let i=masses.length-1;i>=0;i--) if(!masses[i].alive) masses.splice(i,1);
+  draw();
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
