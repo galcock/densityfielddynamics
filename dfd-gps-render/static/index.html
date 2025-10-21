@@ -2,47 +2,85 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="viewport"
+        content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no" />
   <title>DFD GPS Correction — Live</title>
 
-  <!-- DFD site chrome -->
+  <!-- Site chrome -->
   <link rel="icon" href="https://densityfielddynamics.com/favicon.png" type="image/png">
   <link rel="stylesheet" href="https://densityfielddynamics.com/style.css">
+  <meta name="theme-color" content="#0b0b10">
 
   <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <style>
-    .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
-    .grid{display:grid;grid-template-columns:420px 1fr;gap:16px;align-items:start}
-    .controls label{display:block;font-size:14px;color:var(--muted);margin-top:10px}
-    .controls input{width:100%;padding:10px 12px;font-size:16px;border-radius:12px;border:1px solid var(--line);background:#0e121a;color:var(--text)}
-    .kpi{display:flex;align-items:baseline;gap:12px;margin:6px 0 14px}
-    .kpi .big{font-size:28px;font-weight:800;color:var(--accent)}
-    .kpi .small{color:var(--muted)}
-    #map{width:100%;height:560px;border-radius:12px;background:#0e121a}
-    .legend{display:flex;gap:16px;align-items:center;margin-top:10px;color:var(--muted);font-size:14px}
-    .dot{display:inline-block;width:10px;height:10px;border-radius:50%}
-    .dot.green{border:3px solid #21ba45;background:transparent}
-    .dot.blue{background:#2185d0}
-    .dot.red{background:#db2828}
-    pre{background:#0e121a;border:1px solid var(--line);border-radius:12px;padding:12px;overflow:auto}
-    .pill{display:inline-block;padding:2px 8px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:12px;margin-left:8px}
-    .section{padding-top:24px}
+    /* ---- Mobile-first layout ---- */
+    :root{ --gap:12px; }
+    body{ margin:0; }
+    .section{ padding:16px 0; }             /* tighter on mobile */
+    .container{ padding:0 14px; }
 
-    /* Mobile layout */
-    @media (max-width: 900px){
-      .grid{grid-template-columns:1fr}
-      #map{height:56vh}           /* fill screen nicely on phones */
-      .kpi .big{font-size:22px}
+    /* Header: two links, compact */
+    .site-header{ position:sticky; top:0; z-index:40; background:rgba(11,11,16,.65);
+      border-bottom:1px solid var(--line); backdrop-filter:saturate(120%) blur(10px) }
+    .nav{ height:52px }
+    .menu{ gap:14px }
+    .menu a{ padding:6px 8px }
+
+    /* Map first; controls beneath */
+    .stack{ display:grid; gap:var(--gap) }
+    #mapWrap{ background:var(--panel); border:1px solid var(--line); border-radius:var(--radius);
+      box-shadow:var(--shadow); padding:8px }
+    #map{ width:100%; height:52vh; min-height:320px; border-radius:12px; background:#0e121a }
+    .legendbar{ display:flex; gap:18px; align-items:center; padding:8px 6px 2px; color:var(--muted); font-size:14px }
+    .dot{ display:inline-block; width:10px; height:10px; border-radius:50% }
+    .dot.green{ border:3px solid #21ba45; background:transparent }
+    .dot.blue{ background:#2185d0 }
+    .dot.red{ background:#db2828 }
+
+    /* KPI card (compact) */
+    .kpi-card{ background:var(--panel); border:1px solid var(--line);
+      border-radius:var(--radius); box-shadow:var(--shadow); padding:14px }
+    .kpi-row{ display:flex; justify-content:space-between; align-items:baseline; gap:10px }
+    .kpi-big{ font-size:22px; font-weight:800; color:var(--accent) }
+    .kpi-small{ color:var(--muted); font-size:14px }
+
+    /* Controls: collapsible on mobile */
+    .controls{ background:var(--panel); border:1px solid var(--line);
+      border-radius:var(--radius); box-shadow:var(--shadow) }
+    .controls header{ display:flex; align-items:center; justify-content:space-between;
+      padding:12px 14px; border-bottom:1px solid var(--line) }
+    .controls header h2{ margin:0; font-size:16px }
+    .controls .body{ padding:12px 14px; display:grid; gap:10px }
+    .controls label{ font-size:14px; color:var(--muted) }
+    .controls input{ width:100%; padding:10px 12px; font-size:16px; border-radius:12px;
+      border:1px solid var(--line); background:#0e121a; color:var(--text) }
+    .caret{ border:0; background:transparent; color:var(--muted); font-size:20px; line-height:1 }
+
+    /* JSON output (collapsible by default on phones) */
+    details.out { margin-top:8px }
+    details.out > summary{ cursor:pointer; color:var(--muted); padding:10px 14px }
+    pre{ margin:0 14px 14px; background:#0e121a; border:1px solid var(--line);
+        border-radius:12px; padding:12px; overflow:auto; max-height:28vh }
+
+    /* ---- Wide screens: two columns ---- */
+    @media (min-width: 980px){
+      .section{ padding:24px 0 }
+      .stack{ grid-template-columns: 1.1fr .9fr; align-items:start }
+      #map{ height:64vh; min-height:420px }
+      .kpi-big{ font-size:26px }
+      .controls header h2{ font-size:18px }
     }
   </style>
 </head>
 <body>
 <header class="site-header">
   <div class="container nav">
-    <a class="brand" href="https://densityfielddynamics.com"><span><img src="https://densityfielddynamics.com/favicon.png" width="24" height="24" alt=""></span></a>
+    <a class="brand" href="https://densityfielddynamics.com">
+      <span><img src="https://densityfielddynamics.com/favicon.png" width="24" height="24" alt=""></span>
+    </a>
     <nav class="menu">
       <a href="https://densityfielddynamics.com">Home</a>
       <a href="https://dfdgps.com">DFD GPS</a>
@@ -51,44 +89,79 @@
 </header>
 
 <section class="section">
-  <div class="container">
-    <h1>DFD GPS Correction <span class="pill">live met + elevation</span></h1>
-    <div class="grid">
+  <div class="container stack">
 
-      <!-- Left: live fields -->
-      <div class="panel controls">
-        <div class="kpi">
-          <div class="big" id="kpiError">Naive error: –</div>
-          <div class="small" id="kpiTiming"></div>
-        </div>
-
-        <label>Latitude <input id="lat" readonly inputmode="decimal"></label>
-        <label>Longitude <input id="lon" readonly inputmode="decimal"></label>
-        <label>Height h (m) <input id="h_m" readonly></label>
-
-        <label>Elevation (deg) <input id="elev_deg" value="45" inputmode="numeric"></label>
-        <label>Azimuth (deg) <input id="az_deg" value="90" inputmode="numeric"></label>
-        <label>Range (m) <input id="range_m" value="20200000" inputmode="numeric"></label>
-
-        <label>Temperature (K) <input id="temp_K" readonly></label>
-        <label>Pressure (Pa) <input id="pressure_Pa" readonly></label>
-        <label>Relative Humidity (0–1) <input id="rh_frac" readonly></label>
-
-        <div class="muted" id="liveHint">Initializing…</div>
-        <pre id="out">Waiting for GPS…</pre>
+    <!-- Map + legend (TOP on mobile) -->
+    <div id="mapWrap">
+      <div id="map"></div>
+      <div class="legendbar">
+        <span class="dot green"></span> <span>True (ring)</span>
+        <span class="dot blue"></span> <span>DFD-corrected</span>
+        <span class="dot red"></span> <span>Naive</span>
       </div>
-
-      <!-- Right: map + legend -->
-      <div class="panel">
-        <div id="map"></div>
-        <div class="legend">
-          <span class="dot green"></span> <span>🟢 True (ring)</span>
-          <span class="dot blue"></span> <span>🔵 DFD-corrected</span>
-          <span class="dot red"></span> <span>🔴 Naive</span>
-        </div>
-      </div>
-
     </div>
+
+    <!-- Right (or below on mobile): KPI + controls + JSON -->
+    <div class="side">
+      <div class="kpi-card">
+        <div class="kpi-row">
+          <div class="kpi-big" id="kpiError">Naive error: –</div>
+          <div class="kpi-small" id="kpiTiming"></div>
+        </div>
+      </div>
+
+      <div class="controls" id="ctl">
+        <header>
+          <h2>Live inputs</h2>
+          <button class="caret" id="toggleCtl" aria-expanded="true" aria-controls="ctlBody">▾</button>
+        </header>
+        <div class="body" id="ctlBody">
+          <div>
+            <label>Latitude</label>
+            <input id="lat" readonly inputmode="decimal">
+          </div>
+          <div>
+            <label>Longitude</label>
+            <input id="lon" readonly inputmode="decimal">
+          </div>
+          <div>
+            <label>Height h (m)</label>
+            <input id="h_m" readonly>
+          </div>
+          <div>
+            <label>Elevation (deg)</label>
+            <input id="elev_deg" value="45" inputmode="numeric">
+          </div>
+          <div>
+            <label>Azimuth (deg)</label>
+            <input id="az_deg" value="90" inputmode="numeric">
+          </div>
+          <div>
+            <label>Range (m)</label>
+            <input id="range_m" value="20200000" inputmode="numeric">
+          </div>
+          <div>
+            <label>Temperature (K)</label>
+            <input id="temp_K" readonly>
+          </div>
+          <div>
+            <label>Pressure (Pa)</label>
+            <input id="pressure_Pa" readonly>
+          </div>
+          <div>
+            <label>Relative humidity (0–1)</label>
+            <input id="rh_frac" readonly>
+          </div>
+          <div class="muted" id="liveHint">Initializing…</div>
+        </div>
+      </div>
+
+      <details class="out" id="outBox" open>
+        <summary>Numerical output</summary>
+        <pre id="out">Waiting for GPS…</pre>
+      </details>
+    </div>
+
   </div>
 </section>
 
@@ -99,35 +172,32 @@
 </footer>
 
 <script>
-/* ========= Live engine (no page reloads) ========= */
+/* ===== live engine (2 Hz) ===== */
 const DEG = Math.PI/180;
 let map, marks={}, latestPos={}, lastMet={t:0}, tick=null;
 
 function initMap(lat, lon){
   if (map) return;
-  map = L.map('map', {zoomControl:true}).setView([lat, lon], 18);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19}).addTo(map);
-  // Markers
-  marks.true = L.circleMarker([lat, lon], {radius:9,color:'#21ba45',weight:3,fillColor:'#0b0b10',fillOpacity:0.2}).bindTooltip('True').addTo(map);
-  marks.dfd  = L.circleMarker([lat, lon], {radius:7,color:'#2185d0',fillColor:'#2185d0',fillOpacity:0.95,weight:2}).bindTooltip('DFD-corrected').addTo(map);
-  marks.naive= L.circleMarker([lat, lon], {radius:7,color:'#db2828',fillColor:'#db2828',fillOpacity:0.95,weight:2}).bindTooltip('Naive').addTo(map);
-  marks.line = L.polyline([[lat,lon],[lat,lon]], {color:'#db2828',dashArray:'6,6'}).addTo(map);
-  setTimeout(()=>map.invalidateSize(),100);
+  map = L.map('map',{ zoomControl:true }).setView([lat,lon], 18);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
+  marks.true  = L.circleMarker([lat,lon],{radius:9,color:'#21ba45',weight:3,fillColor:'#0b0b10',fillOpacity:0.2}).addTo(map);
+  marks.dfd   = L.circleMarker([lat,lon],{radius:7,color:'#2185d0',fillColor:'#2185d0',fillOpacity:0.95,weight:2}).addTo(map);
+  marks.naive = L.circleMarker([lat,lon],{radius:7,color:'#db2828',fillColor:'#db2828',fillOpacity:0.95,weight:2}).addTo(map);
+  marks.line  = L.polyline([[lat,lon],[lat,lon]],{color:'#db2828',dashArray:'6,6'}).addTo(map);
+  setTimeout(()=>map.invalidateSize(),120);
 }
 function toDegOffset(lat, dxE, dyN){
-  const dLat = dyN/111320;
-  const dLon = dxE/(111320*Math.cos(lat*DEG));
+  const dLat=dyN/111320, dLon=dxE/(111320*Math.cos(lat*DEG));
   return [lat+dLat, latestPos.lon+dLon];
 }
-function haversine(lat1,lon1,lat2,lon2){
+function hav(lat1,lon1,lat2,lon2){
   const R=6371000, dLat=(lat2-lat1)*DEG, dLon=(lon2-lon1)*DEG;
   const a=Math.sin(dLat/2)**2 + Math.cos(lat1*DEG)*Math.cos(lat2*DEG)*Math.sin(dLon/2)**2;
   return 2*R*Math.asin(Math.sqrt(a));
 }
-
 async function fetchMet(lat,lon){
   const now=Date.now();
-  if (now-lastMet.t<60000 && lastMet.lat && haversine(lastMet.lat,lastMet.lon,lat,lon)<500) return;
+  if (now-lastMet.t<60000 && lastMet.lat && hav(lastMet.lat,lastMet.lon,lat,lon)<500) return;
   try{
     const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,surface_pressure`);
     const j = await r.json(), c=j.current||{};
@@ -137,13 +207,11 @@ async function fetchMet(lat,lon){
     h_m.value = Math.round(j.elevation||0);
     liveHint.textContent = 'Live data loaded (Open-Meteo).';
     lastMet={t:now,lat,lon};
-  }catch(e){ console.warn(e); liveHint.textContent='Live data fetch failed; using last values.'; }
+  }catch(e){ liveHint.textContent='Live data fetch failed (using previous).'; }
 }
-
 async function compute(){
   if (!latestPos.lat) return;
   await fetchMet(latestPos.lat, latestPos.lon);
-
   const payload = {
     lat: latestPos.lat, lon: latestPos.lon, h_m: +h_m.value||0,
     elev_deg: +elev_deg.value||45, az_deg: +az_deg.value||90,
@@ -153,9 +221,10 @@ async function compute(){
   try{
     const res = await fetch('/dfd-correct',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     const data = await res.json(); out.textContent = JSON.stringify(data,null,2);
-    const elevR = payload.elev_deg*DEG, azR = payload.az_deg*DEG;
+
+    const elevR = payload.elev_deg*DEG, azR=payload.az_deg*DEG;
     const horiz = data.range_bias_m*Math.cos(elevR);
-    const dE=Math.sin(azR)*horiz, dN=Math.cos(azR)*horiz;
+    const dE = Math.sin(azR)*horiz, dN=Math.cos(azR)*horiz;
     const [nLat,nLon]=toDegOffset(payload.lat,dE,dN);
 
     marks.true.setLatLng([payload.lat,payload.lon]);
@@ -163,30 +232,39 @@ async function compute(){
     marks.naive.setLatLng([nLat,nLon]);
     marks.line.setLatLngs([[payload.lat,payload.lon],[nLat,nLon]]);
     const dist=Math.hypot(dE,dN);
-    kpiError.textContent=`Naive error: ${dist.toFixed(2)} m`;
-    kpiTiming.textContent=`Timing bias: ${data.timing_bias_ns.toFixed(2)} ns`;
+    document.getElementById('kpiError').textContent=`Naive error: ${dist.toFixed(2)} m`;
+    document.getElementById('kpiTiming').textContent=`Timing bias: ${data.timing_bias_ns.toFixed(2)} ns`;
 
-    // Keep view stable but ensure both markers visible
+    // Keep both visible; no jumpy animation on mobile
     const group=L.featureGroup([marks.true,marks.naive]);
     map.fitBounds(group.getBounds().pad(0.35),{animate:false});
-  }catch(e){ /* network hiccup – ignore this tick */ }
+  }catch(e){ /* skip this tick */ }
 }
-
 navigator.geolocation.watchPosition(
   p=>{
-    latestPos={lat:p.coords.latitude,lon:p.coords.longitude,h:p.coords.altitude||0,acc:p.coords.accuracy||null};
+    latestPos={ lat:p.coords.latitude, lon:p.coords.longitude,
+                h:p.coords.altitude||0, acc:p.coords.accuracy||null };
     lat.value=latestPos.lat.toFixed(6); lon.value=latestPos.lon.toFixed(6); h_m.value=Math.round(latestPos.h);
     if (!map) initMap(latestPos.lat, latestPos.lon);
   },
-  err=>{ console.warn(err); liveHint.textContent='GPS permission denied.'; },
+  err=>{ document.getElementById('liveHint').textContent='GPS permission denied.'; },
   { enableHighAccuracy:true, maximumAge:0, timeout:10000 }
 );
+tick=setInterval(compute, 500);
 
-// 2 Hz loop
-tick = setInterval(compute, 500);
+/* collapsible controls on mobile */
+const toggleBtn=document.getElementById('toggleCtl');
+const bodyEl=document.getElementById('ctlBody');
+toggleBtn.addEventListener('click',()=>{
+  const open = bodyEl.style.display!=='none';
+  bodyEl.style.display = open ? 'none' : 'grid';
+  toggleBtn.textContent = open ? '▸' : '▾';
+  toggleBtn.setAttribute('aria-expanded', String(!open));
+});
 
-// ensure first layout paints correctly on mobile
-document.addEventListener('visibilitychange', ()=>{ if(map) setTimeout(()=>map.invalidateSize(),150); });
+/* reflow map when browser bars show/hide on iOS */
+addEventListener('resize', ()=>{ if(map) setTimeout(()=>map.invalidateSize(),120) });
+document.addEventListener('visibilitychange', ()=>{ if(map) setTimeout(()=>map.invalidateSize(),120) });
 </script>
 </body>
 </html>
