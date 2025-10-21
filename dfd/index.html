@@ -37,12 +37,34 @@
 
 <script>
 async function run(){
-  const p = (id)=>parseFloat(document.getElementById(id).value);
-  const payload = {lat:p('lat'),lon:p('lon'),h_m:p('h_m'),elev_deg:p('elev_deg'),
-                   range_m:p('range_m'),temp_K:p('temp_K'),pressure_Pa:p('pressure_Pa'),rh_frac:p('rh_frac')};
-  const res = await fetch('/api/dfd-correct', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
-  const data = await res.json();
-  document.getElementById('out').textContent = JSON.stringify(data, null, 2);
+  const p = id => parseFloat(document.getElementById(id).value);
+  const payload = {
+    lat:p('lat'), lon:p('lon'), h_m:p('h_m'),
+    elev_deg:p('elev_deg'), range_m:p('range_m'),
+    temp_K:p('temp_K'), pressure_Pa:p('pressure_Pa'), rh_frac:p('rh_frac')
+  };
+  const out = document.getElementById('out');
+  out.textContent = 'Computing…';
+
+  try {
+    const res = await fetch('/api/index/dfd-correct', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+    });
+
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = { error:text }; }
+
+    if (!res.ok) {
+      out.textContent = `Error ${res.status}:\n${JSON.stringify(data, null, 2)}`;
+      return;
+    }
+    out.textContent = JSON.stringify(data, null, 2);
+  } catch (err) {
+    out.textContent = `Network error:\n${err}`;
+  }
 }
 </script>
 </body>
