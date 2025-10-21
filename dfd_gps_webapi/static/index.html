@@ -1,0 +1,65 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DFD GPS Correction Demo</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; margin: 2rem; line-height: 1.45; }
+    .card { border: 1px solid #ddd; border-radius: 12px; padding: 1.25rem; max-width: 900px; }
+    h1 { margin-top: 0; }
+    label { display:block; font-size: 0.9rem; margin-top: 0.5rem; }
+    input { width: 100%; padding: 0.5rem; font-size: 1rem; }
+    .row { display:flex; gap:1rem; flex-wrap: wrap; }
+    .row > div { flex:1 1 280px; }
+    button { margin-top: 1rem; padding: 0.75rem 1rem; font-size: 1rem; border-radius:10px; border:1px solid #333; background:#111; color:#fff; cursor:pointer; }
+    pre { background: #f7f7f7; padding: 0.75rem; border-radius:8px; overflow:auto; }
+    .note { color:#555; font-size: 0.95rem; }
+    .pill { display:inline-block; padding:0.2rem 0.5rem; border:1px solid #ccc; border-radius:999px; font-size:0.8rem; color:#333; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>DFD GPS Correction Demo <span class="pill">ψ-powered</span></h1>
+    <p class="note">This demo computes a ψ-informed timing/range correction from local meteorology and geometry. Compare your measured range with the DFD-corrected range to see the improvement.</p>
+
+    <div class="row">
+      <div>
+        <label>Latitude (deg) <input id="lat" type="number" value="34.05" step="0.0001"></label>
+        <label>Longitude (deg) <input id="lon" type="number" value="-118.25" step="0.0001"></label>
+        <label>Height h (m) <input id="h_m" type="number" value="100"></label>
+        <label>Elevation angle (deg) <input id="elev_deg" type="number" value="45"></label>
+        <label>Nominal geometric range (m) <input id="range_m" type="number" value="20200000"></label>
+      </div>
+      <div>
+        <label>Temperature (K) <input id="temp_K" type="number" value="293.15"></label>
+        <label>Pressure (Pa) <input id="pressure_Pa" type="number" value="101325"></label>
+        <label>Relative humidity (0..1) <input id="rh_frac" type="number" value="0.50" step="0.01"></label>
+      </div>
+    </div>
+
+    <button onclick="run()">Compute DFD Correction</button>
+    <h3>Result</h3>
+    <pre id="out">Click Compute…</pre>
+  </div>
+
+<script>
+async function run() {
+  const payload = {
+    lat: parseFloat(document.getElementById('lat').value),
+    lon: parseFloat(document.getElementById('lon').value),
+    h_m: parseFloat(document.getElementById('h_m').value),
+    elev_deg: parseFloat(document.getElementById('elev_deg').value),
+    range_m: parseFloat(document.getElementById('range_m').value),
+    temp_K: parseFloat(document.getElementById('temp_K').value),
+    pressure_Pa: parseFloat(document.getElementById('pressure_Pa').value),
+    rh_frac: parseFloat(document.getElementById('rh_frac').value),
+  };
+  const res = await fetch('/dfd-correct', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+  const data = await res.json();
+  document.getElementById('out').textContent = JSON.stringify(data, null, 2);
+}
+</script>
+</body>
+</html>
