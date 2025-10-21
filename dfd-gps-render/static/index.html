@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>DFD GPS Correction — Visual Demo</title>
+  <title>DFD GPS Correction — Live Demo</title>
 
   <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -12,37 +12,35 @@
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
   <style>
-    :root { --bg:#fff; --fg:#111; --muted:#666; --border:#e5e5e5; --brand:#0a0a0a; }
-    html,body{background:var(--bg);color:var(--fg);margin:0}
-    body{font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
-         line-height:1.5; padding:24px}
-    h1,h2{margin:0 0 8px 0}
-    .wrap{max-width:1200px;margin:0 auto}
-    .grid{display:grid;grid-template-columns:420px 1fr;gap:16px}
-    .card{border:1px solid var(--border); border-radius:14px; padding:16px; background:#fff}
-    label{display:block; font-size:14px; color:var(--muted); margin-top:10px}
-    input{width:100%; padding:10px 12px; font-size:16px; border:1px solid var(--border); border-radius:10px}
-    .row{display:flex; gap:8px}
-    .row > div{flex:1}
-    button{margin-top:14px; padding:10px 14px; border-radius:10px; border:1px solid #111;
-           background:#111; color:#fff; font-size:16px; cursor:pointer}
-    button.secondary{background:#f7f7f7; color:#111; border-color:var(--border)}
-    .pill{display:inline-block; font-size:12px; padding:2px 8px; border:1px solid var(--border);
-          border-radius:999px; color:#333; margin-left:8px}
-    #map{width:100%; height:560px; border-radius:12px}
-    pre{background:#f7f7f7; padding:12px; border-radius:10px; overflow:auto}
-    .legend{font-size:14px; color:#333; display:flex; gap:16px; margin-top:8px}
+    :root { --border:#e6e6e6; }
+    html, body { margin:0; background:#fff; color:#111; font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial; }
+    .wrap { max-width:1200px; margin: 24px auto; padding: 0 16px; }
+    .grid { display:grid; grid-template-columns: 420px 1fr; gap: 16px; align-items: start; }
+    .card { border: 1px solid var(--border); border-radius: 14px; padding: 16px; background:#fff; }
+    h1 { margin: 0 0 10px 0; }
+    .pill { display:inline-block; font-size:12px; padding:2px 8px; border:1px solid var(--border); border-radius:999px; color:#333; margin-left:8px }
+    label { display:block; font-size:14px; color:#555; margin-top:10px }
+    input { width:100%; padding:10px 12px; font-size:16px; border:1px solid var(--border); border-radius:10px }
+    .row { display:flex; gap:8px }
+    .row > div { flex:1 }
+    button { padding:10px 14px; border-radius:10px; border:1px solid #111; background:#111; color:#fff; font-size:16px; cursor:pointer }
+    button.secondary { background:#f7f7f7; color:#111; border-color:var(--border) }
+    #map { width:100%; height: 560px; border-radius:12px; background:#f2f2f2 }
+    pre { background:#f7f7f7; padding:12px; border-radius:10px; overflow:auto; }
+    .legend { font-size:14px; color:#333; display:flex; gap:16px; margin-top:8px }
+    .hint { font-size:13px; color:#666; margin-top:6px }
   </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>DFD GPS Correction <span class="pill">visual demo</span></h1>
+  <h1>DFD GPS Correction <span class="pill">live met + elevation</span></h1>
   <div class="grid">
 
     <!-- Controls -->
     <div class="card">
-      <div class="row">
-        <button class="secondary" onclick="useMyLocation()">Use my location</button>
+      <div class="row" style="margin-bottom:8px">
+        <button class="secondary" id="locBtn">Use my location</button>
+        <button id="autoBtn" title="Locate + fetch weather/elevation">Auto-fill weather</button>
         <button onclick="run()">Compute & Visualize</button>
       </div>
 
@@ -62,9 +60,10 @@
         <div><label>Pressure (Pa) <input id="pressure_Pa" type="number" value="101325"></label></div>
       </div>
       <label>Relative humidity (0..1) <input id="rh_frac" type="number" value="0.5" step="0.01"></label>
+      <div class="hint" id="liveHint"></div>
 
       <h2 style="margin-top:16px">Numerical Output</h2>
-      <pre id="out">Click “Use my location”, then “Compute & Visualize”.</pre>
+      <pre id="out">Click “Use my location” or “Auto-fill weather”, then “Compute & Visualize”.</pre>
       <div class="legend">
         <div>🟢 <b>True</b></div>
         <div>🔴 <b>Naive GPS</b></div>
@@ -81,17 +80,21 @@
 </div>
 
 <script>
-let map, trueMarker, naiveMarker, dfdMarker, biasLine;
 const DEG = Math.PI / 180;
+let map, trueMarker, naiveMarker, dfdMarker, biasLine;
 
 function initMap(lat, lon){
+  // Create map once
   if (!map) {
     map = L.map('map', {zoomControl:true}).setView([lat, lon], 17);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 20, attribution: '&copy; OpenStreetMap'
     }).addTo(map);
+    // Fix "gray map" when container size changes
+    setTimeout(() => map.invalidateSize(), 100);
   } else {
-    map.setView([lat, lon]);
+    map.setView([lat, lon], map.getZoom());
+    setTimeout(() => map.invalidateSize(), 100);
   }
   const mk = (lat, lon, color, label) =>
     L.circleMarker([lat, lon], {radius:7, color:color, fillColor:color, fillOpacity:0.9, weight:2})
@@ -104,33 +107,87 @@ function initMap(lat, lon){
 
 function metersToLatLonOffset(latDeg, dxEast_m, dyNorth_m){
   const latRad = latDeg * DEG;
-  const dLat = dyNorth_m / 111320; // meters per degree latitude
+  const dLat = dyNorth_m / 111320; // meters per deg latitude
   const dLon = dxEast_m / (111320 * Math.cos(latRad));
   return { dLat, dLon };
 }
 
+// --- Live data helpers ---
+async function fetchOpenMeteo(lat, lon){
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,surface_pressure&timezone=auto`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error('Open-Meteo error');
+  const j = await r.json();
+  const cur = j.current || {};
+  // temp: °C -> K, pressure: hPa -> Pa, RH% -> fraction
+  const tempK = (typeof cur.temperature_2m === 'number') ? (cur.temperature_2m + 273.15) : null;
+  const rh = (typeof cur.relative_humidity_2m === 'number') ? (cur.relative_humidity_2m/100) : null;
+  const pPa = (typeof cur.surface_pressure === 'number') ? (cur.surface_pressure * 100) : null;
+  // elevation (m) is provided top-level for the grid cell
+  const elev = (typeof j.elevation === 'number') ? j.elevation : null;
+  return { tempK, rh, pPa, elev, provider:'Open-Meteo' };
+}
+
+async function fetchOpenElevation(lat, lon){
+  const url = `https://api.open-elevation.com/api/v1/lookup?locations=${lat},${lon}`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error('Open-Elevation error');
+  const j = await r.json();
+  const elev = j?.results?.[0]?.elevation ?? null;
+  return elev;
+}
+
 async function useMyLocation(){
   if (!navigator.geolocation) {
-    alert('Geolocation not supported in this browser.');
+    alert('Geolocation not supported.');
     return;
   }
   navigator.geolocation.getCurrentPosition(
-    (pos) => {
+    async (pos) => {
       const { latitude, longitude, altitude } = pos.coords;
-      if (typeof latitude === 'number')  document.getElementById('lat').value = latitude.toFixed(6);
-      if (typeof longitude === 'number') document.getElementById('lon').value = longitude.toFixed(6);
-      if (typeof altitude === 'number')  document.getElementById('h_m').value = Math.round(altitude);
-      initMap(latitude || 34.05, longitude || -118.25);
+      document.getElementById('lat').value = latitude.toFixed(6);
+      document.getElementById('lon').value = longitude.toFixed(6);
+      if (typeof altitude === 'number') document.getElementById('h_m').value = Math.round(altitude);
+      initMap(latitude, longitude);
     },
     (err) => {
       console.warn('Geolocation error:', err);
-      alert('Could not get your location. Using defaults (Grant permission and reload to use GPS).');
-      const lat = parseFloat(document.getElementById('lat').value) || 34.05;
-      const lon = parseFloat(document.getElementById('lon').value) || -118.25;
-      initMap(lat, lon);
+      alert('Could not get your location. You can still enter coordinates manually.');
+      initMap(parseFloat(lat.value)||34.05, parseFloat(lon.value)||-118.25);
     },
-    { enableHighAccuracy: true, timeout: 8000, maximumAge: 10000 }
+    { enableHighAccuracy:true, timeout:10000, maximumAge:10000 }
   );
+}
+
+async function autoFill(){
+  const lat = parseFloat(document.getElementById('lat').value);
+  const lon = parseFloat(document.getElementById('lon').value);
+  if (!isFinite(lat) || !isFinite(lon)) {
+    alert('Please set latitude/longitude first (click “Use my location”).');
+    return;
+  }
+  document.getElementById('liveHint').textContent = 'Fetching live weather…';
+  try {
+    const w = await fetchOpenMeteo(lat, lon);
+    if (w.tempK) document.getElementById('temp_K').value = w.tempK.toFixed(2);
+    if (w.pPa)   document.getElementById('pressure_Pa').value = Math.round(w.pPa);
+    if (w.rh)    document.getElementById('rh_frac').value = Math.max(0, Math.min(1, w.rh)).toFixed(2);
+
+    // Elevation: prefer Open-Meteo’s grid elevation; fallback to Open-Elevation
+    let h = w.elev;
+    if (h == null) {
+      document.getElementById('liveHint').textContent = 'Fetching elevation…';
+      h = await fetchOpenElevation(lat, lon);
+    }
+    if (isFinite(h)) document.getElementById('h_m').value = Math.round(h);
+
+    document.getElementById('liveHint').textContent =
+      `Live data loaded (${w.provider}${w.elev==null ? ' + Open-Elevation' : ''}).`;
+  } catch (e) {
+    console.error(e);
+    document.getElementById('liveHint').textContent =
+      'Live data fetch failed. You can enter met values manually.';
+  }
 }
 
 async function run(){
@@ -156,8 +213,8 @@ async function run(){
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify(payload)
     });
-    const text = await res.text();
-    let data; try { data = JSON.parse(text); } catch { data = { error:text }; }
+    const txt = await res.text();
+    let data; try { data = JSON.parse(txt); } catch { data = { error: txt }; }
 
     if (!res.ok) {
       out.textContent = `Error ${res.status}:\n${JSON.stringify(data, null, 2)}`;
@@ -165,7 +222,7 @@ async function run(){
     }
     out.textContent = JSON.stringify(data, null, 2);
 
-    // Ground visualization
+    // Visualize ground error
     const azRad = g('az_deg') * DEG;
     const elevRad = g('elev_deg') * DEG;
     const horiz_m = data.range_bias_m * Math.cos(elevRad); // project slant to ground
@@ -173,25 +230,32 @@ async function run(){
     const dN = Math.cos(azRad) * horiz_m;
 
     const off = metersToLatLonOffset(lat, dE, dN);
-    const trueLat = lat, trueLon = lon;
     const naiveLat = lat + off.dLat, naiveLon = lon + off.dLon;
 
-    trueMarker.setLatLng([trueLat, trueLon]);
+    trueMarker.setLatLng([lat, lon]);
     naiveMarker.setLatLng([naiveLat, naiveLon]);
-    dfdMarker.setLatLng([trueLat, trueLon]);
+    dfdMarker.setLatLng([lat, lon]);
+    biasLine.setLatLngs([[lat, lon], [naiveLat, naiveLon]]);
 
-    biasLine.setLatLngs([[trueLat, trueLon],[naiveLat, naiveLon]]);
+    const distMeters = Math.hypot(dE, dN);
+    naiveMarker.bindTooltip(`🔴 Naive (+${distMeters.toFixed(2)} m)`).openTooltip();
+
     const group = L.featureGroup([trueMarker, naiveMarker, dfdMarker]);
     map.fitBounds(group.getBounds().pad(0.4));
+    setTimeout(() => map.invalidateSize(), 100);
   } catch (e) {
     out.textContent = `Network error:\n${e}`;
   }
 }
 
-// Auto-center on load (will prompt for permission)
-document.addEventListener('DOMContentLoaded', () => {
-  useMyLocation();
+// Wire up buttons & initial geolocate
+document.getElementById('locBtn').addEventListener('click', useMyLocation);
+document.getElementById('autoBtn').addEventListener('click', async () => {
+  // ensure we have a location first
+  if (!map) await useMyLocation();
+  await autoFill();
 });
+document.addEventListener('DOMContentLoaded', useMyLocation);
 </script>
 </body>
 </html>
