@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>DFD GPS Correction — Live Demo</title>
+  <title>DFD GPS Correction — Live</title>
 
-  <!-- Use site favicon + main style -->
+  <!-- DFD site chrome -->
   <link rel="icon" href="https://densityfielddynamics.com/favicon.png" type="image/png">
   <link rel="stylesheet" href="https://densityfielddynamics.com/style.css">
 
@@ -16,33 +16,35 @@
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
   <style>
-    /* Light page-specific tweaks layered on top of your site css */
+    /* Page layout that sits on top of your site.css */
     .panel { background: var(--panel); border:1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding:16px }
     .grid { display:grid; grid-template-columns: 420px 1fr; gap:16px; align-items:start }
     .controls label{display:block; font-size:14px; color:var(--muted); margin-top:10px}
-    .controls input, .controls select { width:100%; padding:10px 12px; font-size:16px; border-radius:12px; border:1px solid var(--line); background:#0e121a; color:var(--text)}
+    .controls input{ width:100%; padding:10px 12px; font-size:16px; border-radius:12px; border:1px solid var(--line); background:#0e121a; color:var(--text)}
     .row{display:flex; gap:10px}
     .row>div{flex:1}
-    .btn{cursor:pointer}
-    #map{width:100%; height:560px; border-radius:12px}
-    .legend{font-size:14px; color:var(--muted); display:flex; gap:12px; margin-top:8px}
+    #map{width:100%; height:560px; border-radius:12px; background:#0e121a}
     .kpi{display:flex; align-items:baseline; gap:12px; margin:6px 0 14px}
     .kpi .big{font-size:28px; font-weight:800; color:var(--accent)}
     .kpi .small{color:var(--muted)}
     pre{background:#0e121a; border:1px solid var(--line); border-radius:12px; padding:12px; overflow:auto}
     .pill{display:inline-block; padding:2px 8px; border:1px solid var(--line); border-radius:999px; color:var(--muted); font-size:12px; margin-left:8px}
+    /* tighter top spacing */
+    .section{padding-top:24px}
+    header.site-header .menu {gap:16px}
   </style>
 </head>
 <body>
 
+<!-- Minimal header -->
 <header class="site-header">
   <div class="container nav">
-    <a class="brand" href="/"><span><img src="https://densityfielddynamics.com/favicon.png" width="24" height="24" alt=""></span></a>
+    <a class="brand" href="https://densityfielddynamics.com">
+      <span><img src="https://densityfielddynamics.com/favicon.png" width="24" height="24" alt=""></span>
+    </a>
     <nav class="menu">
-      <a href="/">Home</a>
-      <a href="/#publications">Publications</a>
-      <a href="/#labs">Labs</a>
-      <a href="https://dfdgps.com" target="_blank">DFD GPS</a>
+      <a href="https://densityfielddynamics.com">Home</a>
+      <a href="https://dfdgps.com">DFD GPS</a>
     </nav>
   </div>
 </header>
@@ -52,22 +54,18 @@
     <h1>DFD GPS Correction <span class="pill">live met + elevation</span></h1>
     <div class="grid">
 
-      <!-- Controls -->
+      <!-- Controls (read-only except for azimuth/elevation overrides) -->
       <div class="panel controls">
-        <div class="row" style="margin-bottom:8px">
-          <button class="btn tiny" id="locBtn">Use my location</button>
-          <button class="btn tiny" id="autoBtn" title="Locate + fetch weather/elevation">Auto-fill weather</button>
-          <button class="btn primary tiny" id="goBtn">Compute & Visualize</button>
-          <label style="display:flex; align-items:center; gap:8px; margin-left:auto">
-            <input type="checkbox" id="liveChk"> Live (30s)
-          </label>
+        <div class="kpi">
+          <div class="big" id="kpiError">Naive error: –</div>
+          <div class="small" id="kpiTiming"></div>
         </div>
 
-        <label>Latitude (deg) <input id="lat" type="number" step="0.000001"></label>
-        <label>Longitude (deg) <input id="lon" type="number" step="0.000001"></label>
+        <label>Latitude (deg) <input id="lat" type="number" step="0.000001" readonly></label>
+        <label>Longitude (deg) <input id="lon" type="number" step="0.000001" readonly></label>
 
         <div class="row">
-          <div><label>Height h (m) <input id="h_m" type="number" value="30"></label></div>
+          <div><label>Height h (m) <input id="h_m" type="number" value="0" readonly></label></div>
           <div><label>Elevation (deg) <input id="elev_deg" type="number" value="45"></label></div>
         </div>
         <div class="row">
@@ -75,25 +73,14 @@
           <div><label>Nominal geometric range (m) <input id="range_m" type="number" value="20200000"></label></div>
         </div>
         <div class="row">
-          <div><label>Temperature (K) <input id="temp_K" type="number" value="293.15"></label></div>
-          <div><label>Pressure (Pa) <input id="pressure_Pa" type="number" value="101325"></label></div>
+          <div><label>Temperature (K) <input id="temp_K" type="number" value="293.15" readonly></label></div>
+          <div><label>Pressure (Pa) <input id="pressure_Pa" type="number" value="101325" readonly></label></div>
         </div>
-        <label>Relative humidity (0..1) <input id="rh_frac" type="number" value="0.5" step="0.01"></label>
-        <div class="muted" id="liveHint"></div>
+        <label>Relative humidity (0..1) <input id="rh_frac" type="number" value="0.5" step="0.01" readonly></label>
+        <div class="muted" id="liveHint">Initializing…</div>
 
         <h2>Numerical Output</h2>
-        <div class="kpi">
-          <div class="big" id="kpiError">Naive error: –</div>
-          <div class="small" id="kpiTiming"></div>
-        </div>
-        <pre id="out">Click “Use my location” (best on iPhone), then “Auto-fill weather”, then “Compute & Visualize”.</pre>
-
-        <div class="legend">
-          <div>🟢 <b>True</b> (green ring)</div>
-          <div>🔴 <b>Naive GPS</b> (uncorrected)</div>
-          <div>🔵 <b>DFD-corrected</b> (coincides with True)</div>
-        </div>
-        <p class="muted">Note: Macs often use Wi-Fi positioning (~10–50 m). For meter-level truth, open this page on your iPhone (GNSS).</p>
+        <pre id="out">Waiting for GPS…</pre>
       </div>
 
       <!-- Map -->
@@ -108,13 +95,18 @@
 <footer class="site-footer">
   <div class="container foot">
     <div class="muted">© Density Field Dynamics</div>
-    <div><a class="doi" href="/">DFD</a></div>
+    <div><a class="doi" href="https://densityfielddynamics.com">DFD</a></div>
   </div>
 </footer>
 
 <script>
+/* ====== Live engine ====== */
 const DEG = Math.PI / 180;
-let map, trueRing, dfdDot, naiveDot, biasLine, liveTimer;
+let map, trueRing, dfdDot, naiveDot, biasLine;
+let havePos = false;
+let lastWeather = { t:0, lat:null, lon:null };
+let latestPos = { lat:null, lon:null, h:0, acc:null };
+let computeTimer = null;   // 2 Hz compute loop
 
 function initMap(lat, lon){
   if (!map) {
@@ -127,7 +119,6 @@ function initMap(lat, lon){
     map.setView([lat, lon], map.getZoom());
     setTimeout(() => map.invalidateSize(), 100);
   }
-  // True = green ring, DFD = blue dot stacked on top
   if (!trueRing) trueRing = L.circleMarker([lat, lon], {
     radius:9, color:'#21ba45', weight:3, fillColor:'#0b0b10', fillOpacity:0.2
   }).bindTooltip('🟢 True').addTo(map);
@@ -147,125 +138,127 @@ function metersToLatLonOffset(latDeg, dxEast_m, dyNorth_m){
   return { dLat, dLon };
 }
 
-// Live data
+/* ---- Live weather/elevation (throttled) ---- */
 async function fetchOpenMeteo(lat, lon){
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,surface_pressure&timezone=auto`;
-  const r = await fetch(url); if(!r.ok) throw new Error('Open-Meteo error');
-  const j = await r.json(), c = j.current || {};
+  const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,surface_pressure&timezone=auto`);
+  if (!r.ok) throw new Error('Open-Meteo error'); const j = await r.json(); const c=j.current||{};
   return {
-    tempK: typeof c.temperature_2m==='number' ? c.temperature_2m+273.15 : null,
-    rh:    typeof c.relative_humidity_2m==='number' ? c.relative_humidity_2m/100 : null,
-    pPa:   typeof c.surface_pressure==='number' ? c.surface_pressure*100 : null,
-    elev:  typeof j.elevation==='number' ? j.elevation : null,
-    provider: 'Open-Meteo'
+    tempK: typeof c.temperature_2m==='number'? c.temperature_2m+273.15 : null,
+    rh:    typeof c.relative_humidity_2m==='number'? c.relative_humidity_2m/100 : null,
+    pPa:   typeof c.surface_pressure==='number'? c.surface_pressure*100 : null,
+    elev:  typeof j.elevation==='number'? j.elevation : null,
+    provider:'Open-Meteo'
   };
 }
 async function fetchOpenElevation(lat, lon){
   const r = await fetch(`https://api.open-elevation.com/api/v1/lookup?locations=${lat},${lon}`);
-  if(!r.ok) throw new Error('Open-Elevation error');
-  const j = await r.json();
+  if (!r.ok) throw new Error('Open-Elevation error'); const j=await r.json();
   return j?.results?.[0]?.elevation ?? null;
 }
+async function refreshMetIfNeeded(){
+  if (!havePos) return;
+  const now = Date.now();
+  // refresh if >60s or we moved >500 m
+  const moved = (lastWeather.lat==null)? 1e9 : haversineMeters(lastWeather.lat,lastWeather.lon,latestPos.lat,latestPos.lon);
+  if (now - lastWeather.t < 60_000 && moved < 500) return;
 
-async function useMyLocation(){
-  if (!navigator.geolocation) { alert('Geolocation not supported.'); return; }
-  navigator.geolocation.getCurrentPosition(
-    pos => {
-      const { latitude, longitude, altitude, accuracy } = pos.coords;
-      lat.value = latitude.toFixed(6);
-      lon.value = longitude.toFixed(6);
-      if (typeof altitude==='number') h_m.value = Math.round(altitude);
-      initMap(latitude, longitude);
-      if (accuracy && accuracy>20) document.getElementById('liveHint').textContent =
-        `Browser accuracy ~${Math.round(accuracy)} m (Macs use Wi-Fi; iPhone gives GNSS).`;
-    },
-    err => { console.warn(err); alert('Location failed. Enter coordinates manually.'); },
-    { enableHighAccuracy:true, timeout:10000, maximumAge:10000 }
-  );
-}
-
-async function autoFill(){
-  const la = parseFloat(lat.value), lo = parseFloat(lon.value);
-  if (!isFinite(la)||!isFinite(lo)) { alert('Set latitude/longitude first.'); return; }
-  const hint = document.getElementById('liveHint');
-  hint.textContent = 'Fetching live weather…';
+  liveHint.textContent = 'Fetching live weather…';
   try{
-    const w = await fetchOpenMeteo(la, lo);
+    const w = await fetchOpenMeteo(latestPos.lat, latestPos.lon);
     if (w.tempK) temp_K.value = w.tempK.toFixed(2);
     if (w.pPa)   pressure_Pa.value = Math.round(w.pPa);
     if (w.rh!=null) rh_frac.value = Math.max(0,Math.min(1,w.rh)).toFixed(2);
-
-    let h = w.elev; if (h==null) { hint.textContent='Fetching elevation…'; h = await fetchOpenElevation(la, lo); }
+    let h = w.elev; if (h==null) { liveHint.textContent='Fetching elevation…'; h = await fetchOpenElevation(latestPos.lat, latestPos.lon); }
     if (isFinite(h)) h_m.value = Math.round(h);
-
-    hint.textContent = `Live data loaded (${w.provider}${w.elev==null ? ' + Open-Elevation' : ''}).`;
-  }catch(e){ console.error(e); hint.textContent='Live data fetch failed. Enter met values manually.'; }
+    liveHint.textContent = `Live data loaded (${w.provider}${w.elev==null?' + Open-Elevation':''}).`;
+    lastWeather = { t: now, lat: latestPos.lat, lon: latestPos.lon };
+  }catch(e){
+    console.error(e); liveHint.textContent='Live data fetch failed. Using previous values.';
+  }
 }
 
-async function computeAndDraw(){
-  const g = id=>parseFloat(document.getElementById(id).value);
-  const la=g('lat'), lo=g('lon');
-  if (!map) initMap(la,lo);
+/* ---- Geolocation watch + 2 Hz compute loop ---- */
+function startGeolocation(){
+  if (!navigator.geolocation){ liveHint.textContent='Geolocation not supported.'; return; }
+  navigator.geolocation.watchPosition(
+    pos=>{
+      const { latitude, longitude, altitude, accuracy } = pos.coords;
+      latestPos = { lat: latitude, lon: longitude, h: (typeof altitude==='number'? altitude: 0), acc: accuracy };
+      lat.value = latitude.toFixed(6);
+      lon.value = longitude.toFixed(6);
+      h_m.value = Math.round(latestPos.h);
+      if (!map) initMap(latitude, longitude); else map.setView([latitude, longitude]);
+      if (accuracy && accuracy>20) liveHint.textContent = `Browser accuracy ~${Math.round(accuracy)} m (Macs use Wi-Fi; iPhone = GNSS).`;
+      havePos = true;
+    },
+    err=>{ console.warn(err); liveHint.textContent='Waiting for GPS permission…'; },
+    { enableHighAccuracy:true, timeout:10_000, maximumAge:0 }
+  );
 
+  // 2 Hz compute/render loop (does NOT refetch weather this fast)
+  computeTimer = setInterval(async ()=>{
+    if (!havePos) return;
+    await refreshMetIfNeeded();
+    await computeAndDraw();
+  }, 500);
+}
+
+/* ---- Core compute/visualize ---- */
+async function computeAndDraw(){
+  const la = latestPos.lat, lo = latestPos.lon;
+  if (la==null || lo==null) return;
   const payload = {
-    lat:la, lon:lo,
-    h_m:g('h_m'), elev_deg:g('elev_deg'), az_deg:g('az_deg'),
-    range_m:g('range_m'), temp_K:g('temp_K'), pressure_Pa:g('pressure_Pa'), rh_frac:g('rh_frac')
+    lat: la, lon: lo,
+    h_m: parseFloat(h_m.value) || 0,
+    elev_deg: parseFloat(elev_deg.value) || 45,
+    az_deg: parseFloat(az_deg.value) || 90,
+    range_m: parseFloat(range_m.value) || 20200000,
+    temp_K: parseFloat(temp_K.value) || 293.15,
+    pressure_Pa: parseFloat(pressure_Pa.value) || 101325,
+    rh_frac: parseFloat(rh_frac.value) || 0.5
   };
 
-  const out = document.getElementById('out');
   out.textContent = 'Computing…';
   const res = await fetch('/dfd-correct',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-  const txt = await res.text(); let data; try{data=JSON.parse(txt)}catch{data={error:txt}};
-  if(!res.ok){ out.textContent=`Error ${res.status}:\n${JSON.stringify(data,null,2)}`; return; }
+  const txt = await res.text(); let data; try{ data=JSON.parse(txt) }catch{ data={error:txt} };
+  if (!res.ok){ out.textContent = `Error ${res.status}:\n${JSON.stringify(data,null,2)}`; return; }
   out.textContent = JSON.stringify(data,null,2);
 
-  // Project slant bias to ground
-  const elevRad = g('elev_deg')*DEG, azRad = g('az_deg')*DEG;
+  // project slant bias to ground and draw
+  const elevRad = (parseFloat(elev_deg.value)||45) * DEG;
+  const azRad   = (parseFloat(az_deg.value)||90) * DEG;
   const horiz_m = data.range_bias_m * Math.cos(elevRad);
   const dE = Math.sin(azRad)*horiz_m, dN = Math.cos(azRad)*horiz_m;
   const off = metersToLatLonOffset(la, dE, dN);
-  const nLat = la+off.dLat, nLon = lo+off.dLon;
+  const nLat = la + off.dLat, nLon = lo + off.dLon;
 
   trueRing.setLatLng([la, lo]);
   dfdDot.setLatLng([la, lo]);        // corrected lands on True
   naiveDot.setLatLng([nLat, nLon]);
-  biasLine.setLatLngs([[la, lo],[nLat, nLon]]);
-  const dist = Math.hypot(dE,dN);
-  naiveDot.bindTooltip(`🔴 Naive (+${dist.toFixed(2)} m)`).openTooltip();
+  biasLine.setLatLngs([[la, lo], [nLat, nLon]]);
 
-  // KPIs
+  const dist = Math.hypot(dE, dN);
+  naiveDot.bindTooltip(`🔴 Naive (+${dist.toFixed(2)} m)`);
   document.getElementById('kpiError').textContent = `Naive error: ${dist.toFixed(2)} m`;
   document.getElementById('kpiTiming').textContent = `Timing bias: ${data.timing_bias_ns.toFixed(2)} ns`;
 
   const group = L.featureGroup([trueRing, dfdDot, naiveDot]);
   map.fitBounds(group.getBounds().pad(0.35));
-  setTimeout(()=>map.invalidateSize(),100);
+  setTimeout(()=>map.invalidateSize(), 100);
 }
 
-// Live loop
-function setLive(on){
-  clearInterval(liveTimer);
-  if (on){
-    liveTimer = setInterval(async()=>{
-      await useMyLocation();
-      await autoFill();
-      await computeAndDraw();
-    }, 30000); // 30s
-  }
+/* ---- Utils ---- */
+function haversineMeters(lat1,lon1,lat2,lon2){
+  const R=6371000, dLat=(lat2-lat1)*DEG, dLon=(lon2-lon1)*DEG;
+  const a=Math.sin(dLat/2)**2 + Math.cos(lat1*DEG)*Math.cos(lat2*DEG)*Math.sin(dLon/2)**2;
+  return 2*R*Math.asin(Math.sqrt(a));
 }
 
-// Wire up
-document.getElementById('locBtn').addEventListener('click', useMyLocation);
-document.getElementById('autoBtn').addEventListener('click', async ()=>{ if(!map) await useMyLocation(); await autoFill(); });
-document.getElementById('goBtn').addEventListener('click', computeAndDraw);
-document.getElementById('liveChk').addEventListener('change', (e)=> setLive(e.target.checked));
-
-// Start
-document.addEventListener('DOMContentLoaded', async()=>{
-  await useMyLocation();
-  await autoFill();
-  await computeAndDraw();
+/* ---- Boot ---- */
+document.addEventListener('DOMContentLoaded', ()=>{
+  // set some defaults to avoid “set lat/long first”
+  lat.value = ''; lon.value = ''; h_m.value = 0;
+  startGeolocation();
 });
 </script>
 </body>
