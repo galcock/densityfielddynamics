@@ -6,7 +6,7 @@
         content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no" />
   <title>DFD GPS Correction — Live</title>
 
-  <!-- DFD site chrome -->
+  <!-- DFD site chrome (unchanged) -->
   <link rel="icon" href="https://densityfielddynamics.com/favicon.png" type="image/png">
   <link rel="stylesheet" href="https://densityfielddynamics.com/style.css">
   <meta name="theme-color" content="#0b0b10">
@@ -16,18 +16,18 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <style>
-    /* Page fixes / overrides */
+    /* ---------- page-only fixes (do not edit site.css) ---------- */
     *{ box-sizing:border-box }
-    html,body{ width:100%; overflow-x:hidden } /* stop any sideways scroll */
+    html,body{ width:100%; overflow-x:hidden }             /* stop any horizontal scroll */
     :root{ --gap:14px }
 
-    /* Tidy header: icon + 2 links; hide long brand text from site.css on this page */
+    /* Header: compact, keep icon + 2 links, hide long brand label from site.css */
     .site-header{ position:sticky; top:0; z-index:40; background:rgba(11,11,16,.66);
       border-bottom:1px solid var(--line); backdrop-filter:saturate(120%) blur(10px) }
     .nav{ height:54px }
-    .brand::after{ content:""; } /* remove long “Density Field Dynamics” text */
+    .brand::after{ content:""; }                           /* remove long “Density Field Dynamics” text */
     .menu{ gap:14px }
-    .menu a{ padding:6px 8px }
+    .menu a{ padding:6px 8px; white-space:nowrap }
 
     /* Section spacing */
     .section{ padding:16px 0 }
@@ -35,19 +35,23 @@
 
     /* Layout: map first on mobile; two columns on desktop with map dominant */
     .layout{ display:grid; gap:var(--gap) }
-    @media (min-width: 1100px){
-      .layout{ grid-template-columns: 1.3fr .7fr; align-items:start } /* map ~65% */
+    .layout > *{ min-width:0 }                             /* KEY: allow children to shrink; no squeeze */
+    @media (min-width:1100px){
+      .layout{ grid-template-columns: minmax(520px,1.3fr) minmax(360px,.7fr); align-items:start }
     }
 
     /* Map card */
     .card{ background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow) }
-    #mapWrap{ padding:8px }
-    #map{ width:100%; height:62vh; min-height:340px; border-radius:12px; background:#0e121a; }
+    #mapWrap{ padding:8px; min-width:480px }               /* keep reasonable width on desktop */
+    #map{ width:100%; height:62vh; min-height:340px; border-radius:12px; background:#0e121a }
     @media (min-width:1100px){
       #map{ height:72vh; min-height:460px }
     }
+    @media (max-width:1099px){
+      #mapWrap{ min-width:0 }                              /* mobile full width */
+    }
 
-    /* In-map legend as Leaflet control look */
+    /* In-map legend (fixed inside map) */
     .map-legend{
       position:absolute; left:12px; bottom:12px; z-index:500;
       background:rgba(11,11,16,.78); border:1px solid var(--line); border-radius:12px;
@@ -65,14 +69,16 @@
     .controls header{ display:flex; justify-content:space-between; align-items:center; padding:12px 14px; border-top:1px solid var(--line) }
     .controls header h2{ margin:0; font-size:16px }
     .controls .body{ padding:12px 14px; display:grid; gap:10px }
+    .controls, .controls *{ min-width:0 }                  /* inputs won't force the grid wider */
     .controls label{ font-size:14px; color:var(--muted) }
     .controls input{ width:100%; padding:10px 12px; font-size:16px; border-radius:12px; border:1px solid var(--line); background:#0e121a; color:var(--text) }
     .caret{ border:0; background:transparent; color:var(--muted); font-size:20px; line-height:1 }
 
-    /* JSON output */
+    /* JSON: never push layout wider */
     details.out{ margin-top:10px }
     details.out > summary{ cursor:pointer; color:var(--muted); padding:10px 14px }
-    pre{ margin:0 14px 14px; background:#0e121a; border:1px solid var(--line); border-radius:12px; padding:12px; max-height:32vh; overflow:auto }
+    pre{ margin:0 14px 14px; background:#0e121a; border:1px solid var(--line); border-radius:12px;
+         padding:12px; max-height:32vh; overflow:auto; white-space:pre-wrap; word-break:break-word }
   </style>
 </head>
 <body>
@@ -145,9 +151,9 @@
 </footer>
 
 <script>
-/* ===== Live engine (2 Hz), centered on DFD/True ===== */
+/* ===== Live engine (2 Hz), always centered on DFD/True ===== */
 const DEG = Math.PI/180;
-let map, marks={}, latestPos={}, lastMet={t:0}, loop=null, firstZoom=true;
+let map, marks={}, latestPos={}, lastMet={t:0}, loop=null, firstCenter=true;
 
 function initMap(lat, lon){
   if (map) return;
@@ -210,31 +216,31 @@ async function compute(){
 
     // KPI
     const dist=Math.hypot(dE,dN);
-    kpiError.textContent=`Naive error: ${dist.toFixed(2)} m`;
-    kpiTiming.textContent=`Timing bias: ${data.timing_bias_ns.toFixed(2)} ns`;
+    document.getElementById('kpiError').textContent=`Naive error: ${dist.toFixed(2)} m`;
+    document.getElementById('kpiTiming').textContent=`Timing bias: ${data.timing_bias_ns.toFixed(2)} ns`;
 
-    // Always center on *DFD/True* (corrected) and keep current zoom
+    // Always center on *DFD/True* (corrected) and keep current zoom (no jitter)
     const z = map.getZoom() || 19;
-    map.setView([payload.lat,payload.lon], firstZoom ? 19 : z, {animate:false});
-    firstZoom=false;
+    map.setView([payload.lat,payload.lon], firstCenter ? 19 : z, { animate:false });
+    firstCenter=false;
   }catch(e){ /* skip this tick on network hiccup */ }
 }
 
-// Geo watch
+// Geolocation
 navigator.geolocation.watchPosition(
   p=>{
     latestPos={lat:p.coords.latitude,lon:p.coords.longitude,h:p.coords.altitude||0,acc:p.coords.accuracy||null};
     lat.value=latestPos.lat.toFixed(6); lon.value=latestPos.lon.toFixed(6); h_m.value=Math.round(latestPos.h);
     if (!map) initMap(latestPos.lat,latestPos.lon);
   },
-  err=>{ liveHint.textContent='GPS permission denied.'; },
+  err=>{ document.getElementById('liveHint').textContent='GPS permission denied.'; },
   { enableHighAccuracy:true, maximumAge:0, timeout:10000 }
 );
 
 // 2 Hz loop
 loop=setInterval(compute, 500);
 
-// collapsible controls
+// Collapsible controls
 toggleCtl.addEventListener('click',()=>{
   const body=document.getElementById('ctlBody');
   const open=body.style.display!=='none';
@@ -243,9 +249,15 @@ toggleCtl.addEventListener('click',()=>{
   toggleCtl.setAttribute('aria-expanded', String(!open));
 });
 
-// reflow on iOS bar show/hide
-addEventListener('resize', ()=>{ if(map) setTimeout(()=>map.invalidateSize(),120) });
-document.addEventListener('visibilitychange', ()=>{ if(map) setTimeout(()=>map.invalidateSize(),120) });
+/* Reflow map whenever layout changes so Leaflet never squishes */
+const layoutEl=document.querySelector('.layout');
+if (window.ResizeObserver && layoutEl){
+  const ro=new ResizeObserver(()=>{ if (map) setTimeout(()=>map.invalidateSize(),60); });
+  ro.observe(layoutEl);
+}
+addEventListener('orientationchange', ()=>{ if (map) setTimeout(()=>map.invalidateSize(),120); });
+addEventListener('resize',           ()=>{ if (map) setTimeout(()=>map.invalidateSize(),120); });
+document.addEventListener('visibilitychange', ()=>{ if (map) setTimeout(()=>map.invalidateSize(),120); });
 </script>
 </body>
 </html>
