@@ -4,45 +4,125 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>DFD GPS Correction Demo</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; margin: 2rem; line-height: 1.45; }
-    .card { border:1px solid #ddd; border-radius:12px; padding:1.25rem; max-width:900px; }
-    label{display:block;margin-top:.5rem;font-size:.9rem} input{width:100%;padding:.5rem}
-    .row{display:flex;gap:1rem;flex-wrap:wrap}.row>div{flex:1 1 280px}
-    button{margin-top:1rem;padding:.75rem 1rem;border-radius:10px;border:1px solid #333;background:#111;color:#fff;cursor:pointer}
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; margin: 1.2rem; line-height: 1.45; }
+    .grid { display:grid; grid-template-columns: 420px 1fr; gap: 1rem; }
+    .card { border:1px solid #ddd; border-radius:12px; padding:1rem; }
+    label{display:block;margin-top:.5rem;font-size:.9rem}
+    input{width:100%;padding:.5rem}
+    button{margin-top:1rem;padding:.7rem 1rem;border-radius:10px;border:1px solid #333;background:#111;color:#fff;cursor:pointer}
     pre{background:#f7f7f7;padding:.75rem;border-radius:8px;overflow:auto}
+    #map { width:100%; height: 520px; border-radius:12px; }
+    .legend { font-size: 0.9rem; margin-top: .5rem; }
+    .pill { display:inline-block; padding:.1rem .5rem; border:1px solid #ccc; border-radius:999px; font-size:.8rem; color:#333; }
+    .row { display:flex; gap: .5rem; }
   </style>
 </head>
 <body>
-<div class="card">
-  <h1>DFD GPS Correction Demo</h1>
-  <div class="row">
-    <div>
+  <div class="grid">
+    <!-- Controls -->
+    <div class="card">
+      <h2>DFD GPS Correction <span class="pill">visual demo</span></h2>
       <label>Latitude (deg) <input id="lat" type="number" value="34.05" step="0.0001"></label>
       <label>Longitude (deg) <input id="lon" type="number" value="-118.25" step="0.0001"></label>
-      <label>Height h (m) <input id="h_m" type="number" value="100"></label>
-      <label>Elevation (deg) <input id="elev_deg" type="number" value="45"></label>
-      <label>Nominal geometric range (m) <input id="range_m" type="number" value="20200000"></label>
-    </div>
-    <div>
-      <label>Temperature (K) <input id="temp_K" type="number" value="293.15"></label>
-      <label>Pressure (Pa) <input id="pressure_Pa" type="number" value="101325"></label>
+      <div class="row">
+        <div style="flex:1">
+          <label>Height h (m) <input id="h_m" type="number" value="100"></label>
+        </div>
+        <div style="flex:1">
+          <label>Elevation (deg) <input id="elev_deg" type="number" value="45"></label>
+        </div>
+      </div>
+      <div class="row">
+        <div style="flex:1">
+          <label>Azimuth (deg, 0=N, 90=E) <input id="az_deg" type="number" value="90"></label>
+        </div>
+        <div style="flex:1">
+          <label>Nominal geometric range (m) <input id="range_m" type="number" value="20200000"></label>
+        </div>
+      </div>
+      <div class="row">
+        <div style="flex:1">
+          <label>Temperature (K) <input id="temp_K" type="number" value="293.15"></label>
+        </div>
+        <div style="flex:1">
+          <label>Pressure (Pa) <input id="pressure_Pa" type="number" value="101325"></label>
+        </div>
+      </div>
       <label>Relative humidity (0..1) <input id="rh_frac" type="number" value="0.5" step="0.01"></label>
+
+      <button onclick="run()">Compute & Visualize</button>
+
+      <h3>Numerical Output</h3>
+      <pre id="out">Click “Compute & Visualize”…</pre>
+      <div class="legend">
+        <div>🟢 <b>True / Ground Truth</b> (your entered lat/lon)</div>
+        <div>🔴 <b>Naive GPS</b> (biased by atmosphere along LOS)</div>
+        <div>🔵 <b>DFD-corrected</b> (snaps back to truth)</div>
+      </div>
+      <p style="font-size:.85rem;color:#555;margin-top:.5rem">
+        Note: This visualization uses a simple geometric projection of the slant-path bias onto the ground
+        using your elevation + azimuth. Real GNSS geometry is more complex, but this makes the improvement
+        visible and intuitive.
+      </p>
+    </div>
+
+    <!-- Map -->
+    <div class="card">
+      <div id="map"></div>
     </div>
   </div>
-  <button onclick="run()">Compute DFD Correction</button>
-  <h3>Result</h3>
-  <pre id="out">Click Compute…</pre>
-</div>
 
 <script>
+const C = 299792458;
+let map, trueMarker, naiveMarker, dfdMarker;
+
+// Initialize map
+function initMap(lat, lon){
+  if (!map) {
+    map = L.map('map').setView([lat, lon], 16);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19, attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
+  } else {
+    map.setView([lat, lon], map.getZoom());
+  }
+  // Create markers once
+  if (!trueMarker)  trueMarker  = L.marker([lat, lon], {title:'True'}).addTo(map);
+  if (!naiveMarker) naiveMarker = L.marker([lat, lon], {title:'Naive'}).addTo(map);
+  if (!dfdMarker)   dfdMarker   = L.marker([lat, lon], {title:'DFD-corrected'}).addTo(map);
+
+  trueMarker.bindPopup('🟢 True / Ground Truth');
+  naiveMarker.bindPopup('🔴 Naive GPS');
+  dfdMarker.bindPopup('🔵 DFD-corrected');
+}
+
+function metersToLatLonOffset(latDeg, dxEast_m, dyNorth_m){
+  const latRad = latDeg * Math.PI / 180;
+  const dLat = dyNorth_m / 111320; // ~ meters per degree latitude
+  const dLon = dxEast_m / (111320 * Math.cos(latRad));
+  return { dLat, dLon };
+}
+
 async function run(){
   const p = id => parseFloat(document.getElementById(id).value);
+  const lat = p('lat'), lon = p('lon');
+  initMap(lat, lon);
+
   const payload = {
-    lat:p('lat'), lon:p('lon'), h_m:p('h_m'),
-    elev_deg:p('elev_deg'), range_m:p('range_m'),
-    temp_K:p('temp_K'), pressure_Pa:p('pressure_Pa'), rh_frac:p('rh_frac')
+    lat, lon,
+    h_m: p('h_m'),
+    elev_deg: p('elev_deg'),
+    range_m: p('range_m'),
+    temp_K: p('temp_K'),
+    pressure_Pa: p('pressure_Pa'),
+    rh_frac: p('rh_frac')
   };
+
   const out = document.getElementById('out');
   out.textContent = 'Computing…';
 
@@ -54,15 +134,52 @@ async function run(){
     });
     const text = await res.text();
     let data; try { data = JSON.parse(text); } catch { data = { error:text }; }
+
     if (!res.ok) {
       out.textContent = `Error ${res.status}:\n${JSON.stringify(data, null, 2)}`;
       return;
     }
+
+    // Show raw numbers
     out.textContent = JSON.stringify(data, null, 2);
+
+    // --- Convert bias to a visible ground error ---
+    const rangeBias_m = data.range_bias_m;           // slant path excess (m)
+    const elevRad = (p('elev_deg') * Math.PI) / 180;
+    const azRad   = (p('az_deg')   * Math.PI) / 180;
+
+    // Project slant bias to horizontal component
+    const horiz_m = rangeBias_m * Math.cos(elevRad); // meters on ground plane
+
+    // Break into East/North using azimuth (0=N, 90=E)
+    const dE = Math.sin(azRad) * horiz_m;
+    const dN = Math.cos(azRad) * horiz_m;
+
+    // Convert meters → degrees and update markers
+    const off = metersToLatLonOffset(lat, dE, dN);
+
+    trueMarker.setLatLng([lat, lon]);  // ground truth (green)
+    naiveMarker.setLatLng([lat + off.dLat, lon + off.dLon]); // naive (red)
+    dfdMarker.setLatLng([lat, lon]);   // corrected lands back on truth (blue)
+
+    // Colorize markers via colored emoji icons
+    trueMarker.bindTooltip('🟢 True').openTooltip();
+    naiveMarker.bindTooltip('🔴 Naive (+bias)').openTooltip();
+    dfdMarker.bindTooltip('🔵 DFD-corrected').openTooltip();
+
+    // Fit all three markers
+    const group = L.featureGroup([trueMarker, naiveMarker, dfdMarker]);
+    map.fitBounds(group.getBounds().pad(0.25));
+
   } catch (err) {
     out.textContent = `Network error:\n${err}`;
   }
 }
+
+// Auto-init the map at first load
+document.addEventListener('DOMContentLoaded', () => {
+  initMap(34.05, -118.25);
+});
 </script>
 </body>
 </html>
