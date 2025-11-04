@@ -21,7 +21,7 @@
   .pill{display:inline-block;padding:4px 10px;border-radius:999px;background:#ffffff12;border:1px solid #ffffff22;font-size:12px;margin-right:6px}
   .legend{position:absolute;right:12px;bottom:12px;background:#0009;border:1px solid #ffffff25;border-radius:10px;padding:8px 10px;font-size:12px}
   .legend i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;box-shadow:0 0 8px #fff2}
-  .hud{position:absolute;left:12px;top:12px;background:#0009;border:1px solid #ffffff25;border-radius:12px;padding:10px 12px;backdrop-filter:blur(3px);max-width:560px}
+  .hud{position:absolute;left:12px;top:12px;background:#0009;border:1px solid #ffffff25;border-radius:12px;padding:10px 12px;backdrop-filter:blur(3px);max-width:620px}
   .kpi{font-weight:800}
   .note{font-size:12px;color:#b7c6ff}
 </style>
@@ -37,8 +37,11 @@
         <span class="pill">ṙ=c<sub>1</sub>v</span>
         <span class="pill">ṽ=c<sub>1</sub>(I−vvᵀ)∇ψ</span>
         <span class="pill">a=(c²/2)∇ψ</span>
+        <span id="betaCapPill" class="pill">β<sub>max</sub>·c<sub>1</sub> cap</span>
       </div>
-      <div class="note" style="margin-top:6px">This illustrative animation exaggerates particle speeds for visibility; real DFD ray and matter equations follow the same ψ-field but differ in scale. A small core radius is added for framerate. Photons (cyan) follow n = e^ψ; test masses (green) move Newtonian. Different dt/units can make masses *appear* faster than photons on-screen.</div>
+      <div class="note" style="margin-top:6px">
+        Illustrative DFD ray law (not to scale; optional core radius for framerate). Photons (cyan) follow n=e<sup>ψ</sup> with speed c<sub>1</sub>=e<sup>−ψ</sup>. Test masses (green) follow a=(c²/2)∇ψ. By default, mass speed is capped at β<sub>max</sub>·c<sub>1</sub> so masses never outrun photons. Toggle “Fast mode” to exaggerate motion.
+      </div>
     </div>
     <div class="legend">
       <div><i style="background:var(--amber)"></i> ψ contour</div>
@@ -64,7 +67,7 @@
     <label>Contours</label>
     <input id="iso" type="range" min="6" max="64" step="1" value="20"/>
     <div class="row">
-      <label><input id="showIso" type="checkbox" checked/> show ψ‑contours</label>
+      <label><input id="showIso" type="checkbox" checked/> show ψ-contours</label>
       <label><input id="showGrad" type="checkbox"/> show ∇ψ vectors</label>
       <label><input id="finiteCore" type="checkbox" checked/> finite radius core</label>
       <label>R<sub>core</sub> <input id="rcore" type="range" min="0.2" max="3.0" step="0.05" value="0.8"/></label>
@@ -77,13 +80,24 @@
       <button id="burst">Burst</button>
       <button id="clear">Clear</button>
     </div>
-    <div class="row"><label><input id="autoPh" type="checkbox" checked/> stream photons</label><label><input id="autoMs" type="checkbox"/> periodic masses</label></div>
+    <div class="row">
+      <label><input id="autoPh" type="checkbox" checked/> stream photons</label>
+      <label><input id="autoMs" type="checkbox"/> periodic masses</label>
+    </div>
 
     <h2>Integrator</h2>
     <label>Ray time step (dt)</label>
     <input id="raydt" type="range" min="0.05" max="2.0" step="0.05" value="0.6"/>
     <label>Matter time step (dt)</label>
     <input id="mtdt" type="range" min="0.05" max="1.5" step="0.01" value="0.45"/>
+
+    <div class="row">
+      <label><input id="fastMode" type="checkbox"/> Fast mode (exaggerated)</label>
+      <label style="margin-left:8px;">β<sub>max</sub> (mass cap)
+        <input id="betaMax" type="range" min="0.10" max="0.95" step="0.01" value="0.70"/>
+      </label>
+    </div>
+    <div class="note">Fast mode disables the β<sub>max</sub>·c<sub>1</sub> cap and slightly boosts dt for show-and-tell. Default mode keeps masses &lt; photons everywhere.</div>
   </div>
 </div>
 
@@ -106,21 +120,26 @@ addEventListener('mousemove',e=>{if(drag){cam.x-=(e.clientX-last[0])/cam.z; cam.
 cv.addEventListener('wheel',e=>{const k=Math.exp(-e.deltaY*0.0013); const m=Wc([e.clientX,e.clientY]); cam.z*=k; const m2=Wc([e.clientX,e.clientY]); cam.x+=m[0]-m2[0]; cam.y+=m[1]-m2[1]});
 
 // ---------- Field (DFD) ----------
-const P={GM:3, iso:20, showIso:true, showGrad:false, raydt:0.6, mtdt:0.45, finiteCore:true, rcore:0.8};
+const P={
+  GM:3, iso:20, showIso:true, showGrad:false,
+  raydt:0.6, mtdt:0.45,
+  finiteCore:true, rcore:0.8,
+  fast:false, betaMax:0.70
+};
 const C={x:0,y:0}; const eps=1e-9;
+
 function psi_raw(x,y){
   const dx=x-C.x, dy=y-C.y; const r=Math.hypot(dx,dy)+eps; return 2*P.GM/r;
 }
 function psi_core(x,y){
-  // finite-radius body: outside r>=rc -> same as point; inside r<rc -> constant ψ(rc)
+  // outside r>=rc -> 2GM/r ; inside r<rc -> constant ψ(rc)
   const dx=x-C.x, dy=y-C.y; const r=Math.hypot(dx,dy)+eps;
-  const rc=P.rcore;
-  const psi_rc = 2*P.GM/rc;
+  const rc=P.rcore, psi_rc=2*P.GM/rc;
   return (r>=rc)? 2*P.GM/r : psi_rc;
 }
 function grad_core(x,y){
   const dx=x-C.x, dy=y-C.y; const r=Math.hypot(dx,dy)+eps; const rc=P.rcore;
-  if(r<rc){ return [0,0]; } // inside uniform core we freeze gradient for demo (outside is exact)
+  if(r<rc){ return [0,0]; } // freeze gradient inside core (demo)
   const r2=dx*dx+dy*dy+eps*eps; const R=Math.sqrt(r2); const k=-2*P.GM/(r2*R);
   return [k*dx,k*dy];
 }
@@ -132,26 +151,59 @@ function gradPsi(x,y){
 
 // ---------- Entities ----------
 const photons=[], masses=[];
-function addPhoton(){ const y=(Math.random()*0.6-0.3)*(H/cam.z)*0.8; photons.push({x:-W*0.55/cam.z+cam.x, y:y+cam.y, vx:1, vy:0, path:[], alive:true}); }
-function addMass(){ const y=(Math.random()*0.6-0.3)*(H/cam.z)*0.6; masses.push({x:-W*0.45/cam.z+cam.x, y:y+cam.y, vx:0.6, vy:0, path:[], alive:true}); }
+function addPhoton(){
+  const y=(Math.random()*0.6-0.3)*(H/cam.z)*0.8;
+  photons.push({x:-W*0.55/cam.z+cam.x, y:y+cam.y, vx:1, vy:0, path:[], alive:true});
+}
+function addMass(){
+  const y=(Math.random()*0.6-0.3)*(H/cam.z)*0.6;
+  masses.push({x:-W*0.45/cam.z+cam.x, y:y+cam.y, vx:0.6, vy:0, path:[], alive:true});
+}
 
 // ---------- DFD Integrators ----------
+// Photons: direction integrates with curvature term, speed = c1 = e^{-ψ}
 function stepPhoton(p){
-  const dt=P.raydt*(1/cam.z)*40;
+  const dt=(P.fast?1.15:1.0)*P.raydt*(1/cam.z)*40;
   let vx=p.vx, vy=p.vy; const vL=Math.hypot(vx,vy)||1; vx/=vL; vy/=vL;
   const g=gradPsi(p.x,p.y);
   const c1=Math.exp(-psi(p.x,p.y)); // e^{-ψ}
-  const dot=g[0]*vx+g[1]*vy; // perpendicular curvature
+  // curvature term: c1 (I - vv^T) ∇ψ
+  const dot=g[0]*vx+g[1]*vy;
   const ax=c1*(g[0]-dot*vx), ay=c1*(g[1]-dot*vy);
-  vx+=ax*dt; vy+=ay*dt; const L=Math.hypot(vx,vy)||1; vx/=L; vy/=L;
+  vx+=ax*dt; vy+=ay*dt;
+  const L=Math.hypot(vx,vy)||1; vx/=L; vy/=L; // keep as unit tangent
   p.x+=c1*vx*dt; p.y+=c1*vy*dt;
   p.vx=vx; p.vy=vy; p.path.push([p.x,p.y]);
-  const s=S([p.x,p.y]); p.alive = s[0]>-160 && s[0]<W+160 && s[1]>-160 && s[1]<H+160 && p.path.length<12000;
+  const s=S([p.x,p.y]);
+  p.alive = s[0]>-160 && s[0]<W+160 && s[1]>-160 && s[1]<H+160 && p.path.length<12000;
 }
+
+// Masses: a=(c^2/2)∇ψ with c=1 ⇒ a=0.5∇ψ, then **speed cap**: |v| ≤ β_max c1 (disabled in Fast mode)
 function stepMass(m){
-  const dt=P.mtdt*(1/cam.z)*40; const g=gradPsi(m.x,m.y);
-  const ax=0.5*g[0], ay=0.5*g[1]; m.vx+=ax*dt; m.vy+=ay*dt; m.x+=m.vx*dt; m.y+=m.vy*dt;
-  m.path.push([m.x,m.y]); const s=S([m.x,m.y]); m.alive = s[0]>-160 && s[0]<W+160 && s[1]>-160 && s[1]<H+160 && m.path.length<12000;
+  const dt=(P.fast?1.20:1.0)*P.mtdt*(1/cam.z)*40;
+  const g=gradPsi(m.x,m.y);
+  // integrate velocity
+  m.vx += 0.5*g[0]*dt;
+  m.vy += 0.5*g[1]*dt;
+
+  // --- Physical cap so masses never outrun photons (default mode) ---
+  if(!P.fast){
+    const c1 = Math.exp(-psi(m.x,m.y));
+    const vmax = Math.max(1e-9, P.betaMax * c1); // β_max * c1
+    const vmag = Math.hypot(m.vx, m.vy);
+    if(vmag > vmax){
+      const s = vmax / vmag;
+      m.vx *= s; m.vy *= s;
+    }
+  }
+
+  // advance position
+  m.x += m.vx*dt;
+  m.y += m.vy*dt;
+
+  m.path.push([m.x,m.y]);
+  const s=S([m.x,m.y]);
+  m.alive = s[0]>-160 && s[0]<W+160 && s[1]>-160 && s[1]<H+160 && m.path.length<12000;
 }
 
 // ---------- Drawing ----------
@@ -183,13 +235,15 @@ function draw(){
   const c=S([C.x,C.y]); cx.fillStyle='#fff'; cx.beginPath(); cx.arc(c[0],c[1],5,0,6.283); cx.fill();
   function trails(list,col){ cx.save(); cx.strokeStyle=col; cx.lineWidth=1.6; cx.globalAlpha=0.97; for(const p of list){ if(p.path.length<2) continue; cx.beginPath(); const a=S(p.path[0]); cx.moveTo(a[0],a[1]); for(let i=1;i<p.path.length;i++){ const s=S(p.path[i]); cx.lineTo(s[0],s[1]); } cx.stroke(); } cx.restore(); }
   trails(photons,'#48d4ff'); trails(masses,'#4ef07a');
-  // draw core radius if enabled
-  if(P.finiteCore){ const c0=S([C.x,C.y]); cx.save(); cx.strokeStyle='rgba(255,255,255,0.3)'; cx.setLineDash([6,6]); cx.beginPath(); cx.arc(c0[0],c0[1], P.rcore*cam.z, 0, 6.283); cx.stroke(); cx.restore(); }
+  if(P.finiteCore){
+    const c0=S([C.x,C.y]); cx.save(); cx.strokeStyle='rgba(255,255,255,0.3)'; cx.setLineDash([6,6]); cx.beginPath(); cx.arc(c0[0],c0[1], P.rcore*cam.z, 0, 6.283); cx.stroke(); cx.restore();
+  }
 }
 
 // ---------- UI ----------
 const gm=document.getElementById('gm'), gmVal=document.getElementById('gmVal');
 function syncGM(){ P.GM=parseFloat(gm.value); gmVal.textContent=P.GM.toFixed(2); } gm.addEventListener('input',syncGM); syncGM();
+
 document.getElementById('iso').addEventListener('input',e=>P.iso=parseInt(e.target.value,10));
 document.getElementById('showIso').addEventListener('change',e=>P.showIso=e.target.checked);
 document.getElementById('showGrad').addEventListener('change',e=>P.showGrad=e.target.checked);
@@ -208,6 +262,21 @@ document.getElementById('p2').addEventListener('click',()=>{ cam.z=520; });
 const raydt=document.getElementById('raydt'), mtdt=document.getElementById('mtdt');
 raydt.addEventListener('input',e=>P.raydt=parseFloat(e.target.value));
 mtdt.addEventListener('input',e=>P.mtdt=parseFloat(e.target.value));
+
+const fastMode=document.getElementById('fastMode');
+const betaMax=document.getElementById('betaMax');
+const betaCapPill=document.getElementById('betaCapPill');
+
+fastMode.addEventListener('change',e=>{
+  P.fast = e.target.checked;
+  betaMax.disabled = P.fast;
+  betaCapPill.style.display = P.fast ? 'none' : 'inline-block';
+});
+betaMax.addEventListener('input',e=>{ P.betaMax=parseFloat(e.target.value); });
+
+// init UI state
+betaMax.disabled = P.fast;
+betaCapPill.style.display = P.fast ? 'none' : 'inline-block';
 
 // ---------- Main loop ----------
 let acc=0;
