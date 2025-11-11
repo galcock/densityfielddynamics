@@ -190,7 +190,7 @@ function psi_raw(x,y){
   if (P.purist || !P.useSoftCore) return 2*P.GM/r;        // exact ψ
   const rc=P.rcore, GM=P.GM;                               // approx ψ (soft core)
   if (r>=rc) return 2*GM/r;
-  const a=3*GM/rc, b=-GM/(rc**3); return a + b*r*r;        // C¹ match
+  const a=3*GM/rc, b=-GM/(rc**3); return a + b*r*r;        // C¹ match to exterior
 }
 function gradPsi(x,y){
   const dx=x-C.x, dy=y-C.y; const r=Math.hypot(dx,dy)+eps; const ux=dx/r, uy=dy/r;
@@ -205,46 +205,71 @@ const photons=[], masses=[];
 function addPhoton(){const y=(Math.random()*0.6-0.3)*(H/cam.z)*0.8; photons.push({x:-W*0.55/cam.z+cam.x, y:y+cam.y, vx:1, vy:0, path:[], alive:true});}
 function addMass(){const y=(Math.random()*0.6-0.3)*(H/cam.z)*0.6; masses.push({x:-W*0.45/cam.z+cam.x, y:y+cam.y, vx:0.15, vy:0, path:[], alive:true});}
 
-// ---------- Integrators ----------
+// ---------- Integrators (synchronized step scaling) ----------
+const ALPHA = 2.5; // adaptivity vs |∇ψ| for both species
+
+function localStepScale(x,y){
+  // Same numeric adaptivity for both photons and masses
+  const g=gradPsi(x,y); const gmag=Math.hypot(g[0],g[1]);
+  return 1/(1 + ALPHA*gmag);
+}
+
 function stepPhoton(p){
-  const g=gradPsi(p.x,p.y), gmag=Math.hypot(g[0],g[1]);
   const c1=c1_at(p.x,p.y);
-  const dt0=(P.fast?1.15:1.0)*P.raydt*(1/cam.z)*40;
-  const dt = dt0 / (1 + 2.5*gmag); // adaptivity (numeric only)
+  const scale = localStepScale(p.x,p.y);
+  const dt = (P.fast?1.15:1.0)*P.raydt*(1/cam.z)*40 * scale;
+
+  // Normalize direction
   let vx=p.vx, vy=p.vy; const vL=Math.hypot(vx,vy)||1; vx/=vL; vy/=vL;
+
+  // Geodesic optics update: v-dot = c1 (I - v v^T) ∇ψ
+  const g=gradPsi(p.x,p.y);
   const dot=g[0]*vx + g[1]*vy;
   const ax=c1*(g[0]-dot*vx), ay=c1*(g[1]-dot*vy);
+
   vx+=ax*dt; vy+=ay*dt; const L=Math.hypot(vx,vy)||1; vx/=L; vy/=L;
-  p.x+=c1*vx*dt; p.y+=c1*vy*dt; p.vx=vx; p.vy=vy; p.path.push([p.x,p.y]);
+
+  // Position advance uses the same dt scaling
+  p.x+=c1*vx*dt; p.y+=c1*vy*dt;
+  p.vx=vx; p.vy=vy; p.path.push([p.x,p.y]);
+
   const s=S([p.x,p.y]);
   p.alive = s[0]>-160 && s[0]<W+160 && s[1]>-160 && s[1]<H+160 && p.path.length<12000;
 }
-function stepMass(m){
-  const dt=(P.fast?1.20:1.0)*P.mtdt*(1/cam.z)*40;
-  const g=gradPsi(m.x,m.y);
-  // weak-field a = (c^2/2)∇ψ with c≡1 (factor absorbed in dt scaling)
-  m.vx+=0.5*g[0]*dt; m.vy+=0.5*g[1]*dt;
 
-  // PHYSICAL causal cone: |v| < c1(x). This is physics, not UX.
+function stepMass(m){
+  const c1=c1_at(m.x,m.y);
+  const scale = localStepScale(m.x,m.y);
+  const dt = (P.fast?1.20:1.0)*P.mtdt*(1/cam.z)*40 * scale;
+
+  // Acceleration (weak-field): a = (c^2/2) ∇ψ, with c≡1 in our units
+  const g=gradPsi(m.x,m.y);
+  m.vx += 0.5*g[0]*dt;
+  m.vy += 0.5*g[1]*dt;
+
+  // Enforce causal cone BEFORE moving (physics, not UX)
   if (P.cone){
-    const c1=c1_at(m.x,m.y);
-    const vmax=0.999*c1;
-    const vmag=Math.hypot(m.vx,m.vy);
-    if(vmag>vmax){ const s=vmax/vmag; m.vx*=s; m.vy*=s; }
+    const vmax = 0.999 * c1; // stay strictly inside
+    const vmag = Math.hypot(m.vx,m.vy);
+    if (vmag > vmax){ const s=vmax/vmag; m.vx*=s; m.vy*=s; }
   }
 
-  // Optional UX cap ONLY in Approximate mode
+  // Optional UX cap only in Approximate mode
   if(!P.purist && !P.fast){
     const c1rim = Math.exp(-2*P.GM/Math.max(P.rcore,eps));
-    const vmax  = Math.max(1e-4, P.betaMax * c1rim);
-    const vmag  = Math.hypot(m.vx,m.vy);
-    if(vmag>vmax){ const s=vmax/vmag; m.vx*=s; m.vy*=s; }
+    const vmaxUX = Math.max(1e-4, P.betaMax * c1rim);
+    const vmag = Math.hypot(m.vx,m.vy);
+    if(vmag>vmaxUX){ const s=vmaxUX/vmag; m.vx*=s; m.vy*=s; }
   }
 
-  m.x+=m.vx*dt; m.y+=m.vy*dt;
+  // Now move; with the same dt scaling as photons, |v|<c1 guarantees
+  // the mass cannot advance farther than a photon at the same (x,y).
+  m.x += m.vx * dt;
+  m.y += m.vy * dt;
+
   m.path.push([m.x,m.y]);
   const s=S([m.x,m.y]);
-  m.alive=s[0]>-160&&s[0]<W+160&&s[1]>-160&&s[1]<H+160&&m.path.length<12000;
+  m.alive = s[0]>-160&&s[0]<W+160&&s[1]>-160&&s[1]<H+160&&m.path.length<12000;
 }
 
 // ---------- Precompute ψ-grid & Contours (with progress) ----------
@@ -393,7 +418,7 @@ function draw(){
 
   function trails(list,col){ cx.save(); cx.strokeStyle=col; cx.lineWidth=1.6; cx.globalAlpha=0.97;
     for(const p of list){ if(p.path.length<2) continue; cx.beginPath(); const a=S(p.path[0]); cx.moveTo(a[0],a[1]);
-      for(let i=1;i<p.path.length;i++){ const s=S(p.path[i]); cx.lineTo(s[0],s[1]); } cx.stroke(); } cx.restore(); }
+      for(let i=1;i<p.path.length;i++){const s=S(p.path[i]); cx.lineTo(s[0],s[1]);} cx.stroke(); } cx.restore(); }
   trails(photons,'#48d4ff'); trails(masses,'#4ef07a');
 }
 
