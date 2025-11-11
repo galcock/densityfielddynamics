@@ -21,15 +21,18 @@
   .pill{display:inline-block;padding:4px 10px;border-radius:999px;background:#ffffff12;border:1px solid #ffffff22;font-size:12px;margin-right:6px}
   .legend{position:absolute;right:12px;bottom:12px;background:#0009;border:1px solid #ffffff25;border-radius:10px;padding:8px 10px;font-size:12px}
   .legend i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;box-shadow:0 0 8px #fff2}
-  .hud{position:absolute;left:12px;top:12px;background:#0009;border:1px solid #ffffff25;border-radius:12px;padding:10px 12px;backdrop-filter:blur(3px);max-width:620px}
+  .hud{position:absolute;left:12px;top:12px;background:#000c;border:1px solid #ffffff25;border-radius:12px;padding:10px 12px;backdrop-filter:blur(3px);max-width:760px}
   .kpi{font-weight:800}
   .note{font-size:12px;color:#b7c6ff}
+  .disclaimer{position:absolute;left:12px;bottom:12px;background:#000c;border:1px solid #ffffff25;border-radius:10px;padding:10px 12px;font-size:12px;max-width:760px}
+  .disclaimer b{color:#eaf2ff}
 </style>
 </head>
 <body>
 <div class="layout">
   <div id="view">
     <canvas id="cv"></canvas>
+
     <div class="hud">
       <div class="row">
         <span class="pill">n=e<sup>ψ</sup></span>
@@ -40,14 +43,23 @@
         <span id="betaCapPill" class="pill">β<sub>max</sub>·c<sub>1</sub> cap</span>
       </div>
       <div class="note" style="margin-top:6px">
-        Photons (cyan) use speed c<sub>1</sub> from a clamped core (no stalls);  
-        test masses (green) are strictly &lt; photons except in Fast Mode.
+        Photons (cyan) use c<sub>1</sub> from a clamped core (no stalls).
+        Test masses (green) are strictly slower than photons except in Fast Mode.
       </div>
     </div>
+
     <div class="legend">
       <div><i style="background:var(--amber)"></i> ψ contour</div>
       <div><i style="background:var(--cyan)"></i> photon</div>
       <div><i style="background:var(--green)"></i> test mass</div>
+    </div>
+
+    <!-- Clear disclaimer so users aren’t confused -->
+    <div class="disclaimer">
+      <b>Disclaimer.</b> This is an interactive toy model illustrating a scalar-optical gravity framework (“DFD”).
+      It’s not GR, it’s not a full N-body solver, and it omits many real-world effects. The sliders exaggerate fields for clarity,
+      the core is “soft” for forces but “clamped” for optical speed, and ray/matter steps are adaptive to avoid numerical artifacts.
+      Treat the picture as an intuition builder, not a measurement. If paths look odd, reduce <b>GM</b> or <b>dt</b>, or disable Fast Mode.
     </div>
   </div>
 
@@ -131,7 +143,7 @@ const GM_SMOOTH = 0.10; // smooths slider → simulation
 function psi_force(x,y){
   const dx=x-C.x, dy=y-C.y; const r=Math.hypot(dx,dy)+eps; const rc=P.rcore, GM=P.GM;
   if(!P.finiteCore || r>=rc) return 2*GM/r;
-  const a = 3*GM/rc, b = -GM/(rc**3);           // ψ = a + b r²
+  const a = 3*GM/rc, b = -GM/(rc**3);           // ψ = a + b r² inside
   return a + b*r*r;
 }
 function gradPsi(x,y){
@@ -149,6 +161,8 @@ function psi_speed(x,y){
   return 2*GM/reff;
 }
 function c1_at(x,y){ return Math.exp(-psi_speed(x,y)); }
+// Rim c1 for the cap (prevents core choke)
+function c1_at_rc(){ return Math.exp(-2*P.GM / Math.max(P.rcore, eps)); }
 
 // ---------- Entities ----------
 const photons=[], masses=[];
@@ -157,18 +171,28 @@ function addMass(){const y=(Math.random()*0.6-0.3)*(H/cam.z)*0.6;masses.push({x:
 
 // ---------- Integrators ----------
 function stepPhoton(p){
-  const dt=(P.fast?1.15:1.0)*P.raydt*(1/cam.z)*40;
-  let vx=p.vx,vy=p.vy;const vL=Math.hypot(vx,vy)||1;vx/=vL;vy/=vL;
-  const g=gradPsi(p.x,p.y);
-  const c1=c1_at(p.x,p.y);
-  const dot=g[0]*vx+g[1]*vy;
-  const ax=c1*(g[0]-dot*vx), ay=c1*(g[1]-dot*vy);
-  vx+=ax*dt; vy+=ay*dt;
-  const L=Math.hypot(vx,vy)||1;vx/=L;vy/=L;
-  p.x+=c1*vx*dt; p.y+=c1*vy*dt;
+  // Adaptive dt in steep gradients to avoid over-bend / turn-back
+  const g = gradPsi(p.x,p.y);
+  const gmag = Math.hypot(g[0], g[1]);
+  const c1 = c1_at(p.x,p.y);
+
+  const dt0 = (P.fast?1.15:1.0)*P.raydt*(1/cam.z)*40;
+  const dt  = dt0 / (1 + 2.5*gmag); // shrink where bending is strong
+
+  // Unit direction update with transverse acceleration
+  let vx=p.vx, vy=p.vy; const vL=Math.hypot(vx,vy)||1; vx/=vL; vy/=vL;
+  const dot = g[0]*vx + g[1]*vy;
+  const ax = c1 * (g[0] - dot*vx);
+  const ay = c1 * (g[1] - dot*vy);
+
+  vx += ax*dt; vy += ay*dt;
+  const L = Math.hypot(vx,vy)||1; vx/=L; vy/=L;
+
+  p.x += c1*vx*dt; p.y += c1*vy*dt;
   p.vx=vx; p.vy=vy; p.path.push([p.x,p.y]);
+
   const s=S([p.x,p.y]);
-  p.alive=s[0]>-160&&s[0]<W+160&&s[1]>-160&&s[1]<H+160&&p.path.length<12000;
+  p.alive = s[0]>-160 && s[0]<W+160 && s[1]>-160 && s[1]<H+160 && p.path.length<12000;
 }
 
 function stepMass(m){
@@ -178,8 +202,10 @@ function stepMass(m){
   m.vy+=0.5*g[1]*dt;
 
   if(!P.fast){
-    const vmax = Math.max(1e-9, P.betaMax * c1_at(m.x,m.y) * 0.999);
-    const vmag = Math.hypot(m.vx,m.vy);
+    // Cap relative to the rim c1, with a small floor to avoid crawl-to-zero
+    const c1cap = c1_at_rc();
+    const vmax  = Math.max(1e-4, P.betaMax * c1cap);
+    const vmag  = Math.hypot(m.vx,m.vy);
     if(vmag>vmax){ const s=vmax/vmag; m.vx*=s; m.vy*=s; }
   }
 
@@ -191,34 +217,88 @@ function stepMass(m){
 
 // ---------- Draw ----------
 function drawIso(target){
-  const step=Math.max(12,80/cam.z);cx.beginPath();
-  for(let sy=-H/2;sy<=H/2;sy+=step){
-    for(let sx=-W/2;sx<=W/2;sx+=step){
-      const A=Wc([sx+W/2,sy+H/2]),B=Wc([sx+step+W/2,sy+H/2]),Cw=Wc([sx+W/2,sy+step+H/2]),D=Wc([sx+step+W/2,sy+step+H/2]);
-      const s=[psi_force(A[0],A[1])>target,psi_force(B[0],B[1])>target,psi_force(D[0],D[1])>target,psi_force(Cw[0],Cw[1])>target];
-      function seg(P,Q,a,b){if(a===b)return;const t=(target-psi_force(P[0],P[1]))/(psi_force(Q[0],Q[1])-psi_force(P[0],P[1]));const p=S([P[0]+t*(Q[0]-P[0]),P[1]+t*(Q[1]-P[1])]);cx.moveTo(p[0],p[1]);cx.lineTo(p[0],p[1]);}
-      seg(A,B,s[0],s[1]);seg(B,D,s[1],s[2]);seg(D,Cw,s[2],s[3]);seg(Cw,A,s[3],s[0]);
+  const step=Math.max(12,80/cam.z);
+  cx.beginPath();
+  for(let sy=-H/2; sy<=H/2; sy+=step){
+    for(let sx=-W/2; sx<=W/2; sx+=step){
+      // Cell world corners: A(top-left), B(top-right), D(bottom-right), C(bottom-left)
+      const A=Wc([sx+W/2,sy+H/2]);
+      const B=Wc([sx+step+W/2,sy+H/2]);
+      const Cw=Wc([sx+W/2,sy+step+H/2]);
+      const D=Wc([sx+step+W/2,sy+step+H/2]);
+
+      const vA=psi_force(A[0],A[1]);
+      const vB=psi_force(B[0],B[1]);
+      const vC=psi_force(Cw[0],Cw[1]);
+      const vD=psi_force(D[0],D[1]);
+
+      const sA=vA>target, sB=vB>target, sC=vC>target, sD=vD>target;
+
+      const pts=[];
+      function ip(P,Q,vP,vQ){
+        const t=(target-vP)/(vQ-vP);
+        const w=[P[0]+t*(Q[0]-P[0]), P[1]+t*(Q[1]-P[1])];
+        return S(w);
+      }
+      // Edges: 0=A-B (top), 1=B-D (right), 2=C-D (bottom), 3=A-C (left)
+      if(sA!==sB) pts.push(ip(A,B,vA,vB));
+      if(sB!==sD) pts.push(ip(B,D,vB,vD));
+      if(sC!==sD) pts.push(ip(Cw,D,vC,vD));
+      if(sA!==sC) pts.push(ip(A,Cw,vA,vC));
+
+      if(pts.length===2){
+        cx.moveTo(pts[0][0],pts[0][1]); cx.lineTo(pts[1][0],pts[1][1]);
+      }else if(pts.length===4){
+        // ambiguous saddle; draw two segments
+        cx.moveTo(pts[0][0],pts[0][1]); cx.lineTo(pts[1][0],pts[1][1]);
+        cx.moveTo(pts[2][0],pts[2][1]); cx.lineTo(pts[3][0],pts[3][1]);
+      }
     }
   }
   cx.stroke();
 }
+
 function drawGrad(){
-  if(!P.showGrad)return;
-  cx.save();cx.strokeStyle='rgba(120,220,255,0.55)';const step=Math.max(22,140/cam.z);
-  for(let y=-H;y<=H;y+=step){for(let x=-W;x<=W;x+=step){
-    const w=Wc([x+W/2,y+H/2]);const g=gradPsi(w[0],w[1]);
-    const p1=S([w[0],w[1]]);const p2=S([w[0]+g[0]*140/cam.z,w[1]+g[1]*140/cam.z]);
-    cx.beginPath();cx.moveTo(p1[0],p1[1]);cx.lineTo(p2[0],p2[1]);cx.stroke();
-  }}cx.restore();
+  if(!P.showGrad) return;
+  cx.save(); cx.strokeStyle='rgba(120,220,255,0.55)';
+  const step=Math.max(22,140/cam.z);
+  for(let y=-H;y<=H;y+=step){ for(let x=-W;x<=W;x+=step){
+    const w=Wc([x+W/2,y+H/2]); const g=gradPsi(w[0],w[1]);
+    const p1=S([w[0],w[1]]); const p2=S([w[0]+g[0]*140/cam.z, w[1]+g[1]*140/cam.z]);
+    cx.beginPath(); cx.moveTo(p1[0],p1[1]); cx.lineTo(p2[0],p2[1]); cx.stroke();
+  }} cx.restore();
 }
+
 function draw(){
   cx.clearRect(0,0,W,H);
-  if(P.showIso){cx.save();cx.strokeStyle='rgba(255,210,80,0.36)';cx.lineWidth=1;for(let i=1;i<=P.iso;i++){drawIso(0.08*i);}cx.restore();}
+
+  if(P.showIso){
+    cx.save(); cx.strokeStyle='rgba(255,210,80,0.36)'; cx.lineWidth=1;
+    for(let i=1;i<=P.iso;i++){ drawIso(0.08*i); }
+    cx.restore();
+  }
+
   drawGrad();
-  const c=S([C.x,C.y]);cx.fillStyle='#fff';cx.beginPath();cx.arc(c[0],c[1],5,0,6.283);cx.fill();
-  function trails(list,col){cx.save();cx.strokeStyle=col;cx.lineWidth=1.6;cx.globalAlpha=0.97;for(const p of list){if(p.path.length<2)continue;cx.beginPath();const a=S(p.path[0]);cx.moveTo(a[0],a[1]);for(let i=1;i<p.path.length;i++){const s=S(p.path[i]);cx.lineTo(s[0],s[1]);}cx.stroke();}cx.restore();}
-  trails(photons,'#48d4ff');trails(masses,'#4ef07a');
-  if(P.finiteCore){const c0=S([C.x,C.y]);cx.save();cx.strokeStyle='rgba(255,255,255,0.3)';cx.setLineDash([6,6]);cx.beginPath();cx.arc(c0[0],c0[1],P.rcore*cam.z,0,6.283);cx.stroke();cx.restore();}
+
+  // Source marker
+  const c=S([C.x,C.y]); cx.fillStyle='#fff'; cx.beginPath(); cx.arc(c[0],c[1],5,0,6.283); cx.fill();
+
+  // Trails
+  function trails(list,col){ cx.save(); cx.strokeStyle=col; cx.lineWidth=1.6; cx.globalAlpha=0.97;
+    for(const p of list){ if(p.path.length<2) continue;
+      cx.beginPath(); const a=S(p.path[0]); cx.moveTo(a[0],a[1]);
+      for(let i=1;i<p.path.length;i++){ const s=S(p.path[i]); cx.lineTo(s[0],s[1]); }
+      cx.stroke();
+    } cx.restore();
+  }
+  trails(photons,'#48d4ff'); trails(masses,'#4ef07a');
+
+  // Core ring (visual; affects speed clamp & force model as defined above)
+  if(P.finiteCore){
+    const c0=S([C.x,C.y]);
+    cx.save(); cx.strokeStyle='rgba(255,255,255,0.3)'; cx.setLineDash([6,6]);
+    cx.beginPath(); cx.arc(c0[0],c0[1],P.rcore*cam.z,0,6.283); cx.stroke(); cx.restore();
+  }
 }
 
 // ---------- UI ----------
