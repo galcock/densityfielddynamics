@@ -118,7 +118,11 @@
     <label>Ray time step (dt)</label>
     <input id="raydt" type="range" min="0.03" max="1.50" step="0.03" value="0.45"/>
     <label>Matter time step (dt)</label>
-    <input id="mtdt" type="range" min="0.03" max="1.20" step="0.01" value="0.35"/>
+    <input id="mtdt" type="range" min="0.03" max="1.20" step="0.01" value="0.25"/>
+
+    <div class="row">
+      <label><input id="cone" type="checkbox" checked/> Respect causal cone (|v| &lt; c₁)</label>
+    </div>
 
     <div class="row">
       <label><input id="fastMode" type="checkbox"/> Fast mode (relaxes adaptivity; not physics)</label>
@@ -174,9 +178,9 @@ cv.addEventListener('wheel',e=>{const k=Math.exp(-e.deltaY*0.0013); const m=Wc([
 
 // ---------- Params / Mode ----------
 const P={ GM:3, GM_target:3, iso:24, showIso:true, showGrad:false,
-          raydt:0.45, mtdt:0.35,
+          raydt:0.45, mtdt:0.25,
           purist:true, useSoftCore:false, rcore:0.8,
-          fast:false, betaMax:0.70,
+          fast:false, betaMax:0.70, cone:true,
           gridStep:28 };
 const C={x:0,y:0}; const eps=1e-9; const GM_SMOOTH=0.10;
 
@@ -186,7 +190,7 @@ function psi_raw(x,y){
   if (P.purist || !P.useSoftCore) return 2*P.GM/r;        // exact ψ
   const rc=P.rcore, GM=P.GM;                               // approx ψ (soft core)
   if (r>=rc) return 2*GM/r;
-  const a=3*GM/rc, b=-GM/(rc**3); return a + b*r*r;
+  const a=3*GM/rc, b=-GM/(rc**3); return a + b*r*r;        // C¹ match
 }
 function gradPsi(x,y){
   const dx=x-C.x, dy=y-C.y; const r=Math.hypot(dx,dy)+eps; const ux=dx/r, uy=dy/r;
@@ -199,7 +203,7 @@ function c1_at(x,y){ return Math.exp(-psi_raw(x,y)); }
 // ---------- Entities ----------
 const photons=[], masses=[];
 function addPhoton(){const y=(Math.random()*0.6-0.3)*(H/cam.z)*0.8; photons.push({x:-W*0.55/cam.z+cam.x, y:y+cam.y, vx:1, vy:0, path:[], alive:true});}
-function addMass(){const y=(Math.random()*0.6-0.3)*(H/cam.z)*0.6; masses.push({x:-W*0.45/cam.z+cam.x, y:y+cam.y, vx:0.6, vy:0, path:[], alive:true});}
+function addMass(){const y=(Math.random()*0.6-0.3)*(H/cam.z)*0.6; masses.push({x:-W*0.45/cam.z+cam.x, y:y+cam.y, vx:0.15, vy:0, path:[], alive:true});}
 
 // ---------- Integrators ----------
 function stepPhoton(p){
@@ -218,7 +222,17 @@ function stepPhoton(p){
 function stepMass(m){
   const dt=(P.fast?1.20:1.0)*P.mtdt*(1/cam.z)*40;
   const g=gradPsi(m.x,m.y);
-  m.vx+=0.5*g[0]*dt; m.vy+=0.5*g[1]*dt;        // a ∝ ∇ψ (units absorbed)
+  // weak-field a = (c^2/2)∇ψ with c≡1 (factor absorbed in dt scaling)
+  m.vx+=0.5*g[0]*dt; m.vy+=0.5*g[1]*dt;
+
+  // PHYSICAL causal cone: |v| < c1(x). This is physics, not UX.
+  if (P.cone){
+    const c1=c1_at(m.x,m.y);
+    const vmax=0.999*c1;
+    const vmag=Math.hypot(m.vx,m.vy);
+    if(vmag>vmax){ const s=vmax/vmag; m.vx*=s; m.vy*=s; }
+  }
+
   // Optional UX cap ONLY in Approximate mode
   if(!P.purist && !P.fast){
     const c1rim = Math.exp(-2*P.GM/Math.max(P.rcore,eps));
@@ -226,6 +240,7 @@ function stepMass(m){
     const vmag  = Math.hypot(m.vx,m.vy);
     if(vmag>vmax){ const s=vmax/vmag; m.vx*=s; m.vy*=s; }
   }
+
   m.x+=m.vx*dt; m.y+=m.vy*dt;
   m.path.push([m.x,m.y]);
   const s=S([m.x,m.y]);
@@ -246,11 +261,9 @@ function hideOverlay(){ overlay.style.display='none'; }
 function scheduleRecompute(why){
   if (recomputeScheduled) return;
   recomputeScheduled = true;
-  // If canvas isn’t sized yet, delay until next frame
   requestAnimationFrame(()=>{ if(W===0||H===0){ measureThenRecompute(why); } else { recomputeGrid(why); } });
 }
 function measureThenRecompute(why){
-  // Force a measure & then recompute
   W=cv.clientWidth|0; H=cv.clientHeight|0;
   cv.width=W*dpr; cv.height=H*dpr; cx.setTransform(dpr,0,0,dpr,0,0);
   recomputeGrid(why||'measure');
@@ -266,8 +279,7 @@ function recomputeGrid(why){
 
   const cols = Math.max(3, Math.ceil(W/step)+3);
   const rows = Math.max(3, Math.ceil(H/step)+3);
-  // Align grid to current camera/world box
-  const TL = Wc([0,0]);    // top-left world coord
+  const TL = Wc([0,0]);
   grid = {cols, rows, step, x0:TL[0], y0:TL[1], psi:new Float32Array(cols*rows)};
 
   let i=0, total=cols*rows;
@@ -306,7 +318,7 @@ function precomputeContours(){
   statusText.textContent='Tracing ψ-contours…';
   contours.length=0;
   const levels = P.iso;
-  const vmin = 0.08, vmax = 0.08*levels;
+  const vmin = 0.08;
   const targets = Array.from({length:levels},(_,i)=>vmin*(i+1));
   const step = grid.step;
   const cols = grid.cols-1, rows=grid.rows-1;
@@ -317,8 +329,8 @@ function precomputeContours(){
     while(count<2000 && idx<total){
       const l = Math.floor(idx/(cols*rows));
       const cell = idx % (cols*rows);
-      const cx = cell % cols, cy=(cell/cols)|0;
-      traceCell(cx,cy,targets[l]);
+      const cxCell = cell % cols, cyCell=(cell/cols)|0;
+      traceCell(cxCell,cyCell,targets[l]);
       idx++; count++;
     }
     bar.style.width=((idx/total)*100).toFixed(1)+'%';
@@ -351,7 +363,7 @@ function precomputeContours(){
     if(sC!==sD) pts.push(ip(Cw,D,vC,vD));
     if(sA!==sC) pts.push(ip(A,Cw,vA,vC));
     if(pts.length===2){ contours.push([pts[0],pts[1],target]); }
-    else if(pts.length===4){ contours.push([pts[0],pts[1],target]); contours.push([pts[2],[pts[3][0],pts[3][1]],target]); }
+    else if(pts.length===4){ contours.push([pts[0],pts[1],target]); contours.push([pts[2],pts[3],target]); }
   }
 }
 
@@ -408,6 +420,7 @@ const gridStep=document.getElementById('gridStep');
 const recomputeBtn=document.getElementById('recompute');
 const resetView=document.getElementById('resetView');
 const modeBadge=document.getElementById('modeBadge');
+const cone=document.getElementById('cone');
 
 function syncGM(){ P.GM_target=parseFloat(gm.value); gmVal.textContent=P.GM_target.toFixed(2); gmBadge.textContent=P.GM_target.toFixed(2); scheduleRecompute('GM change'); }
 gm.addEventListener('input',syncGM); syncGM();
@@ -428,6 +441,7 @@ raydt.addEventListener('input',e=>P.raydt=parseFloat(e.target.value));
 mtdt.addEventListener('input',e=>P.mtdt=parseFloat(e.target.value));
 fastMode.addEventListener('change',e=>P.fast=e.target.checked);
 betaMax.addEventListener('input',e=>P.betaMax=parseFloat(e.target.value));
+cone.addEventListener('change',e=>P.cone=e.target.checked);
 
 purist.addEventListener('change',()=>{
   P.purist=purist.checked;
@@ -462,7 +476,6 @@ requestAnimationFrame(loop);
 
 // ---------- Boot: force measure, then initial recompute ----------
 (function boot(){
-  // ensure canvas is sized before first compute
   dpr=window.devicePixelRatio||1;
   W=cv.clientWidth|0; H=cv.clientHeight|0;
   cv.width=W*dpr; cv.height=H*dpr; cx.setTransform(dpr,0,0,dpr,0,0);
