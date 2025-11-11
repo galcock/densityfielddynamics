@@ -121,32 +121,45 @@ cv.addEventListener('wheel',e=>{const k=Math.exp(-e.deltaY*0.0013); const m=Wc([
 
 // ---------- Field (DFD) ----------
 const P={
-  GM:3, iso:20, showIso:true, showGrad:false,
+  GM:3, GM_target:3, iso:20, showIso:true, showGrad:false,
   raydt:0.6, mtdt:0.45,
   finiteCore:true, rcore:0.8,
   fast:false, betaMax:0.70
 };
 const C={x:0,y:0}; const eps=1e-9;
+const GM_SMOOTH = 0.10;        // 0..1 per frame low-pass toward target
+const CAP_DECAY_FLOOR = 0.85;  // at most 15% speed reduction per step via cap
 
+// ψ outside: 2GM/r. Inside: quadratic soft core with C¹ continuity at r=rc.
+// ψ_in(r) = A + B r² where A=3GM/rc, B=−GM/rc³
 function psi_raw(x,y){
   const dx=x-C.x, dy=y-C.y; const r=Math.hypot(dx,dy)+eps; return 2*P.GM/r;
 }
 function psi_core(x,y){
-  // outside r>=rc -> 2GM/r ; inside r<rc -> constant ψ(rc)
   const dx=x-C.x, dy=y-C.y; const r=Math.hypot(dx,dy)+eps;
-  const rc=P.rcore, psi_rc=2*P.GM/rc;
-  return (r>=rc)? 2*P.GM/r : psi_rc;
+  const rc=P.rcore, GM=P.GM;
+  if(r>=rc) return 2*GM/r;
+  const A=3*GM/rc, B=-GM/(rc*rc*rc);
+  return A + B*r*r;
 }
+// ∇ψ outside: −2GM r̂ / r². Inside: ∂ψ/∂r = 2Br = −2GM r / rc³.
 function grad_core(x,y){
-  const dx=x-C.x, dy=y-C.y; const r=Math.hypot(dx,dy)+eps; const rc=P.rcore;
-  if(r<rc){ return [0,0]; } // freeze gradient inside core (demo)
-  const r2=dx*dx+dy*dy+eps*eps; const R=Math.sqrt(r2); const k=-2*P.GM/(r2*R);
-  return [k*dx,k*dy];
+  const dx=x-C.x, dy=y-C.y; const r=Math.hypot(dx,dy)+eps; const rc=P.rcore, GM=P.GM;
+  const ux=dx/r, uy=dy/r;
+  if(r>=rc){
+    const k=-2*GM/(r*r); // magnitude times r̂ / r
+    return [k*ux, k*uy];
+  } else {
+    const dpsi = -2*GM*r/(rc*rc*rc);
+    return [dpsi*ux, dpsi*uy];
+  }
 }
 function psi(x,y){ return P.finiteCore ? psi_core(x,y) : psi_raw(x,y); }
 function gradPsi(x,y){
   if(P.finiteCore) return grad_core(x,y);
-  const dx=x-C.x, dy=y-C.y; const r2=dx*dx+dy*dy+eps*eps; const R=Math.sqrt(r2); const k=-2*P.GM/(r2*R); return [k*dx,k*dy];
+  const dx=x-C.x, dy=y-C.y; const r=Math.hypot(dx,dy)+eps; const GM=P.GM;
+  const ux=dx/r, uy=dy/r; const k=-2*GM/(r*r);
+  return [k*ux, k*uy];
 }
 
 // ---------- Entities ----------
@@ -167,37 +180,34 @@ function stepPhoton(p){
   let vx=p.vx, vy=p.vy; const vL=Math.hypot(vx,vy)||1; vx/=vL; vy/=vL;
   const g=gradPsi(p.x,p.y);
   const c1=Math.exp(-psi(p.x,p.y)); // e^{-ψ}
-  // curvature term: c1 (I - vv^T) ∇ψ
   const dot=g[0]*vx+g[1]*vy;
   const ax=c1*(g[0]-dot*vx), ay=c1*(g[1]-dot*vy);
   vx+=ax*dt; vy+=ay*dt;
-  const L=Math.hypot(vx,vy)||1; vx/=L; vy/=L; // keep as unit tangent
+  const L=Math.hypot(vx,vy)||1; vx/=L; vy/=L;
   p.x+=c1*vx*dt; p.y+=c1*vy*dt;
   p.vx=vx; p.vy=vy; p.path.push([p.x,p.y]);
   const s=S([p.x,p.y]);
   p.alive = s[0]>-160 && s[0]<W+160 && s[1]>-160 && s[1]<H+160 && p.path.length<12000;
 }
 
-// Masses: a=(c^2/2)∇ψ with c=1 ⇒ a=0.5∇ψ, then **speed cap**: |v| ≤ β_max c1 (disabled in Fast mode)
+// Masses: a=(c^2/2)∇ψ with c=1 ⇒ a=0.5∇ψ, plus **soft cap** toward β_max c1
 function stepMass(m){
   const dt=(P.fast?1.20:1.0)*P.mtdt*(1/cam.z)*40;
   const g=gradPsi(m.x,m.y);
-  // integrate velocity
   m.vx += 0.5*g[0]*dt;
   m.vy += 0.5*g[1]*dt;
 
-  // --- Physical cap so masses never outrun photons (default mode) ---
   if(!P.fast){
     const c1 = Math.exp(-psi(m.x,m.y));
-    const vmax = Math.max(1e-9, P.betaMax * c1); // β_max * c1
+    const vmax = Math.max(1e-9, P.betaMax * c1);
     const vmag = Math.hypot(m.vx, m.vy);
     if(vmag > vmax){
-      const s = vmax / vmag;
-      m.vx *= s; m.vy *= s;
+      const hardS = vmax / vmag;
+      const softS = Math.max(CAP_DECAY_FLOOR, hardS); // rate-limit shrink
+      m.vx *= softS; m.vy *= softS;
     }
   }
 
-  // advance position
   m.x += m.vx*dt;
   m.y += m.vy*dt;
 
@@ -242,7 +252,7 @@ function draw(){
 
 // ---------- UI ----------
 const gm=document.getElementById('gm'), gmVal=document.getElementById('gmVal');
-function syncGM(){ P.GM=parseFloat(gm.value); gmVal.textContent=P.GM.toFixed(2); } gm.addEventListener('input',syncGM); syncGM();
+function syncGM(){ P.GM_target=parseFloat(gm.value); gmVal.textContent=P.GM_target.toFixed(2); } gm.addEventListener('input',syncGM); syncGM();
 
 document.getElementById('iso').addEventListener('input',e=>P.iso=parseInt(e.target.value,10));
 document.getElementById('showIso').addEventListener('change',e=>P.showIso=e.target.checked);
@@ -282,6 +292,10 @@ betaCapPill.style.display = P.fast ? 'none' : 'inline-block';
 let acc=0;
 function loop(){
   requestAnimationFrame(loop);
+
+  // Smooth GM toward target to avoid discontinuous field jumps
+  P.GM += (P.GM_target - P.GM) * GM_SMOOTH;
+
   acc+=1/60;
   if(document.getElementById('autoPh').checked && acc>0.06){ addPhoton(); acc=0; }
   if(document.getElementById('autoMs').checked && Math.random()<0.02){ addMass(); }
