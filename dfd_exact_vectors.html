@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>DFD — ψ Field Optics & Matter (Exact + Vectors)</title>
+<title>DFD — ψ Field Optics & Matter (Stable v2)</title>
 <style>
   :root { --bg:#05070d; --fg:#eaf2ff; --muted:#a9b9ff; --cyan:#48d4ff; --green:#4ef07a; --amber:#ffd24d; }
   html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font:15px/1.45 system-ui,Segoe UI,Roboto,Helvetica,Arial}
@@ -40,7 +40,8 @@
         <span id="betaCapPill" class="pill">β<sub>max</sub>·c<sub>1</sub> cap</span>
       </div>
       <div class="note" style="margin-top:6px">
-        Illustrative DFD ray law (not to scale; optional core radius for framerate). Photons (cyan) follow n=e<sup>ψ</sup> with speed c<sub>1</sub>=e<sup>−ψ</sup>. Test masses (green) follow a=(c²/2)∇ψ. By default, mass speed is capped at β<sub>max</sub>·c<sub>1</sub> so masses never outrun photons. Toggle “Fast mode” to exaggerate motion.
+        Photons (cyan) use speed c<sub>1</sub> from a clamped core (no stalls);  
+        test masses (green) are strictly &lt; photons except in Fast Mode.
       </div>
     </div>
     <div class="legend">
@@ -52,7 +53,7 @@
 
   <div class="panel">
     <h1>DFD Controls</h1>
-    <div class="note">Point mass outside a finite core (optional). ψ=2GM/r with inward ∇ψ. Numerics use c=1.</div>
+    <div class="note">ψ = 2GM/r outside; C¹ soft core inside. GM updates are smoothed.</div>
 
     <h2>Presets</h2>
     <div class="row">
@@ -93,11 +94,11 @@
 
     <div class="row">
       <label><input id="fastMode" type="checkbox"/> Fast mode (exaggerated)</label>
-      <label style="margin-left:8px;">β<sub>max</sub> (mass cap)
+      <label style="margin-left:8px;">β<sub>max</sub>
         <input id="betaMax" type="range" min="0.10" max="0.95" step="0.01" value="0.70"/>
       </label>
     </div>
-    <div class="note">Fast mode disables the β<sub>max</sub>·c<sub>1</sub> cap and slightly boosts dt for show-and-tell. Default mode keeps masses &lt; photons everywhere.</div>
+    <div class="note">Fast Mode disables the β<sub>max</sub>·c₁ cap.</div>
   </div>
 </div>
 
@@ -109,7 +110,7 @@ let W=0,H=0,dpr=1;
 function resize(){ dpr=window.devicePixelRatio||1; W=cv.clientWidth|0; H=cv.clientHeight|0; cv.width=W*dpr; cv.height=H*dpr; cx.setTransform(dpr,0,0,dpr,0,0); }
 addEventListener('resize',resize); resize();
 
-// ---------- Camera & interaction ----------
+// ---------- Camera ----------
 let cam={x:0,y:0,z:250};
 function S([x,y]){return[(x-cam.x)*cam.z+W/2,(y-cam.y)*cam.z+H/2]}
 function Wc([sx,sy]){return[(sx-W/2)/cam.z+cam.x,(sy-H/2)/cam.z+cam.y]}
@@ -119,193 +120,149 @@ addEventListener('mouseup',()=>drag=false);
 addEventListener('mousemove',e=>{if(drag){cam.x-=(e.clientX-last[0])/cam.z; cam.y-=(e.clientY-last[1])/cam.z; last=[e.clientX,e.clientY]}});
 cv.addEventListener('wheel',e=>{const k=Math.exp(-e.deltaY*0.0013); const m=Wc([e.clientX,e.clientY]); cam.z*=k; const m2=Wc([e.clientX,e.clientY]); cam.x+=m[0]-m2[0]; cam.y+=m[1]-m2[1]});
 
-// ---------- Field (DFD) ----------
-const P={
-  GM:3, GM_target:3, iso:20, showIso:true, showGrad:false,
-  raydt:0.6, mtdt:0.45,
-  finiteCore:true, rcore:0.8,
-  fast:false, betaMax:0.70
-};
+// ---------- Field ----------
+const P={GM:3, GM_target:3, iso:20, showIso:true, showGrad:false,
+          raydt:0.6, mtdt:0.45, finiteCore:true, rcore:0.8,
+          fast:false, betaMax:0.70};
 const C={x:0,y:0}; const eps=1e-9;
-const GM_SMOOTH = 0.10;        // 0..1 per frame low-pass toward target
-const CAP_DECAY_FLOOR = 0.85;  // at most 15% speed reduction per step via cap
+const GM_SMOOTH = 0.10; // smooths slider → simulation
 
-// ψ outside: 2GM/r. Inside: quadratic soft core with C¹ continuity at r=rc.
-// ψ_in(r) = A + B r² where A=3GM/rc, B=−GM/rc³
-function psi_raw(x,y){
-  const dx=x-C.x, dy=y-C.y; const r=Math.hypot(dx,dy)+eps; return 2*P.GM/r;
+// C¹ soft-core potential for forces (value + derivative match at rc)
+function psi_force(x,y){
+  const dx=x-C.x, dy=y-C.y; const r=Math.hypot(dx,dy)+eps; const rc=P.rcore, GM=P.GM;
+  if(!P.finiteCore || r>=rc) return 2*GM/r;
+  const a = 3*GM/rc, b = -GM/(rc**3);           // ψ = a + b r²
+  return a + b*r*r;
 }
-function psi_core(x,y){
-  const dx=x-C.x, dy=y-C.y; const r=Math.hypot(dx,dy)+eps;
-  const rc=P.rcore, GM=P.GM;
-  if(r>=rc) return 2*GM/r;
-  const A=3*GM/rc, B=-GM/(rc*rc*rc);
-  return A + B*r*r;
-}
-// ∇ψ outside: −2GM r̂ / r². Inside: ∂ψ/∂r = 2Br = −2GM r / rc³.
-function grad_core(x,y){
+function gradPsi(x,y){
   const dx=x-C.x, dy=y-C.y; const r=Math.hypot(dx,dy)+eps; const rc=P.rcore, GM=P.GM;
   const ux=dx/r, uy=dy/r;
-  if(r>=rc){
-    const k=-2*GM/(r*r); // magnitude times r̂ / r
-    return [k*ux, k*uy];
-  } else {
-    const dpsi = -2*GM*r/(rc*rc*rc);
-    return [dpsi*ux, dpsi*uy];
-  }
+  if(!P.finiteCore || r>=rc){ const k=-2*GM/(r*r); return [k*ux,k*uy]; }
+  const dpsi_dr = -2*GM*r/(rc**3);               // matches slope at rc
+  return [dpsi_dr*ux, dpsi_dr*uy];
 }
-function psi(x,y){ return P.finiteCore ? psi_core(x,y) : psi_raw(x,y); }
-function gradPsi(x,y){
-  if(P.finiteCore) return grad_core(x,y);
-  const dx=x-C.x, dy=y-C.y; const r=Math.hypot(dx,dy)+eps; const GM=P.GM;
-  const ux=dx/r, uy=dy/r; const k=-2*GM/(r*r);
-  return [k*ux, k*uy];
+
+// CLAMPED speed/core index: use ψ at max(r, rc) for speeds/caps
+function psi_speed(x,y){
+  const dx=x-C.x, dy=y-C.y; const r=Math.hypot(dx,dy)+eps; const rc=P.rcore, GM=P.GM;
+  const reff = (!P.finiteCore)? r : Math.max(r, rc);
+  return 2*GM/reff;
 }
+function c1_at(x,y){ return Math.exp(-psi_speed(x,y)); }
 
 // ---------- Entities ----------
 const photons=[], masses=[];
-function addPhoton(){
-  const y=(Math.random()*0.6-0.3)*(H/cam.z)*0.8;
-  photons.push({x:-W*0.55/cam.z+cam.x, y:y+cam.y, vx:1, vy:0, path:[], alive:true});
-}
-function addMass(){
-  const y=(Math.random()*0.6-0.3)*(H/cam.z)*0.6;
-  masses.push({x:-W*0.45/cam.z+cam.x, y:y+cam.y, vx:0.6, vy:0, path:[], alive:true});
-}
+function addPhoton(){const y=(Math.random()*0.6-0.3)*(H/cam.z)*0.8;photons.push({x:-W*0.55/cam.z+cam.x,y:y+cam.y,vx:1,vy:0,path:[],alive:true});}
+function addMass(){const y=(Math.random()*0.6-0.3)*(H/cam.z)*0.6;masses.push({x:-W*0.45/cam.z+cam.x,y:y+cam.y,vx:0.6,vy:0,path:[],alive:true});}
 
-// ---------- DFD Integrators ----------
-// Photons: direction integrates with curvature term, speed = c1 = e^{-ψ}
+// ---------- Integrators ----------
 function stepPhoton(p){
   const dt=(P.fast?1.15:1.0)*P.raydt*(1/cam.z)*40;
-  let vx=p.vx, vy=p.vy; const vL=Math.hypot(vx,vy)||1; vx/=vL; vy/=vL;
+  let vx=p.vx,vy=p.vy;const vL=Math.hypot(vx,vy)||1;vx/=vL;vy/=vL;
   const g=gradPsi(p.x,p.y);
-  const c1=Math.exp(-psi(p.x,p.y)); // e^{-ψ}
+  const c1=c1_at(p.x,p.y);
   const dot=g[0]*vx+g[1]*vy;
   const ax=c1*(g[0]-dot*vx), ay=c1*(g[1]-dot*vy);
   vx+=ax*dt; vy+=ay*dt;
-  const L=Math.hypot(vx,vy)||1; vx/=L; vy/=L;
+  const L=Math.hypot(vx,vy)||1;vx/=L;vy/=L;
   p.x+=c1*vx*dt; p.y+=c1*vy*dt;
   p.vx=vx; p.vy=vy; p.path.push([p.x,p.y]);
   const s=S([p.x,p.y]);
-  p.alive = s[0]>-160 && s[0]<W+160 && s[1]>-160 && s[1]<H+160 && p.path.length<12000;
+  p.alive=s[0]>-160&&s[0]<W+160&&s[1]>-160&&s[1]<H+160&&p.path.length<12000;
 }
 
-// Masses: a=(c^2/2)∇ψ with c=1 ⇒ a=0.5∇ψ, then HARD cap: |v| ≤ β_max * c1
 function stepMass(m){
   const dt=(P.fast?1.20:1.0)*P.mtdt*(1/cam.z)*40;
-
-  // integrate velocity
   const g=gradPsi(m.x,m.y);
-  m.vx += 0.5*g[0]*dt;
-  m.vy += 0.5*g[1]*dt;
+  m.vx+=0.5*g[0]*dt;
+  m.vy+=0.5*g[1]*dt;
 
   if(!P.fast){
-    // strict cap so masses never outrun photons
-    const c1 = Math.exp(-psi(m.x,m.y));
-    const vcap = Math.max(1e-9, P.betaMax * c1 * 0.999); // small margin under photons
-    const vmag = Math.hypot(m.vx, m.vy);
-    if(vmag > vcap){
-      const s = vcap / vmag;
-      m.vx *= s; m.vy *= s;
-    }
+    const vmax = Math.max(1e-9, P.betaMax * c1_at(m.x,m.y) * 0.999);
+    const vmag = Math.hypot(m.vx,m.vy);
+    if(vmag>vmax){ const s=vmax/vmag; m.vx*=s; m.vy*=s; }
   }
 
-  // advance position
-  m.x += m.vx*dt;
-  m.y += m.vy*dt;
-
+  m.x+=m.vx*dt; m.y+=m.vy*dt;
   m.path.push([m.x,m.y]);
   const s=S([m.x,m.y]);
-  m.alive = s[0]>-160 && s[0]<W+160 && s[1]>-160 && s[1]<H+160 && m.path.length<12000;
+  m.alive=s[0]>-160&&s[0]<W+160&&s[1]>-160&&s[1]<H+160&&m.path.length<12000;
 }
 
-// ---------- Drawing ----------
+// ---------- Draw ----------
 function drawIso(target){
-  const step=Math.max(12,80/cam.z); cx.beginPath();
-  for(let sy=-H/2; sy<=H/2; sy+=step){
-    for(let sx=-W/2; sx<=W/2; sx+=step){
-      const A=Wc([sx+W/2,sy+H/2]), B=Wc([sx+step+W/2,sy+H/2]), Cw=Wc([sx+W/2,sy+step+H/2]), D=Wc([sx+step+W/2,sy+step+H/2]);
-      const s=[psi(A[0],A[1])>target, psi(B[0],B[1])>target, psi(D[0],D[1])>target, psi(Cw[0],Cw[1])>target];
-      function seg(P,Q,a,b){ if(a===b) return; const t=(target-psi(P[0],P[1]))/(psi(Q[0],Q[1])-psi(P[0],P[1])); const p=S([P[0]+t*(Q[0]-P[0]), P[1]+t*(Q[1]-P[1])]); cx.moveTo(p[0],p[1]); cx.lineTo(p[0],p[1]); }
-      seg(A,B,s[0],s[1]); seg(B,D,s[1],s[2]); seg(D,Cw,s[2],s[3]); seg(Cw,A,s[3],s[0]);
+  const step=Math.max(12,80/cam.z);cx.beginPath();
+  for(let sy=-H/2;sy<=H/2;sy+=step){
+    for(let sx=-W/2;sx<=W/2;sx+=step){
+      const A=Wc([sx+W/2,sy+H/2]),B=Wc([sx+step+W/2,sy+H/2]),Cw=Wc([sx+W/2,sy+step+H/2]),D=Wc([sx+step+W/2,sy+step+H/2]);
+      const s=[psi_force(A[0],A[1])>target,psi_force(B[0],B[1])>target,psi_force(D[0],D[1])>target,psi_force(Cw[0],Cw[1])>target];
+      function seg(P,Q,a,b){if(a===b)return;const t=(target-psi_force(P[0],P[1]))/(psi_force(Q[0],Q[1])-psi_force(P[0],P[1]));const p=S([P[0]+t*(Q[0]-P[0]),P[1]+t*(Q[1]-P[1])]);cx.moveTo(p[0],p[1]);cx.lineTo(p[0],p[1]);}
+      seg(A,B,s[0],s[1]);seg(B,D,s[1],s[2]);seg(D,Cw,s[2],s[3]);seg(Cw,A,s[3],s[0]);
     }
   }
   cx.stroke();
 }
 function drawGrad(){
-  if(!P.showGrad) return;
-  cx.save(); cx.strokeStyle='rgba(120,220,255,0.55)'; const step=Math.max(22,140/cam.z);
-  for(let y=-H;y<=H;y+=step){ for(let x=-W;x<=W;x+=step){
-    const w=Wc([x+W/2,y+H/2]); const g=gradPsi(w[0],w[1]);
-    const p1=S([w[0],w[1]]); const p2=S([w[0]+g[0]*140/cam.z, w[1]+g[1]*140/cam.z]);
-    cx.beginPath(); cx.moveTo(p1[0],p1[1]); cx.lineTo(p2[0],p2[1]); cx.stroke();
-  }} cx.restore();
+  if(!P.showGrad)return;
+  cx.save();cx.strokeStyle='rgba(120,220,255,0.55)';const step=Math.max(22,140/cam.z);
+  for(let y=-H;y<=H;y+=step){for(let x=-W;x<=W;x+=step){
+    const w=Wc([x+W/2,y+H/2]);const g=gradPsi(w[0],w[1]);
+    const p1=S([w[0],w[1]]);const p2=S([w[0]+g[0]*140/cam.z,w[1]+g[1]*140/cam.z]);
+    cx.beginPath();cx.moveTo(p1[0],p1[1]);cx.lineTo(p2[0],p2[1]);cx.stroke();
+  }}cx.restore();
 }
 function draw(){
   cx.clearRect(0,0,W,H);
-  if(P.showIso){ cx.save(); cx.strokeStyle='rgba(255,210,80,0.36)'; cx.lineWidth=1; for(let i=1;i<=P.iso;i++){ drawIso(0.08*i); } cx.restore(); }
+  if(P.showIso){cx.save();cx.strokeStyle='rgba(255,210,80,0.36)';cx.lineWidth=1;for(let i=1;i<=P.iso;i++){drawIso(0.08*i);}cx.restore();}
   drawGrad();
-  const c=S([C.x,C.y]); cx.fillStyle='#fff'; cx.beginPath(); cx.arc(c[0],c[1],5,0,6.283); cx.fill();
-  function trails(list,col){ cx.save(); cx.strokeStyle=col; cx.lineWidth=1.6; cx.globalAlpha=0.97; for(const p of list){ if(p.path.length<2) continue; cx.beginPath(); const a=S(p.path[0]); cx.moveTo(a[0],a[1]); for(let i=1;i<p.path.length;i++){ const s=S(p.path[i]); cx.lineTo(s[0],s[1]); } cx.stroke(); } cx.restore(); }
-  trails(photons,'#48d4ff'); trails(masses,'#4ef07a');
-  if(P.finiteCore){
-    const c0=S([C.x,C.y]); cx.save(); cx.strokeStyle='rgba(255,255,255,0.3)'; cx.setLineDash([6,6]); cx.beginPath(); cx.arc(c0[0],c0[1], P.rcore*cam.z, 0, 6.283); cx.stroke(); cx.restore();
-  }
+  const c=S([C.x,C.y]);cx.fillStyle='#fff';cx.beginPath();cx.arc(c[0],c[1],5,0,6.283);cx.fill();
+  function trails(list,col){cx.save();cx.strokeStyle=col;cx.lineWidth=1.6;cx.globalAlpha=0.97;for(const p of list){if(p.path.length<2)continue;cx.beginPath();const a=S(p.path[0]);cx.moveTo(a[0],a[1]);for(let i=1;i<p.path.length;i++){const s=S(p.path[i]);cx.lineTo(s[0],s[1]);}cx.stroke();}cx.restore();}
+  trails(photons,'#48d4ff');trails(masses,'#4ef07a');
+  if(P.finiteCore){const c0=S([C.x,C.y]);cx.save();cx.strokeStyle='rgba(255,255,255,0.3)';cx.setLineDash([6,6]);cx.beginPath();cx.arc(c0[0],c0[1],P.rcore*cam.z,0,6.283);cx.stroke();cx.restore();}
 }
 
 // ---------- UI ----------
-const gm=document.getElementById('gm'), gmVal=document.getElementById('gmVal');
-function syncGM(){ P.GM_target=parseFloat(gm.value); gmVal.textContent=P.GM_target.toFixed(2); } gm.addEventListener('input',syncGM); syncGM();
-
+const gm=document.getElementById('gm'),gmVal=document.getElementById('gmVal');
+function syncGM(){P.GM_target=parseFloat(gm.value);gmVal.textContent=P.GM_target.toFixed(2);}gm.addEventListener('input',syncGM);syncGM();
 document.getElementById('iso').addEventListener('input',e=>P.iso=parseInt(e.target.value,10));
 document.getElementById('showIso').addEventListener('change',e=>P.showIso=e.target.checked);
 document.getElementById('showGrad').addEventListener('change',e=>P.showGrad=e.target.checked);
 document.getElementById('finiteCore').addEventListener('change',e=>P.finiteCore=e.target.checked);
 document.getElementById('rcore').addEventListener('input',e=>P.rcore=parseFloat(e.target.value));
-
 document.getElementById('ph').addEventListener('click',addPhoton);
 document.getElementById('ms').addEventListener('click',addMass);
 document.getElementById('burst').addEventListener('click',()=>{for(let i=0;i<120;i++) addPhoton();});
 document.getElementById('clear').addEventListener('click',()=>{photons.length=0; masses.length=0;});
-
 document.getElementById('p0').addEventListener('click',()=>{ gm.value=3; syncGM(); cam.x=0; cam.y=0; cam.z=250; });
 document.getElementById('p1').addEventListener('click',()=>{ gm.value=8; syncGM(); cam.z=360; });
 document.getElementById('p2').addEventListener('click',()=>{ cam.z=520; });
-
 const raydt=document.getElementById('raydt'), mtdt=document.getElementById('mtdt');
 raydt.addEventListener('input',e=>P.raydt=parseFloat(e.target.value));
 mtdt.addEventListener('input',e=>P.mtdt=parseFloat(e.target.value));
-
 const fastMode=document.getElementById('fastMode');
 const betaMax=document.getElementById('betaMax');
 const betaCapPill=document.getElementById('betaCapPill');
-
-fastMode.addEventListener('change',e=>{
-  P.fast = e.target.checked;
-  betaMax.disabled = P.fast;
-  betaCapPill.style.display = P.fast ? 'none' : 'inline-block';
-});
+fastMode.addEventListener('change',e=>{P.fast=e.target.checked;betaMax.disabled=P.fast;betaCapPill.style.display=P.fast?'none':'inline-block';});
 betaMax.addEventListener('input',e=>{ P.betaMax=parseFloat(e.target.value); });
-
-// init UI state
-betaMax.disabled = P.fast;
-betaCapPill.style.display = P.fast ? 'none' : 'inline-block';
+betaMax.disabled=P.fast; betaCapPill.style.display=P.fast?'none':'inline-block';
 
 // ---------- Main loop ----------
 let acc=0;
 function loop(){
   requestAnimationFrame(loop);
-
-  // Smooth GM toward target to avoid discontinuous field jumps
+  // smooth GM → avoids freeze on slider thrash
   P.GM += (P.GM_target - P.GM) * GM_SMOOTH;
 
   acc+=1/60;
   if(document.getElementById('autoPh').checked && acc>0.06){ addPhoton(); acc=0; }
   if(document.getElementById('autoMs').checked && Math.random()<0.02){ addMass(); }
+
   for(const p of photons) if(p.alive) stepPhoton(p);
-  for(const m of masses) if(m.alive) stepMass(m);
+  for(const m of masses)  if(m.alive) stepMass(m);
+
   for(let i=photons.length-1;i>=0;i--) if(!photons[i].alive) photons.splice(i,1);
-  for(let i=masses.length-1;i>=0;i--) if(!masses[i].alive) masses.splice(i,1);
+  for(let i=masses.length-1;i>=0;i--)   if(!masses[i].alive)  masses.splice(i,1);
+
   draw();
 }
 requestAnimationFrame(loop);
