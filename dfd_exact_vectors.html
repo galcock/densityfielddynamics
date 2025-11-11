@@ -190,24 +190,27 @@ function stepPhoton(p){
   p.alive = s[0]>-160 && s[0]<W+160 && s[1]>-160 && s[1]<H+160 && p.path.length<12000;
 }
 
-// Masses: a=(c^2/2)∇ψ with c=1 ⇒ a=0.5∇ψ, plus **soft cap** toward β_max c1
+// Masses: a=(c^2/2)∇ψ with c=1 ⇒ a=0.5∇ψ, then HARD cap: |v| ≤ β_max * c1
 function stepMass(m){
   const dt=(P.fast?1.20:1.0)*P.mtdt*(1/cam.z)*40;
+
+  // integrate velocity
   const g=gradPsi(m.x,m.y);
   m.vx += 0.5*g[0]*dt;
   m.vy += 0.5*g[1]*dt;
 
   if(!P.fast){
+    // strict cap so masses never outrun photons
     const c1 = Math.exp(-psi(m.x,m.y));
-    const vmax = Math.max(1e-9, P.betaMax * c1);
+    const vcap = Math.max(1e-9, P.betaMax * c1 * 0.999); // small margin under photons
     const vmag = Math.hypot(m.vx, m.vy);
-    if(vmag > vmax){
-      const hardS = vmax / vmag;
-      const softS = Math.max(CAP_DECAY_FLOOR, hardS); // rate-limit shrink
-      m.vx *= softS; m.vy *= softS;
+    if(vmag > vcap){
+      const s = vcap / vmag;
+      m.vx *= s; m.vy *= s;
     }
   }
 
+  // advance position
   m.x += m.vx*dt;
   m.y += m.vy*dt;
 
