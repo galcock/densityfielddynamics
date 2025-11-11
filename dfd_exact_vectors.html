@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>DFD — ψ Field Optics & Matter (Stable v2)</title>
+<title>DFD — ψ Field Optics & Matter (Purist, Exact Equations)</title>
 <style>
-  :root { --bg:#05070d; --fg:#eaf2ff; --muted:#a9b9ff; --cyan:#48d4ff; --green:#4ef07a; --amber:#ffd24d; }
+  :root { --bg:#05070d; --fg:#eaf2ff; --muted:#a9b9ff; --cyan:#48d4ff; --green:#4ef07a; --amber:#ffd24d; --red:#ff6b6b;}
   html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font:15px/1.45 system-ui,Segoe UI,Roboto,Helvetica,Arial}
   .layout{display:flex;height:100%}
   #view{flex:1;position:relative;background:radial-gradient(1200px 700px at 60% 40%, #0c1f3f 0%, #07132a 60%, #040a18 100%)}
   canvas{width:100%;height:100%;display:block}
-  .panel{width:460px;background:linear-gradient(180deg,#07132a,#0b1938);border-left:1px solid #ffffff18;padding:14px 16px;overflow:auto}
+  .panel{width:480px;background:linear-gradient(180deg,#07132a,#0b1938);border-left:1px solid #ffffff18;padding:14px 16px;overflow:auto}
   h1{font-size:16px;margin:0 0 8px 0}
   h2{font-size:13px;margin:14px 0 6px 0;color:#d9e6ff}
   label{display:block;margin:8px 0 4px 0}
@@ -18,14 +18,23 @@
   .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
   button{background:#0d2747;border:1px solid #315a86;color:#eaf2ff;border-radius:8px;padding:8px 10px;cursor:pointer}
   button.primary{background:#143b6d;border-color:#3d77b1}
+  button.warn{background:#4c1620;border-color:#8a3a47}
   .pill{display:inline-block;padding:4px 10px;border-radius:999px;background:#ffffff12;border:1px solid #ffffff22;font-size:12px;margin-right:6px}
-  .legend{position:absolute;right:12px;bottom:12px;background:#0009;border:1px solid #ffffff25;border-radius:10px;padding:8px 10px;font-size:12px}
+  .legend{position:absolute;right:12px;bottom:12px;background:#000b;border:1px solid #ffffff25;border-radius:10px;padding:8px 10px;font-size:12px}
   .legend i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;box-shadow:0 0 8px #fff2}
-  .hud{position:absolute;left:12px;top:12px;background:#000c;border:1px solid #ffffff25;border-radius:12px;padding:10px 12px;backdrop-filter:blur(3px);max-width:760px}
+  .hud{position:absolute;left:12px;top:12px;background:#000b;border:1px solid #ffffff25;border-radius:12px;padding:10px 12px;backdrop-filter:blur(3px);max-width:860px}
   .kpi{font-weight:800}
   .note{font-size:12px;color:#b7c6ff}
-  .disclaimer{position:absolute;left:12px;bottom:12px;background:#000c;border:1px solid #ffffff25;border-radius:10px;padding:10px 12px;font-size:12px;max-width:760px}
+  .disclaimer{position:absolute;left:12px;bottom:12px;background:#000c;border:1px solid #ffffff25;border-radius:10px;padding:10px 12px;font-size:12px;max-width:860px}
   .disclaimer b{color:#eaf2ff}
+  .overlay{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:#000c;backdrop-filter:blur(2px)}
+  .card{background:#081a37;border:1px solid #ffffff25;border-radius:12px;padding:16px;min-width:340px;max-width:520px}
+  .progress{height:10px;background:#041024;border:1px solid #234; border-radius:8px;overflow:hidden;margin-top:10px}
+  .bar{height:100%;width:0%;background:linear-gradient(90deg,#3fb2ff,#48d4ff);transition:width 0.08s}
+  .status{font-size:12px;color:#b7c6ff;margin-top:6px}
+  .badge{padding:2px 8px;border-radius:999px;border:1px solid #ffffff2a;font-size:11px;margin-left:8px}
+  .badge.good{background:#1d3b1d;color:#c9ffd0;border-color:#2f6f39}
+  .badge.warn{background:#43211f;color:#ffd9d6;border-color:#7f3d36}
 </style>
 </head>
 <body>
@@ -35,16 +44,16 @@
 
     <div class="hud">
       <div class="row">
-        <span class="pill">n=e<sup>ψ</sup></span>
-        <span class="pill">c<sub>1</sub>=e<sup>−ψ</sup></span>
-        <span class="pill">ṙ=c<sub>1</sub>v</span>
-        <span class="pill">ṽ=c<sub>1</sub>(I−vvᵀ)∇ψ</span>
-        <span class="pill">a=(c²/2)∇ψ</span>
-        <span id="betaCapPill" class="pill">β<sub>max</sub>·c<sub>1</sub> cap</span>
+        <span class="pill">n = e<sup>ψ</sup></span>
+        <span class="pill">c<sub>1</sub> = e<sup>−ψ</sup></span>
+        <span class="pill">ṙ = c<sub>1</sub> v</span>
+        <span class="pill">ṽ = c<sub>1</sub>(I − v vᵀ)∇ψ</span>
+        <span class="pill">a = (c²/2)∇ψ</span>
+        <span id="modeBadge" class="badge good">Purist (Exact ψ)</span>
       </div>
       <div class="note" style="margin-top:6px">
-        Photons (cyan) use c<sub>1</sub> from a clamped core (no stalls).
-        Test masses (green) are strictly slower than photons except in Fast Mode.
+        This panel runs DFD’s **exact** ray and matter laws with ψ = 2GM/r. No damping, no caps, no clamped core.
+        For speed, contours are precomputed on a grid. Toggle “Approximate” only for stability demos.
       </div>
     </div>
 
@@ -54,75 +63,98 @@
       <div><i style="background:var(--green)"></i> test mass</div>
     </div>
 
-    <!-- Clear disclaimer so users aren’t confused -->
+    <div id="computeOverlay" class="overlay">
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <div>
+            <div style="font-weight:700">Computing ψ-grid & contours…</div>
+            <div class="status" id="statusText">Initializing</div>
+          </div>
+          <div class="badge">GM=<span id="gmBadge">—</span></div>
+        </div>
+        <div class="progress"><div id="bar" class="bar"></div></div>
+        <div class="note" style="margin-top:8px">
+          Purist = exact equations. No hidden heuristics. This step ensures clean contours & stable bends.
+        </div>
+      </div>
+    </div>
+
     <div class="disclaimer">
-      <b>Disclaimer.</b> This is an interactive toy model illustrating a scalar-optical gravity framework (“DFD”).
-      It’s not GR, it’s not a full N-body solver, and it omits many real-world effects. The sliders exaggerate fields for clarity,
-      the core is “soft” for forces but “clamped” for optical speed, and ray/matter steps are adaptive to avoid numerical artifacts.
-      Treat the picture as an intuition builder, not a measurement. If paths look odd, reduce <b>GM</b> or <b>dt</b>, or disable Fast Mode.
+      <b>Model disclaimers.</b> This interactive shows DFD’s <b>exact</b> ray and matter laws in a 2D slice:
+      ψ(x,y) = 2GM/r, c<sub>1</sub> = e<sup>−ψ</sup>, rays: ṙ = c<sub>1</sub> v, ṽ = c<sub>1</sub>(I − v vᵀ)∇ψ; matter: a = (c²/2)∇ψ.
+      No GR curvature language, no two-way-speed tricks. Sliders exaggerate fields for visibility.
+      Optional “Approximate” adds a soft core & UX cap for frame-rate only; it is <b>off by default</b>.
+      If a path looks odd, lower dt or keep Purist on.
     </div>
   </div>
 
   <div class="panel">
     <h1>DFD Controls</h1>
-    <div class="note">ψ = 2GM/r outside; C¹ soft core inside. GM updates are smoothed.</div>
+    <div class="note">Purist mode is exact. Changing GM or resolution re-computes ψ-grid and contours.</div>
 
-    <h2>Presets</h2>
+    <h2>Mode</h2>
     <div class="row">
-      <button id="p0" class="primary">Baseline</button>
-      <button id="p1">Stronger</button>
-      <button id="p2">Zoom-in</button>
+      <label><input id="purist" type="checkbox" checked/> Purist (exact ψ; no caps)</label>
+      <label><input id="approx" type="checkbox"/> Approximate (soft core + UX cap)</label>
     </div>
 
     <h2>Field</h2>
     <label>GM (strength) <span id="gmVal" class="kpi"></span></label>
     <input id="gm" type="range" min="0.5" max="12" step="0.1" value="3"/>
     <label>Contours</label>
-    <input id="iso" type="range" min="6" max="64" step="1" value="20"/>
+    <input id="iso" type="range" min="6" max="64" step="1" value="24"/>
     <div class="row">
       <label><input id="showIso" type="checkbox" checked/> show ψ-contours</label>
       <label><input id="showGrad" type="checkbox"/> show ∇ψ vectors</label>
-      <label><input id="finiteCore" type="checkbox" checked/> finite radius core</label>
+      <label><input id="finiteCore" type="checkbox"/> finite radius core (Approximate only)</label>
       <label>R<sub>core</sub> <input id="rcore" type="range" min="0.2" max="3.0" step="0.05" value="0.8"/></label>
     </div>
+    <div class="row">
+      <button id="recompute" class="primary">Recompute grid/contours</button>
+      <button id="resetView">Reset view</button>
+    </div>
+
+    <h2>Integrator</h2>
+    <label>Ray time step (dt)</label>
+    <input id="raydt" type="range" min="0.03" max="1.50" step="0.03" value="0.45"/>
+    <label>Matter time step (dt)</label>
+    <input id="mtdt" type="range" min="0.03" max="1.20" step="0.01" value="0.35"/>
+
+    <div class="row">
+      <label><input id="fastMode" type="checkbox"/> Fast mode (relaxes adaptivity; not physics)</label>
+      <label style="margin-left:8px;">β<sub>max</sub> (Approx.)
+        <input id="betaMax" type="range" min="0.10" max="0.95" step="0.01" value="0.70"/>
+      </label>
+    </div>
+    <div class="note">Fast Mode & β<sub>max</sub> ignored in Purist (exact) mode.</div>
 
     <h2>Launch</h2>
     <div class="row">
       <button id="ph" class="primary">Photon →</button>
       <button id="ms">Test mass →</button>
-      <button id="burst">Burst</button>
-      <button id="clear">Clear</button>
+      <button id="burst">Photon burst</button>
+      <button id="clear" class="warn">Clear</button>
     </div>
     <div class="row">
       <label><input id="autoPh" type="checkbox" checked/> stream photons</label>
       <label><input id="autoMs" type="checkbox"/> periodic masses</label>
     </div>
 
-    <h2>Integrator</h2>
-    <label>Ray time step (dt)</label>
-    <input id="raydt" type="range" min="0.05" max="2.0" step="0.05" value="0.6"/>
-    <label>Matter time step (dt)</label>
-    <input id="mtdt" type="range" min="0.05" max="1.5" step="0.01" value="0.45"/>
-
-    <div class="row">
-      <label><input id="fastMode" type="checkbox"/> Fast mode (exaggerated)</label>
-      <label style="margin-left:8px;">β<sub>max</sub>
-        <input id="betaMax" type="range" min="0.10" max="0.95" step="0.01" value="0.70"/>
-      </label>
-    </div>
-    <div class="note">Fast Mode disables the β<sub>max</sub>·c₁ cap.</div>
+    <h2>Resolution</h2>
+    <div class="note">Higher grid density = crisper contours (recompute required).</div>
+    <label>Grid step (px)</label>
+    <input id="gridStep" type="range" min="8" max="60" step="2" value="28"/>
   </div>
 </div>
 
 <script>
-// ---------- Canvas ----------
+// -------------- Canvas & Camera --------------
 const cv = document.getElementById('cv');
 const cx = cv.getContext('2d');
 let W=0,H=0,dpr=1;
-function resize(){ dpr=window.devicePixelRatio||1; W=cv.clientWidth|0; H=cv.clientHeight|0; cv.width=W*dpr; cv.height=H*dpr; cx.setTransform(dpr,0,0,dpr,0,0); }
+function resize(){ dpr=window.devicePixelRatio||1; W=cv.clientWidth|0; H=cv.clientHeight|0; cv.width=W*dpr; cv.height=H*dpr; cx.setTransform(dpr,0,0,dpr,0,0); dirtyGrid=true; scheduleRecompute('resize'); }
 addEventListener('resize',resize); resize();
 
-// ---------- Camera ----------
 let cam={x:0,y:0,z:250};
 function S([x,y]){return[(x-cam.x)*cam.z+W/2,(y-cam.y)*cam.z+H/2]}
 function Wc([sx,sy]){return[(sx-W/2)/cam.z+cam.x,(sy-H/2)/cam.z+cam.y]}
@@ -132,132 +164,192 @@ addEventListener('mouseup',()=>drag=false);
 addEventListener('mousemove',e=>{if(drag){cam.x-=(e.clientX-last[0])/cam.z; cam.y-=(e.clientY-last[1])/cam.z; last=[e.clientX,e.clientY]}});
 cv.addEventListener('wheel',e=>{const k=Math.exp(-e.deltaY*0.0013); const m=Wc([e.clientX,e.clientY]); cam.z*=k; const m2=Wc([e.clientX,e.clientY]); cam.x+=m[0]-m2[0]; cam.y+=m[1]-m2[1]});
 
-// ---------- Field ----------
-const P={GM:3, GM_target:3, iso:20, showIso:true, showGrad:false,
-          raydt:0.6, mtdt:0.45, finiteCore:true, rcore:0.8,
-          fast:false, betaMax:0.70};
-const C={x:0,y:0}; const eps=1e-9;
-const GM_SMOOTH = 0.10; // smooths slider → simulation
+// -------------- Parameters / Mode --------------
+const P={
+  GM:3, GM_target:3,
+  iso:24, showIso:true, showGrad:false,
+  raydt:0.45, mtdt:0.35,
+  purist:true, useSoftCore:false, rcore:0.8,
+  fast:false, betaMax:0.70,
+  gridStep:28
+};
+const C={x:0,y:0}; const eps=1e-9; const GM_SMOOTH=0.10;
 
-// C¹ soft-core potential for forces (value + derivative match at rc)
-function psi_force(x,y){
-  const dx=x-C.x, dy=y-C.y; const r=Math.hypot(dx,dy)+eps; const rc=P.rcore, GM=P.GM;
-  if(!P.finiteCore || r>=rc) return 2*GM/r;
-  const a = 3*GM/rc, b = -GM/(rc**3);           // ψ = a + b r² inside
+// -------------- Exact Field (Purist) + Optional Soft Core --------------
+function psi_raw(x,y){
+  const dx=x-C.x, dy=y-C.y; const r=Math.hypot(dx,dy)+eps;
+  if (P.purist || !P.useSoftCore) return 2*P.GM/r; // exact point-mass ψ
+  const rc=P.rcore, GM=P.GM;
+  if (r>=rc) return 2*GM/r;
+  const a=3*GM/rc, b=-GM/(rc**3); // C¹ match at rc: ψ=a+br²
   return a + b*r*r;
 }
 function gradPsi(x,y){
-  const dx=x-C.x, dy=y-C.y; const r=Math.hypot(dx,dy)+eps; const rc=P.rcore, GM=P.GM;
+  const dx=x-C.x, dy=y-C.y; const r=Math.hypot(dx,dy)+eps;
   const ux=dx/r, uy=dy/r;
-  if(!P.finiteCore || r>=rc){ const k=-2*GM/(r*r); return [k*ux,k*uy]; }
-  const dpsi_dr = -2*GM*r/(rc**3);               // matches slope at rc
-  return [dpsi_dr*ux, dpsi_dr*uy];
+  if (P.purist || !P.useSoftCore){
+    const k=-2*P.GM/(r*r); return [k*ux,k*uy]; // exact ∇ψ
+  }
+  const rc=P.rcore, GM=P.GM;
+  if (r>=rc){ const k=-2*GM/(r*r); return [k*ux,k*uy]; }
+  const dpsi_dr=-2*GM*r/(rc**3); return [dpsi_dr*ux,dpsi_dr*uy];
 }
+function c1_at(x,y){ return Math.exp(-psi_raw(x,y)); }
 
-// CLAMPED speed/core index: use ψ at max(r, rc) for speeds/caps
-function psi_speed(x,y){
-  const dx=x-C.x, dy=y-C.y; const r=Math.hypot(dx,dy)+eps; const rc=P.rcore, GM=P.GM;
-  const reff = (!P.finiteCore)? r : Math.max(r, rc);
-  return 2*GM/reff;
-}
-function c1_at(x,y){ return Math.exp(-psi_speed(x,y)); }
-// Rim c1 for the cap (prevents core choke)
-function c1_at_rc(){ return Math.exp(-2*P.GM / Math.max(P.rcore, eps)); }
-
-// ---------- Entities ----------
+// -------------- Entities --------------
 const photons=[], masses=[];
-function addPhoton(){const y=(Math.random()*0.6-0.3)*(H/cam.z)*0.8;photons.push({x:-W*0.55/cam.z+cam.x,y:y+cam.y,vx:1,vy:0,path:[],alive:true});}
-function addMass(){const y=(Math.random()*0.6-0.3)*(H/cam.z)*0.6;masses.push({x:-W*0.45/cam.z+cam.x,y:y+cam.y,vx:0.6,vy:0,path:[],alive:true});}
+function addPhoton(){const y=(Math.random()*0.6-0.3)*(H/cam.z)*0.8; photons.push({x:-W*0.55/cam.z+cam.x, y:y+cam.y, vx:1, vy:0, path:[], alive:true});}
+function addMass(){const y=(Math.random()*0.6-0.3)*(H/cam.z)*0.6; masses.push({x:-W*0.45/cam.z+cam.x, y:y+cam.y, vx:0.6, vy:0, path:[], alive:true});}
 
-// ---------- Integrators ----------
+// -------------- Integrators (Exact; with adaptive dt for rays only) --------------
 function stepPhoton(p){
-  // Adaptive dt in steep gradients to avoid over-bend / turn-back
-  const g = gradPsi(p.x,p.y);
-  const gmag = Math.hypot(g[0], g[1]);
-  const c1 = c1_at(p.x,p.y);
+  const g=gradPsi(p.x,p.y), gmag=Math.hypot(g[0],g[1]);
+  const c1=c1_at(p.x,p.y);
+  const dt0=(P.fast?1.15:1.0)*P.raydt*(1/cam.z)*40;
+  const dt = dt0 / (1 + 2.5*gmag); // numeric stability; not a physics change
 
-  const dt0 = (P.fast?1.15:1.0)*P.raydt*(1/cam.z)*40;
-  const dt  = dt0 / (1 + 2.5*gmag); // shrink where bending is strong
-
-  // Unit direction update with transverse acceleration
   let vx=p.vx, vy=p.vy; const vL=Math.hypot(vx,vy)||1; vx/=vL; vy/=vL;
-  const dot = g[0]*vx + g[1]*vy;
-  const ax = c1 * (g[0] - dot*vx);
-  const ay = c1 * (g[1] - dot*vy);
+  const dot=g[0]*vx + g[1]*vy;
+  const ax=c1*(g[0]-dot*vx), ay=c1*(g[1]-dot*vy);
+  vx+=ax*dt; vy+=ay*dt;
+  const L=Math.hypot(vx,vy)||1; vx/=L; vy/=L;
 
-  vx += ax*dt; vy += ay*dt;
-  const L = Math.hypot(vx,vy)||1; vx/=L; vy/=L;
-
-  p.x += c1*vx*dt; p.y += c1*vy*dt;
+  p.x+=c1*vx*dt; p.y+=c1*vy*dt;
   p.vx=vx; p.vy=vy; p.path.push([p.x,p.y]);
 
   const s=S([p.x,p.y]);
   p.alive = s[0]>-160 && s[0]<W+160 && s[1]>-160 && s[1]<H+160 && p.path.length<12000;
 }
-
 function stepMass(m){
   const dt=(P.fast?1.20:1.0)*P.mtdt*(1/cam.z)*40;
   const g=gradPsi(m.x,m.y);
-  m.vx+=0.5*g[0]*dt;
-  m.vy+=0.5*g[1]*dt;
+  // Units choose c²/2 = 0.5 factor baked into dt; dynamics are proportional
+  m.vx+=0.5*g[0]*dt; m.vy+=0.5*g[1]*dt;
 
-  if(!P.fast){
-    // Cap relative to the rim c1, with a small floor to avoid crawl-to-zero
-    const c1cap = c1_at_rc();
-    const vmax  = Math.max(1e-4, P.betaMax * c1cap);
+  // No caps in Purist. Optional UX cap only when Approximate mode active:
+  if(!P.purist && !P.fast){
+    const c1rim = Math.exp(-2*P.GM/Math.max(P.rcore,eps));
+    const vmax  = Math.max(1e-4, P.betaMax * c1rim);
     const vmag  = Math.hypot(m.vx,m.vy);
     if(vmag>vmax){ const s=vmax/vmag; m.vx*=s; m.vy*=s; }
   }
-
   m.x+=m.vx*dt; m.y+=m.vy*dt;
   m.path.push([m.x,m.y]);
   const s=S([m.x,m.y]);
   m.alive=s[0]>-160&&s[0]<W+160&&s[1]>-160&&s[1]<H+160&&m.path.length<12000;
 }
 
-// ---------- Draw ----------
-function drawIso(target){
-  const step=Math.max(12,80/cam.z);
-  cx.beginPath();
-  for(let sy=-H/2; sy<=H/2; sy+=step){
-    for(let sx=-W/2; sx<=W/2; sx+=step){
-      // Cell world corners: A(top-left), B(top-right), D(bottom-right), C(bottom-left)
-      const A=Wc([sx+W/2,sy+H/2]);
-      const B=Wc([sx+step+W/2,sy+H/2]);
-      const Cw=Wc([sx+W/2,sy+step+H/2]);
-      const D=Wc([sx+step+W/2,sy+step+H/2]);
+// -------------- Precompute ψ-grid & Contours (with progress) --------------
+let grid=null, contours=[], dirtyGrid=true;
+const overlay = document.getElementById('computeOverlay');
+const bar = document.getElementById('bar');
+const statusText = document.getElementById('statusText');
+const gmBadge = document.getElementById('gmBadge');
 
-      const vA=psi_force(A[0],A[1]);
-      const vB=psi_force(B[0],B[1]);
-      const vC=psi_force(Cw[0],Cw[1]);
-      const vD=psi_force(D[0],D[1]);
+function showOverlay(msg){ overlay.style.display='flex'; statusText.textContent=msg||'Working…'; bar.style.width='0%'; gmBadge.textContent=P.GM.toFixed(2); }
+function hideOverlay(){ overlay.style.display='none'; }
 
-      const sA=vA>target, sB=vB>target, sC=vC>target, sD=vD>target;
+function scheduleRecompute(why){ if (!recomputeScheduled){ recomputeScheduled=true; setTimeout(()=>recomputeGrid(why), 60); } }
+let recomputeScheduled=false;
 
-      const pts=[];
-      function ip(P,Q,vP,vQ){
-        const t=(target-vP)/(vQ-vP);
-        const w=[P[0]+t*(Q[0]-P[0]), P[1]+t*(Q[1]-P[1])];
-        return S(w);
-      }
-      // Edges: 0=A-B (top), 1=B-D (right), 2=C-D (bottom), 3=A-C (left)
-      if(sA!==sB) pts.push(ip(A,B,vA,vB));
-      if(sB!==sD) pts.push(ip(B,D,vB,vD));
-      if(sC!==sD) pts.push(ip(Cw,D,vC,vD));
-      if(sA!==sC) pts.push(ip(A,Cw,vA,vC));
+function recomputeGrid(why){
+  recomputeScheduled=false;
+  showOverlay(`Setting up (${why})`);
+  const step = Math.max(8, parseInt(document.getElementById('gridStep').value,10));
+  P.gridStep = step;
+  const cols = Math.max(2, Math.ceil(W/step)+2);
+  const rows = Math.max(2, Math.ceil(H/step)+2);
+  const x0 = Wc([0,0])[0], y0 = Wc([0,0])[1];
+  grid = {cols, rows, step, x0, y0, psi:new Float32Array(cols*rows)};
 
-      if(pts.length===2){
-        cx.moveTo(pts[0][0],pts[0][1]); cx.lineTo(pts[1][0],pts[1][1]);
-      }else if(pts.length===4){
-        // ambiguous saddle; draw two segments
-        cx.moveTo(pts[0][0],pts[0][1]); cx.lineTo(pts[1][0],pts[1][1]);
-        cx.moveTo(pts[2][0],pts[2][1]); cx.lineTo(pts[3][0],pts[3][1]);
-      }
+  // Compute ψ over grid in chunks to animate progress bar
+  let i=0, total=cols*rows;
+  statusText.textContent='Computing ψ-field…';
+  (function chunk(){
+    const batch = Math.min(4000, total-i);
+    for(let k=0;k<batch;k++,i++){
+      const gx = i % cols;
+      const gy = (i/cols)|0;
+      const wx = x0 + gx*step/cam.z;
+      const wy = y0 + gy*step/cam.z;
+      grid.psi[i] = psi_raw(wx,wy);
     }
-  }
-  cx.stroke();
+    bar.style.width = ((i/total)*100).toFixed(1)+'%';
+    if(i<total){ requestAnimationFrame(chunk); }
+    else { precomputeContours(); }
+  })();
 }
 
+function samplePsiWorld(wx,wy){
+  // Bilinear from grid (for contours consistency)
+  if(!grid) return psi_raw(wx,wy);
+  const {x0,y0,step,cols,rows,psi}=grid;
+  const gx=(wx - x0)*cam.z/step, gy=(wy - y0)*cam.z/step;
+  const ix=Math.floor(gx), iy=Math.floor(gy);
+  const tx=gx-ix, ty=gy-iy;
+  function val(i,j){
+    const clamped_i=Math.max(0,Math.min(cols-1,i));
+    const clamped_j=Math.max(0,Math.min(rows-1,j));
+    return psi[clamped_j*cols+clamped_i];
+  }
+  const v00=val(ix,iy), v10=val(ix+1,iy), v01=val(ix,iy+1), v11=val(ix+1,iy+1);
+  return (1-tx)*(1-ty)*v00 + tx*(1-ty)*v10 + (1-tx)*ty*v01 + tx*ty*v11;
+}
+
+function precomputeContours(){
+  statusText.textContent='Tracing ψ-contours…';
+  contours.length=0;
+  const levels = P.iso;
+  const vmin = 0.08, vmax = 0.08*levels;
+  const targets = Array.from({length:levels},(_,i)=>vmin*(i+1));
+  const step = grid.step;
+  const cols = grid.cols-1, rows=grid.rows-1;
+
+  let idx=0, total=targets.length*cols*rows;
+  (function chunk(){
+    let count=0;
+    while(count<1200 && idx<total){
+      const l = Math.floor(idx/(cols*rows));
+      const cell = idx % (cols*rows);
+      const cx = cell % cols, cy=(cell/cols)|0;
+      traceCell(cx,cy,targets[l]);
+      idx++; count++;
+    }
+    bar.style.width=((idx/total)*100).toFixed(1)+'%';
+    if(idx<total){ requestAnimationFrame(chunk); }
+    else { hideOverlay(); dirtyGrid=false; }
+  })();
+
+  function worldAtCell(ix,iy){
+    const wx = grid.x0 + ix*step/cam.z;
+    const wy = grid.y0 + iy*step/cam.z;
+    return [wx,wy];
+  }
+  function traceCell(ix,iy,target){
+    const A=worldAtCell(ix,iy);
+    const B=worldAtCell(ix+1,iy);
+    const Cw=worldAtCell(ix,iy+1);
+    const D=worldAtCell(ix+1,iy+1);
+    const vA=samplePsiWorld(A[0],A[1]);
+    const vB=samplePsiWorld(B[0],B[1]);
+    const vC=samplePsiWorld(Cw[0],Cw[1]);
+    const vD=samplePsiWorld(D[0],D[1]);
+    const sA=vA>target, sB=vB>target, sC=vC>target, sD=vD>target;
+    const pts=[];
+    function ip(P,Q,vP,vQ){
+      const t = (target-vP)/(vQ-vP);
+      return [P[0]+t*(Q[0]-P[0]), P[1]+t*(Q[1]-P[1])];
+    }
+    if(sA!==sB) pts.push(ip(A,B,vA,vB));
+    if(sB!==sD) pts.push(ip(B,D,vB,vD));
+    if(sC!==sD) pts.push(ip(Cw,D,vC,vD));
+    if(sA!==sC) pts.push(ip(A,Cw,vA,vC));
+    if(pts.length===2){ contours.push([pts[0],pts[1],target]); }
+    else if(pts.length===4){ contours.push([pts[0],pts[1],target]); contours.push([pts[2],pts[3],target]); }
+  }
+}
+
+// -------------- Draw --------------
 function drawGrad(){
   if(!P.showGrad) return;
   cx.save(); cx.strokeStyle='rgba(120,220,255,0.55)';
@@ -268,22 +360,22 @@ function drawGrad(){
     cx.beginPath(); cx.moveTo(p1[0],p1[1]); cx.lineTo(p2[0],p2[1]); cx.stroke();
   }} cx.restore();
 }
-
+function drawContours(){
+  if(!P.showIso || !contours.length) return;
+  cx.save(); cx.strokeStyle='rgba(255,210,80,0.40)'; cx.lineWidth=1;
+  for(const seg of contours){
+    const a=S(seg[0]), b=S(seg[1]);
+    cx.beginPath(); cx.moveTo(a[0],a[1]); cx.lineTo(b[0],b[1]); cx.stroke();
+  }
+  cx.restore();
+}
 function draw(){
   cx.clearRect(0,0,W,H);
-
-  if(P.showIso){
-    cx.save(); cx.strokeStyle='rgba(255,210,80,0.36)'; cx.lineWidth=1;
-    for(let i=1;i<=P.iso;i++){ drawIso(0.08*i); }
-    cx.restore();
-  }
-
+  drawContours();
   drawGrad();
 
-  // Source marker
   const c=S([C.x,C.y]); cx.fillStyle='#fff'; cx.beginPath(); cx.arc(c[0],c[1],5,0,6.283); cx.fill();
 
-  // Trails
   function trails(list,col){ cx.save(); cx.strokeStyle=col; cx.lineWidth=1.6; cx.globalAlpha=0.97;
     for(const p of list){ if(p.path.length<2) continue;
       cx.beginPath(); const a=S(p.path[0]); cx.moveTo(a[0],a[1]);
@@ -292,50 +384,77 @@ function draw(){
     } cx.restore();
   }
   trails(photons,'#48d4ff'); trails(masses,'#4ef07a');
-
-  // Core ring (visual; affects speed clamp & force model as defined above)
-  if(P.finiteCore){
-    const c0=S([C.x,C.y]);
-    cx.save(); cx.strokeStyle='rgba(255,255,255,0.3)'; cx.setLineDash([6,6]);
-    cx.beginPath(); cx.arc(c0[0],c0[1],P.rcore*cam.z,0,6.283); cx.stroke(); cx.restore();
-  }
 }
 
-// ---------- UI ----------
+// -------------- UI --------------
 const gm=document.getElementById('gm'),gmVal=document.getElementById('gmVal');
-function syncGM(){P.GM_target=parseFloat(gm.value);gmVal.textContent=P.GM_target.toFixed(2);}gm.addEventListener('input',syncGM);syncGM();
-document.getElementById('iso').addEventListener('input',e=>P.iso=parseInt(e.target.value,10));
-document.getElementById('showIso').addEventListener('change',e=>P.showIso=e.target.checked);
-document.getElementById('showGrad').addEventListener('change',e=>P.showGrad=e.target.checked);
-document.getElementById('finiteCore').addEventListener('change',e=>P.finiteCore=e.target.checked);
-document.getElementById('rcore').addEventListener('input',e=>P.rcore=parseFloat(e.target.value));
-document.getElementById('ph').addEventListener('click',addPhoton);
-document.getElementById('ms').addEventListener('click',addMass);
-document.getElementById('burst').addEventListener('click',()=>{for(let i=0;i<120;i++) addPhoton();});
-document.getElementById('clear').addEventListener('click',()=>{photons.length=0; masses.length=0;});
-document.getElementById('p0').addEventListener('click',()=>{ gm.value=3; syncGM(); cam.x=0; cam.y=0; cam.z=250; });
-document.getElementById('p1').addEventListener('click',()=>{ gm.value=8; syncGM(); cam.z=360; });
-document.getElementById('p2').addEventListener('click',()=>{ cam.z=520; });
-const raydt=document.getElementById('raydt'), mtdt=document.getElementById('mtdt');
-raydt.addEventListener('input',e=>P.raydt=parseFloat(e.target.value));
-mtdt.addEventListener('input',e=>P.mtdt=parseFloat(e.target.value));
+const iso=document.getElementById('iso');
+const showIso=document.getElementById('showIso');
+const showGrad=document.getElementById('showGrad');
+const finiteCore=document.getElementById('finiteCore');
+const rcore=document.getElementById('rcore');
+const ph=document.getElementById('ph');
+const ms=document.getElementById('ms');
+const burst=document.getElementById('burst');
+const clearBtn=document.getElementById('clear');
+const autoPh=document.getElementById('autoPh');
+const autoMs=document.getElementById('autoMs');
+const raydt=document.getElementById('raydt');
+const mtdt=document.getElementById('mtdt');
 const fastMode=document.getElementById('fastMode');
 const betaMax=document.getElementById('betaMax');
-const betaCapPill=document.getElementById('betaCapPill');
-fastMode.addEventListener('change',e=>{P.fast=e.target.checked;betaMax.disabled=P.fast;betaCapPill.style.display=P.fast?'none':'inline-block';});
-betaMax.addEventListener('input',e=>{ P.betaMax=parseFloat(e.target.value); });
-betaMax.disabled=P.fast; betaCapPill.style.display=P.fast?'none':'inline-block';
+const purist=document.getElementById('purist');
+const approx=document.getElementById('approx');
+const gridStep=document.getElementById('gridStep');
+const recomputeBtn=document.getElementById('recompute');
+const resetView=document.getElementById('resetView');
+const modeBadge=document.getElementById('modeBadge');
 
-// ---------- Main loop ----------
+function syncGM(){ P.GM_target=parseFloat(gm.value); gmVal.textContent=P.GM_target.toFixed(2); gmBadge.textContent=P.GM_target.toFixed(2); scheduleRecompute('GM change'); }
+gm.addEventListener('input',syncGM); syncGM();
+
+iso.addEventListener('input',e=>{P.iso=parseInt(e.target.value,10); scheduleRecompute('iso levels');});
+showIso.addEventListener('change',e=>P.showIso=e.target.checked);
+showGrad.addEventListener('change',e=>P.showGrad=e.target.checked);
+
+finiteCore.addEventListener('change',e=>{ if(P.purist){ e.target.checked=false; return; } P.useSoftCore = e.target.checked; scheduleRecompute('core toggle'); });
+rcore.addEventListener('input',e=>{ P.rcore=parseFloat(e.target.value); if(P.useSoftCore) scheduleRecompute('rcore'); });
+
+ph.addEventListener('click',addPhoton);
+ms.addEventListener('click',addMass);
+burst.addEventListener('click',()=>{for(let i=0;i<150;i++) addPhoton();});
+clearBtn.addEventListener('click',()=>{photons.length=0; masses.length=0;});
+
+raydt.addEventListener('input',e=>P.raydt=parseFloat(e.target.value));
+mtdt.addEventListener('input',e=>P.mtdt=parseFloat(e.target.value));
+fastMode.addEventListener('change',e=>P.fast=e.target.checked);
+betaMax.addEventListener('input',e=>P.betaMax=parseFloat(e.target.value));
+
+purist.addEventListener('change',()=>{
+  P.purist=purist.checked;
+  if(P.purist){ approx.checked=false; P.useSoftCore=false; finiteCore.checked=false; P.fast=false; fastMode.checked=false; modeBadge.textContent='Purist (Exact ψ)'; modeBadge.className='badge good'; }
+  scheduleRecompute('mode change');
+});
+approx.addEventListener('change',()=>{
+  if(approx.checked){ P.purist=false; purist.checked=false; P.useSoftCore=finiteCore.checked; modeBadge.textContent='Approximate (Soft core + UX cap)'; modeBadge.className='badge warn'; }
+  else { P.purist=true; purist.checked=true; P.useSoftCore=false; finiteCore.checked=false; modeBadge.textContent='Purist (Exact ψ)'; modeBadge.className='badge good'; }
+  scheduleRecompute('mode change');
+});
+
+gridStep.addEventListener('input',()=>scheduleRecompute('grid step'));
+recomputeBtn.addEventListener('click',()=>scheduleRecompute('manual'));
+resetView.addEventListener('click',()=>{ cam.x=0; cam.y=0; cam.z=250; scheduleRecompute('view reset'); });
+
+// -------------- Main loop --------------
 let acc=0;
 function loop(){
   requestAnimationFrame(loop);
-  // smooth GM → avoids freeze on slider thrash
+  // smooth GM
   P.GM += (P.GM_target - P.GM) * GM_SMOOTH;
 
   acc+=1/60;
-  if(document.getElementById('autoPh').checked && acc>0.06){ addPhoton(); acc=0; }
-  if(document.getElementById('autoMs').checked && Math.random()<0.02){ addMass(); }
+  if(autoPh.checked && acc>0.06){ addPhoton(); acc=0; }
+  if(autoMs.checked && Math.random()<0.02){ addMass(); }
 
   for(const p of photons) if(p.alive) stepPhoton(p);
   for(const m of masses)  if(m.alive) stepMass(m);
@@ -346,6 +465,9 @@ function loop(){
   draw();
 }
 requestAnimationFrame(loop);
+
+// Initial compute
+scheduleRecompute('initial');
 </script>
 </body>
 </html>
