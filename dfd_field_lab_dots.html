@@ -1,0 +1,611 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>DFD Field Lab — dot-grid ψ visualization (toy)</title>
+  <style>
+    :root{
+      --bg:#070b12;
+      --panel:#0f1623;
+      --panel2:#0b111b;
+      --ink:#e6edf6;
+      --muted:#9ab0c7;
+      --accent:#59a6ff;
+      --line:rgba(255,255,255,0.10);
+    }
+    html,body{height:100%; margin:0;}
+    body{
+      background: radial-gradient(1200px 700px at 30% 40%, #0b1630 0%, var(--bg) 55%, #05070c 100%);
+      color:var(--ink);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    #wrap{display:grid; grid-template-columns: 360px 1fr; height:100%;}
+    #ui{background:linear-gradient(180deg, var(--panel) 0%, var(--panel2) 100%); border-right:1px solid var(--line); padding:14px; overflow:auto;}
+    h1{font-size:14px; margin:0 0 12px 0; letter-spacing:0.2px;}
+    .p{font-size:12px; color:var(--muted); line-height:1.35; margin:10px 0;}
+    .card{background:rgba(0,0,0,0.22); border:1px solid var(--line); border-radius:14px; padding:10px;}
+    .row{display:flex; align-items:center; gap:10px; margin:10px 0; flex-wrap:wrap;}
+    .row label{width:160px; font-size:12px; color:var(--muted);}
+    input[type="range"]{width:160px;}
+    select{background:#0b111b;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:6px 8px;}
+    button{
+      background:rgba(255,255,255,0.06); color:var(--ink);
+      border:1px solid var(--line); padding:8px 10px; border-radius:12px; cursor:pointer;
+    }
+    button.primary{background:rgba(89,166,255,0.18); border-color:rgba(89,166,255,0.35);}
+    button:hover{border-color:rgba(255,255,255,0.22);}
+    .kbd{padding:1px 6px;border:1px solid rgba(255,255,255,0.18);border-bottom-width:2px;border-radius:8px;color:#fff;}
+    #stage{position:relative;}
+    canvas{display:block;width:100%;height:100%;}
+    #hud{
+      position:absolute; left:14px; top:14px; max-width:620px;
+      background:rgba(0,0,0,0.55); border:1px solid var(--line);
+      border-radius:14px; padding:10px 12px;
+      font-size:12px; color:var(--muted);
+      backdrop-filter: blur(4px);
+    }
+    #hud b{color:#fff;}
+    .pill{display:inline-block; padding:2px 8px; border-radius:999px; border:1px solid rgba(255,255,255,0.16); color:#fff; font-size:11px; margin-right:6px;}
+    .grid2{display:grid; grid-template-columns: 1fr 1fr; gap:10px;}
+  </style>
+</head>
+<body>
+<div id="wrap">
+  <div id="ui">
+    <h1>DFD Field Lab (toy) — “dot field” ψ visualization</h1>
+
+    <div class="card p">
+      This imitates that “full field / dot lattice” aesthetic, but with DFD’s core mapping:
+      <span class="pill">n = e^ψ</span>
+      <span class="pill">a = (c²/2)∇ψ</span>
+      <br><br>
+      <b>Mouse:</b> click to add +mass (Shift-click adds −mass). Drag a source to move it.
+      <br>
+      <b>Keys:</b> <span class="kbd">R</span> reset, <span class="kbd">L</span> shoot rays, <span class="kbd">P</span> drop particle, <span class="kbd">Space</span> pause.
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <label>Resolution (dot grid)</label>
+        <select id="gridN">
+          <option value="128">128</option>
+          <option value="160" selected>160</option>
+          <option value="192">192</option>
+          <option value="224">224</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <label>View</label>
+        <select id="viewMode">
+          <option value="psi" selected>ψ field</option>
+          <option value="n">n = exp(sψ)</option>
+          <option value="grad">|∇ψ| magnitude</option>
+        </select>
+      </div>
+
+      <div class="row"><label>Source strength</label>
+        <input id="massStrength" type="range" min="0.2" max="6" step="0.1" value="2.0"/>
+        <span id="massStrengthVal"></span>
+      </div>
+
+      <div class="row"><label>ψ scale (s)</label>
+        <input id="psiScale" type="range" min="0.1" max="4" step="0.1" value="1.0"/>
+        <span id="psiScaleVal"></span>
+      </div>
+
+      <div class="row"><label>Nonlinear μ(|∇ψ|/a*)</label>
+        <input id="useMu" type="checkbox"/>
+        <span style="font-size:12px;color:var(--muted)">(μ=x/(1+x))</span>
+      </div>
+
+      <div class="row"><label>a* threshold</label>
+        <input id="astar" type="range" min="0.02" max="1.0" step="0.01" value="0.15"/>
+        <span id="astarVal"></span>
+      </div>
+
+      <div class="row"><label>Solver iters / update</label>
+        <input id="iters" type="range" min="10" max="250" step="5" value="90"/>
+        <span id="itersVal"></span>
+      </div>
+
+      <div class="row"><label>Dot glow</label>
+        <input id="glow" type="range" min="0" max="3" step="0.1" value="1.4"/>
+        <span id="glowVal"></span>
+      </div>
+
+      <div class="row"><label>Dot size</label>
+        <input id="dotSize" type="range" min="1" max="3" step="0.1" value="1.6"/>
+        <span id="dotSizeVal"></span>
+      </div>
+
+      <div class="row"><label>Rays per shot</label>
+        <input id="rays" type="range" min="10" max="200" step="10" value="80"/>
+        <span id="raysVal"></span>
+      </div>
+
+      <div class="row"><label>Ray steps</label>
+        <input id="raySteps" type="range" min="150" max="2200" step="50" value="900"/>
+        <span id="rayStepsVal"></span>
+      </div>
+
+      <div class="row"><label>Ray step size</label>
+        <input id="ds" type="range" min="0.3" max="2.0" step="0.05" value="0.9"/>
+        <span id="dsVal"></span>
+      </div>
+
+      <div class="row" style="gap:8px; flex-wrap:wrap;">
+        <button class="primary" id="btnRecompute">Recompute ψ</button>
+        <button id="btnShoot">Shoot rays</button>
+        <button id="btnDrop">Drop particle</button>
+        <button id="btnReset">Reset</button>
+      </div>
+
+      <div class="grid2" style="margin-top:10px;">
+        <div class="card p" style="margin:0;">
+          <b>Why this “works” visually</b><br>
+          It’s a PDE on a grid: each dot stores a scalar. We solve a static DFD-shaped constraint and render the entire lattice every frame.
+        </div>
+        <div class="card p" style="margin:0;">
+          <b>What’s DFD here</b><br>
+          Sources → ψ via ∇·(μ∇ψ) = −κρ. Then optics uses n=e^{sψ}, and matter uses a∝∇ψ.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="stage">
+    <canvas id="c"></canvas>
+    <div id="hud">
+      <div><b>DFD Field Lab</b> — full-field dot lattice. Click to add sources; <b>Shift</b> = negative.</div>
+      <div style="margin-top:6px;">
+        <span class="pill">View: <span id="hudView">ψ</span></span>
+        <span class="pill">μ: <span id="hudMu">off</span></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const clamp = (x,a,b)=>Math.max(a,Math.min(b,x));
+  const lerp = (a,b,t)=>a+(b-a)*t;
+
+  const ui = (id)=>document.getElementById(id);
+  const $gridN = ui("gridN");
+  const $viewMode = ui("viewMode");
+  const $massStrength = ui("massStrength"); const $massStrengthVal = ui("massStrengthVal");
+  const $psiScale = ui("psiScale"); const $psiScaleVal = ui("psiScaleVal");
+  const $useMu = ui("useMu");
+  const $astar = ui("astar"); const $astarVal = ui("astarVal");
+  const $iters = ui("iters"); const $itersVal = ui("itersVal");
+  const $glow = ui("glow"); const $glowVal = ui("glowVal");
+  const $dotSize = ui("dotSize"); const $dotSizeVal = ui("dotSizeVal");
+  const $rays = ui("rays"); const $raysVal = ui("raysVal");
+  const $raySteps = ui("raySteps"); const $rayStepsVal = ui("rayStepsVal");
+  const $ds = ui("ds"); const $dsVal = ui("dsVal");
+
+  const $btnRecompute = ui("btnRecompute");
+  const $btnShoot = ui("btnShoot");
+  const $btnDrop = ui("btnDrop");
+  const $btnReset = ui("btnReset");
+
+  const $hudView = ui("hudView");
+  const $hudMu = ui("hudMu");
+
+  function refreshLabels(){
+    $massStrengthVal.textContent = (+$massStrength.value).toFixed(1);
+    $psiScaleVal.textContent = (+$psiScale.value).toFixed(1);
+    $astarVal.textContent = (+$astar.value).toFixed(2);
+    $itersVal.textContent = (+$iters.value)|0;
+    $glowVal.textContent = (+$glow.value).toFixed(1);
+    $dotSizeVal.textContent = (+$dotSize.value).toFixed(1);
+    $raysVal.textContent = (+$rays.value)|0;
+    $rayStepsVal.textContent = (+$raySteps.value)|0;
+    $dsVal.textContent = (+$ds.value).toFixed(2);
+    $hudView.textContent = $viewMode.value;
+    $hudMu.textContent = $useMu.checked ? "on" : "off";
+  }
+  [$massStrength,$psiScale,$astar,$iters,$glow,$dotSize,$rays,$raySteps,$ds].forEach(el => el.addEventListener("input", refreshLabels));
+  $viewMode.addEventListener("change", refreshLabels);
+  $useMu.addEventListener("change", refreshLabels);
+  refreshLabels();
+
+  const canvas = ui("c");
+  const ctx = canvas.getContext("2d", { alpha:false });
+  let W=0,H=0, DPR=1;
+
+  function resize(){
+    DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+    W = canvas.clientWidth; H = canvas.clientHeight;
+    canvas.width = Math.floor(W * DPR);
+    canvas.height = Math.floor(H * DPR);
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+  }
+  window.addEventListener("resize", ()=>{ resize(); requestDraw = true; });
+  resize();
+
+  // Grid
+  let N = +$gridN.value;
+  let psi = new Float32Array(N*N);
+  let psi2 = new Float32Array(N*N);
+  let rho = new Float32Array(N*N);
+
+  function idx(i,j){ return i + N*j; }
+  function resetField(){ psi.fill(0); psi2.fill(0); rho.fill(0); }
+  function setN(newN){
+    N = newN;
+    psi = new Float32Array(N*N);
+    psi2 = new Float32Array(N*N);
+    rho = new Float32Array(N*N);
+    sources = [];
+    rays = [];
+    particle = null;
+    requestSolve = true; requestDraw = true;
+  }
+  $gridN.addEventListener("change", ()=> setN(+$gridN.value));
+
+  // Sources
+  let sources = [];
+  let dragging = false;
+  let dragIndex = -1;
+
+  function addSource(x,y,m){
+    sources.push({x,y,m});
+    requestSolve = true; requestDraw = true;
+  }
+
+  function rebuildRho(){
+    rho.fill(0);
+    const strength = +$massStrength.value;
+    const sigma = 1.7;
+    const rad = 6;
+    for (const s of sources){
+      const gx = Math.floor(s.x * (N-1));
+      const gy = Math.floor(s.y * (N-1));
+      for (let dy=-rad; dy<=rad; dy++){
+        for (let dx=-rad; dx<=rad; dx++){
+          const i = gx+dx, j = gy+dy;
+          if (i<0||j<0||i>=N||j>=N) continue;
+          const r2 = (dx*dx+dy*dy)/(sigma*sigma);
+          rho[idx(i,j)] += strength * s.m * Math.exp(-0.5*r2);
+        }
+      }
+    }
+  }
+
+  // μ
+  function mu(x){ return x/(1+x); }
+
+  function gradPsi(i,j){
+    const im = Math.max(0,i-1), ip = Math.min(N-1,i+1);
+    const jm = Math.max(0,j-1), jp = Math.min(N-1,j+1);
+    const dpsi_dx = (psi[idx(ip,j)] - psi[idx(im,j)]) * 0.5;
+    const dpsi_dy = (psi[idx(i,jp)] - psi[idx(i,jm)]) * 0.5;
+    return [dpsi_dx, dpsi_dy];
+  }
+
+  // Static solve (toy 2D): ∇·(μ∇ψ) = -κρ
+  function solveStep(iterations){
+    rebuildRho();
+    const useMu = $useMu.checked;
+    const astar = +$astar.value;
+
+    for (let it=0; it<iterations; it++){
+      for (let j=1; j<N-1; j++){
+        for (let i=1; i<N-1; i++){
+          const c = idx(i,j);
+
+          let muC = 1.0;
+          if (useMu){
+            const [gx,gy] = gradPsi(i,j);
+            const gmag = Math.hypot(gx,gy);
+            muC = mu(gmag / astar);
+          }
+
+          const sumN = psi[idx(i-1,j)] + psi[idx(i+1,j)] + psi[idx(i,j-1)] + psi[idx(i,j+1)];
+          const rhs = -rho[c];
+          let val = (sumN - rhs)/4.0;
+
+          if (useMu){
+            val *= (0.25 + 0.75*muC);
+          }
+          psi2[c] = val;
+        }
+      }
+      const tmp = psi; psi = psi2; psi2 = tmp;
+    }
+  }
+
+  // Sampling
+  function samplePsi(x,y){
+    const fx = clamp(x,0,1) * (N-1);
+    const fy = clamp(y,0,1) * (N-1);
+    const i = Math.floor(fx), j = Math.floor(fy);
+    const tx = fx - i, ty = fy - j;
+    const i1 = Math.min(N-1, i+1), j1 = Math.min(N-1, j+1);
+    const a = psi[idx(i,j)], b = psi[idx(i1,j)], c = psi[idx(i,j1)], d = psi[idx(i1,j1)];
+    return lerp(lerp(a,b,tx), lerp(c,d,tx), ty);
+  }
+  function gradPsiContinuous(x,y){
+    const eps = 1.0/(N-1);
+    const gx = (samplePsi(x+eps,y) - samplePsi(x-eps,y)) / (2*eps);
+    const gy = (samplePsi(x,y+eps) - samplePsi(x,y-eps)) / (2*eps);
+    return [gx,gy];
+  }
+
+  // Rays: d v/ds = (I - vv^T) ∇ ln n
+  function gradLnN(x,y){
+    const s = +$psiScale.value;
+    const eps = 1.0/(N-1);
+    const px = samplePsi(x+eps,y) - samplePsi(x-eps,y);
+    const py = samplePsi(x,y+eps) - samplePsi(x,y-eps);
+    return [(px/(2*eps))*s, (py/(2*eps))*s];
+  }
+  let rays = [];
+  function shootRays(){
+    rays = [];
+    const count = (+$rays.value)|0;
+    const steps = (+$raySteps.value)|0;
+    const ds = +$ds.value * (1.0/Math.max(W,H));
+    const origin = {x:0.12, y:0.50};
+    const fan = 0.9;
+    for (let r=0;r<count;r++){
+      const ang = (-fan/2) + fan*(r/(count-1));
+      let x=origin.x, y=origin.y;
+      let vx=Math.cos(ang), vy=Math.sin(ang);
+      const path = [];
+      for (let t=0;t<steps;t++){
+        path.push([x,y]);
+        const [gX,gY] = gradLnN(x,y);
+        const dot = vx*gX + vy*gY;
+        const ax = gX - dot*vx;
+        const ay = gY - dot*vy;
+        vx += ax*ds; vy += ay*ds;
+        const norm = Math.hypot(vx,vy) || 1;
+        vx/=norm; vy/=norm;
+        x += vx*ds; y += vy*ds;
+        if (x<0||y<0||x>1||y>1) break;
+      }
+      rays.push(path);
+    }
+    requestDraw = true;
+  }
+
+  // Particle: a = (1/2)∇ψ  (c=1 units)
+  let particle = null;
+  function dropParticle(){ particle = {x:0.75,y:0.25,vx:0,vy:0}; requestDraw=true; }
+  function updateParticle(dt){
+    if (!particle) return;
+    const [gx,gy] = gradPsiContinuous(particle.x, particle.y);
+    const ax = 0.5*gx, ay = 0.5*gy;
+    particle.vx += ax*dt; particle.vy += ay*dt;
+    particle.x += particle.vx*dt; particle.y += particle.vy*dt;
+    if (particle.x<0){particle.x=0; particle.vx*=-0.6;}
+    if (particle.x>1){particle.x=1; particle.vx*=-0.6;}
+    if (particle.y<0){particle.y=0; particle.vy*=-0.6;}
+    if (particle.y>1){particle.y=1; particle.vy*=-0.6;}
+  }
+
+  // Dot-field rendering
+  const off = document.createElement("canvas");
+  let octx = off.getContext("2d");
+  function ensureOff(){
+    off.width = N; off.height = N;
+    octx = off.getContext("2d", { willReadFrequently:false });
+  }
+  ensureOff();
+
+  function colorMap(t){
+    const a = [36, 114, 255];
+    const b = [152, 73, 255];
+    const c = [255, 92, 163];
+    let r,g,bb;
+    if (t<0.5){
+      const u = t/0.5;
+      r = lerp(a[0], b[0], u);
+      g = lerp(a[1], b[1], u);
+      bb = lerp(a[2], b[2], u);
+    } else {
+      const u = (t-0.5)/0.5;
+      r = lerp(b[0], c[0], u);
+      g = lerp(b[1], c[1], u);
+      bb = lerp(b[2], c[2], u);
+    }
+    return [r|0,g|0,bb|0];
+  }
+
+  function buildDotImage(){
+    const mode = $viewMode.value;
+    const s = +$psiScale.value;
+
+    let min=+1e9, max=-1e9;
+    if (mode === "grad"){
+      for (let j=1;j<N-1;j++){
+        for (let i=1;i<N-1;i++){
+          const [gx,gy] = gradPsi(i,j);
+          const v = Math.hypot(gx,gy);
+          if (v<min) min=v; if (v>max) max=v;
+        }
+      }
+    } else if (mode === "n"){
+      for (let k=0;k<psi.length;k++){
+        const v = Math.exp(s*psi[k]);
+        if (v<min) min=v; if (v>max) max=v;
+      }
+    } else {
+      for (let k=0;k<psi.length;k++){
+        const v = psi[k];
+        if (v<min) min=v; if (v>max) max=v;
+      }
+    }
+    const span = Math.max(1e-6, max-min);
+
+    const img = octx.createImageData(N,N);
+    const data = img.data;
+    for (let j=0;j<N;j++){
+      for (let i=0;i<N;i++){
+        const p = 4*(i + N*j);
+        let v;
+        if (mode === "grad"){
+          if (i===0||j===0||i===N-1||j===N-1) v=min;
+          else {
+            const [gx,gy] = gradPsi(i,j);
+            v = Math.hypot(gx,gy);
+          }
+        } else if (mode === "n"){
+          v = Math.exp(s*psi[idx(i,j)]);
+        } else {
+          v = psi[idx(i,j)];
+        }
+        let t = (v - min)/span;
+        t = clamp(t,0,1);
+
+        const [r,g,b] = colorMap(t);
+        data[p+0] = r;
+        data[p+1] = g;
+        data[p+2] = b;
+        data[p+3] = 255;
+      }
+    }
+    octx.putImageData(img,0,0);
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    buildDotImage();
+
+    // Base
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(off, 0,0, W,H);
+
+    // Glow
+    const glow = +$glow.value;
+    if (glow > 0.01){
+      ctx.globalCompositeOperation = "screen";
+      ctx.filter = `blur(${glow}px)`;
+      ctx.globalAlpha = 0.55;
+      ctx.drawImage(off, 0,0, W,H);
+      ctx.filter = "none";
+      ctx.globalAlpha = 1.0;
+      ctx.globalCompositeOperation = "source-over";
+    }
+    ctx.restore();
+
+    // Sources
+    ctx.save();
+    for (const s of sources){
+      const x = s.x*W, y = s.y*H;
+      ctx.beginPath(); ctx.arc(x,y, 7, 0, Math.PI*2);
+      ctx.strokeStyle = (s.m>=0) ? "rgba(255,255,255,0.85)" : "rgba(255,123,114,0.85)";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // Rays
+    if (rays.length){
+      ctx.save();
+      ctx.strokeStyle = "rgba(255,255,255,0.88)";
+      ctx.lineWidth = 1.2;
+      for (const path of rays){
+        if (path.length<2) continue;
+        ctx.beginPath();
+        ctx.moveTo(path[0][0]*W, path[0][1]*H);
+        for (let i=1;i<path.length;i++) ctx.lineTo(path[i][0]*W, path[i][1]*H);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // Particle
+    if (particle){
+      ctx.save();
+      ctx.fillStyle = "rgba(210,153,34,0.95)";
+      ctx.strokeStyle = "rgba(0,0,0,0.45)";
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(particle.x*W, particle.y*H, 6, 0, Math.PI*2);
+      ctx.fill(); ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  // Input
+  function toNorm(e){
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX - rect.left)/rect.width;
+    const y = (e.clientY - rect.top)/rect.height;
+    return [clamp(x,0,1), clamp(y,0,1)];
+  }
+  canvas.addEventListener("pointerdown", (e)=>{
+    const [x,y] = toNorm(e);
+    let hit=-1;
+    for (let i=sources.length-1;i>=0;i--){
+      const s = sources[i];
+      const dx = (s.x-x)*W, dy=(s.y-y)*H;
+      if (Math.hypot(dx,dy) < 12){ hit=i; break; }
+    }
+    if (hit>=0){
+      dragging=true; dragIndex=hit;
+      canvas.setPointerCapture(e.pointerId);
+      return;
+    }
+    addSource(x,y, e.shiftKey ? -1 : +1);
+  });
+  canvas.addEventListener("pointermove", (e)=>{
+    if (!dragging) return;
+    const [x,y] = toNorm(e);
+    sources[dragIndex].x = x;
+    sources[dragIndex].y = y;
+    requestSolve = true; requestDraw = true;
+  });
+  canvas.addEventListener("pointerup", ()=>{ dragging=false; dragIndex=-1; });
+
+  let paused=false;
+  window.addEventListener("keydown", (e)=>{
+    if (e.key==="r"||e.key==="R") doReset();
+    if (e.key==="l"||e.key==="L") shootRays();
+    if (e.key==="p"||e.key==="P") dropParticle();
+    if (e.code==="Space") paused=!paused;
+  });
+
+  $btnReset.addEventListener("click", doReset);
+  $btnRecompute.addEventListener("click", ()=>{ requestSolve=true; });
+  $btnShoot.addEventListener("click", shootRays);
+  $btnDrop.addEventListener("click", dropParticle);
+
+  function doReset(){
+    sources=[]; rays=[]; particle=null;
+    resetField();
+    requestSolve = true; requestDraw = true;
+  }
+
+  // Loop
+  let requestSolve = true, requestDraw = true;
+  let last = performance.now();
+  function frame(now){
+    const dt = Math.min(0.03, (now-last)/1000); last = now;
+
+    if (!paused){
+      if (requestSolve){
+        solveStep((+$iters.value)|0);
+        requestSolve=false;
+        requestDraw=true;
+      }
+      updateParticle(dt);
+    }
+    if (requestDraw || particle){
+      draw();
+      requestDraw=false;
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+})();
+</script>
+</body>
+</html>
