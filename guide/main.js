@@ -1369,3 +1369,410 @@ const lazyLoadObserver = new IntersectionObserver((entries) => {
 document.querySelectorAll('.interactive-demo, .monte-carlo-demo, .sparc-gallery').forEach(el => {
     lazyLoadObserver.observe(el);
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// IMMERSIVE AUDIO SYSTEM
+// ─────────────────────────────────────────────────────────────────────────────
+
+class CosmicAudio {
+    constructor() {
+        this.audioContext = null;
+        this.masterGain = null;
+        this.isPlaying = false;
+        this.drones = [];
+        this.sfxEnabled = true;
+        
+        this.init();
+    }
+    
+    init() {
+        // Setup audio toggle button
+        const toggleBtn = document.getElementById('audio-toggle');
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => this.toggle());
+        }
+        
+        // Add SFX to interactive elements
+        this.setupSFXTriggers();
+    }
+    
+    async start() {
+        if (this.audioContext) return;
+        
+        try {
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // Master volume
+            this.masterGain = this.audioContext.createGain();
+            this.masterGain.gain.value = 0;
+            this.masterGain.connect(this.audioContext.destination);
+            
+            // Create ambient space drones
+            this.createAmbientDrones();
+            
+            // Fade in
+            this.masterGain.gain.linearRampToValueAtTime(0.3, this.audioContext.currentTime + 2);
+            
+            this.isPlaying = true;
+            this.updateUI(true);
+            
+        } catch (e) {
+            console.log('Audio not available:', e);
+        }
+    }
+    
+    createAmbientDrones() {
+        // Deep space drone frequencies (mystical chord)
+        const frequencies = [55, 82.5, 110, 165, 220]; // A1, E2, A2, E3, A3
+        
+        frequencies.forEach((freq, i) => {
+            // Oscillator
+            const osc = this.audioContext.createOscillator();
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+            
+            // Very slow frequency modulation for ethereal movement
+            const lfo = this.audioContext.createOscillator();
+            lfo.type = 'sine';
+            lfo.frequency.value = 0.05 + (i * 0.01); // Very slow
+            
+            const lfoGain = this.audioContext.createGain();
+            lfoGain.gain.value = freq * 0.01; // Subtle pitch bend
+            
+            lfo.connect(lfoGain);
+            lfoGain.connect(osc.frequency);
+            
+            // Individual gain with panning
+            const gain = this.audioContext.createGain();
+            gain.gain.value = 0.15 - (i * 0.02);
+            
+            // Stereo panning
+            const panner = this.audioContext.createStereoPanner();
+            panner.pan.value = (i - 2) * 0.3; // Spread across stereo field
+            
+            // Filter for warmth
+            const filter = this.audioContext.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = 800 + (i * 200);
+            filter.Q.value = 1;
+            
+            // Connect chain
+            osc.connect(gain);
+            gain.connect(filter);
+            filter.connect(panner);
+            panner.connect(this.masterGain);
+            
+            // Start
+            osc.start();
+            lfo.start();
+            
+            this.drones.push({ osc, lfo, gain, filter, panner });
+        });
+        
+        // Add subtle noise layer for "space dust"
+        this.createSpaceDust();
+        
+        // Add distant "cosmic chimes"
+        this.startCosmicChimes();
+    }
+    
+    createSpaceDust() {
+        const bufferSize = this.audioContext.sampleRate * 2;
+        const buffer = this.audioContext.createBuffer(2, bufferSize, this.audioContext.sampleRate);
+        
+        for (let channel = 0; channel < 2; channel++) {
+            const data = buffer.getChannelData(channel);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = (Math.random() * 2 - 1) * 0.015; // Very quiet noise
+            }
+        }
+        
+        const noise = this.audioContext.createBufferSource();
+        noise.buffer = buffer;
+        noise.loop = true;
+        
+        const noiseFilter = this.audioContext.createBiquadFilter();
+        noiseFilter.type = 'bandpass';
+        noiseFilter.frequency.value = 1000;
+        noiseFilter.Q.value = 0.5;
+        
+        const noiseGain = this.audioContext.createGain();
+        noiseGain.gain.value = 0.1;
+        
+        noise.connect(noiseFilter);
+        noiseFilter.connect(noiseGain);
+        noiseGain.connect(this.masterGain);
+        
+        noise.start();
+    }
+    
+    startCosmicChimes() {
+        // Random ethereal tones that play occasionally
+        const chimeFreqs = [440, 523.25, 659.25, 783.99, 880, 1046.5]; // A major scale high
+        
+        const playChime = () => {
+            if (!this.isPlaying) return;
+            
+            const freq = chimeFreqs[Math.floor(Math.random() * chimeFreqs.length)];
+            
+            const osc = this.audioContext.createOscillator();
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+            
+            const gain = this.audioContext.createGain();
+            gain.gain.value = 0;
+            
+            const reverb = this.createSimpleReverb();
+            
+            osc.connect(gain);
+            gain.connect(reverb);
+            reverb.connect(this.masterGain);
+            
+            const now = this.audioContext.currentTime;
+            gain.gain.linearRampToValueAtTime(0.05, now + 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 4);
+            
+            osc.start(now);
+            osc.stop(now + 4);
+            
+            // Schedule next chime
+            setTimeout(playChime, 3000 + Math.random() * 8000);
+        };
+        
+        // Start after a delay
+        setTimeout(playChime, 2000);
+    }
+    
+    createSimpleReverb() {
+        const convolver = this.audioContext.createConvolver();
+        const rate = this.audioContext.sampleRate;
+        const length = rate * 2;
+        const impulse = this.audioContext.createBuffer(2, length, rate);
+        
+        for (let channel = 0; channel < 2; channel++) {
+            const data = impulse.getChannelData(channel);
+            for (let i = 0; i < length; i++) {
+                data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 2);
+            }
+        }
+        
+        convolver.buffer = impulse;
+        return convolver;
+    }
+    
+    // Sound effects
+    playSFX(type) {
+        if (!this.audioContext || !this.sfxEnabled) return;
+        
+        const now = this.audioContext.currentTime;
+        
+        switch(type) {
+            case 'whoosh':
+                this.playWhoosh(now);
+                break;
+            case 'reveal':
+                this.playReveal(now);
+                break;
+            case 'click':
+                this.playClick(now);
+                break;
+            case 'success':
+                this.playSuccess(now);
+                break;
+            case 'transition':
+                this.playTransition(now);
+                break;
+        }
+    }
+    
+    playWhoosh(now) {
+        const noise = this.audioContext.createOscillator();
+        noise.type = 'sawtooth';
+        noise.frequency.value = 100;
+        
+        const filter = this.audioContext.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.value = 500;
+        filter.Q.value = 2;
+        
+        const gain = this.audioContext.createGain();
+        
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.masterGain);
+        
+        filter.frequency.linearRampToValueAtTime(2000, now + 0.2);
+        filter.frequency.linearRampToValueAtTime(100, now + 0.5);
+        
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+        
+        noise.start(now);
+        noise.stop(now + 0.5);
+    }
+    
+    playReveal(now) {
+        const osc = this.audioContext.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.value = 220;
+        
+        const gain = this.audioContext.createGain();
+        
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+        
+        osc.frequency.linearRampToValueAtTime(880, now + 0.3);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+        
+        osc.start(now);
+        osc.stop(now + 0.8);
+    }
+    
+    playClick(now) {
+        const osc = this.audioContext.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.value = 1200;
+        
+        const gain = this.audioContext.createGain();
+        
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+        
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+        
+        osc.start(now);
+        osc.stop(now + 0.05);
+    }
+    
+    playSuccess(now) {
+        [523.25, 659.25, 783.99].forEach((freq, i) => {
+            const osc = this.audioContext.createOscillator();
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+            
+            const gain = this.audioContext.createGain();
+            osc.connect(gain);
+            gain.connect(this.masterGain);
+            
+            const startTime = now + (i * 0.1);
+            gain.gain.setValueAtTime(0.08, startTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.5);
+            
+            osc.start(startTime);
+            osc.stop(startTime + 0.5);
+        });
+    }
+    
+    playTransition(now) {
+        const osc = this.audioContext.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.value = 110;
+        
+        const filter = this.audioContext.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.value = 200;
+        
+        const gain = this.audioContext.createGain();
+        
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.masterGain);
+        
+        filter.frequency.linearRampToValueAtTime(1000, now + 0.5);
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 1);
+        
+        osc.start(now);
+        osc.stop(now + 1);
+    }
+    
+    setupSFXTriggers() {
+        // Buttons and links
+        document.querySelectorAll('button, .nav-links a, .cta-button').forEach(el => {
+            el.addEventListener('mouseenter', () => this.playSFX('click'));
+        });
+        
+        // Chapter entries (scroll-triggered via GSAP)
+        document.querySelectorAll('.chapter').forEach(chapter => {
+            ScrollTrigger.create({
+                trigger: chapter,
+                start: 'top 80%',
+                onEnter: () => this.playSFX('whoosh'),
+                once: true
+            });
+        });
+        
+        // Big reveals
+        document.querySelectorAll('.reveal-text, .dramatic-reveal').forEach(el => {
+            ScrollTrigger.create({
+                trigger: el,
+                start: 'top 80%',
+                onEnter: () => this.playSFX('reveal'),
+                once: true
+            });
+        });
+        
+        // Section transitions
+        document.querySelectorAll('.part-divider').forEach(el => {
+            ScrollTrigger.create({
+                trigger: el,
+                start: 'top center',
+                onEnter: () => this.playSFX('transition'),
+                once: true
+            });
+        });
+    }
+    
+    toggle() {
+        if (this.isPlaying) {
+            this.stop();
+        } else {
+            this.start();
+        }
+    }
+    
+    stop() {
+        if (!this.audioContext) return;
+        
+        // Fade out
+        this.masterGain.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 1);
+        
+        setTimeout(() => {
+            this.drones.forEach(d => {
+                d.osc.stop();
+                d.lfo.stop();
+            });
+            this.drones = [];
+            this.audioContext.close();
+            this.audioContext = null;
+            this.isPlaying = false;
+            this.updateUI(false);
+        }, 1100);
+    }
+    
+    updateUI(isOn) {
+        const btn = document.getElementById('audio-toggle');
+        if (!btn) return;
+        
+        const onIcon = btn.querySelector('.audio-on');
+        const offIcon = btn.querySelector('.audio-off');
+        
+        if (isOn) {
+            btn.classList.add('active');
+            onIcon.style.display = 'inline';
+            offIcon.style.display = 'none';
+        } else {
+            btn.classList.remove('active');
+            onIcon.style.display = 'none';
+            offIcon.style.display = 'inline';
+        }
+    }
+}
+
+// Initialize audio system
+const cosmicAudio = new CosmicAudio();
+
+// Export for use in other modules if needed
+window.cosmicAudio = cosmicAudio;
