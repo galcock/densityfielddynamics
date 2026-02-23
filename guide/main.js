@@ -1469,7 +1469,7 @@ class CosmicAudio {
             
             // Separate gains for music and SFX
             this.musicGain = this.audioContext.createGain();
-            this.musicGain.gain.value = 0.25;
+            this.musicGain.gain.value = 0.2; // Gentle background
             this.musicGain.connect(this.masterGain);
             
             this.sfxGain = this.audioContext.createGain();
@@ -1543,10 +1543,9 @@ class CosmicAudio {
             this.drones.push({ osc, lfo, gain, filter, panner });
         });
         
-        // Add subtle shimmer layer
-        this.createShimmerLayer();
+        // Removed shimmer layer - was causing ear fatigue
         
-        // Add space dust noise
+        // Add space dust noise (low frequency only)
         this.createSpaceDust();
         
         // Add cosmic chimes
@@ -1554,36 +1553,6 @@ class CosmicAudio {
         
         // Add deep sub bass pulse
         this.createSubPulse();
-    }
-    
-    createShimmerLayer() {
-        // High frequency shimmer for sparkle
-        const shimmerFreqs = [1760, 2093, 2637, 3136]; // High A major
-        
-        shimmerFreqs.forEach((freq, i) => {
-            const osc = this.audioContext.createOscillator();
-            osc.type = 'sine';
-            osc.frequency.value = freq;
-            
-            const lfo = this.audioContext.createOscillator();
-            lfo.type = 'sine';
-            lfo.frequency.value = 0.1 + (i * 0.05);
-            
-            const lfoGain = this.audioContext.createGain();
-            lfoGain.gain.value = 0.015; // Very subtle volume modulation
-            
-            const gain = this.audioContext.createGain();
-            gain.gain.value = 0.008;
-            
-            lfo.connect(lfoGain);
-            lfoGain.connect(gain.gain);
-            
-            osc.connect(gain);
-            gain.connect(this.musicGain);
-            
-            osc.start();
-            lfo.start();
-        });
     }
     
     createSubPulse() {
@@ -1613,13 +1582,14 @@ class CosmicAudio {
     }
     
     createSpaceDust() {
+        // Gentle low-frequency rumble - NO high frequencies
         const bufferSize = this.audioContext.sampleRate * 2;
         const buffer = this.audioContext.createBuffer(2, bufferSize, this.audioContext.sampleRate);
         
         for (let channel = 0; channel < 2; channel++) {
             const data = buffer.getChannelData(channel);
             for (let i = 0; i < bufferSize; i++) {
-                data[i] = (Math.random() * 2 - 1) * 0.008;
+                data[i] = (Math.random() * 2 - 1) * 0.005;
             }
         }
         
@@ -1627,13 +1597,14 @@ class CosmicAudio {
         noise.buffer = buffer;
         noise.loop = true;
         
+        // LOWPASS filter - removes all high frequencies
         const noiseFilter = this.audioContext.createBiquadFilter();
-        noiseFilter.type = 'highpass';
-        noiseFilter.frequency.value = 3000;
-        noiseFilter.Q.value = 0.3;
+        noiseFilter.type = 'lowpass';
+        noiseFilter.frequency.value = 300; // Only very low frequencies
+        noiseFilter.Q.value = 0.5;
         
         const noiseGain = this.audioContext.createGain();
-        noiseGain.gain.value = 0.15;
+        noiseGain.gain.value = 0.08;
         
         noise.connect(noiseFilter);
         noiseFilter.connect(noiseGain);
@@ -1643,7 +1614,8 @@ class CosmicAudio {
     }
     
     startCosmicChimes() {
-        const chimeFreqs = [523.25, 659.25, 783.99, 1046.5, 1318.5]; // C major high
+        // Lower frequencies - gentle bells, not piercing
+        const chimeFreqs = [261.63, 329.63, 392, 440, 523.25]; // C4-C5 range only
         
         const playChime = () => {
             if (!this.isPlaying || !this.audioContext) return;
@@ -1654,41 +1626,30 @@ class CosmicAudio {
             osc.type = 'sine';
             osc.frequency.value = freq;
             
-            const osc2 = this.audioContext.createOscillator();
-            osc2.type = 'sine';
-            osc2.frequency.value = freq * 2.01; // Slight detune for shimmer
-            
             const gain = this.audioContext.createGain();
             gain.gain.value = 0;
             
-            const gain2 = this.audioContext.createGain();
-            gain2.gain.value = 0;
-            
+            // Lowpass filter to keep it gentle
             const filter = this.audioContext.createBiquadFilter();
             filter.type = 'lowpass';
-            filter.frequency.value = 4000;
+            filter.frequency.value = 1000;
             
-            osc.connect(gain);
-            osc2.connect(gain2);
-            gain.connect(filter);
-            gain2.connect(filter);
-            filter.connect(this.musicGain);
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(this.musicGain);
             
             const now = this.audioContext.currentTime;
-            gain.gain.linearRampToValueAtTime(0.03, now + 0.2);
-            gain.gain.exponentialRampToValueAtTime(0.0001, now + 5);
-            gain2.gain.linearRampToValueAtTime(0.015, now + 0.3);
-            gain2.gain.exponentialRampToValueAtTime(0.0001, now + 4);
+            gain.gain.linearRampToValueAtTime(0.02, now + 0.3); // Quieter
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 4);
             
             osc.start(now);
-            osc2.start(now);
-            osc.stop(now + 5);
-            osc2.stop(now + 5);
+            osc.stop(now + 4);
             
-            setTimeout(playChime, 4000 + Math.random() * 6000);
+            // Less frequent - every 8-15 seconds
+            setTimeout(playChime, 8000 + Math.random() * 7000);
         };
         
-        setTimeout(playChime, 3000);
+        setTimeout(playChime, 5000);
     }
     
     // ═══════════════════════════════════════════════════════════════════
@@ -2073,3 +2034,135 @@ class CosmicAudio {
 // Initialize audio system
 const cosmicAudio = new CosmicAudio();
 window.cosmicAudio = cosmicAudio;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DISCUSSION SECTION
+// ─────────────────────────────────────────────────────────────────────────────
+
+class DiscussionSystem {
+    constructor() {
+        this.submitBtn = document.getElementById('submit-question');
+        this.nameInput = document.getElementById('commenter-name');
+        this.questionInput = document.getElementById('question-text');
+        this.questionsList = document.getElementById('questions-list');
+        
+        if (this.submitBtn) {
+            this.submitBtn.addEventListener('click', () => this.submitQuestion());
+        }
+        
+        this.loadQuestions();
+    }
+    
+    submitQuestion() {
+        const name = this.nameInput.value.trim() || 'Anonymous';
+        const text = this.questionInput.value.trim();
+        
+        if (!text) {
+            this.questionInput.style.borderColor = '#e74c3c';
+            setTimeout(() => {
+                this.questionInput.style.borderColor = '';
+            }, 2000);
+            return;
+        }
+        
+        const question = {
+            id: Date.now(),
+            name: name,
+            text: text,
+            time: new Date().toLocaleDateString(),
+            pending: true
+        };
+        
+        // Save to localStorage
+        const questions = this.getStoredQuestions();
+        questions.unshift(question);
+        localStorage.setItem('dfd-questions', JSON.stringify(questions));
+        
+        // Add to UI
+        this.addQuestionToUI(question);
+        
+        // Clear form
+        this.nameInput.value = '';
+        this.questionInput.value = '';
+        
+        // Play sound if audio is on
+        if (window.cosmicAudio && window.cosmicAudio.isPlaying) {
+            window.cosmicAudio.playSFX('success');
+        }
+        
+        // Show thank you message
+        this.showThankYou();
+    }
+    
+    getStoredQuestions() {
+        try {
+            return JSON.parse(localStorage.getItem('dfd-questions')) || [];
+        } catch {
+            return [];
+        }
+    }
+    
+    loadQuestions() {
+        const questions = this.getStoredQuestions();
+        questions.forEach(q => this.addQuestionToUI(q));
+    }
+    
+    addQuestionToUI(question) {
+        const item = document.createElement('div');
+        item.className = 'question-item user-question';
+        item.innerHTML = `
+            <div class="question-header">
+                <span class="questioner-name">${this.escapeHtml(question.name)}</span>
+                <span class="question-time">${question.time}</span>
+            </div>
+            <div class="question-body">
+                <p class="question-text">${this.escapeHtml(question.text)}</p>
+                ${question.pending ? '<p class="pending-note">Awaiting response...</p>' : ''}
+            </div>
+        `;
+        
+        // Insert after the sample question
+        const sample = this.questionsList.querySelector('.sample');
+        if (sample && sample.nextSibling) {
+            this.questionsList.insertBefore(item, sample.nextSibling);
+        } else {
+            this.questionsList.appendChild(item);
+        }
+    }
+    
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    showThankYou() {
+        const msg = document.createElement('div');
+        msg.className = 'thank-you-message';
+        msg.innerHTML = '✓ Question submitted! We\'ll respond soon.';
+        msg.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #2ecc71;
+            color: #fff;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            font-weight: 600;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        `;
+        document.body.appendChild(msg);
+        
+        setTimeout(() => {
+            msg.style.opacity = '0';
+            msg.style.transition = 'opacity 0.3s';
+            setTimeout(() => msg.remove(), 300);
+        }, 3000);
+    }
+}
+
+// Initialize discussion system after DOM loads
+document.addEventListener('DOMContentLoaded', () => {
+    new DiscussionSystem();
+});
