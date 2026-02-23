@@ -1473,7 +1473,7 @@ class CosmicAudio {
             this.musicGain.connect(this.masterGain);
             
             this.sfxGain = this.audioContext.createGain();
-            this.sfxGain.gain.value = 0.4;
+            this.sfxGain.gain.value = 0.15; // Reduced - was too loud
             this.sfxGain.connect(this.masterGain);
             
             // Create ambient space drones
@@ -1772,29 +1772,29 @@ class CosmicAudio {
         });
     }
     
-    // Soft click
+    // Soft click - gentle tap
     playClick(now) {
         const osc = this.audioContext.createOscillator();
         osc.type = 'sine';
-        osc.frequency.value = 2000;
-        osc.frequency.exponentialRampToValueAtTime(800, now + 0.03);
+        osc.frequency.value = 800; // Lower starting frequency
+        osc.frequency.exponentialRampToValueAtTime(400, now + 0.04);
         
         const gain = this.audioContext.createGain();
-        gain.gain.setValueAtTime(0.08, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+        gain.gain.setValueAtTime(0.04, now); // Quieter
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
         
         osc.connect(gain);
         gain.connect(this.sfxGain);
         
         osc.start(now);
-        osc.stop(now + 0.08);
+        osc.stop(now + 0.1);
     }
     
-    // Gentle hover
+    // Gentle hover - subtle
     playHover(now) {
         const osc = this.audioContext.createOscillator();
         osc.type = 'sine';
-        osc.frequency.value = 1500;
+        osc.frequency.value = 600; // Lower
         
         const gain = this.audioContext.createGain();
         gain.gain.setValueAtTime(0.04, now);
@@ -1888,23 +1888,23 @@ class CosmicAudio {
         osc2.stop(now + 1);
     }
     
-    // Sparkle
+    // Sparkle - gentle high tones
     playSparkle(now) {
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 3; i++) {
             const osc = this.audioContext.createOscillator();
             osc.type = 'sine';
-            osc.frequency.value = 2000 + Math.random() * 2000;
+            osc.frequency.value = 1200 + Math.random() * 800; // Lower frequency range
             
             const gain = this.audioContext.createGain();
-            const startTime = now + i * 0.05;
-            gain.gain.setValueAtTime(0.05, startTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.15);
+            const startTime = now + i * 0.08;
+            gain.gain.setValueAtTime(0.02, startTime); // Much quieter
+            gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.2);
             
             osc.connect(gain);
             gain.connect(this.sfxGain);
             
             osc.start(startTime);
-            osc.stop(startTime + 0.2);
+            osc.stop(startTime + 0.25);
         }
     }
     
@@ -1926,35 +1926,29 @@ class CosmicAudio {
         osc.stop(now + 1);
     }
     
-    // Single chime
+    // Single chime - soft bell tone
     playChime(now) {
-        const freq = 880 + Math.random() * 440;
+        const freq = 523 + Math.random() * 200; // C5 range, lower
         
         const osc = this.audioContext.createOscillator();
         osc.type = 'sine';
         osc.frequency.value = freq;
         
-        const osc2 = this.audioContext.createOscillator();
-        osc2.type = 'sine';
-        osc2.frequency.value = freq * 2;
-        
         const gain = this.audioContext.createGain();
-        gain.gain.setValueAtTime(0.08, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+        gain.gain.setValueAtTime(0.04, now); // Quieter
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
         
-        const gain2 = this.audioContext.createGain();
-        gain2.gain.setValueAtTime(0.03, now);
-        gain2.gain.exponentialRampToValueAtTime(0.001, now + 1);
+        // Add gentle filter
+        const filter = this.audioContext.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.value = 2000;
         
-        osc.connect(gain);
-        osc2.connect(gain2);
+        osc.connect(filter);
+        filter.connect(gain);
         gain.connect(this.sfxGain);
-        gain2.connect(this.sfxGain);
         
         osc.start(now);
-        osc2.start(now);
-        osc.stop(now + 2);
-        osc2.stop(now + 1.5);
+        osc.stop(now + 1.5);
     }
     
     // Magic spell
@@ -1986,89 +1980,22 @@ class CosmicAudio {
     // ═══════════════════════════════════════════════════════════════════
     
     setupSFXTriggers() {
-        // Navigation and buttons
+        // Navigation clicks only (removed hover sounds - too frequent)
         document.querySelectorAll('.nav-links a').forEach(el => {
-            el.addEventListener('mouseenter', () => this.playSFX('hover'));
             el.addEventListener('click', () => this.playSFX('click'));
         });
         
+        // Button clicks only
         document.querySelectorAll('button:not(.audio-toggle)').forEach(el => {
-            el.addEventListener('mouseenter', () => this.playSFX('hover'));
             el.addEventListener('click', () => this.playSFX('click'));
         });
         
-        // CTA buttons
+        // CTA buttons - special sound
         document.querySelectorAll('.cta-button, .cta-primary').forEach(el => {
-            el.addEventListener('mouseenter', () => this.playSFX('glow'));
-            el.addEventListener('click', () => this.playSFX('magic'));
+            el.addEventListener('click', () => this.playSFX('reveal'));
         });
         
-        // Galaxy buttons
-        document.querySelectorAll('.galaxy-btn').forEach(el => {
-            el.addEventListener('click', () => this.playSFX('chime'));
-        });
-        
-        // Test cards
-        document.querySelectorAll('.test-card').forEach(el => {
-            el.addEventListener('mouseenter', () => this.playSFX('sparkle'));
-        });
-        
-        // Interactive demos
-        document.querySelectorAll('.interactive-demo canvas, .psi-visualization canvas').forEach(el => {
-            el.addEventListener('mouseenter', () => this.playSFX('glow'));
-        });
-        
-        // Chapters entering viewport
-        document.querySelectorAll('.chapter').forEach(chapter => {
-            ScrollTrigger.create({
-                trigger: chapter,
-                start: 'top 80%',
-                onEnter: () => this.playSFX('whoosh'),
-                once: true
-            });
-        });
-        
-        // Content blocks
-        document.querySelectorAll('.content-block, .fade-in').forEach(el => {
-            ScrollTrigger.create({
-                trigger: el,
-                start: 'top 85%',
-                onEnter: () => this.playSFX('glow'),
-                once: true
-            });
-        });
-        
-        // Equations
-        document.querySelectorAll('.equation-card, .equation-showcase').forEach(el => {
-            ScrollTrigger.create({
-                trigger: el,
-                start: 'top 80%',
-                onEnter: () => this.playSFX('reveal'),
-                once: true
-            });
-        });
-        
-        // Big numbers and stats
-        document.querySelectorAll('.big-zero, .dramatic-stat, .hero-title').forEach(el => {
-            ScrollTrigger.create({
-                trigger: el,
-                start: 'top 80%',
-                onEnter: () => this.playSFX('magic'),
-                once: true
-            });
-        });
-        
-        // Test results
-        document.querySelectorAll('.test-card .checkmark').forEach(el => {
-            ScrollTrigger.create({
-                trigger: el,
-                start: 'top 90%',
-                onEnter: () => this.playSFX('success'),
-                once: true
-            });
-        });
-        
-        // Part dividers / transitions
+        // Part/chapter transitions only - subtle whoosh
         document.querySelectorAll('.chapter-header').forEach(el => {
             ScrollTrigger.create({
                 trigger: el,
@@ -2078,22 +2005,22 @@ class CosmicAudio {
             });
         });
         
-        // Falsification tests
-        document.querySelectorAll('.falsify-test').forEach(el => {
+        // Equations get a gentle reveal sound
+        document.querySelectorAll('.equation-showcase').forEach(el => {
             ScrollTrigger.create({
                 trigger: el,
-                start: 'top 85%',
-                onEnter: () => this.playSFX('deep'),
+                start: 'top 80%',
+                onEnter: () => this.playSFX('reveal'),
                 once: true
             });
         });
         
-        // Quotes
-        document.querySelectorAll('blockquote, .feature-quote').forEach(el => {
+        // Big dramatic numbers only
+        document.querySelectorAll('.big-zero').forEach(el => {
             ScrollTrigger.create({
                 trigger: el,
                 start: 'top 80%',
-                onEnter: () => this.playSFX('chime'),
+                onEnter: () => this.playSFX('magic'),
                 once: true
             });
         });
