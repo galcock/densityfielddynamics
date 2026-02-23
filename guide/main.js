@@ -1543,74 +1543,8 @@ class CosmicAudio {
             this.drones.push({ osc, lfo, gain, filter, panner });
         });
         
-        // Removed shimmer layer - was causing ear fatigue
-        
-        // Add space dust noise (low frequency only)
-        this.createSpaceDust();
-        
-        // Add cosmic chimes
+        // Just the original drones + occasional chimes - nothing else
         this.startCosmicChimes();
-        
-        // Add deep sub bass pulse
-        this.createSubPulse();
-    }
-    
-    createSubPulse() {
-        // Very low sub bass that slowly pulses
-        const osc = this.audioContext.createOscillator();
-        osc.type = 'sine';
-        osc.frequency.value = 30; // Sub bass
-        
-        const lfo = this.audioContext.createOscillator();
-        lfo.type = 'sine';
-        lfo.frequency.value = 0.05; // Very slow pulse
-        
-        const lfoGain = this.audioContext.createGain();
-        lfoGain.gain.value = 0.04;
-        
-        const gain = this.audioContext.createGain();
-        gain.gain.value = 0.1;
-        
-        lfo.connect(lfoGain);
-        lfoGain.connect(gain.gain);
-        
-        osc.connect(gain);
-        gain.connect(this.musicGain);
-        
-        osc.start();
-        lfo.start();
-    }
-    
-    createSpaceDust() {
-        // Gentle low-frequency rumble - NO high frequencies
-        const bufferSize = this.audioContext.sampleRate * 2;
-        const buffer = this.audioContext.createBuffer(2, bufferSize, this.audioContext.sampleRate);
-        
-        for (let channel = 0; channel < 2; channel++) {
-            const data = buffer.getChannelData(channel);
-            for (let i = 0; i < bufferSize; i++) {
-                data[i] = (Math.random() * 2 - 1) * 0.005;
-            }
-        }
-        
-        const noise = this.audioContext.createBufferSource();
-        noise.buffer = buffer;
-        noise.loop = true;
-        
-        // LOWPASS filter - removes all high frequencies
-        const noiseFilter = this.audioContext.createBiquadFilter();
-        noiseFilter.type = 'lowpass';
-        noiseFilter.frequency.value = 300; // Only very low frequencies
-        noiseFilter.Q.value = 0.5;
-        
-        const noiseGain = this.audioContext.createGain();
-        noiseGain.gain.value = 0.08;
-        
-        noise.connect(noiseFilter);
-        noiseFilter.connect(noiseGain);
-        noiseGain.connect(this.musicGain);
-        
-        noise.start();
     }
     
     startCosmicChimes() {
