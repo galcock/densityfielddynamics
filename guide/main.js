@@ -450,27 +450,43 @@ class GalaxyDemo {
         this.draw();
     }
     
-    onMouseDown(e) {
+    getCanvasCoords(e) {
         const rect = this.canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        const scaleX = this.canvas.width / rect.width;
+        const scaleY = this.canvas.height / rect.height;
+        return {
+            x: (e.clientX - rect.left) * scaleX,
+            y: (e.clientY - rect.top) * scaleY
+        };
+    }
+    
+    onMouseDown(e) {
+        const { x, y } = this.getCanvasCoords(e);
         
         // Check if clicking near the star
         const starX = this.centerX + Math.cos(this.starAngle) * this.starRadius;
         const starY = this.centerY + Math.sin(this.starAngle) * this.starRadius;
         
         const dist = Math.sqrt((x - starX) ** 2 + (y - starY) ** 2);
-        if (dist < 30) {
+        if (dist < 40) { // Increased hit area
             this.isDragging = true;
+            this.canvas.style.cursor = 'grabbing';
+            if (window.cosmicAudio) window.cosmicAudio.playSFX('click');
         }
     }
     
     onMouseMove(e) {
-        if (!this.isDragging) return;
+        const { x, y } = this.getCanvasCoords(e);
         
-        const rect = this.canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        // Check for hover on star
+        const starX = this.centerX + Math.cos(this.starAngle) * this.starRadius;
+        const starY = this.centerY + Math.sin(this.starAngle) * this.starRadius;
+        const dist = Math.sqrt((x - starX) ** 2 + (y - starY) ** 2);
+        
+        if (!this.isDragging) {
+            this.canvas.style.cursor = dist < 40 ? 'grab' : 'default';
+            return;
+        }
         
         // Calculate new angle and radius
         const dx = x - this.centerX;
@@ -739,6 +755,10 @@ class PsiFieldVisualization {
                 if (this.valueDisplay) {
                     this.valueDisplay.innerHTML = `${this.mass.toFixed(1)} M<sub>⊕</sub>`;
                 }
+            });
+            // Add sound on slider change
+            this.slider.addEventListener('change', () => {
+                if (window.cosmicAudio) window.cosmicAudio.playSFX('glow');
             });
         }
         
@@ -1039,9 +1059,28 @@ class MonteCarloVisualization {
         
         const runBtn = document.getElementById('mc-run');
         if (runBtn) {
-            runBtn.addEventListener('click', () => this.run());
+            runBtn.addEventListener('click', () => {
+                this.run();
+                if (window.cosmicAudio) window.cosmicAudio.playSFX('magic');
+            });
         }
         
+        // Auto-run when scrolled into view
+        if (this.canvas) {
+            ScrollTrigger.create({
+                trigger: this.canvas,
+                start: 'top 70%',
+                onEnter: () => {
+                    if (!this.hasAutoRun) {
+                        this.hasAutoRun = true;
+                        setTimeout(() => this.run(), 500);
+                    }
+                },
+                once: true
+            });
+        }
+        
+        this.hasAutoRun = false;
         this.draw();
     }
     
@@ -1057,6 +1096,7 @@ class MonteCarloVisualization {
         const addSample = () => {
             if (currentSample >= totalSamples) {
                 this.isRunning = false;
+                if (window.cosmicAudio) window.cosmicAudio.playSFX('success');
                 return;
             }
             
@@ -1075,6 +1115,11 @@ class MonteCarloVisualization {
                 alpha: 1,
                 duration: 0.3
             });
+            
+            // Sound effect every few samples
+            if (currentSample % 10 === 0 && window.cosmicAudio) {
+                window.cosmicAudio.playSFX('sparkle');
+            }
             
             currentSample++;
             
@@ -1188,6 +1233,7 @@ class SparcVisualization {
                 document.querySelectorAll('.galaxy-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 this.currentGalaxy = btn.dataset.galaxy;
+                if (window.cosmicAudio) window.cosmicAudio.playSFX('chime');
                 this.draw();
             });
         });
@@ -1371,16 +1417,19 @@ document.querySelectorAll('.interactive-demo, .monte-carlo-demo, .sparc-gallery'
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// IMMERSIVE AUDIO SYSTEM
+// IMMERSIVE AUDIO SYSTEM - COMPLETE REWRITE
 // ─────────────────────────────────────────────────────────────────────────────
 
 class CosmicAudio {
     constructor() {
         this.audioContext = null;
         this.masterGain = null;
+        this.sfxGain = null;
+        this.musicGain = null;
         this.isPlaying = false;
         this.drones = [];
         this.sfxEnabled = true;
+        this.hasStarted = false;
         
         this.init();
     }
@@ -1392,8 +1441,19 @@ class CosmicAudio {
             toggleBtn.addEventListener('click', () => this.toggle());
         }
         
-        // Add SFX to interactive elements
-        this.setupSFXTriggers();
+        // AUTO-START on first user interaction (required by browsers)
+        const startOnInteraction = () => {
+            if (!this.hasStarted) {
+                this.start();
+                this.hasStarted = true;
+            }
+        };
+        
+        // Listen for first interaction
+        document.addEventListener('click', startOnInteraction, { once: true });
+        document.addEventListener('scroll', startOnInteraction, { once: true });
+        document.addEventListener('touchstart', startOnInteraction, { once: true });
+        document.addEventListener('keydown', startOnInteraction, { once: true });
     }
     
     async start() {
@@ -1407,14 +1467,28 @@ class CosmicAudio {
             this.masterGain.gain.value = 0;
             this.masterGain.connect(this.audioContext.destination);
             
+            // Separate gains for music and SFX
+            this.musicGain = this.audioContext.createGain();
+            this.musicGain.gain.value = 0.25;
+            this.musicGain.connect(this.masterGain);
+            
+            this.sfxGain = this.audioContext.createGain();
+            this.sfxGain.gain.value = 0.4;
+            this.sfxGain.connect(this.masterGain);
+            
             // Create ambient space drones
             this.createAmbientDrones();
             
             // Fade in
-            this.masterGain.gain.linearRampToValueAtTime(0.3, this.audioContext.currentTime + 2);
+            this.masterGain.gain.linearRampToValueAtTime(0.5, this.audioContext.currentTime + 3);
             
             this.isPlaying = true;
             this.updateUI(true);
+            
+            // Setup all SFX triggers
+            this.setupSFXTriggers();
+            
+            console.log('🔊 Cosmic Audio System Activated');
             
         } catch (e) {
             console.log('Audio not available:', e);
@@ -1422,7 +1496,7 @@ class CosmicAudio {
     }
     
     createAmbientDrones() {
-        // Deep space drone frequencies (mystical chord)
+        // Deep space drone frequencies (mystical open fifth chord)
         const frequencies = [55, 82.5, 110, 165, 220]; // A1, E2, A2, E3, A3
         
         frequencies.forEach((freq, i) => {
@@ -1434,33 +1508,33 @@ class CosmicAudio {
             // Very slow frequency modulation for ethereal movement
             const lfo = this.audioContext.createOscillator();
             lfo.type = 'sine';
-            lfo.frequency.value = 0.05 + (i * 0.01); // Very slow
+            lfo.frequency.value = 0.03 + (i * 0.007); // Very slow
             
             const lfoGain = this.audioContext.createGain();
-            lfoGain.gain.value = freq * 0.01; // Subtle pitch bend
+            lfoGain.gain.value = freq * 0.008; // Subtle pitch bend
             
             lfo.connect(lfoGain);
             lfoGain.connect(osc.frequency);
             
-            // Individual gain with panning
+            // Individual gain
             const gain = this.audioContext.createGain();
-            gain.gain.value = 0.15 - (i * 0.02);
+            gain.gain.value = 0.12 - (i * 0.015);
             
             // Stereo panning
             const panner = this.audioContext.createStereoPanner();
-            panner.pan.value = (i - 2) * 0.3; // Spread across stereo field
+            panner.pan.value = (i - 2) * 0.25;
             
             // Filter for warmth
             const filter = this.audioContext.createBiquadFilter();
             filter.type = 'lowpass';
-            filter.frequency.value = 800 + (i * 200);
-            filter.Q.value = 1;
+            filter.frequency.value = 600 + (i * 150);
+            filter.Q.value = 0.7;
             
             // Connect chain
             osc.connect(gain);
             gain.connect(filter);
             filter.connect(panner);
-            panner.connect(this.masterGain);
+            panner.connect(this.musicGain);
             
             // Start
             osc.start();
@@ -1469,11 +1543,73 @@ class CosmicAudio {
             this.drones.push({ osc, lfo, gain, filter, panner });
         });
         
-        // Add subtle noise layer for "space dust"
+        // Add subtle shimmer layer
+        this.createShimmerLayer();
+        
+        // Add space dust noise
         this.createSpaceDust();
         
-        // Add distant "cosmic chimes"
+        // Add cosmic chimes
         this.startCosmicChimes();
+        
+        // Add deep sub bass pulse
+        this.createSubPulse();
+    }
+    
+    createShimmerLayer() {
+        // High frequency shimmer for sparkle
+        const shimmerFreqs = [1760, 2093, 2637, 3136]; // High A major
+        
+        shimmerFreqs.forEach((freq, i) => {
+            const osc = this.audioContext.createOscillator();
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+            
+            const lfo = this.audioContext.createOscillator();
+            lfo.type = 'sine';
+            lfo.frequency.value = 0.1 + (i * 0.05);
+            
+            const lfoGain = this.audioContext.createGain();
+            lfoGain.gain.value = 0.015; // Very subtle volume modulation
+            
+            const gain = this.audioContext.createGain();
+            gain.gain.value = 0.008;
+            
+            lfo.connect(lfoGain);
+            lfoGain.connect(gain.gain);
+            
+            osc.connect(gain);
+            gain.connect(this.musicGain);
+            
+            osc.start();
+            lfo.start();
+        });
+    }
+    
+    createSubPulse() {
+        // Very low sub bass that slowly pulses
+        const osc = this.audioContext.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.value = 30; // Sub bass
+        
+        const lfo = this.audioContext.createOscillator();
+        lfo.type = 'sine';
+        lfo.frequency.value = 0.05; // Very slow pulse
+        
+        const lfoGain = this.audioContext.createGain();
+        lfoGain.gain.value = 0.04;
+        
+        const gain = this.audioContext.createGain();
+        gain.gain.value = 0.1;
+        
+        lfo.connect(lfoGain);
+        lfoGain.connect(gain.gain);
+        
+        osc.connect(gain);
+        gain.connect(this.musicGain);
+        
+        osc.start();
+        lfo.start();
     }
     
     createSpaceDust() {
@@ -1483,7 +1619,7 @@ class CosmicAudio {
         for (let channel = 0; channel < 2; channel++) {
             const data = buffer.getChannelData(channel);
             for (let i = 0; i < bufferSize; i++) {
-                data[i] = (Math.random() * 2 - 1) * 0.015; // Very quiet noise
+                data[i] = (Math.random() * 2 - 1) * 0.008;
             }
         }
         
@@ -1492,26 +1628,25 @@ class CosmicAudio {
         noise.loop = true;
         
         const noiseFilter = this.audioContext.createBiquadFilter();
-        noiseFilter.type = 'bandpass';
-        noiseFilter.frequency.value = 1000;
-        noiseFilter.Q.value = 0.5;
+        noiseFilter.type = 'highpass';
+        noiseFilter.frequency.value = 3000;
+        noiseFilter.Q.value = 0.3;
         
         const noiseGain = this.audioContext.createGain();
-        noiseGain.gain.value = 0.1;
+        noiseGain.gain.value = 0.15;
         
         noise.connect(noiseFilter);
         noiseFilter.connect(noiseGain);
-        noiseGain.connect(this.masterGain);
+        noiseGain.connect(this.musicGain);
         
         noise.start();
     }
     
     startCosmicChimes() {
-        // Random ethereal tones that play occasionally
-        const chimeFreqs = [440, 523.25, 659.25, 783.99, 880, 1046.5]; // A major scale high
+        const chimeFreqs = [523.25, 659.25, 783.99, 1046.5, 1318.5]; // C major high
         
         const playChime = () => {
-            if (!this.isPlaying) return;
+            if (!this.isPlaying || !this.audioContext) return;
             
             const freq = chimeFreqs[Math.floor(Math.random() * chimeFreqs.length)];
             
@@ -1519,182 +1654,371 @@ class CosmicAudio {
             osc.type = 'sine';
             osc.frequency.value = freq;
             
+            const osc2 = this.audioContext.createOscillator();
+            osc2.type = 'sine';
+            osc2.frequency.value = freq * 2.01; // Slight detune for shimmer
+            
             const gain = this.audioContext.createGain();
             gain.gain.value = 0;
             
-            const reverb = this.createSimpleReverb();
+            const gain2 = this.audioContext.createGain();
+            gain2.gain.value = 0;
+            
+            const filter = this.audioContext.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = 4000;
             
             osc.connect(gain);
-            gain.connect(reverb);
-            reverb.connect(this.masterGain);
+            osc2.connect(gain2);
+            gain.connect(filter);
+            gain2.connect(filter);
+            filter.connect(this.musicGain);
             
             const now = this.audioContext.currentTime;
-            gain.gain.linearRampToValueAtTime(0.05, now + 0.1);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + 4);
+            gain.gain.linearRampToValueAtTime(0.03, now + 0.2);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + 5);
+            gain2.gain.linearRampToValueAtTime(0.015, now + 0.3);
+            gain2.gain.exponentialRampToValueAtTime(0.0001, now + 4);
             
             osc.start(now);
-            osc.stop(now + 4);
+            osc2.start(now);
+            osc.stop(now + 5);
+            osc2.stop(now + 5);
             
-            // Schedule next chime
-            setTimeout(playChime, 3000 + Math.random() * 8000);
+            setTimeout(playChime, 4000 + Math.random() * 6000);
         };
         
-        // Start after a delay
-        setTimeout(playChime, 2000);
+        setTimeout(playChime, 3000);
     }
     
-    createSimpleReverb() {
-        const convolver = this.audioContext.createConvolver();
-        const rate = this.audioContext.sampleRate;
-        const length = rate * 2;
-        const impulse = this.audioContext.createBuffer(2, length, rate);
-        
-        for (let channel = 0; channel < 2; channel++) {
-            const data = impulse.getChannelData(channel);
-            for (let i = 0; i < length; i++) {
-                data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 2);
-            }
-        }
-        
-        convolver.buffer = impulse;
-        return convolver;
-    }
+    // ═══════════════════════════════════════════════════════════════════
+    // SOUND EFFECTS - ALL NEW, NO FARTS
+    // ═══════════════════════════════════════════════════════════════════
     
-    // Sound effects
     playSFX(type) {
-        if (!this.audioContext || !this.sfxEnabled) return;
+        if (!this.audioContext || !this.sfxEnabled || !this.isPlaying) return;
         
         const now = this.audioContext.currentTime;
         
         switch(type) {
-            case 'whoosh':
-                this.playWhoosh(now);
-                break;
-            case 'reveal':
-                this.playReveal(now);
-                break;
-            case 'click':
-                this.playClick(now);
-                break;
-            case 'success':
-                this.playSuccess(now);
-                break;
-            case 'transition':
-                this.playTransition(now);
-                break;
+            case 'whoosh': this.playWhoosh(now); break;
+            case 'reveal': this.playReveal(now); break;
+            case 'click': this.playClick(now); break;
+            case 'hover': this.playHover(now); break;
+            case 'success': this.playSuccess(now); break;
+            case 'transition': this.playTransition(now); break;
+            case 'glow': this.playGlow(now); break;
+            case 'sparkle': this.playSparkle(now); break;
+            case 'deep': this.playDeep(now); break;
+            case 'chime': this.playChime(now); break;
+            case 'magic': this.playMagic(now); break;
         }
     }
     
+    // Ethereal swoosh - NOT a fart
     playWhoosh(now) {
-        const noise = this.audioContext.createOscillator();
-        noise.type = 'sawtooth';
-        noise.frequency.value = 100;
+        // White noise swoosh with high-pass filter
+        const bufferSize = this.audioContext.sampleRate * 0.5;
+        const buffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
+        const data = buffer.getChannelData(0);
+        
+        for (let i = 0; i < bufferSize; i++) {
+            const envelope = Math.sin(Math.PI * i / bufferSize);
+            data[i] = (Math.random() * 2 - 1) * envelope * 0.3;
+        }
+        
+        const noise = this.audioContext.createBufferSource();
+        noise.buffer = buffer;
         
         const filter = this.audioContext.createBiquadFilter();
         filter.type = 'bandpass';
-        filter.frequency.value = 500;
-        filter.Q.value = 2;
+        filter.Q.value = 0.5;
+        filter.frequency.setValueAtTime(800, now);
+        filter.frequency.linearRampToValueAtTime(3000, now + 0.15);
+        filter.frequency.linearRampToValueAtTime(1500, now + 0.4);
         
         const gain = this.audioContext.createGain();
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.linearRampToValueAtTime(0.25, now + 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
         
         noise.connect(filter);
         filter.connect(gain);
-        gain.connect(this.masterGain);
-        
-        filter.frequency.linearRampToValueAtTime(2000, now + 0.2);
-        filter.frequency.linearRampToValueAtTime(100, now + 0.5);
-        
-        gain.gain.setValueAtTime(0.1, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+        gain.connect(this.sfxGain);
         
         noise.start(now);
-        noise.stop(now + 0.5);
     }
     
+    // Magical reveal tone
     playReveal(now) {
-        const osc = this.audioContext.createOscillator();
-        osc.type = 'sine';
-        osc.frequency.value = 220;
+        const freqs = [440, 554.37, 659.25]; // A major chord
         
-        const gain = this.audioContext.createGain();
-        
-        osc.connect(gain);
-        gain.connect(this.masterGain);
-        
-        osc.frequency.linearRampToValueAtTime(880, now + 0.3);
-        gain.gain.setValueAtTime(0.1, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
-        
-        osc.start(now);
-        osc.stop(now + 0.8);
+        freqs.forEach((freq, i) => {
+            const osc = this.audioContext.createOscillator();
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+            osc.frequency.linearRampToValueAtTime(freq * 1.02, now + 0.5);
+            
+            const gain = this.audioContext.createGain();
+            gain.gain.setValueAtTime(0, now);
+            gain.gain.linearRampToValueAtTime(0.08 - i * 0.02, now + 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+            
+            osc.connect(gain);
+            gain.connect(this.sfxGain);
+            
+            osc.start(now + i * 0.05);
+            osc.stop(now + 1.5);
+        });
     }
     
+    // Soft click
     playClick(now) {
         const osc = this.audioContext.createOscillator();
         osc.type = 'sine';
-        osc.frequency.value = 1200;
+        osc.frequency.value = 2000;
+        osc.frequency.exponentialRampToValueAtTime(800, now + 0.03);
         
         const gain = this.audioContext.createGain();
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
         
         osc.connect(gain);
-        gain.connect(this.masterGain);
-        
-        gain.gain.setValueAtTime(0.1, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+        gain.connect(this.sfxGain);
         
         osc.start(now);
-        osc.stop(now + 0.05);
+        osc.stop(now + 0.08);
     }
     
+    // Gentle hover
+    playHover(now) {
+        const osc = this.audioContext.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.value = 1500;
+        
+        const gain = this.audioContext.createGain();
+        gain.gain.setValueAtTime(0.04, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+        
+        osc.connect(gain);
+        gain.connect(this.sfxGain);
+        
+        osc.start(now);
+        osc.stop(now + 0.12);
+    }
+    
+    // Success arpeggio
     playSuccess(now) {
-        [523.25, 659.25, 783.99].forEach((freq, i) => {
+        const freqs = [523.25, 659.25, 783.99, 1046.5]; // C major arpeggio
+        
+        freqs.forEach((freq, i) => {
             const osc = this.audioContext.createOscillator();
             osc.type = 'sine';
             osc.frequency.value = freq;
             
             const gain = this.audioContext.createGain();
-            osc.connect(gain);
-            gain.connect(this.masterGain);
+            const startTime = now + (i * 0.08);
+            gain.gain.setValueAtTime(0.1, startTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.4);
             
-            const startTime = now + (i * 0.1);
-            gain.gain.setValueAtTime(0.08, startTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.5);
+            osc.connect(gain);
+            gain.connect(this.sfxGain);
             
             osc.start(startTime);
             osc.stop(startTime + 0.5);
         });
     }
     
+    // Section transition - deep wave
     playTransition(now) {
         const osc = this.audioContext.createOscillator();
         osc.type = 'sine';
-        osc.frequency.value = 110;
+        osc.frequency.value = 80;
+        osc.frequency.linearRampToValueAtTime(200, now + 0.5);
+        osc.frequency.linearRampToValueAtTime(100, now + 1);
+        
+        const osc2 = this.audioContext.createOscillator();
+        osc2.type = 'sine';
+        osc2.frequency.value = 160;
+        osc2.frequency.linearRampToValueAtTime(400, now + 0.5);
+        osc2.frequency.linearRampToValueAtTime(200, now + 1);
+        
+        const gain = this.audioContext.createGain();
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.12, now + 0.3);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
         
         const filter = this.audioContext.createBiquadFilter();
         filter.type = 'lowpass';
-        filter.frequency.value = 200;
-        
-        const gain = this.audioContext.createGain();
+        filter.frequency.value = 500;
         
         osc.connect(filter);
+        osc2.connect(filter);
         filter.connect(gain);
-        gain.connect(this.masterGain);
+        gain.connect(this.sfxGain);
         
-        filter.frequency.linearRampToValueAtTime(1000, now + 0.5);
-        gain.gain.setValueAtTime(0.15, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 1);
+        osc.start(now);
+        osc2.start(now);
+        osc.stop(now + 1.5);
+        osc2.stop(now + 1.5);
+    }
+    
+    // Warm glow
+    playGlow(now) {
+        const osc = this.audioContext.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.value = 330;
+        
+        const osc2 = this.audioContext.createOscillator();
+        osc2.type = 'sine';
+        osc2.frequency.value = 440;
+        
+        const gain = this.audioContext.createGain();
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.06, now + 0.2);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+        
+        osc.connect(gain);
+        osc2.connect(gain);
+        gain.connect(this.sfxGain);
+        
+        osc.start(now);
+        osc2.start(now);
+        osc.stop(now + 1);
+        osc2.stop(now + 1);
+    }
+    
+    // Sparkle
+    playSparkle(now) {
+        for (let i = 0; i < 5; i++) {
+            const osc = this.audioContext.createOscillator();
+            osc.type = 'sine';
+            osc.frequency.value = 2000 + Math.random() * 2000;
+            
+            const gain = this.audioContext.createGain();
+            const startTime = now + i * 0.05;
+            gain.gain.setValueAtTime(0.05, startTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.15);
+            
+            osc.connect(gain);
+            gain.connect(this.sfxGain);
+            
+            osc.start(startTime);
+            osc.stop(startTime + 0.2);
+        }
+    }
+    
+    // Deep bass hit
+    playDeep(now) {
+        const osc = this.audioContext.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.value = 60;
+        osc.frequency.exponentialRampToValueAtTime(30, now + 0.5);
+        
+        const gain = this.audioContext.createGain();
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+        
+        osc.connect(gain);
+        gain.connect(this.sfxGain);
         
         osc.start(now);
         osc.stop(now + 1);
     }
     
+    // Single chime
+    playChime(now) {
+        const freq = 880 + Math.random() * 440;
+        
+        const osc = this.audioContext.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        
+        const osc2 = this.audioContext.createOscillator();
+        osc2.type = 'sine';
+        osc2.frequency.value = freq * 2;
+        
+        const gain = this.audioContext.createGain();
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+        
+        const gain2 = this.audioContext.createGain();
+        gain2.gain.setValueAtTime(0.03, now);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 1);
+        
+        osc.connect(gain);
+        osc2.connect(gain2);
+        gain.connect(this.sfxGain);
+        gain2.connect(this.sfxGain);
+        
+        osc.start(now);
+        osc2.start(now);
+        osc.stop(now + 2);
+        osc2.stop(now + 1.5);
+    }
+    
+    // Magic spell
+    playMagic(now) {
+        const freqs = [330, 415, 494, 622, 740];
+        
+        freqs.forEach((freq, i) => {
+            const osc = this.audioContext.createOscillator();
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+            osc.frequency.linearRampToValueAtTime(freq * 1.5, now + 0.5);
+            
+            const gain = this.audioContext.createGain();
+            const startTime = now + i * 0.06;
+            gain.gain.setValueAtTime(0, startTime);
+            gain.gain.linearRampToValueAtTime(0.06, startTime + 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.8);
+            
+            osc.connect(gain);
+            gain.connect(this.sfxGain);
+            
+            osc.start(startTime);
+            osc.stop(startTime + 1);
+        });
+    }
+    
+    // ═══════════════════════════════════════════════════════════════════
+    // SFX TRIGGERS - COMPREHENSIVE
+    // ═══════════════════════════════════════════════════════════════════
+    
     setupSFXTriggers() {
-        // Buttons and links
-        document.querySelectorAll('button, .nav-links a, .cta-button').forEach(el => {
-            el.addEventListener('mouseenter', () => this.playSFX('click'));
+        // Navigation and buttons
+        document.querySelectorAll('.nav-links a').forEach(el => {
+            el.addEventListener('mouseenter', () => this.playSFX('hover'));
+            el.addEventListener('click', () => this.playSFX('click'));
         });
         
-        // Chapter entries (scroll-triggered via GSAP)
+        document.querySelectorAll('button:not(.audio-toggle)').forEach(el => {
+            el.addEventListener('mouseenter', () => this.playSFX('hover'));
+            el.addEventListener('click', () => this.playSFX('click'));
+        });
+        
+        // CTA buttons
+        document.querySelectorAll('.cta-button, .cta-primary').forEach(el => {
+            el.addEventListener('mouseenter', () => this.playSFX('glow'));
+            el.addEventListener('click', () => this.playSFX('magic'));
+        });
+        
+        // Galaxy buttons
+        document.querySelectorAll('.galaxy-btn').forEach(el => {
+            el.addEventListener('click', () => this.playSFX('chime'));
+        });
+        
+        // Test cards
+        document.querySelectorAll('.test-card').forEach(el => {
+            el.addEventListener('mouseenter', () => this.playSFX('sparkle'));
+        });
+        
+        // Interactive demos
+        document.querySelectorAll('.interactive-demo canvas, .psi-visualization canvas').forEach(el => {
+            el.addEventListener('mouseenter', () => this.playSFX('glow'));
+        });
+        
+        // Chapters entering viewport
         document.querySelectorAll('.chapter').forEach(chapter => {
             ScrollTrigger.create({
                 trigger: chapter,
@@ -1704,8 +2028,18 @@ class CosmicAudio {
             });
         });
         
-        // Big reveals
-        document.querySelectorAll('.reveal-text, .dramatic-reveal').forEach(el => {
+        // Content blocks
+        document.querySelectorAll('.content-block, .fade-in').forEach(el => {
+            ScrollTrigger.create({
+                trigger: el,
+                start: 'top 85%',
+                onEnter: () => this.playSFX('glow'),
+                once: true
+            });
+        });
+        
+        // Equations
+        document.querySelectorAll('.equation-card, .equation-showcase').forEach(el => {
             ScrollTrigger.create({
                 trigger: el,
                 start: 'top 80%',
@@ -1714,12 +2048,52 @@ class CosmicAudio {
             });
         });
         
-        // Section transitions
-        document.querySelectorAll('.part-divider').forEach(el => {
+        // Big numbers and stats
+        document.querySelectorAll('.big-zero, .dramatic-stat, .hero-title').forEach(el => {
             ScrollTrigger.create({
                 trigger: el,
-                start: 'top center',
+                start: 'top 80%',
+                onEnter: () => this.playSFX('magic'),
+                once: true
+            });
+        });
+        
+        // Test results
+        document.querySelectorAll('.test-card .checkmark').forEach(el => {
+            ScrollTrigger.create({
+                trigger: el,
+                start: 'top 90%',
+                onEnter: () => this.playSFX('success'),
+                once: true
+            });
+        });
+        
+        // Part dividers / transitions
+        document.querySelectorAll('.chapter-header').forEach(el => {
+            ScrollTrigger.create({
+                trigger: el,
+                start: 'top 70%',
                 onEnter: () => this.playSFX('transition'),
+                once: true
+            });
+        });
+        
+        // Falsification tests
+        document.querySelectorAll('.falsify-test').forEach(el => {
+            ScrollTrigger.create({
+                trigger: el,
+                start: 'top 85%',
+                onEnter: () => this.playSFX('deep'),
+                once: true
+            });
+        });
+        
+        // Quotes
+        document.querySelectorAll('blockquote, .feature-quote').forEach(el => {
+            ScrollTrigger.create({
+                trigger: el,
+                start: 'top 80%',
+                onEnter: () => this.playSFX('chime'),
                 once: true
             });
         });
@@ -1736,20 +2110,18 @@ class CosmicAudio {
     stop() {
         if (!this.audioContext) return;
         
-        // Fade out
-        this.masterGain.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 1);
+        this.masterGain.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.5);
         
         setTimeout(() => {
             this.drones.forEach(d => {
-                d.osc.stop();
-                d.lfo.stop();
+                try { d.osc.stop(); d.lfo.stop(); } catch(e) {}
             });
             this.drones = [];
             this.audioContext.close();
             this.audioContext = null;
             this.isPlaying = false;
             this.updateUI(false);
-        }, 1100);
+        }, 600);
     }
     
     updateUI(isOn) {
@@ -1761,18 +2133,16 @@ class CosmicAudio {
         
         if (isOn) {
             btn.classList.add('active');
-            onIcon.style.display = 'inline';
-            offIcon.style.display = 'none';
+            if (onIcon) onIcon.style.display = 'inline';
+            if (offIcon) offIcon.style.display = 'none';
         } else {
             btn.classList.remove('active');
-            onIcon.style.display = 'none';
-            offIcon.style.display = 'inline';
+            if (onIcon) onIcon.style.display = 'none';
+            if (offIcon) offIcon.style.display = 'inline';
         }
     }
 }
 
 // Initialize audio system
 const cosmicAudio = new CosmicAudio();
-
-// Export for use in other modules if needed
 window.cosmicAudio = cosmicAudio;
