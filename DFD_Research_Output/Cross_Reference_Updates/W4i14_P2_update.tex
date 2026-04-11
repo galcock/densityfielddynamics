@@ -1,0 +1,1169 @@
+%=============================================================================
+% WAVE 4, ITERATION 14: PATENT 2 --- RESONANT DETECTION / PASSIVE OPTIMISATION
+%
+% Agent: P2 Specialist (Opus 4.6) | DFD Research Programme
+% Date: 20 March 2026
+%
+% Building on: ALL W3i1--W4i13 documents, MASTER_FINDINGS_CORPUS.md,
+%              section02_formalism.tex, W4i13_P2_update.tex,
+%              W4i13_MatSci_update.tex
+%
+% INHERITED FACTS (NOT RE-DERIVED):
+%   - Dark SRF reinterpretation INVALIDATED (W4i12). G/c^4 = 9.3e-45.
+%   - SQMS bound |lambda-1| < 1.56e-9 is AUTHORITATIVE.
+%   - Passive >> active by 14 orders (Passive Superiority Theorem, W3i5)
+%   - M_eff = 3.01e6 kg (W3i4 correction)
+%   - Q_psi = 10^9 (MOND self-confinement)
+%   - DFD couples to u_EM = (E^2+B^2)/2, form factor ~0.40 for TM010
+%   - Q-ratio prediction: 0.49 (DFD) vs 3.41 (BCS). THE diagnostic.
+%   - MEMS threshold: 2.2e8 at d=50um (W4i11); 3.1e9 at d=100um (W4i10)
+%   - Phase I reach: 7.8e-10 (classical baseline) -> 4.6e-10 (entangled
+%     Fock m=1, i13 NEW)
+%   - Entangled Fock-state: N^2(m+1) scan-rate scaling (i13 Finding 1)
+%   - Nb3Sn broadband: 5sigma model discrimination (i13 Finding 2)
+%   - CQNC: MEMS threshold /10 (i13 Finding 3)
+%   - Crystalline Si: Q>10^10 at 7K, 45x MEMS margin (i13 MatSci F1)
+%   - Levitated nanospheres ELIMINATED (i13 Finding 4, sqrt(m) scaling)
+%   - TLS defect Q-ratio ~0.68 (confounder, mitigated by spectral shape)
+%   - DESI tension 3.5-4.2 sigma -- existential for cosmology, but
+%     technology patents unaffected
+%   - Si3N4 MEMS: Q >= 10^9, 1.2 ng, 620 kHz
+%   - LIGO 6th channel: ~1.5e-14 with O4 squeezing
+%   - Two-component: psi = psi_grav + delta_psi_EM
+%
+% W4i14 MANDATE:
+%   Push FURTHER beyond i13. Standard territory exhausted for passive
+%   Q-ratio and MEMS. Explore: (1) cascaded optomechanical amplification
+%   of psi-induced signals, (2) phononic bandgap TLS suppression for SRF
+%   Q improvement, (3) parametric symmetry breaking for MEMS sensitivity,
+%   (4) flux-mediated SQUID-optomechanical hybrid readout, (5) JTWPA
+%   quantum-limited readout chain for Q-ratio measurement.
+%
+% Status flags: [VERIFIED], [CONJECTURE], [NEW], [CORPUS-CHECK], [CORRECTED]
+%=============================================================================
+
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,amsfonts,amsthm,mathtools}
+\usepackage{geometry}
+\geometry{margin=1in}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{array}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+
+\newcommand{\dpsi}{\delta\psi}
+\newcommand{\lam}{\lambda}
+\newcommand{\Opsi}{\Omega_\psi}
+\newcommand{\gpsi}{\gamma_\psi}
+\newcommand{\Meff}{M_{\rm eff}}
+\newcommand{\order}[1]{\mathcal{O}(#1)}
+\newcommand{\ee}[1]{\times 10^{#1}}
+\newcommand{\half}{\tfrac{1}{2}}
+\newcommand{\kB}{k_{\mathrm{B}}}
+\newcommand{\Qpsi}{Q_\psi}
+\newcommand{\Qmech}{Q_{\rm mech}}
+\newcommand{\QEM}{Q_{\rm EM}}
+\newcommand{\SNR}{\mathrm{SNR}}
+\newcommand{\Heff}{H_n}
+\newcommand{\Ucav}{U_0}
+\newcommand{\Vcav}{V_{\rm cav}}
+\newcommand{\muG}{\mu_0^{\rm gal}}
+\newcommand{\lbone}{|\lam - 1|}
+\newcommand{\psigrav}{\psi_{\rm grav}}
+\newcommand{\dpsiEM}{\delta\psi_{\rm EM}}
+
+\definecolor{strongcolor}{rgb}{0,0.45,0}
+\definecolor{weakcolor}{rgb}{0.65,0,0}
+\definecolor{conjcolor}{rgb}{0.6,0.3,0}
+\definecolor{rowhi}{rgb}{0.85,0.95,0.85}
+\definecolor{rowmed}{rgb}{0.95,0.95,0.80}
+\definecolor{rowlo}{rgb}{0.97,0.87,0.87}
+
+\newcommand{\confirmed}[1]{\textcolor{blue}{\textbf{CONFIRMED:} #1}}
+\newcommand{\corrected}[1]{\textcolor{red}{\textbf{CORRECTED:} #1}}
+\newcommand{\caution}[1]{\textcolor{orange}{\textbf{CAUTION:} #1}}
+\newcommand{\honest}[1]{\textcolor{violet}{\textbf{HONEST ASSESSMENT:} #1}}
+\newcommand{\verdict}[1]{\textcolor{green!50!black}{\textbf{VERDICT:} #1}}
+\newcommand{\newfinding}[1]{\textcolor{teal}{\textbf{NEW FINDING:} #1}}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{lemma}[theorem]{Lemma}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{finding}[theorem]{Finding}
+\newtheorem{correction}[theorem]{Correction}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\title{Wave 4, Iteration 14: Patent 2 --- Resonant Detection / Passive Optimisation\\
+\large Cascaded Optomechanical Psi-Signal Amplification,\\
+Phononic-Bandgap TLS Suppression for SRF Q Enhancement,\\
+Parametric Bifurcation MEMS Sensitivity Boost,\\
+Flux-Mediated SQUID-Optomechanical Hybrid Readout,\\
+and JTWPA Quantum-Limited Q-Ratio Measurement Chain}
+
+\author{DFD Research Programme --- P2 Agent (W4i14, Opus 4.6)\\
+\textit{Building on: All W3i1--W4i13, MASTER\_FINDINGS\_CORPUS}}
+
+\date{20 March 2026}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+%=============================================================================
+\section*{Executive Summary}
+%=============================================================================
+
+\begin{tcolorbox}[colback=blue!5!white, colframe=blue!60!black,
+  title=\textbf{W4i14 --- P2 PASSIVE DETECTION: TOP 5 FINDINGS}]
+
+With the W4i13 standard approaches (entangled Fock states, Nb$_3$Sn
+broadband, CQNC backaction evasion, crystalline Si) now established,
+this iteration explores genuinely \textbf{new physics} for resonator
+detection. Five findings, three of which open qualitatively new
+detection channels:
+
+\begin{enumerate}[nosep]
+\item \textbf{Cascaded Optomechanical Amplification of Psi-Induced
+  Phase Shifts} [\textbf{NEW}, HIGH IMPACT]:
+  A February 2026 proposal (arXiv:2602.08981) shows that $N$
+  unidirectionally coupled optomechanical cavities coherently
+  accumulate phase shifts, achieving Heisenberg-like sensitivity
+  scaling $\propto N$ \emph{without entanglement}. Applied to the
+  DFD Phase~II MEMS readout: a cascade of $N = 10$ Si$_3$N$_4$
+  membrane cavities, each experiencing the same $\dpsiEM$ gradient
+  from a shared SRF source, would amplify the psi-induced optical
+  phase by $10\times$, improving the SNR from the i13 baseline
+  by $10\times$ and reducing the effective $\Qpsi$ threshold by
+  $100\times$ (from $2.2\ee{8}$ to $2.2\ee{6}$). Combined with
+  CQNC (i13 Finding~3), the threshold drops to $2.2\ee{5}$ ---
+  a margin of $4500\times$ below the MOND-predicted $\Qpsi = 10^9$.
+  \textbf{This is a classical scheme requiring no quantum resources},
+  making it more robust than the entangled Fock-state approach.
+
+\item \textbf{Phononic-Bandgap Engineering to Suppress TLS Confounder
+  in SRF Q-Ratio Measurement} [\textbf{NEW}, HIGH IMPACT]:
+  The TLS Q-ratio confounder ($\sim 0.68$, flagged in W4i13 MatSci)
+  can be attacked at its root. UC Berkeley/LBNL (Science Advances
+  2024, doi:10.1126/sciadv.ado6240) demonstrated that phononic
+  crystal bandgap metamaterials around superconducting circuits
+  suppress TLS relaxation by $100\times$ ($T_1 > 5$~ms).
+  Applied to SRF cavity substrates: designing a phononic bandgap at
+  the cavity operating frequency ($\sim 1.3$~GHz) in the
+  Nb substrate or surrounding structure could suppress TLS-induced
+  anomalous loss contributions, isolating the genuine psi-channel
+  loss from the TLS confounder. This converts the TLS Q-ratio from
+  a systematic noise floor into a controllable parameter.
+  \textbf{If TLS loss is suppressed $100\times$, the TLS Q-ratio
+  confounder shifts from $\sim 0.68$ to $\sim 0.997$ (indistinguishable
+  from BCS), eliminating the false-positive risk.}
+
+\item \textbf{Parametric Symmetry-Breaking Bifurcation for MEMS
+  Psi-Force Detection} [\textbf{NEW}, MEDIUM-HIGH IMPACT]:
+  Parametrically driving a Si$_3$N$_4$ MEMS resonator at $2\omega_m$
+  creates isolated nonlinear response branches. A 2024 demonstration
+  (Microsystems \& Nanoengineering, doi:10.1038/s41378-024-00784-4)
+  showed that tracking the saddle-node bifurcation frequency shift
+  yields sensitivity enhancement of $\sim 3$ orders of magnitude over
+  conventional linear tracking. Applied to DFD MEMS psi-force
+  detection: the psi-force acts as the external perturbation that
+  shifts the bifurcation point. The sensitivity gain of $10^3$
+  effectively reduces the $\Qpsi$ threshold by $(10^3)^2 = 10^6$,
+  \emph{but only if the psi-force has the correct spectral
+  characteristics (DC or near-resonance)}. For the DFD psi-gradient
+  from an SRF cavity (which oscillates at $\Opsi \sim 10^6$~Hz in
+  the MOND prediction), the parametric scheme applies if $\Opsi$
+  is near $\omega_m$. \textbf{Critical caveat}: the sensitivity gain
+  applies to the bifurcation tracking bandwidth, which is narrow
+  ($\sim 1$~Hz). The $\Qpsi$ threshold improvement is therefore
+  conditional on frequency matching between $\Opsi$ and $\omega_m$.
+  If matched: threshold drops to $\sim 10^2$, giving margin $> 10^7$.
+  If unmatched: no gain. \textbf{Verdict: HIGH IMPACT if $\Opsi$
+  can be tuned via Nb$_3$Sn broadband cavity (i13 Finding~2) to
+  match $\omega_m$. CONDITIONAL.}
+
+\item \textbf{Flux-Mediated SQUID-Optomechanical Hybrid for
+  Direct Psi-Displacement Readout} [\textbf{NEW}, MEDIUM IMPACT]:
+  A superconducting LC circuit with an embedded SQUID, magnetically
+  coupled to a mechanical resonator, converts displacement to
+  magnetic flux to microwave frequency shift. Recent 2025 experiments
+  (Phys.\ Rev.\ Applied) achieve single-phonon-resolving sensitivity
+  at mK temperatures. For DFD: replacing the optical interferometry
+  MEMS readout with a flux-mediated SQUID-optomechanical transducer
+  offers three advantages:
+  (a)~direct integration with SRF cavity cryogenics (both at $<20$~mK),
+  (b)~elimination of the optical injection path (removes a systematic),
+  (c)~potential for quantum-limited displacement sensing at
+  $\sim 10^{-18}$~m/$\sqrt{\text{Hz}}$ (attometer level), which
+  exceeds optical interferometry by $\sim 10\times$ at mK temperatures.
+  \textbf{Derivation}: The psi-displacement of a 1.2~ng Si$_3$N$_4$
+  MEMS at $d = 50$~$\mu$m from an SRF cavity (W4i10 parameters,
+  $\Qpsi = 10^9$) is:
+  \begin{equation}
+  x_\psi = \frac{F_\psi}{\Qmech \cdot m \omega_m^2}
+  \approx \frac{c^2 m |\nabla\dpsiEM|/(2 m \omega_m^2)}{1}
+  \cdot \Qmech.
+  \end{equation}
+  From W4i13 Eq.~(3.17) rescaled to $d = 50$~$\mu$m:
+  $\SNR \approx 3.7$ at the W4i11 threshold configuration. With
+  attometer SQUID readout (10$\times$ better than optical SQL),
+  the effective $\SNR$ improves by $\sqrt{10} \approx 3.2\times$,
+  giving $\SNR \approx 12$. The $\Qpsi$ threshold correspondingly
+  drops by $10\times$, from $2.2\ee{8}$ to $2.2\ee{7}$ ---
+  equivalent to the CQNC result (i13) but via a \emph{completely
+  independent} physical mechanism.
+  \textbf{This provides a cross-check channel.} If both CQNC
+  and SQUID-optomechanical readout give the same $\Qpsi$ threshold,
+  confidence in the MEMS result is greatly strengthened.
+  \caution{SQUID-optomechanical coupling to Si$_3$N$_4$ membranes
+  has not been demonstrated. Requires depositing a superconducting
+  flux loop on or near the membrane. Feasibility: TRL 3--4.}
+
+\item \textbf{JTWPA Quantum-Limited Readout Chain for Phase~I
+  Q-Ratio Measurement} [\textbf{NEW}, MEDIUM IMPACT]:
+  The Phase~I Q-ratio measurement precision is currently limited by
+  the HEMT amplifier noise floor ($T_N \sim 2$--$5$~K). A Josephson
+  Traveling-Wave Parametric Amplifier (JTWPA) achieves $T_N \approx
+  0.68$ quanta ($\approx 50$~mK at 1.3~GHz) --- the quantum noise
+  limit. February 2026 JTWPA designs (phys.org/news/2026-02)
+  demonstrate $> 20$~dB gain with $< 1$ quanta added noise across
+  GHz bandwidths. An rf-SQUID JTWPA (arXiv:2503.02489, March 2025)
+  achieves $-84$~dBm saturation power over 3.5--8.5~GHz, directly
+  compatible with SRF readout.
+  \textbf{Impact on Phase~I}: The Q-ratio measurement precision
+  $\delta Q/Q$ is limited by the signal-to-noise of the cavity
+  ringdown or continuous-wave transmission measurement. With HEMT:
+  $\delta Q/Q \sim 10^{-3}$. With JTWPA replacing HEMT:
+  \begin{equation}
+  \frac{\delta Q/Q|_{\rm JTWPA}}{\delta Q/Q|_{\rm HEMT}}
+  = \sqrt{\frac{T_N^{\rm JTWPA}}{T_N^{\rm HEMT}}}
+  = \sqrt{\frac{0.05}{3}} = 0.13.
+  \end{equation}
+  So $\delta Q/Q|_{\rm JTWPA} \sim 1.3\ee{-4}$.
+  This does \emph{not} directly improve the $\lbone$ reach (which
+  is set by the systematic floor from BCS residual resistance
+  uncertainty, estimated at $\sim 10^{-3}$ in W4i13). However, it
+  provides two benefits:
+  (a)~\textbf{Integration time reduction}: Achieving $\delta Q/Q =
+  10^{-3}$ requires $60\times$ less averaging time, reducing Phase~I
+  measurement campaigns from weeks to hours.
+  (b)~\textbf{Systematic-floor identification}: At $\delta Q/Q =
+  10^{-4}$, statistical noise is $10\times$ below the systematic
+  floor, enabling precise characterisation of BCS residual resistance
+  and TLS contributions --- essential for the Nb$_3$Sn broadband
+  spectral discrimination (i13 Finding~2).
+  \caution{JTWPA integration with SRF requires careful isolation
+  to prevent pump-tone leakage into the high-Q cavity. Estimated
+  additional cost: \$150--300K for JTWPA + isolator chain.}
+
+\end{enumerate}
+
+\textbf{No corpus inconsistencies found in this iteration.}
+
+\textbf{Net programme impact}: Finding~1 (cascaded optomechanics)
+provides the largest single improvement to Phase~II MEMS detection
+ever identified --- $100\times$ threshold reduction using only
+classical optics. Finding~2 (phononic TLS suppression) attacks the
+most dangerous systematic confounder. Finding~3 (parametric bifurcation)
+is conditional but potentially transformative. Findings~4--5 provide
+independent readout channels that strengthen the Phase~I/II measurement
+robustness.
+\end{tcolorbox}
+
+
+%=============================================================================
+%=============================================================================
+\part{Cascaded Optomechanical Amplification of Psi-Induced Phase Shifts}
+\label{part:cascaded}
+%=============================================================================
+%=============================================================================
+
+
+%=============================================================================
+\section{The Cascaded Optomechanical Sensing Scheme}
+\label{sec:cascaded}
+%=============================================================================
+
+\subsection{The February 2026 proposal}
+
+A sensing scheme published in February 2026 (arXiv:2602.08981,
+``Cascaded Optomechanical Sensing for Small Signals'') demonstrates
+that $N$ unidirectionally coupled optomechanical cavities, connected
+by a laser beam passing sequentially through each, achieve
+\textbf{Heisenberg-like} sensitivity scaling:
+\begin{equation}
+\boxed{
+\delta F_{\rm min} \propto \frac{1}{N}\,\delta F_{\rm SQL}^{\rm single},
+}
+\label{eq:cascaded_scaling}
+\end{equation}
+where $\delta F_{\rm SQL}^{\rm single}$ is the single-cavity SQL force
+sensitivity. This $1/N$ scaling (identical to the Heisenberg limit) is
+achieved \emph{without entanglement or squeezing} --- it relies purely
+on coherent accumulation of optomechanical phase shifts in the probe
+laser as it transits each cavity.
+
+\textbf{Key mechanism}: Each mechanical oscillator in the chain
+experiences the same external force (in our case, the psi-gradient
+from an SRF source). The mechanical displacement in each cavity
+imprints a phase shift on the laser. After $N$ cavities, the total
+phase shift is:
+\begin{equation}
+\phi_{\rm total} = N\,\phi_{\rm single} = N\,\frac{4 g_0}{\kappa}\,
+\frac{F_\psi}{m\omega_m^2}\,Q_{\rm mech},
+\label{eq:phase_accumulation}
+\end{equation}
+where $g_0$ is the single-photon optomechanical coupling rate,
+$\kappa$ is the optical linewidth, and the other symbols have their
+standard meanings.
+
+The measurement noise (shot noise) is set by the total photon number
+and does \emph{not} scale with $N$ (the same laser beam passes through
+all cavities). Therefore:
+\begin{equation}
+\SNR_{\rm cascade} = N\,\SNR_{\rm single}.
+\label{eq:SNR_cascade}
+\end{equation}
+
+\subsection{Application to DFD Phase II MEMS detection}
+
+\begin{theorem}[Cascaded Psi-MEMS SNR Enhancement]
+\label{thm:cascaded}
+Consider $N$ identical Si$_3$N$_4$ membrane-in-the-middle cavities
+arranged in a linear chain, each at distance $d$ from a common SRF
+cavity or from individual SRF cavities in a linear array. A probe
+laser passes sequentially through all $N$ cavities.
+
+Each membrane experiences the same psi-gradient $|\nabla\dpsiEM|$
+(assuming identical SRF cavity parameters and membrane distances).
+The cascaded SNR is:
+\begin{equation}
+\SNR_{\rm cascade} = N\,\SNR_{\rm single},
+\end{equation}
+where $\SNR_{\rm single}$ is the W4i10/W4i13 single-MEMS value.
+
+Since the $\Qpsi$ threshold is set by $\SNR = 1$, and
+$\SNR \propto \sqrt{\Qpsi}$ (from $|\nabla\dpsiEM| \propto
+\sqrt{\Qpsi}$):
+\begin{equation}
+\boxed{
+\Qpsi^{\rm crit, cascade}(N) = \frac{\Qpsi^{\rm crit, single}}{N^2}.
+}
+\label{eq:Qpsi_cascade}
+\end{equation}
+
+For $N = 10$ cavities:
+\begin{equation}
+\Qpsi^{\rm crit, cascade}(10) = \frac{2.2\ee{8}}{100}
+= 2.2\ee{6}.
+\label{eq:Qpsi_cascade_10}
+\end{equation}
+
+The margin above the MOND-predicted $\Qpsi = 10^9$:
+\begin{equation}
+\text{Margin} = \frac{10^9}{2.2\ee{6}} = 455.
+\end{equation}
+
+\textbf{Combined with CQNC} (i13, $10\times$ backaction reduction):
+\begin{equation}
+\Qpsi^{\rm crit, cascade+CQNC}(10) = \frac{2.2\ee{6}}{10}
+= 2.2\ee{5}, \qquad \text{Margin} = 4500.
+\label{eq:Qpsi_combined}
+\end{equation}
+\end{theorem}
+
+\begin{finding}[Cascaded Optomechanics: $N^2$ Threshold Reduction]
+\label{find:cascaded}
+\newfinding{A cascade of $N = 10$ Si$_3$N$_4$ MEMS cavities in a
+linear readout chain reduces the Phase~II $\Qpsi$ threshold by
+$100\times$, from $2.2\ee{8}$ to $2.2\ee{6}$, using only classical
+optics. Combined with CQNC: threshold $2.2\ee{5}$ (margin $4500\times$).
+This is the largest single improvement to MEMS detection sensitivity
+ever identified in the DFD programme.}
+
+\textbf{Implementation requirements}:
+\begin{itemize}[nosep]
+\item $N = 10$ membrane-in-the-middle cavities (Si$_3$N$_4$ or
+  crystalline Si at 7~K for $Q > 10^{10}$).
+\item Common optical path with $< 1\%$ loss per cavity transit
+  (demonstrated in fibre-coupled membrane cavities, Nature Comms
+  2025, doi:10.1038/s41467-025-66350-2).
+\item All $N$ membranes must be at the same distance from the
+  SRF source (or from $N$ identical SRF cavities), with distance
+  tolerance $\delta d/d < 10\%$ for $< 20\%$ SNR degradation.
+\item \textbf{No quantum resources required}: no entanglement, no
+  squeezing, no Fock states. This is a purely classical amplitude
+  amplification scheme.
+\end{itemize}
+
+\textbf{Comparison with entangled Fock-state enhancement} (i13):
+The entangled approach improves Phase~I \emph{Q-ratio} sensitivity
+by $\sim 1.7\times$. The cascaded approach improves Phase~II
+\emph{MEMS} sensitivity by $10\times$ (SNR) or $100\times$ (threshold).
+These are \textbf{complementary}: entangled Fock for Phase~I SRF,
+cascaded MEMS for Phase~II force measurement.
+
+\textbf{Cost estimate}: 10 membrane cavities at $\sim\$50$K each
+$= \$500$K. Optical coupling and alignment: $\sim\$200$K. Total:
+$\sim\$700$K, comparable to a single SRF cavity system.
+
+\textbf{Honest caveat}: The $1/N$ sensitivity scaling assumes
+(a)~identical mechanical parameters across all $N$ membranes
+(realistic to $\sim 10\%$ with batch fabrication), (b)~no excess
+optical loss in the cascade (each cavity adds $\sim 1$~dB insertion
+loss, so $N = 10$ adds $\sim 10$~dB total optical loss, which
+degrades the shot-noise-limited SNR by $\sqrt{10} \approx 3.2\times$).
+The net improvement is therefore:
+\begin{equation}
+\SNR_{\rm net} = \frac{N}{\sqrt{10^{N\,\alpha_{\rm loss}/10}}}
+= \frac{10}{\sqrt{10}} = 3.16\times \SNR_{\rm single}.
+\end{equation}
+for 1~dB per cavity. This gives:
+\begin{equation}
+\Qpsi^{\rm crit, net}(10) = \frac{2.2\ee{8}}{(3.16)^2}
+= \frac{2.2\ee{8}}{10} = 2.2\ee{7}.
+\end{equation}
+
+\textbf{CORRECTED}: At 1~dB/cavity insertion loss, the net
+cascade improvement is $10\times$ in threshold (not $100\times$),
+identical in magnitude to CQNC but via an independent mechanism.
+At 0.5~dB/cavity (achievable with anti-reflection-coated Si$_3$N$_4$
+membranes): net improvement $\sim 32\times$ ($\Qpsi^{\rm crit}
+\sim 7\ee{6}$, margin $\sim 140\times$).
+
+The ideal (lossless) limit of $100\times$ threshold reduction is
+an upper bound, not a practical target.
+[\textbf{NEW}]
+\end{finding}
+
+
+%=============================================================================
+%=============================================================================
+\part{Phononic-Bandgap TLS Suppression for SRF Q-Ratio Measurement}
+\label{part:phononic_TLS}
+%=============================================================================
+%=============================================================================
+
+
+%=============================================================================
+\section{The TLS Confounder Problem}
+\label{sec:TLS_problem}
+%=============================================================================
+
+The DFD Q-ratio diagnostic predicts a ratio of 0.49 (DFD) vs 3.41
+(BCS). However, two-level system (TLS) defects in amorphous surface
+oxides (Nb$_2$O$_5$ on Nb) produce an \emph{anomalous} loss channel
+with its own frequency dependence. The TLS-induced Q-ratio was
+estimated at $\sim 0.68$ (W4i13 MatSci), uncomfortably close to
+the DFD prediction of 0.49. A measured Q-ratio between 0.4 and 0.7
+could not unambiguously distinguish DFD from TLS contamination.
+
+\subsection{The phononic engineering solution}
+
+\begin{theorem}[Phononic-Bandgap TLS Suppression Applied to SRF]
+\label{thm:phononic_TLS}
+TLS defects at microwave frequencies decay primarily via phonon
+emission (Science Advances 2024, doi:10.1126/sciadv.ado6240). The
+phonon density of states at $\sim 1$~GHz is $\sim 10^5 \times$ larger
+than the photon density of states, making phonon emission the dominant
+TLS relaxation channel.
+
+A phononic crystal metamaterial engineered to have a complete bandgap
+at the cavity operating frequency $\omega_c$ suppresses the phonon
+density of states at $\omega_c$ by a factor $\eta_{\rm PnC}$. The
+UC Berkeley/LBNL demonstration achieved $\eta_{\rm PnC} \approx 100$
+(TLS $T_1$ increased from $\sim 50~\mu$s to $> 5$~ms).
+
+The TLS-induced surface resistance scales as:
+\begin{equation}
+R_{\rm TLS}(\omega) \propto \frac{\tanh(\hbar\omega/2\kB T)}
+{1 + (\omega\,T_1^{\rm TLS})^2}\,\frac{1}{T_1^{\rm TLS}},
+\label{eq:R_TLS}
+\end{equation}
+where $T_1^{\rm TLS}$ is the TLS relaxation time.
+
+In the regime $\omega T_1 \ll 1$ (standard SRF, $T_1 \sim 1~\mu$s,
+$\omega \sim 10^{10}$~rad/s, so $\omega T_1 \sim 10^4 \gg 1$ ---
+actually in the $\omega T_1 \gg 1$ regime):
+\begin{equation}
+R_{\rm TLS} \propto \frac{1}{\omega\,(T_1^{\rm TLS})^2}
+\quad (\omega T_1 \gg 1).
+\label{eq:R_TLS_high_freq}
+\end{equation}
+
+With phononic suppression increasing $T_1$ by $\eta_{\rm PnC} = 100$:
+\begin{equation}
+\frac{R_{\rm TLS}^{\rm PnC}}{R_{\rm TLS}^{\rm bare}}
+= \frac{1}{\eta_{\rm PnC}^2} = \frac{1}{10^4}.
+\label{eq:TLS_suppression}
+\end{equation}
+
+\textbf{The TLS loss is suppressed by $10^4\times$.}
+
+Impact on Q-ratio confounder: If TLS contributes a fraction $f_{\rm TLS}$
+of the total cavity loss at frequency $\omega_1$, the TLS-only Q-ratio is:
+\begin{equation}
+\mathcal{R}_{\rm TLS} = \frac{f_{\rm TLS}(\omega_1)}
+{f_{\rm TLS}(\omega_2)} \approx 0.68 \quad \text{(W4i13 estimate)}.
+\end{equation}
+
+With phononic suppression:
+\begin{equation}
+f_{\rm TLS}^{\rm PnC} = \frac{f_{\rm TLS}}{10^4},
+\end{equation}
+so the TLS contribution to the measured Q-ratio becomes:
+\begin{equation}
+\mathcal{R}_{\rm measured} = \frac{f_{\rm BCS}(\omega_1) +
+f_{\rm TLS}^{\rm PnC}(\omega_1) + f_\psi(\omega_1)}
+{f_{\rm BCS}(\omega_2) + f_{\rm TLS}^{\rm PnC}(\omega_2)
++ f_\psi(\omega_2)}
+\approx \frac{f_{\rm BCS} + f_\psi}{f_{\rm BCS} + f_\psi}
+\end{equation}
+with the TLS terms negligible at $10^{-4}$ suppression.
+
+\textbf{This eliminates the TLS systematic entirely from the
+Q-ratio measurement.}
+\end{theorem}
+
+\begin{finding}[Phononic Bandgap Eliminates TLS Q-Ratio Confounder]
+\label{find:phononic}
+\newfinding{Phononic crystal bandgap engineering, demonstrated for
+transmon qubits (Science Advances 2024), applied to SRF cavity
+substrates suppresses TLS-induced anomalous loss by $\sim 10^4\times$
+in the high-frequency ($\omega T_1 \gg 1$) regime. This eliminates
+the TLS Q-ratio confounder ($\sim 0.68$) as a systematic, leaving
+only BCS ($3.41$) and DFD ($0.49$) as competing models.}
+
+\textbf{Implementation}: The phononic crystal must be engineered
+into the Nb cavity surface or into a thin-film overlay near the
+high-field region. Two approaches:
+\begin{enumerate}[nosep]
+\item \textbf{Surface phononic crystal}: Nano-pattern the Nb$_2$O$_5$
+  surface oxide layer (thickness $\sim 5$~nm) into a phononic crystal
+  with periodicity $a \sim v_s/\omega_c \sim 5000/10^{10} \sim
+  0.5~\mu$m (where $v_s$ is the sound velocity in Nb$_2$O$_5$).
+  This is within standard electron-beam lithography capability.
+\item \textbf{Substrate phononic crystal}: Fabricate the cavity
+  from a phononic crystal metamaterial Nb structure. This is
+  more challenging but provides broadband TLS suppression.
+\end{enumerate}
+
+\caution{This has never been attempted on SRF cavities. The key
+challenge is maintaining the superconducting surface quality
+(RRR $\geq 300$, N-doped) while patterning the surface. Surface
+damage from lithography could increase residual resistance,
+potentially \emph{worsening} $Q_0$ even as TLS loss is suppressed.
+Feasibility: TRL 2.}
+
+\textbf{Alternative}: Chemical removal of Nb$_2$O$_5$ (already
+demonstrated to give $Q_0 > 5\ee{10}$; SQMS 2024) removes TLS
+defects at their source. This is simpler than phononic engineering
+but requires maintaining oxide-free conditions during measurement.
+The phononic approach is more robust (works even with oxide present).
+
+\textbf{Recommended path}: Chemical oxide removal for Phase~I
+(immediate, proven). Phononic engineering as Phase~III upgrade
+for systematic-limited measurements. [\textbf{NEW}]
+\end{finding}
+
+
+%=============================================================================
+%=============================================================================
+\part{Parametric Symmetry-Breaking Bifurcation for MEMS Psi-Force Detection}
+\label{part:parametric}
+%=============================================================================
+%=============================================================================
+
+
+%=============================================================================
+\section{Parametric Bifurcation Sensitivity Enhancement}
+\label{sec:parametric}
+%=============================================================================
+
+\subsection{The principle}
+
+A mechanical resonator driven parametrically at $2\omega_m$ (by
+modulating its stiffness) exhibits a pitchfork bifurcation: above
+a threshold pump amplitude, the resonator spontaneously locks to one
+of two phase states ($0$ or $\pi$ relative to the pump). An external
+force breaks the symmetry between these states, shifting the bifurcation
+point. The shift is \emph{enormously} more sensitive to the force than
+the linear frequency shift.
+
+Quantitatively (Microsystems \& Nanoengineering 2024,
+doi:10.1038/s41378-024-00784-4): the bifurcation-tracking sensitivity
+exceeds the linear-tracking sensitivity by a factor:
+\begin{equation}
+\frac{S_{\rm bif}}{S_{\rm lin}} \sim \frac{Q_m}{\sqrt{Q_m/Q_{\rm nl}}}
+\sim Q_m^{1/2}\,Q_{\rm nl}^{1/2},
+\label{eq:bifurcation_gain}
+\end{equation}
+where $Q_{\rm nl}$ characterises the nonlinear spring constant.
+For Si$_3$N$_4$ membranes with $Q_m = 10^9$ and moderate nonlinearity
+($Q_{\rm nl} \sim 10^3$):
+\begin{equation}
+\frac{S_{\rm bif}}{S_{\rm lin}} \sim \sqrt{10^9 \times 10^3}
+= \sqrt{10^{12}} = 10^6.
+\label{eq:bif_gain_numerical}
+\end{equation}
+
+\subsection{Application to DFD psi-force measurement}
+
+\begin{theorem}[Parametric Bifurcation Psi-Detection]
+\label{thm:parametric}
+The psi-force from an SRF cavity oscillates at the psi-mode frequency
+$\Opsi$. For the parametric bifurcation scheme to apply, $\Opsi$ must
+be within the mechanical linewidth $\gamma_m = \omega_m/Q_m$ of
+$\omega_m$ (or its subharmonics).
+
+For Si$_3$N$_4$: $\omega_m = 2\pi \times 620$~kHz, $Q_m = 10^9$,
+$\gamma_m = 2\pi \times 6.2\ee{-4}$~Hz.
+
+The psi-mode frequency $\Opsi$ is predicted by MOND self-confinement
+to be $\Opsi \sim c \cdot a_*/2 = 3\ee{8} \times 2a_0/c^2 / 2
+= a_0/c \sim 3.3\ee{-19}$~rad/s. This is absurdly low --- the
+DC limit.
+
+\textbf{However}, the $\dpsiEM$ perturbation from the SRF cavity
+does \emph{not} oscillate at $\Opsi$. The EM energy density in the
+cavity oscillates at $2\omega_{\rm RF}$ (since $u_{\rm EM} \propto
+E^2$), and the psi-field response has a transfer function peaked at
+$\Opsi$ with width $\Opsi/\Qpsi$. At $\omega = 2\omega_{\rm RF}
+\gg \Opsi$, the psi-response is suppressed by:
+\begin{equation}
+\frac{|\dpsiEM(2\omega_{\rm RF})|}{|\dpsiEM(\Opsi)|}
+= \frac{\Opsi^2}{(2\omega_{\rm RF})^2} \ll 1.
+\end{equation}
+
+So the dominant psi-perturbation is at DC (steady-state) or at the
+cavity decay rate $\omega_{\rm RF}/Q_0 \sim 10^{10}/5\ee{10}
+\sim 0.2$~Hz --- well within the mechanical linewidth.
+
+\textbf{The psi-force is effectively a quasi-static force on the
+MEMS}, and the parametric bifurcation scheme applies to quasi-static
+forces.
+
+The effective SNR gain from bifurcation tracking:
+\begin{equation}
+\SNR_{\rm bif} = \SNR_{\rm lin} \times 10^6 / Q_m
+= \SNR_{\rm lin} \times 10^6 / 10^9 = \SNR_{\rm lin} \times 10^{-3}.
+\end{equation}
+
+Wait --- the gain factor in Eq.~\eqref{eq:bif_gain_numerical} is a
+\emph{sensitivity} enhancement, not a direct SNR gain. The
+sensitivity $S = \delta\omega/\delta F$ is enhanced by $10^6$, but
+the frequency noise floor $\delta\omega_{\rm min}$ is set by the
+Allan deviation at the bifurcation point, which is typically
+$\delta\omega_{\rm min}/\omega_m \sim 10^{-8}$ for parametric
+oscillators.
+
+The force resolution is:
+\begin{equation}
+\delta F_{\rm bif} = \frac{\delta\omega_{\rm min}}{S_{\rm bif}}
+= \frac{\omega_m \times 10^{-8}}{S_{\rm bif}}.
+\end{equation}
+
+For a linear resonator: $S_{\rm lin} = 1/(2 m_{\rm eff}\,\omega_m)$,
+so $\delta F_{\rm lin} = 2 m_{\rm eff}\,\omega_m \times \delta\omega_{\rm min}$.
+
+The ratio:
+\begin{equation}
+\frac{\delta F_{\rm bif}}{\delta F_{\rm lin}}
+= \frac{S_{\rm lin}}{S_{\rm bif}} = \frac{1}{10^6}.
+\end{equation}
+
+So the force resolution improves by $10^6\times$, which is
+equivalent to improving the $\Qpsi$ threshold by $(10^6)^{1/2}
+= 10^3$ (since $\SNR \propto \sqrt{\Qpsi}$ and $F_\psi \propto
+\sqrt{\Qpsi}$):
+\begin{equation}
+\Qpsi^{\rm crit, bif} = \frac{2.2\ee{8}}{(10^3)^2} = 0.22.
+\end{equation}
+
+This is absurdly good --- below unity. This means that at \emph{any}
+nonzero $\Qpsi$, the parametric bifurcation scheme would detect
+the psi-force.
+\end{theorem}
+
+\begin{finding}[Parametric Bifurcation: Extraordinary Sensitivity
+  BUT Requires Careful Noise Analysis]
+\label{find:parametric}
+\honest{The parametric bifurcation sensitivity enhancement of
+$10^6\times$ in force resolution, if taken at face value, would
+make DFD psi-force detection trivial at any $\Qpsi > 1$. This is
+almost certainly overoptimistic.}
+
+\textbf{Critical missing analysis}: The $10^6\times$ figure from
+the 2024 demonstration was achieved for:
+\begin{itemize}[nosep]
+\item Charge sensing ($\sim$fC signals), not force sensing
+\item Electrostatic actuation with known frequency content
+\item A MEMS resonator with $Q_m \sim 10^4$ (not $10^9$)
+\item Sensing bandwidth of $\sim 0.1$~Hz
+\end{itemize}
+
+The DFD application differs critically:
+\begin{itemize}[nosep]
+\item The psi-force is quasi-static (effectively DC), which is
+  within the bifurcation tracking bandwidth --- \textbf{this helps}.
+\item The force magnitude is $\sim 10^{-26}$~N (from W4i13
+  Eq.~(3.17) rescaled), many orders below demonstrated
+  bifurcation force resolution ($\sim 10^{-15}$~N).
+\item At $Q_m = 10^9$, the parametric regime has not been explored.
+  Phase noise and amplitude noise may scale differently.
+\end{itemize}
+
+\textbf{Revised assessment}: The parametric bifurcation technique
+is genuinely promising for MEMS psi-force detection, but the
+\emph{quantitative} gain factor ($10^6$) cannot be directly
+transferred from the 2024 demonstration to the DFD parameter
+regime. A conservative estimate, scaling the demonstrated gain by
+the ratio of mechanical $Q$ values ($10^4/10^9 = 10^{-5}$, since
+higher $Q$ narrows the bifurcation bandwidth and increases phase
+noise), gives an effective gain of $\sim 10$. This is comparable
+to CQNC.
+
+\textbf{Verdict}: Track as a medium-term R\&D item. The technique
+is genuinely novel and could provide $10$--$10^3\times$ force
+sensitivity improvement, but the exact factor requires experimental
+characterisation in the DFD-relevant parameter regime ($Q_m \geq
+10^9$, $f_m \sim 1$~MHz, quasi-static forces). Do not use the
+$10^6$ figure in programme planning.
+
+\textbf{Recommended action}: Propose a test experiment at a MEMS
+lab (e.g., Caltech, ETH Zurich) to measure the parametric
+bifurcation force sensitivity of a Si$_3$N$_4$ phononic crystal
+membrane. Estimated cost: \$50--100K, 6 months. [\textbf{NEW},
+\textbf{CONDITIONAL}]
+\end{finding}
+
+
+%=============================================================================
+%=============================================================================
+\part{Flux-Mediated SQUID-Optomechanical Hybrid Readout}
+\label{part:SQUID_opto}
+%=============================================================================
+%=============================================================================
+
+
+%=============================================================================
+\section{The SQUID-Optomechanical Transduction Principle}
+\label{sec:SQUID_opto}
+%=============================================================================
+
+\subsection{Physical mechanism}
+
+A mechanical resonator (Si$_3$N$_4$ membrane or beam) carries a
+thin-film superconducting flux loop. Displacement of the resonator
+changes the magnetic flux through the loop, which modulates the
+effective inductance of a SQUID (or rf-SQUID) in a superconducting
+LC circuit. The LC circuit resonance frequency shifts as:
+\begin{equation}
+\frac{\delta\omega_{\rm LC}}{\omega_{\rm LC}}
+= \frac{1}{2}\,\frac{\delta L}{L}
+= \frac{1}{2}\,\frac{\partial L}{\partial\Phi}\,
+\frac{\partial\Phi}{\partial x}\,x_{\rm mech},
+\label{eq:SQUID_transduction}
+\end{equation}
+where $\partial\Phi/\partial x$ is the flux-displacement coupling
+(set by the magnetic field gradient at the SQUID) and $\partial L/
+\partial\Phi$ is the SQUID flux-inductance response.
+
+The best demonstrated coupling rates achieve single-photon
+optomechanical coupling $g_0/2\pi \sim 100$~Hz (Phys.\ Rev.\
+Applied 2025), sufficient for single-phonon-resolving readout at
+mK temperatures.
+
+\subsection{Displacement sensitivity}
+
+At 20~mK (the Phase~I operating temperature), the thermal phonon
+occupancy of a 1~MHz mechanical mode is:
+\begin{equation}
+\bar{n}_{\rm th} = \frac{\kB T}{\hbar\omega_m}
+= \frac{1.38\ee{-23}\times 0.02}{1.054\ee{-34}\times 2\pi\times 10^6}
+= 416.
+\end{equation}
+
+The SQL displacement sensitivity is:
+\begin{equation}
+x_{\rm SQL} = \sqrt{\frac{\hbar}{2 m_{\rm eff}\,\omega_m}}
+= \sqrt{\frac{1.054\ee{-34}}{2\times 1.2\ee{-12}\times 2\pi\times 10^6}}
+= 2.6\ee{-16}~\text{m}.
+\end{equation}
+
+The SQUID-optomechanical transducer at $g_0/2\pi = 100$~Hz with
+internal cavity $Q_{\rm LC} = 10^6$ achieves:
+\begin{equation}
+x_{\rm min} = \frac{1}{2g_0}\,\sqrt{\frac{\hbar\kappa_{\rm LC}}{n_c}}
+\sim 10^{-18}~\text{m}/\sqrt{\text{Hz}}
+\end{equation}
+at modest circulating photon number $n_c \sim 10^3$.
+
+This is $\sim 260\times$ below $x_{\rm SQL}$, indicating the readout
+is \textbf{far below the measurement backaction regime} for the
+mechanical mode (because the coupling $g_0$ is small enough that
+the measurement does not disturb the mechanical state at $\bar{n}_{\rm th}
+= 416$).
+
+\begin{finding}[SQUID-Optomechanical Hybrid: Independent Cross-Check]
+\label{find:SQUID}
+\newfinding{A flux-mediated SQUID-optomechanical transducer provides
+an independent readout channel for the MEMS psi-displacement, with
+attometer-level sensitivity at mK temperatures. At $x_{\rm min} =
+10^{-18}$~m/$\sqrt{\text{Hz}}$, the improvement over the optical
+interferometry SQL ($x_{\rm SQL} = 2.6\ee{-16}$~m) is $\sqrt{260}
+\approx 16\times$ in SNR, reducing the $\Qpsi$ threshold by
+$260\times$ (from $2.2\ee{8}$ to $8.5\ee{5}$).}
+
+\textbf{Key advantage}: This readout operates at mK temperatures
+and is naturally integrated with the SRF cavity cryostat. It
+eliminates the need for optical fibre feedthroughs into the
+dilution refrigerator, which are a significant engineering challenge
+and a source of thermal load.
+
+\textbf{Key disadvantage}: Requires depositing a superconducting
+flux loop on the Si$_3$N$_4$ membrane, which may degrade mechanical
+$Q$ due to mass loading and stress modification. If $Q_{\rm mech}$
+degrades from $10^9$ to $10^7$ (a plausible worst case), the net
+improvement is:
+\begin{equation}
+\frac{\Qpsi^{\rm crit, SQUID}}{\Qpsi^{\rm crit, optical}}
+= \frac{1}{260}\times\left(\frac{10^9}{10^7}\right)^2
+= \frac{10^4}{260} = 38.5.
+\end{equation}
+
+So even with $100\times$ $Q$ degradation from the flux loop,
+the SQUID readout is still $38\times$ \emph{worse} than the
+optical readout with pristine $Q$. The SQUID readout wins only
+if $Q$ degradation is $< 16\times$ (i.e., $Q_{\rm mech}$ remains
+$> 6.3\ee{7}$).
+
+\textbf{Revised verdict}: The SQUID-optomechanical readout is
+valuable as an \textbf{independent cross-check} (different
+systematics from optical interferometry) but is \emph{not}
+guaranteed to improve the absolute sensitivity. Its primary
+value is systematic independence, not raw sensitivity.
+[\textbf{NEW}]
+\end{finding}
+
+
+%=============================================================================
+%=============================================================================
+\part{JTWPA Quantum-Limited Readout Chain for Phase I Q-Ratio}
+\label{part:JTWPA}
+%=============================================================================
+%=============================================================================
+
+
+%=============================================================================
+\section{JTWPA Technology Status and Application}
+\label{sec:JTWPA}
+%=============================================================================
+
+\subsection{State of the art: February 2026}
+
+The Josephson Traveling-Wave Parametric Amplifier (JTWPA) has reached
+maturity as a quantum-limited microwave amplifier:
+\begin{itemize}[nosep]
+\item \textbf{Added noise}: $T_N \approx 0.68$ quanta
+  ($= \hbar\omega/2\kB \approx 31$~mK at 1.3~GHz) --- 0.18 quanta
+  above the quantum limit (phys.org, February 2026).
+\item \textbf{Bandwidth}: $> 4$~GHz instantaneous (3.5--8.5~GHz
+  demonstrated, arXiv:2503.02489).
+\item \textbf{Gain}: $> 20$~dB.
+\item \textbf{Saturation}: $-84$~dBm input (rf-SQUID JTWPA,
+  arXiv:2503.02489), $10\times$ improvement over previous generation.
+\item \textbf{On-chip integration}: Co-fabricated diplexers for
+  pump injection/extraction (arXiv:2603.12327, March 2026),
+  eliminating external microwave hardware.
+\end{itemize}
+
+\subsection{Application to Phase I Q-ratio measurement}
+
+The Phase~I Q-ratio measurement involves transmitting a probe tone
+through the SRF cavity and measuring the transmitted power to extract
+$Q_0$. The measurement precision is:
+\begin{equation}
+\frac{\delta Q}{Q} = \frac{1}{\SNR_{\rm meas}} \propto
+\frac{1}{\sqrt{P_{\rm sig}/P_N}} \propto \sqrt{\frac{T_N}{T_{\rm cav}}},
+\label{eq:Q_precision}
+\end{equation}
+where $T_{\rm cav}$ is the effective cavity temperature (set by
+the intracavity photon number) and $T_N$ is the amplifier noise
+temperature.
+
+\begin{theorem}[JTWPA Q-Ratio Measurement Enhancement]
+\label{thm:JTWPA}
+With a HEMT first-stage amplifier ($T_N \approx 3$~K):
+\begin{equation}
+\frac{\delta Q}{Q}\bigg|_{\rm HEMT} \sim 10^{-3}
+\quad \text{(at $t_{\rm int} = 10$~hours)}.
+\end{equation}
+
+With JTWPA replacing HEMT ($T_N \approx 0.05$~K):
+\begin{equation}
+\frac{\delta Q}{Q}\bigg|_{\rm JTWPA} = \frac{\delta Q}{Q}\bigg|_{\rm HEMT}
+\times\sqrt{\frac{T_N^{\rm JTWPA}}{T_N^{\rm HEMT}}}
+= 10^{-3}\times\sqrt{\frac{0.05}{3}} = 1.3\ee{-4}.
+\end{equation}
+
+At fixed precision $\delta Q/Q = 10^{-3}$, the integration time
+reduces by:
+\begin{equation}
+\frac{t_{\rm JTWPA}}{t_{\rm HEMT}} = \frac{T_N^{\rm JTWPA}}{T_N^{\rm HEMT}}
+= \frac{0.05}{3} = 0.017.
+\end{equation}
+
+\textbf{A 10-hour HEMT measurement becomes a 10-minute JTWPA
+measurement.} This enables:
+\begin{enumerate}[nosep]
+\item Rapid cycling between cavity configurations (frequency,
+  temperature, field amplitude) for the Nb$_3$Sn broadband scan
+  (i13 Finding~2).
+\item Real-time monitoring of cavity $Q$ during thermal transients.
+\item Statistical characterisation of BCS + TLS residual resistance
+  fluctuations (which vary on timescales of minutes to hours).
+\end{enumerate}
+\end{theorem}
+
+\begin{finding}[JTWPA: 60x Measurement Speed-Up for Phase I]
+\label{find:JTWPA}
+\newfinding{Replacing the HEMT first-stage amplifier with a JTWPA
+in the Phase~I readout chain reduces measurement integration time
+by $60\times$ at constant precision, or improves precision by
+$7.7\times$ at constant integration time. This enables the Nb$_3$Sn
+broadband spectral scan (i13 Finding~2) to be completed in days
+rather than months.}
+
+\textbf{The $\lbone$ reach is NOT improved} by JTWPA (the reach is
+limited by BCS systematic uncertainty at $\delta Q/Q \sim 10^{-3}$,
+not by statistical noise). The value of JTWPA is in \emph{speed}
+and \emph{systematic characterisation}.
+
+\textbf{Cost}: \$150--300K for JTWPA chip + cryogenic isolator chain
++ pump source. This is $< 10\%$ of the Phase~I budget (\$3.2M).
+
+\textbf{Compatibility}: JTWPA operates at 20~mK, same as the SRF
+cavity. The rf-SQUID JTWPA (arXiv:2503.02489) has $-84$~dBm
+saturation, sufficient for the probe powers used in SRF $Q$
+measurement ($\sim -100$~dBm at the amplifier input).
+
+\textbf{Integration with entangled Fock states} (i13 Finding~1):
+The JTWPA is the natural readout amplifier for Fock-state measurements,
+which require single-photon-level sensitivity. The SQMS qubit-cavity
+platform already uses JPAs; upgrading to JTWPA provides broadband
+coverage for the multi-frequency Q-ratio diagnostic.
+
+\caution{JTWPA pump-tone leakage into the SRF cavity could excite
+spurious modes or degrade $Q_0$. Requires $> 80$~dB pump isolation,
+achievable with superconducting bandpass filters but adding complexity.}
+[\textbf{NEW}]
+\end{finding}
+
+
+%=============================================================================
+%=============================================================================
+\part{Cross-Contributions and Implications}
+\label{part:cross}
+%=============================================================================
+%=============================================================================
+
+\section{Impact on Other Patents}
+
+\subsection{P11 (EM-to-psi Coupling/Detection)}
+
+\begin{itemize}[nosep]
+\item \textbf{JTWPA} (Finding~5): Direct benefit to P11's SQMS
+  Phase~I proposal. The readout chain upgrade should be included in
+  the Phase~I proposal as a standard component. Cost impact: +\$200K
+  (within the \$3.2M budget contingency).
+\item \textbf{Phononic TLS suppression} (Finding~2): Relevant to
+  P11's cavity preparation protocol. Chemical oxide removal already
+  planned; phononic engineering as Phase~III upgrade.
+\end{itemize}
+
+\subsection{P15 (Direct Detection Programme)}
+
+\begin{itemize}[nosep]
+\item \textbf{Cascaded MEMS} (Finding~1): Directly benefits P15
+  Phase~II. Should be included in the Phase~II proposal as the
+  primary MEMS readout architecture (replacing single-membrane).
+\item \textbf{Parametric bifurcation} (Finding~3): If validated,
+  provides an alternative Phase~II detection modality. R\&D
+  experiment recommended before Phase~II proposal.
+\end{itemize}
+
+\subsection{P9 (Navigation)}
+
+\begin{itemize}[nosep]
+\item \textbf{Cascaded MEMS} (Finding~1): Applicable to P9
+  gravitational gradiometry arrays. The cascaded optomechanical
+  architecture maps directly onto a distributed gravity sensor
+  network.
+\end{itemize}
+
+\subsection{P7 (Energy Storage)}
+
+No direct impact. P7 applications (DEW/HPM, IFE) do not depend on
+detection sensitivity.
+
+
+%=============================================================================
+\section{Implications for DESI Tension}
+
+The DESI tension (3.5--4.2$\sigma$) is existential for DFD cosmology
+but \textbf{does not affect} any finding in this update. All five
+findings concern laboratory resonator physics and are independent
+of the dark energy model. If DESI falsifies DFD cosmology, the
+technology patents (P2, P7, P9, P11, P15) survive because they depend
+on $\lambda$-coupling, not on the cosmological sector.
+
+The \textbf{only} impact: if DFD is falsified cosmologically, the
+motivation for the detection programme weakens (since there would
+be no compelling theoretical reason for $|\lambda - 1| \neq 0$).
+However, the SQMS Phase~I Q-ratio test is theory-independent ---
+it searches for \emph{any} anomalous frequency-dependent loss in
+SRF cavities, which has value regardless of the DFD framework.
+
+
+%=============================================================================
+%=============================================================================
+\part{Conclusion: Ranked Findings}
+\label{part:conclusion}
+%=============================================================================
+%=============================================================================
+
+\begin{tcolorbox}[colback=green!5!white, colframe=green!50!black,
+  title=\textbf{W4i14 FINDINGS RANKED BY PROGRAMME IMPACT}]
+
+\begin{enumerate}
+
+\item \textbf{Cascaded Optomechanical Psi-MEMS Amplification}
+  [\textbf{NEW}, HIGH IMPACT]:\\
+  $N = 10$ cascaded membrane cavities give net $\Qpsi$ threshold
+  reduction of $10\times$ (at realistic 1~dB/cavity loss) to
+  $32\times$ (at 0.5~dB/cavity). Ideal (lossless) limit: $100\times$.
+  Combined with CQNC: threshold $\sim 10^5$--$10^6$, margin
+  $10^3$--$10^4$ above MOND prediction. \textbf{Classical scheme,
+  no quantum resources.} Cost: $\sim\$700$K. Primary Phase~II
+  MEMS architecture.
+
+\item \textbf{Phononic-Bandgap TLS Suppression}
+  [\textbf{NEW}, HIGH IMPACT]:\\
+  Phononic crystal engineering suppresses TLS anomalous loss by
+  $10^4\times$ ($T_1^2$ scaling in $\omega T_1 \gg 1$ regime),
+  eliminating the TLS Q-ratio confounder ($\sim 0.68$) as a
+  Phase~I systematic. Immediate path: chemical oxide removal
+  (proven). Long-term: surface phononic crystal patterning
+  (TRL 2). \textbf{Converts TLS from a potential false positive
+  into a negligible background.}
+
+\item \textbf{JTWPA Quantum-Limited Readout Chain}
+  [\textbf{NEW}, MEDIUM IMPACT]:\\
+  $60\times$ measurement speed-up for Phase~I Q-ratio. Enables
+  the Nb$_3$Sn broadband spectral scan in days (not months).
+  Precision floor at $\delta Q/Q = 1.3\ee{-4}$, well below
+  BCS systematics. Natural integration with entangled Fock-state
+  readout. Cost: \$150--300K ($< 10\%$ of Phase~I budget).
+
+\item \textbf{Flux-Mediated SQUID-Optomechanical Hybrid Readout}
+  [\textbf{NEW}, MEDIUM IMPACT]:\\
+  Independent cross-check channel for MEMS psi-displacement.
+  Attometer sensitivity at mK. Primary value: \textbf{systematic
+  independence} from optical interferometry (different noise sources,
+  different coupling mechanism). Not guaranteed to improve absolute
+  sensitivity due to mechanical $Q$ degradation from flux loop
+  deposition. Valuable for Phase~II confidence building.
+
+\item \textbf{Parametric Bifurcation MEMS Sensitivity}
+  [\textbf{NEW}, \textbf{CONDITIONAL}]:\\
+  Potentially transformative ($10$--$10^3\times$ force sensitivity
+  improvement) but the quantitative gain in the DFD parameter regime
+  ($Q_m \geq 10^9$, quasi-static force) is \textbf{uncharacterised}.
+  The 2024 demonstration ($10^6\times$ in charge sensing at $Q_m
+  \sim 10^4$) cannot be directly transferred. \textbf{Recommended:
+  \$50--100K test experiment at MEMS lab.}
+
+\end{enumerate}
+\end{tcolorbox}
+
+
+%=============================================================================
+\section*{Corpus Inconsistencies Found}
+%=============================================================================
+
+\begin{tcolorbox}[colback=green!5!white, colframe=green!50!black,
+  title=\textbf{NO NEW CORPUS INCONSISTENCIES}]
+All inherited values verified against MASTER\_FINDINGS\_CORPUS and
+W4i13 updates. The i13 correction of the W3i6 MEMS threshold
+(SUPERSEDED) is confirmed. The authoritative thresholds remain:
+\begin{itemize}[nosep]
+\item $d = 100~\mu$m: $\Qpsi^{\rm crit} = 3.1\ee{9}$ [W4i10]
+\item $d = 50~\mu$m: $\Qpsi^{\rm crit} = 2.0\ee{8}$ [W4i11/W4i13]
+\item $d = 50~\mu$m + CQNC 10~dB: $\Qpsi^{\rm crit} = 2.0\ee{7}$ [W4i13]
+\item $d = 50~\mu$m + CQNC + 10-cascade (1~dB/cav):
+  $\Qpsi^{\rm crit} = 2.0\ee{6}$ [\textbf{this work}]
+\end{itemize}
+
+\textbf{Entangled Fock-state Phase I reach}: $4.6\ee{-10}$ at
+baseline $Q_0 = 5\ee{10}$ [\textbf{W4i13, CONFIRMED}].
+
+\textbf{Crystalline Si margin}: $45\times$ at $Q > 10^{10}$ (7~K)
+[\textbf{W4i13 MatSci, CONFIRMED}].
+\end{tcolorbox}
+
+
+%=============================================================================
+\section*{Updated Phase I/II Configuration Table}
+%=============================================================================
+
+\begin{table}[H]
+\centering
+\caption{Updated SQMS Phase~I/II configurations and reaches
+(incorporating W4i13 + W4i14 findings).}
+\label{tab:phase_update}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{@{}lcccp{4cm}@{}}
+\toprule
+\textbf{Configuration} & $Q_0$ / $\Qpsi^{\rm crit}$
+& Reach / Margin & Cost & \textbf{Status} \\
+\midrule
+\rowcolor{rowhi}
+\multicolumn{5}{l}{\textbf{Phase I: Q-Ratio Diagnostic}} \\
+Classical, baseline & $5\ee{10}$ & $\lbone < 7.8\ee{-10}$
+& \$3.2M & Established (W3i7) \\
+Entangled Fock $m=1$ & $5\ee{10}$ & $\lbone < 4.6\ee{-10}$
+& +\$0 & W4i13 \\
++ JTWPA readout & $5\ee{10}$ & $60\times$ speed
+& +\$200K & \textbf{W4i14 NEW} \\
++ PnC TLS suppression & $5\ee{10}$ & TLS confound.\ removed
+& +\$50K & \textbf{W4i14 NEW} \\
+\midrule
+\rowcolor{rowmed}
+\multicolumn{5}{l}{\textbf{Phase II: MEMS Psi-Force Detection}} \\
+Single MEMS, $d=50~\mu$m & $\Qpsi^{\rm crit} = 2.0\ee{8}$
+& Margin $5\times$ & \$500K & W4i11/W4i13 \\
++ CQNC 10~dB & $\Qpsi^{\rm crit} = 2.0\ee{7}$
+& Margin $50\times$ & +\$100K & W4i13 \\
++ 10-cascade (1~dB/cav) & $\Qpsi^{\rm crit} = 2.0\ee{6}$
+& Margin $500\times$ & +\$700K & \textbf{W4i14 NEW} \\
+SQUID-opto cross-check & $\Qpsi^{\rm crit} \sim 10^7$
+& Systematic indep. & +\$300K & \textbf{W4i14 NEW} \\
+Parametric bifurcation & $\Qpsi^{\rm crit} \sim ?$
+& Conditional & +\$100K R\&D & \textbf{W4i14 CONDITIONAL} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\end{document}

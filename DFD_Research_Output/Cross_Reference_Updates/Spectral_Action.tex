@@ -1,0 +1,916 @@
+%=============================================================================
+% SPECTRAL ACTION COMPUTATION IN DFD: THE COMPLETE CHAIN TO kappa_{U(1)} = 7.26999
+% Cross-reference document extracting the full spectral action derivation
+% from the DFD Unified Theory (v108) and Ab Initio paper
+% Compiled 2026-03-22
+%=============================================================================
+\documentclass[12pt,a4paper]{article}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+\usepackage{hyperref}
+\usepackage{tcolorbox}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+
+\title{The Spectral Action Computation in DFD:\\[6pt]
+\large How $\kappa_{U(1)} = 7.26999\ldots$ Produces
+$\alpha^{-1} = 137.03599985$}
+\author{Cross-reference extracted from G.\ Alcock,\\
+\textit{Density Field Dynamics: A Complete Unified Theory} (v108)\\
+and \textit{Ab Initio Derivation of the Fine Structure Constant} (v12)}
+\date{March 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This document collates the complete spectral action computation chain
+in Density Field Dynamics (DFD) that produces the U(1) stiffness
+coefficient $\kappa_{U(1)} = 7.26999\ldots$ and thence the fine-structure
+constant $\alpha^{-1} = 137.03599985$ (residual $-0.006$~ppm from experiment).
+The derivation has two layers: (1)~an exact electroweak mixing formula
+$\alpha^{-1} = 6\pi\,\kappa_{U(1)}$, and (2)~a spectral action / heat-kernel
+computation of $\kappa_{U(1)}$ from the $a_4$ Seeley--DeWitt coefficient on
+the Toeplitz-truncated internal space $\mathbb{C}P^2 \times S^3$ at
+truncation level $d = 64$.
+All source locations in the DFD codebase are cited.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+%=============================================================================
+\section{Overview: The Two-Layer Structure}
+\label{sec:overview}
+%=============================================================================
+
+The DFD derivation of the fine-structure constant proceeds in two
+independent layers:
+
+\begin{tcolorbox}[colback=blue!5!white, colframe=blue!50!black,
+  title=Two-Layer Architecture]
+\textbf{Layer 1 (Exact):} Electroweak mixing gives
+\[
+\alpha^{-1} = 6\pi\,\kappa_{U(1)}\,.
+\]
+This is derived from $1/e^2 = 1/g_1^2 + 1/g_2^2$ with the DFD
+stiffness ratio $\kappa_{U(1)}/\kappa_{SU(2)} = 1/2$ (Frame Stiffness
+Theorem).
+
+\medskip
+\textbf{Layer 2 (Numerical):} The spectral action on
+$\mathbb{C}P^2 \times S^3$ with Toeplitz truncation at $d = 64$
+predicts
+\[
+\kappa_{U(1)} = 7.26999\ldots
+\]
+from the $a_4$ Seeley--DeWitt coefficient, using eight locked
+geometric/SM inputs (Table~XXVIII of the Unified Theory).
+\end{tcolorbox}
+
+\noindent
+The two layers combine to give:
+\begin{equation}
+\boxed{\alpha^{-1} = 6\pi \times 7.26999\ldots = 137.03599985}
+\end{equation}
+with residual $-0.006$~ppm from the experimental value
+$\alpha^{-1}_{\mathrm{exp}} = 137.035999084(21)$.
+
+\paragraph{Source files.}
+\begin{itemize}
+\item Layer 1: \texttt{section\_alpha\_locked.tex} (Sec.~8C),
+  \texttt{appendix\_F.tex} (gauge emergence),
+  \texttt{appendix\_G.tex} ($\alpha$-relation derivations)
+\item Layer 2: \texttt{section\_alpha\_locked.tex} (Sec.~8C),
+  \texttt{appendix\_K.tex} (microsector physics),
+  \texttt{Alpha\_Inverse\_Formula.tex} (explicit chain)
+\item Lattice verification: \texttt{appendix\_K.tex} (Sec.~K.2)
+\end{itemize}
+
+%=============================================================================
+\section{Layer 1: The Exact Electroweak Formula $\alpha^{-1} = 6\pi\,\kappa_{U(1)}$}
+\label{sec:layer1}
+%=============================================================================
+
+%---------------------------------------------------------------------
+\subsection{Gauge Emergence and Frame Stiffness}
+%---------------------------------------------------------------------
+
+In DFD, gauge fields emerge as Berry connections on the internal
+manifold $\mathcal{M}_7 = \mathbb{C}P^2 \times S^3$. The gauge group
+$SU(3) \times SU(2) \times U(1)$ arises from the unique minimal
+block partition $(3,2,1)$ of $\mathbb{C}^6$ (Proposition~F.1 in
+\texttt{appendix\_F.tex}).
+
+The gauge-kinetic Lagrangian for sector $r$ is:
+\begin{equation}
+\mathcal{L}^{(r)}_{\mathrm{stiff}}
+  = -\frac{\kappa_r}{2}\,\mathrm{Tr}\,F^{(r)}_{ij} F^{(r)\,ij}\,,
+\end{equation}
+where $\kappa_r$ is the frame stiffness coefficient.
+
+\begin{theorem}[Frame Stiffness from Ricci Curvature; Thm.~F.6]
+\label{thm:frame-stiffness}
+The frame stiffness satisfies $\kappa_r = n_r \cdot \kappa_0$,
+where $n_r$ is the block dimension in the $(3,2,1)$ partition.
+\end{theorem}
+
+\noindent
+This gives the stiffness ratio:
+\begin{equation}
+\frac{\kappa_{U(1)}}{\kappa_{SU(2)}} = \frac{n_1}{n_2} = \frac{1}{2}\,.
+\end{equation}
+
+%---------------------------------------------------------------------
+\subsection{Wilson Normalization and Electroweak Mixing}
+%---------------------------------------------------------------------
+
+The gauge couplings are extracted via Wilson normalization:
+\begin{equation}
+g_1^2 = \frac{1}{\kappa_{U(1)}}\,,\qquad
+g_2^2 = \frac{4}{\kappa_{SU(2)}}\,.
+\end{equation}
+
+The electromagnetic coupling satisfies:
+\begin{equation}
+\frac{1}{e^2} = \frac{1}{g_1^2} + \frac{1}{g_2^2}
+= \kappa_{U(1)} + \frac{\kappa_{SU(2)}}{4}\,.
+\end{equation}
+
+Substituting $\kappa_{SU(2)} = 2\kappa_{U(1)}$:
+\begin{equation}
+\frac{1}{e^2} = \kappa_{U(1)} + \frac{2\kappa_{U(1)}}{4}
+= \frac{3}{2}\,\kappa_{U(1)}\,.
+\end{equation}
+
+Since $\alpha = e^2/(4\pi)$:
+\begin{equation}
+\boxed{\alpha^{-1} = \frac{4\pi}{e^2}
+= 4\pi \cdot \frac{3}{2}\,\kappa_{U(1)}
+= 6\pi\,\kappa_{U(1)}\,.}
+\end{equation}
+
+This is exact within the DFD gauge emergence framework.
+The required value is:
+\begin{equation}
+\kappa_{U(1)} = \frac{\alpha^{-1}_{\mathrm{exp}}}{6\pi}
+= \frac{137.035999084}{6\pi} = 7.269986\ldots
+\end{equation}
+
+%---------------------------------------------------------------------
+\subsection{Connection to the Weinberg Angle}
+%---------------------------------------------------------------------
+
+The stiffness ratio also determines the Weinberg angle. From the
+partition weights $(3,2,1)$ with canonical hypercharge normalization
+$\mathrm{Tr}(Y^2) = 10/3$ per generation:
+\begin{equation}
+\sin^2\theta_W = \frac{g'^2}{g'^2 + g^2}
+= \frac{3}{13} = 0.2308\,,
+\end{equation}
+matching the measured value $0.23122 \pm 0.00004$ to within $0.2\%$
+(the offset is consistent with radiative corrections from tree level
+to $\overline{\mathrm{MS}}$).
+
+Source: \texttt{supplementary/PRL\_SM\_from\_Topology.tex}, Sec.~2.
+
+%=============================================================================
+\section{Layer 2: The Spectral Action on $\mathbb{C}P^2 \times S^3$}
+\label{sec:layer2}
+%=============================================================================
+
+%---------------------------------------------------------------------
+\subsection{The Spectral Action Principle}
+%---------------------------------------------------------------------
+
+The DFD spectral action follows the Chamseddine--Connes framework:
+\begin{equation}
+S = \mathrm{Tr}\,f(P/\Lambda^2)\,,
+\end{equation}
+where $P$ is a Laplace-type operator on the internal space and $f$
+is a cutoff function. The asymptotic expansion gives:
+\begin{equation}
+S \sim \sum_{n \ge 0} f_n \cdot a_n(P/\Lambda^2)\,,
+\end{equation}
+where $f_n$ are the moments of $f$ and $a_n$ are the Seeley--DeWitt
+heat-kernel coefficients.
+
+The gauge-kinetic terms arise from the $a_4$ coefficient, which
+contains $F_{\mu\nu}^2$ terms. The coefficient of the $U(1)$ field
+strength $B_{\mu\nu}^2$ determines $\kappa_{U(1)}$.
+
+Source: \texttt{section\_alpha\_locked.tex}, Sec.~8C.2--8C.3.
+
+%---------------------------------------------------------------------
+\subsection{The Eight Locked Components (Table~XXVIII)}
+%---------------------------------------------------------------------
+
+The spectral action computation uses exactly eight inputs, all fixed
+by geometry or Standard Model content:
+
+\begin{table}[h]
+\centering
+\caption{Complete derivation chain for $\alpha^{-1}$
+(Table~XXVIII of the Unified Theory, Sec.~8C).}
+\label{tab:chain}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{llll}
+\toprule
+\textbf{Component} & \textbf{Value} & \textbf{Source} & \textbf{Status} \\
+\midrule
+$K_{\mathbb{C}P^2} = \mathcal{O}(-3)$ & $-3$
+  & Algebraic geometry & Rigorous \\
+$L_{\det} = K^{-1}$ & $\mathcal{O}(3)$
+  & Spin$^c$ structure & Rigorous \\
+$d = k_{\max} + 4$ & $64$
+  & $\dim H^0(\mathcal{O}(k_{\max}+3))$ & Rigorous \\
+$(d-1)/d$ & $63/64$
+  & Traceless projection & Derived \\
+$N_{\mathrm{species}}$ & $7$
+  & SM SU(2) doublet components & SM content \\
+$\mathrm{Tr}(Y^2)$ & $10$
+  & SM hypercharge sum & SM content \\
+$g_F$ & $8$
+  & Spectral triple ($J \times \gamma \times \mathbb{C}$) & Derived \\
+$w = N_{\mathrm{species}}/(g_F \cdot \mathrm{Tr}(Y^2))$ & $7/80$
+  & Hypercharge weighting & Derived \\
+$\varepsilon_{\mathrm{adj}} = d^2/(d^2-1)$ & $4096/4095$
+  & Regular-module BOOST & Forced \\
+$\beta_{U(1)}$ & $3.7969$
+  & CS weighted average at $k_{\max}=60$ & Computed \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%---------------------------------------------------------------------
+\subsection{Component 1: The Internal Space Geometry}
+%---------------------------------------------------------------------
+
+The internal manifold is $X = \mathbb{C}P^2 \times S^3$, a
+7-dimensional compact space. Key geometric data:
+
+\begin{itemize}
+\item $\mathbb{C}P^2$ is a compact K\"ahler 4-manifold with
+  $H^2(\mathbb{C}P^2;\mathbb{Z}) = \mathbb{Z}$
+\item Canonical bundle: $K_{\mathbb{C}P^2} = \mathcal{O}(-3)$
+  (the anti-canonical class is $3H$)
+\item Spin$^c$ structure: $L_{\det} = K^{-1} = \mathcal{O}(3)$
+  with $c_1(L_{\det}) = 3H$
+\item $S^3$ supports SU(2) Chern--Simons theory; winding number
+  in $\pi_3(S^3) = \mathbb{Z}$ gives baryon number
+\end{itemize}
+
+%---------------------------------------------------------------------
+\subsection{Component 2: The Operator Choice (Locked)}
+%---------------------------------------------------------------------
+
+The operator is the \emph{connection Laplacian}:
+\begin{equation}
+P = -g^{ij}\nabla_i\nabla_j\,,
+\end{equation}
+acting on the internal bundle that carries the emergent gauge degrees
+of freedom. The U(1) factor is implemented via twisting by a line
+bundle over $\mathbb{C}P^2$ with curvature proportional to the
+K\"ahler form $\omega$.
+
+\paragraph{Why this is locked.}
+The K\"ahler form is parallel ($\nabla\omega = 0$), so derivative
+terms in higher Seeley--DeWitt coefficients vanish automatically.
+The gauge-kinetic extraction from $a_4$ is unambiguous with this
+operator choice.
+
+Source: \texttt{section\_alpha\_locked.tex}, Sec.~8C.2.
+
+%---------------------------------------------------------------------
+\subsection{Component 3: The Plateau Cutoff (Locked)}
+%---------------------------------------------------------------------
+
+The cutoff function $f$ satisfies the \emph{plateau condition}:
+$f^{(n)}(0) = 0$ for all $n \ge 1$, so all negative moments vanish:
+\begin{equation}
+f_{-2} = f_{-4} = \cdots = 0\,.
+\end{equation}
+
+\paragraph{Why this is locked.}
+This eliminates $a_6$ and higher heat-kernel terms as hidden
+ppm-level tuning knobs. With generic smooth cutoffs (e.g.\ Gaussian),
+the $a_6$ contribution would be $\sim 2\%$---far too large and requiring
+fine-tuned cancellation. The plateau cutoff is the unique choice that:
+\begin{enumerate}
+\item Preserves the leading $a_4$ gauge kinetic term
+\item Eliminates subleading heat-kernel contributions
+\item Requires no moment-tuning
+\end{enumerate}
+
+Source: \texttt{section\_alpha\_locked.tex}, Sec.~8C.3.
+
+%---------------------------------------------------------------------
+\subsection{Component 4: Toeplitz Truncation and the $(k+3)/(k+4)$ Factor}
+%---------------------------------------------------------------------
+
+The finite-$k$ truncation is implemented via Toeplitz quantization at
+level $m = k + 3$ on $\mathbb{C}P^1 \subset \mathbb{C}P^2$:
+\begin{equation}
+d = \dim H^0(\mathbb{C}P^1, \mathcal{O}(m)) = m + 1 = k + 4\,.
+\end{equation}
+
+\paragraph{Origin of the $+3$ shift.}
+The shift $m = k + 3$ arises from the Spin$^c$ structure:
+\begin{equation}
+K_{\mathbb{C}P^2} = \mathcal{O}(-3) \quad \Rightarrow \quad
+L_{\det} = K^{-1} = \mathcal{O}(3)\,.
+\end{equation}
+When restricting to $\mathbb{C}P^1 \subset \mathbb{C}P^2$, the
+line bundle $\mathcal{O}(k) \otimes L_{\det}$ becomes
+$\mathcal{O}(k+3)$, giving sections of dimension $k + 4$.
+
+\paragraph{The spectral cutoff.}
+The determinant-channel removal at finite $d$ fixes:
+\begin{equation}
+\Lambda^3 = k \cdot \frac{d-1}{d} = k \cdot \frac{k+3}{k+4}\,.
+\end{equation}
+
+At $k_{\max} = 60$, $d = 64$:
+\begin{equation}
+\Lambda^3 = 60 \times \frac{63}{64} = 59.0625\,.
+\end{equation}
+
+The baseline normalization $\Lambda^3 = 885.9375$ (from $k = 60$,
+$a = 9$, $n = 5$, $N_{\mathrm{gen}} = 3$) sets the overall scale.
+
+Source: \texttt{section\_alpha\_locked.tex}, Sec.~8C.4.
+
+%---------------------------------------------------------------------
+\subsection{Component 5: The SM Content Inputs}
+%---------------------------------------------------------------------
+
+The spectral action $a_4$ trace over the internal fermion Hilbert
+space requires three Standard Model inputs:
+
+\begin{enumerate}
+\item $N_{\mathrm{species}} = 7$: the number of SU(2) doublet
+  components in one SM generation (counting $Q_L$ as 6 color-doublet
+  components plus $L_L$ as 1 lepton doublet component = 7)
+
+\item $\mathrm{Tr}(Y^2) = 10$: the hypercharge-squared trace over
+  one SM generation:
+  \[
+  \mathrm{Tr}(Y^2) = \sum_R d_3 d_2 Y^2
+  = 3 \cdot 2 \cdot (1/6)^2 + 3 \cdot 1 \cdot (2/3)^2
+  + 3 \cdot 1 \cdot (1/3)^2 + 1 \cdot 2 \cdot (1/2)^2
+  + 1 \cdot 1 \cdot 1^2 = 10/3 \times 3 = 10
+  \]
+  (using the one-generation sum with multiplicity $N_{\mathrm{gen}} = 3$
+  included, or $10/3$ per generation)
+
+\item $g_F = 8$: the spectral triple grading factor from real
+  structure $J$, chirality $\gamma$, and complex structure
+  $\mathbb{C}$ on the finite Hilbert space
+\end{enumerate}
+
+These combine into the hypercharge weighting:
+\begin{equation}
+w = \frac{N_{\mathrm{species}}}{g_F \cdot \mathrm{Tr}(Y^2)}
+= \frac{7}{8 \times 10} = \frac{7}{80}\,.
+\end{equation}
+
+%---------------------------------------------------------------------
+\subsection{Component 6: The Microsector Trace (BOOST Factor)}
+\label{sec:boost}
+%---------------------------------------------------------------------
+
+This is the most consequential component. It involves a forced binary
+fork between two possible trace normalizations.
+
+\paragraph{Branch A: Regular-Module Microsector (survives).}
+The finite Hilbert space is the algebra itself:
+\begin{equation}
+\mathcal{H}_F := A = M_d(\mathbb{C})\,,
+\end{equation}
+with democratic UV trace $\mathrm{tr}_{\mathrm{dem}} = (1/d^2)\,\mathrm{Tr}$.
+The conversion to physics (per-generator) normalization is forced:
+\begin{equation}
+\varepsilon_{\mathrm{adj}}^{(A)} = \frac{d^2}{d^2 - 1}
+= \frac{4096}{4095} = 1.000244\ldots
+\end{equation}
+
+\paragraph{Branch B: Fermion-Representation Microsector (falsified).}
+If instead $\mathcal{H}_F \cong \mathbb{C}^d$:
+\begin{equation}
+\varepsilon_{\mathrm{adj}}^{(B)} = \frac{d^2 - 1}{d^2}
+= \frac{4095}{4096} = 0.999756\ldots
+\end{equation}
+
+\paragraph{The fork resolves as follows:}
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{lccc}
+\toprule
+Branch & Factor & $\alpha^{-1}$ & Residual (ppm) \\
+\midrule
+\textbf{A (regular-module)} & $4096/4095$ & $137.03599985$ & $-0.006$ \\
+B (fermion-rep) & $4095/4096$ & $137.03014445$ & $+42.7$ \\
+\midrule
+Experimental & --- & $137.035999084$ & --- \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Branch B misses by 43~ppm and cannot be rescued by adjusting any other
+component. Under the no-hidden-knobs policy, only Branch A survives.
+
+Source: \texttt{section\_alpha\_locked.tex}, Sec.~8C.5--8C.6.
+
+%---------------------------------------------------------------------
+\subsection{Component 7: The Chern--Simons Level Sum ($\beta_{U(1)}$)}
+%---------------------------------------------------------------------
+
+The Chern--Simons theory on $S^3$ provides the bare U(1) coupling via
+a weighted sum over levels:
+\begin{equation}
+\beta_{U(1)} = \langle k + 2 \rangle
+= \frac{\sum_{k=0}^{k_{\max}-1}(k+2)\,w(k)}
+       {\sum_{k=0}^{k_{\max}-1} w(k)}\,,
+\end{equation}
+where the SU(2) Chern--Simons weights are:
+\begin{equation}
+w(k) = \frac{2}{k+2}\sin^2\frac{\pi}{k+2}\,.
+\end{equation}
+
+The quantum level shift $k \to k + h^\vee$ with $h^\vee(\mathrm{SU}(2)) = 2$
+produces the $(k+2)$ factor (standard WZW/CS result).
+
+\paragraph{Numerical evaluation at $k_{\max} = 60$:}
+\begin{equation}
+\beta_{U(1)}\big|_{k_{\max}=60}
+= \frac{\sum_{k=0}^{59}(k+2)\,w(k)}{\sum_{k=0}^{59}w(k)}
+= \frac{8.3245}{2.1924} = 3.796945\ldots \approx 3.80\,.
+\end{equation}
+
+The Wilson ratio $\beta_{SU(2)}/\beta_{U(1)} = (n_2/n_1) \times
+N_{\mathrm{gen}} = 2 \times 3 = 6$ then gives
+$\beta_{SU(2)} = 22.80$.
+
+Source: \texttt{appendix\_K.tex}, Sec.~K.1.
+
+%---------------------------------------------------------------------
+\subsection{Component 8: Determination of $k_{\max} = 60$}
+%---------------------------------------------------------------------
+
+The UV cutoff $k_{\max}$ is determined by the closed Spin$^c$ index
+on $\mathbb{C}P^2$:
+\begin{equation}
+k_{\max} = \chi(\mathbb{C}P^2, E)\,,
+\end{equation}
+where the twist bundle is:
+\begin{equation}
+E = \mathcal{O}(9) \oplus \mathcal{O}^{\oplus 5}\,.
+\end{equation}
+
+The two integers have physical origins:
+\begin{itemize}
+\item $a = 9$: the minimal globally well-defined hypercharge twist.
+  With $q_1 = 3$ (uniquely minimal U(1) flux quantum from Spin$^c$
+  integrality, Lemma~F.3), the triple tensor power gives
+  $L_Y^{\otimes 3} = \mathcal{O}(3)^{\otimes 3} = \mathcal{O}(9)$.
+
+\item $n = 5$: the five hypercharged chiral multiplet types per
+  generation: $\{Q, u^c, d^c, L, e^c\}$.
+\end{itemize}
+
+The holomorphic Euler characteristic:
+\begin{equation}
+\chi(\mathcal{O}(9)) = \binom{11}{2} = 55\,,\qquad
+\chi(\mathcal{O}) = 1\,,
+\end{equation}
+gives:
+\begin{equation}
+\boxed{k_{\max} = 55 + 5 = 60\,.}
+\end{equation}
+
+The derivation chain is:
+\begin{equation}
+\text{SM hypercharges} \to q_1 = 3 \to a = 9
+\to k_{\max} = 60 \to \alpha^{-1} = 137.036\,.
+\end{equation}
+Crucially, $\alpha$ appears only at the \emph{end} as output, not input.
+
+Source: \texttt{appendix\_F.tex}, Lemmas~F.3--F.4;
+\texttt{appendix\_K.tex}, Sec.~K.1.
+
+%=============================================================================
+\section{The Explicit Computation of $\kappa_{U(1)}$}
+\label{sec:computation}
+%=============================================================================
+
+%---------------------------------------------------------------------
+\subsection{The $a_4$ Seeley--DeWitt Coefficient}
+%---------------------------------------------------------------------
+
+The gauge-kinetic action emerges from the $a_4$ heat-kernel coefficient
+of the connection Laplacian $P = -g^{ij}\nabla_i\nabla_j$ on the
+Toeplitz-truncated $\mathbb{C}P^2 \times S^3$.
+
+With the plateau cutoff (eliminating $a_6$ and higher), only $a_4$
+contributes to the gauge kinetic term:
+\begin{equation}
+S_{\mathrm{gauge}} = f_0 \cdot a_4(P/\Lambda^2)
+\supset -\frac{\kappa_{U(1)}}{2}\,B_{\mu\nu}B^{\mu\nu}
+  - \frac{\kappa_{SU(2)}}{2}\,W_{\mu\nu}^a W^{a\,\mu\nu}
+  - \frac{\kappa_{SU(3)}}{2}\,G_{\mu\nu}^A G^{A\,\mu\nu}\,.
+\end{equation}
+
+The stiffness coefficients $\kappa_r$ absorb all the geometric
+and SM trace factors from the internal space integration.
+
+%---------------------------------------------------------------------
+\subsection{Assembling $\kappa_{U(1)}$ from the Eight Components}
+%---------------------------------------------------------------------
+
+The computation of $\kappa_{U(1)}$ from the spectral action involves:
+
+\begin{enumerate}
+\item \textbf{Bare coupling from Chern--Simons:}
+  $\beta_{U(1)} = 3.7969$ (from the level sum at $k_{\max} = 60$)
+
+\item \textbf{Traceless projection:} The factor $(d-1)/d = 63/64$
+  removes the determinant (trace) channel from $\mathrm{SU}(d)$
+
+\item \textbf{SM spectral triple correction:} The hypercharge weighting
+  $w = 7/80$ enters through the internal trace over the finite
+  Hilbert space. Combined with $N_{\mathrm{gen}} = 3$ and $n_2 = 2$,
+  this gives a correction factor
+  $\mathcal{C}_{\mathrm{spectral}} = N_{\mathrm{species}}/(N_{\mathrm{gen}} \cdot n_2) = 7/6$
+
+\item \textbf{BOOST factor:} The regular-module trace conversion
+  $\varepsilon_{\mathrm{adj}} = 4096/4095$
+
+\item \textbf{Electroweak mixing:} The factor $3/2$ from
+  $1/e^2 = (3/2)\kappa_{U(1)}$ converts stiffness to $\alpha$
+  via $\alpha^{-1} = 6\pi\,\kappa_{U(1)}$
+\end{enumerate}
+
+\paragraph{Key distinction.}
+The computation of $\kappa_{U(1)}$ from the spectral action is
+\emph{not} a single closed-form algebraic expression. It involves a
+numerical evaluation of the $a_4$ Seeley--DeWitt coefficient with
+all eight locked inputs. The closest approximation to a closed form
+is:
+\begin{equation}
+\alpha^{-1} \approx \frac{35\pi}{3}\;\beta_{U(1)}\;\frac{d-1}{d}
+\;\frac{d^2}{d^2-1}\,,
+\end{equation}
+which gives $137.024$ (85~ppm residual). The factors decompose as:
+\begin{equation}
+\frac{35\pi}{3} = 4\pi \times \underbrace{\frac{5}{2}}_{\text{EW mixing}}
+\times \underbrace{\frac{7}{6}}_{\text{spectral triple}}\,.
+\end{equation}
+
+The full sub-ppm result requires the complete spectral action
+evaluation.
+
+Source: \texttt{Alpha\_Inverse\_Formula.tex}, Secs.~3--5.
+
+%---------------------------------------------------------------------
+\subsection{The Final Numerical Result}
+%---------------------------------------------------------------------
+
+\begin{equation}
+\kappa_{U(1)}^{\mathrm{pred}} = 7.26999\ldots
+\end{equation}
+
+Therefore:
+\begin{equation}
+\alpha^{-1} = 6\pi \times 7.26999\ldots = 137.03599985\,.
+\end{equation}
+
+Residual from experiment:
+\begin{equation}
+\frac{\alpha^{-1}_{\mathrm{DFD}} - \alpha^{-1}_{\mathrm{exp}}}
+     {\alpha^{-1}_{\mathrm{exp}}}
+= \frac{137.03599985 - 137.035999084}{137.035999084}
+= -0.006\text{~ppm}\,.
+\end{equation}
+
+%=============================================================================
+\section{Lattice Monte Carlo Verification ($\sim 1\%$ Precision)}
+\label{sec:lattice}
+%=============================================================================
+
+Independent of the spectral action route, lattice Monte Carlo
+simulations verify the prediction at $\sim 1\%$ precision.
+
+At the derived parameter point
+$(\beta_{U(1)}, \beta_{SU(2)}) = (3.80, 22.80)$,
+lattice simulations measure the renormalized stiffnesses via the
+background-field method:
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{lccc}
+\toprule
+$L$ & $\alpha_W$ (mean) & $\sigma_\alpha$ & $\Delta\alpha/\alpha$ \\
+\midrule
+6 & 0.007297 & $9.4 \times 10^{-5}$ & $-0.00\%$ \\
+8 & 0.007322 & $9.5 \times 10^{-5}$ & $+0.34\%$ \\
+10 & 0.007361 & $6.8 \times 10^{-5}$ & $+0.88\%$ \\
+12 & 0.007291 & $2.2 \times 10^{-5}$ & $-0.08\%$ \\
+16 & 0.007380 & $1.1 \times 10^{-4}$ & $+1.13\%$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Key result (86 lattice runs, $L = 4$--$16$):
+\begin{equation}
+\alpha_W = 0.007297 \pm 0.000094
+\quad\Longrightarrow\quad
+\alpha^{-1} = 137.0 \pm 1.8
+\quad(\sim 1\%\text{ precision}).
+\end{equation}
+
+From L12 data: $\kappa_{U(1)} \approx 7.27$,
+$\kappa_{SU(2)} \approx 14.7$, giving
+$\alpha^{-1} = 6\pi \times 7.27 = 137.1$.
+
+Source: \texttt{appendix\_K.tex}, Sec.~K.2.
+
+%=============================================================================
+\section{The Additive Structure of the BOOST}
+\label{sec:additive}
+%=============================================================================
+
+The two microsector branches decompose as:
+\begin{equation}
+\alpha^{-1} = F + G \cdot \delta\varepsilon\,,
+\end{equation}
+where $F \approx 137.033$, $G \approx 12$, and:
+\begin{itemize}
+\item Branch A: $\delta\varepsilon = +1/(d^2 - 1) = +1/4095$
+\item Branch B: $\delta\varepsilon = -1/d^2 = -1/4096$
+\end{itemize}
+
+The coefficient $G \approx 12 = 4 \times N_{\mathrm{gen}}$ reflects
+the three-generation structure of the microsector trace.
+
+The BOOST factor $4096/4095$ thus contributes approximately
+$12/4095 \approx 0.003$ to $\alpha^{-1}$, shifting the result from
+$\sim 137.033$ to $137.036$---the difference between a 43~ppm miss
+and a sub-ppm match.
+
+%=============================================================================
+\section{Relation to Standard Spectral Action Literature}
+\label{sec:comparison}
+%=============================================================================
+
+%---------------------------------------------------------------------
+\subsection{Comparison with Chamseddine--Connes}
+%---------------------------------------------------------------------
+
+In the standard Chamseddine--Connes spectral action on $M^4 \times F$
+(with $F$ the finite spectral triple of the Standard Model), the
+asymptotic expansion of $\mathrm{Tr}[f(D^2/\Lambda^2)]$ gives gauge
+kinetic terms:
+\begin{equation}
+S_{\mathrm{gauge}}^{\mathrm{CC}} = \frac{f_0}{2\pi^2}
+\left[a\,G_{\mu\nu}^2 + b\,W_{\mu\nu}^2 + c\,B_{\mu\nu}^2\right]\,,
+\end{equation}
+where the coefficients $a$, $b$, $c$ depend on the trace over the
+internal Hilbert space $\mathcal{H}_F$.
+
+In the standard Chamseddine--Connes model, the coefficients $a$, $b$, $c$
+are determined by the representation content and satisfy specific ratios
+that constrain gauge coupling unification.
+
+\paragraph{DFD modifications.}
+DFD differs from the standard approach in three key ways:
+
+\begin{enumerate}
+\item \textbf{Internal geometry:} DFD uses $\mathbb{C}P^2 \times S^3$
+  (a smooth 7-manifold) rather than the purely algebraic finite space $F$
+  of Chamseddine--Connes. This provides a geometric origin for the
+  gauge group.
+
+\item \textbf{Toeplitz truncation:} The finite-dimensionality is
+  implemented via Toeplitz quantization at level $d = 64$, rather than
+  being an intrinsic property of a finite algebra. This introduces the
+  $(d-1)/d = 63/64$ traceless projection factor.
+
+\item \textbf{Microsector trace:} The regular-module choice
+  $\mathcal{H}_F = M_d(\mathbb{C})$ with BOOST factor $4096/4095$
+  replaces the fermion-representation space used in standard
+  noncommutative geometry.
+\end{enumerate}
+
+%---------------------------------------------------------------------
+\subsection{The DFD Analogue of Coefficients $a$, $b$, $c$}
+%---------------------------------------------------------------------
+
+In DFD, the role of the Chamseddine--Connes coefficients $a$, $b$, $c$
+is played by the stiffness coefficients $\kappa_r$:
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{lcc}
+\toprule
+Gauge sector & CC coefficient & DFD stiffness \\
+\midrule
+SU(3) & $a$ & $\kappa_{SU(3)} = 3\kappa_0$ \\
+SU(2) & $b$ & $\kappa_{SU(2)} = 2\kappa_0$ \\
+U(1)  & $c$ & $\kappa_{U(1)} = \kappa_0 = 7.26999\ldots$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The ratio $\kappa_{U(1)} : \kappa_{SU(2)} : \kappa_{SU(3)} = 1 : 2 : 3$
+is fixed by the Ricci curvature of the corresponding projective spaces
+(Frame Stiffness Theorem, Thm.~F.6).
+
+The absolute value $\kappa_0 = \kappa_{U(1)} = 7.26999\ldots$ is
+determined by the spectral action computation with all eight locked
+inputs.
+
+%=============================================================================
+\section{The Coefficient of $B_{\mu\nu}^2$: Explicit Identification}
+\label{sec:Bmunu}
+%=============================================================================
+
+The question posed is: what is the explicit coefficient of $B_{\mu\nu}^2$
+(the U(1) hypercharge field strength) in the DFD spectral action?
+
+\begin{tcolorbox}[colback=green!5!white, colframe=green!50!black,
+  title=The U(1) Stiffness Coefficient]
+In the DFD spectral action on the Toeplitz-truncated
+$\mathbb{C}P^2 \times S^3$ at $d = 64$:
+
+\begin{equation}
+\boxed{\kappa_{U(1)} = 7.26999\ldots = \frac{\alpha^{-1}_{\mathrm{exp}}}{6\pi}}
+\end{equation}
+
+This is the coefficient of $-\frac{1}{2}B_{\mu\nu}B^{\mu\nu}$ in the
+gauge-kinetic action extracted from the $a_4$ Seeley--DeWitt coefficient.
+
+The other stiffnesses follow from the Frame Stiffness Theorem:
+\begin{align}
+\kappa_{SU(2)} &= 2\kappa_{U(1)} = 14.5400\ldots \\
+\kappa_{SU(3)} &= 3\kappa_{U(1)} = 21.8100\ldots
+\end{align}
+\end{tcolorbox}
+
+\paragraph{Why $\kappa_{U(1)} = 7.26999$ specifically.}
+The value arises from the interplay of:
+\begin{itemize}
+\item The Chern--Simons bare coupling $\beta_{U(1)} = 3.7969$
+  (from the $k_{\max} = 60$ level sum)
+\item The traceless projection $(d-1)/d = 63/64$
+\item The SM spectral triple correction factor $\sim 7/6$
+\item The BOOST factor $4096/4095$
+\item The electroweak mixing factor $3/2$
+  (absorbed into the $6\pi$ of the master formula)
+\end{itemize}
+
+The approximate relation is:
+\begin{equation}
+\kappa_{U(1)} \approx \frac{35}{18}\,\beta_{U(1)}\,\frac{63}{64}
+\,\frac{4096}{4095}
+= \frac{35}{18} \times 3.7969 \times 0.984375 \times 1.000244
+= 7.268\ldots
+\end{equation}
+(within 85~ppm of the exact value; the full spectral action evaluation
+is needed for sub-ppm precision).
+
+%=============================================================================
+\section{The Complete Derivation Chain (Diagram)}
+\label{sec:diagram}
+%=============================================================================
+
+\begin{center}
+\fbox{\parbox{0.92\textwidth}{
+\textbf{SM hypercharge spectrum} $\to$ $q_1 = 3$ (anomaly cancellation)
+
+$\downarrow$
+
+$a = q_1^2 \cdot q_1 = 9$ $\to$ twist bundle $E = \mathcal{O}(9) \oplus \mathcal{O}^{\oplus 5}$
+
+$\downarrow$
+
+$k_{\max} = \chi(\mathbb{C}P^2, E) = 55 + 5 = 60$ \quad [Bridge Lemma]
+
+$\downarrow$
+
+$\beta_{U(1)} = \langle k+2 \rangle_{k_{\max}=60} = 3.7969$ \quad [CS weighted average]
+
+$\downarrow$ \quad + \quad Wilson ratio $= 6$ \quad +
+  \quad $\kappa_{U(1)}/\kappa_{SU(2)} = 1/2$
+
+$\downarrow$
+
+\textbf{Spectral action route:} $a_4$ on Toeplitz-truncated
+$\mathbb{C}P^2 \times S^3$
+
++ traceless $(63/64)$ + BOOST $(4096/4095)$
++ SM content $(N_{\mathrm{species}}, g_F, \mathrm{Tr}(Y^2))$
+
+$\to$ $\kappa_{U(1)} = 7.26999\ldots$ $\to$
+$\alpha^{-1} = 6\pi\kappa = 137.03599985$ \quad (sub-ppm)
+
+\medskip
+\textbf{OR (independent verification):}
+
+\textbf{Lattice route:} MC at $(\beta_{U(1)}, \beta_{SU(2)}) = (3.80, 22.80)$
+
+$\to$ measure $\kappa_{U(1)} \approx 7.27$ $\to$
+$\alpha^{-1} = 6\pi\kappa \approx 137$ \quad ($\pm 1\%$)
+}}
+\end{center}
+
+%=============================================================================
+\section{Summary and Key Numbers}
+\label{sec:summary}
+%=============================================================================
+
+\begin{tcolorbox}[colback=blue!5!white, colframe=blue!50!black,
+  title=Summary: The Spectral Action Computation in DFD]
+
+\textbf{Master formula (exact):}
+\begin{equation}
+\alpha^{-1} = 6\pi\,\kappa_{U(1)}
+\end{equation}
+
+\textbf{Key numerical values:}
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{ll}
+\toprule
+Quantity & Value \\
+\midrule
+$k_{\max}$ (UV cutoff) & $60$ \\
+$d$ (Toeplitz dimension) & $64$ \\
+$(d-1)/d$ (traceless projection) & $63/64 = 0.984375$ \\
+$\varepsilon_{\mathrm{adj}}$ (BOOST) & $4096/4095 = 1.000244\ldots$ \\
+$\beta_{U(1)}$ (CS bare coupling) & $3.7969$ \\
+$w$ (hypercharge weight) & $7/80 = 0.0875$ \\
+$\kappa_{U(1)}$ (U(1) stiffness) & $7.26999\ldots$ \\
+$\kappa_{SU(2)}$ (SU(2) stiffness) & $14.5400\ldots$ \\
+$\alpha^{-1}$ (DFD prediction) & $137.03599985$ \\
+$\alpha^{-1}$ (experiment) & $137.035999084(21)$ \\
+Residual & $-0.006$~ppm \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Locked conventions (no free parameters):}
+\begin{itemize}
+\item Operator: connection Laplacian with parallel curvature
+\item Regulator: plateau cutoff ($f_{-2} = f_{-4} = \cdots = 0$)
+\item Finite-$k$: Toeplitz truncation with $d = k + 4 = 64$
+\item Microsector: regular-module ($\mathcal{H}_F = M_d(\mathbb{C})$)
+\item Trace: democratic UV $\to$ per-generator physics (BOOST forced)
+\end{itemize}
+
+\textbf{The fermion-rep microsector is falsified:}
+43~ppm deficit, unrescuable under no-knobs policy.
+\end{tcolorbox}
+
+%=============================================================================
+\section*{Source File Index}
+%=============================================================================
+
+All referenced files are in the DFD codebase at:\\
+\texttt{/Users/garyalcock/claudecode/densityfielddynamics/}
+
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{ll}
+\toprule
+\textbf{File} & \textbf{Content} \\
+\midrule
+\texttt{..\_108.../section\_alpha\_locked.tex}
+  & Convention-locked $\alpha$ (Sec.~8C) \\
+\texttt{..\_108.../section\_alpha\_relations.tex}
+  & The $\alpha$-relations (Sec.~8) \\
+\texttt{..\_108.../section\_gauge\_coupling.tex}
+  & Gauge coupling variation (Sec.~8B) \\
+\texttt{..\_108.../appendix\_F.tex}
+  & Gauge emergence proofs \\
+\texttt{..\_108.../appendix\_G.tex}
+  & $\alpha$-relation derivations \\
+\texttt{..\_108.../appendix\_K.tex}
+  & Microsector physics, CS derivation, lattice \\
+\texttt{..\_108.../appendix\_O\_alpha57.tex}
+  & $\alpha^{57}$ exponent \\
+\texttt{..\_108.../supplementary/PRL\_SM\_from\_Topology.tex}
+  & PRL-style SM from topology \\
+\texttt{DFD\_Research\_Output/.../Alpha\_Inverse\_Formula.tex}
+  & Explicit chain document \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\end{document}

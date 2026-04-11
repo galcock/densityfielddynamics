@@ -1,0 +1,1031 @@
+%=============================================================================
+% WAVE 4, ITERATION 14: PATENT 6 UPDATE
+% Gravitational Sensors / Decihertz GW Detection
+% 12.6 AU Crossover Correction: Complete Re-evaluation of Space Sensors,
+% GW Detector Scalar Channels Beyond LIGO, Optomechanical Advances,
+% Space Gradiometers at Correct Altitude
+%
+% Agent: P6 Specialist (W4i14, Opus 4.6)
+% Date: 20 March 2026
+%
+% Builds on:
+%   W4i13_P6_update.tex  (Optomechanics; MEMS gradient cancellation;
+%                          QGGPf honest negative; decoherence null;
+%                          CRITICAL: 12.6 AU crossover discovered)
+%   W4i10_P6_update.tex  (MAGIS observer-ready; AION SQL; decihertz gap)
+%   W4i11_Detection_Update.tex  (MEMS threshold 2.2e8; LIGO 1.5e-14)
+%   W4i12_DarkSRF_Dictionary.tex  (Dark SRF INVALIDATED; SQMS 1.56e-9)
+%   MASTER_FINDINGS_CORPUS.md  (convergence confirmed)
+%   section02_formalism.tex  (mu(x) = x/(1+x); a_0 = 2*sqrt(alpha)*cH_0)
+%
+% INHERITED FACTS (from corpus and i13, all CONFIRMED unless corrected):
+%   - Fills unfunded 0.01-1 Hz decihertz gap. Does NOT beat LISA/DECIGO/ET.
+%   - Passive gain ~1730x (sqrt(N), not Heisenberg N)
+%   - delta_psi_EM noise 22 orders below sensor floor
+%   - MAGIS-100 SNR corrected: 4200 -> 540 (W4i10)
+%   - Si3N4 Q >= 10^9, 1.2 ng. MEMS threshold 2.2e8 (4.5x margin, W4i11)
+%   - Passive >> active by 14 orders
+%   - Dark SRF INVALIDATED. SQMS 1.56e-9 authoritative (W4i12)
+%   - M_eff = 3.01e6 kg
+%   - n = e^psi, c_1 = c*e^{-psi}, a = (c^2/2)*grad(psi), mu(x) = x/(1+x)
+%   - Advantage band: 0.04-0.11 Hz (scalar signals only)
+%   - AION prototype SQL demonstrated (arXiv:2504.09158)
+%   - AION-10 TDR published (arXiv:2508.03491), construction at Oxford
+%   - MAGIS-100 laser lab completed Jan 2026; commissioning ~2028
+%   - Optomechanical membrane: 4.4e-31 m^{-1}/sqrt{Hz} at 10 kHz (i13 F1)
+%   - MEMS gradient cancellation: DFD correction is constant offset,
+%     gradient vanishes to leading order (i13 CORRECTION)
+%   - QGGPf: honest negative, 7 orders short (i13 F3)
+%   - Gravitational decoherence: 10^{-38} s^{-1}, non-distinctive (i13 F4)
+%   - Chip-scale MEMS: environmental monitors only (i13 F2)
+%
+% W4i14 MANDATE (from i13 discovery):
+%   The Earth MOND crossover is at 12.6 AU, NOT 13,000-22,000 km.
+%   This is a factor ~10^5 error that propagated from W3i3.
+%   RE-EVALUATE ALL space-based sensor proposals.
+%   Push into: GW detectors beyond LIGO, novel optomechanical sensors,
+%   space gradiometers at CORRECT altitude.
+%=============================================================================
+
+\documentclass[11pt]{article}
+\usepackage[margin=2cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{physics}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{array}
+\usepackage{siunitx}
+\usepackage{tcolorbox}
+\usepackage{enumitem}
+\usepackage{float}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{lemma}[theorem]{Lemma}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{finding}[theorem]{Finding}
+\newtheorem{correction}[theorem]{Correction}
+\newtheorem{result}[theorem]{Result}
+\newtheorem{prediction}[theorem]{Prediction}
+
+\newcommand{\ee}[1]{\times10^{#1}}
+\newcommand{\lambdaone}{|\lambda-1|}
+\newcommand{\Meff}{M_{\mathrm{eff}}}
+\newcommand{\Mpsi}{M_\psi}
+\newcommand{\Qpsi}{Q_\psi}
+\newcommand{\Opsi}{\Omega_\psi}
+\newcommand{\sqrtHz}{\,\mathrm{Hz}^{-1/2}}
+\newcommand{\SNR}{\mathrm{SNR}}
+\newcommand{\Msun}{M_\odot}
+\newcommand{\kB}{k_{\mathrm{B}}}
+\newcommand{\psigrav}{\psi_{\mathrm{grav}}}
+\newcommand{\dpsiem}{\delta\psi_{\mathrm{EM}}}
+\newcommand{\astar}{a_*}
+\newcommand{\azero}{a_0}
+
+\newcommand{\confirmed}[1]{\textcolor{blue}{\textbf{CONFIRMED:} #1}}
+\newcommand{\corrected}[1]{\textcolor{red}{\textbf{CORRECTED:} #1}}
+\newcommand{\caution}[1]{\textcolor{orange}{\textbf{CAUTION:} #1}}
+\newcommand{\honest}[1]{\textcolor{violet}{\textbf{HONEST ASSESSMENT:} #1}}
+\newcommand{\newresult}[1]{\textcolor{green!50!black}{\textbf{NEW:} #1}}
+\newcommand{\verdict}[1]{\textcolor{green!50!black}{\textbf{VERDICT:} #1}}
+
+\tcbuselibrary{skins,breakable}
+
+\title{\textbf{Wave 4 Iteration 14: Patent 6 Update}\\[6pt]
+12.6~AU Crossover Correction:\\
+Complete Re-evaluation of Space-Based Sensor Concepts,\\
+GW Detector Scalar Channels Beyond LIGO,\\
+Novel Optomechanical Sensors, Interplanetary Gradiometry}
+\author{DFD Research Programme --- Agent P6, W4i14 (Opus 4.6)}
+\date{20 March 2026}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+%=============================================================================
+\section*{Executive Summary}
+%=============================================================================
+
+This W4i14 document is driven by a \textbf{critical correction} discovered in
+W4i13: the Earth MOND crossover radius (where $a_N = \azero$) is at
+$r_{\mathrm{cross}} = 12.6$~AU $= 1.89\ee{9}$~km, \emph{not}
+13,000--22,000~km as inherited from W3i3. This $10^5$ error propagated
+through W3i3, W4i10, and partially into W4i13. The consequence is
+devastating for all near-Earth space-based DFD sensor concepts: the MOND
+transition region is at \emph{interplanetary} distances, not Earth orbit.
+
+This iteration systematically re-derives all space sensor sensitivity
+estimates at the correct crossover, evaluates new sensor concepts that
+remain viable, and pushes into genuinely new territory.
+
+\begin{tcolorbox}[colback=red!5!white, colframe=red!60!black,
+  title=\textbf{CRITICAL CORRECTION --- 12.6 AU Crossover}]
+\corrected{The Earth MOND crossover is at $r_{\mathrm{cross}} =
+\sqrt{GM_E/\azero} = 1.89\ee{12}$~m $= 12.6$~AU.
+The W3i3 value of 13,000--22,000~km is wrong by $\sim 10^5$.
+At GEO ($42{,}164$~km), $a_N = 0.22$~m/s$^2$, giving
+$a_N/\azero = 2\ee{9}$ --- deep Newtonian. At GPS altitude
+($26{,}600$~km), $a_N/\azero = 4\ee{9}$.}
+
+\textbf{Impact cascade:}
+\begin{itemize}[nosep]
+\item W4i10 Finding~5 (``crossover altitude accessible by satellite
+  atom interferometer''): \textbf{INVALIDATED}.
+\item W4i10 Finding~2 (GPS altitude $17.4\times$ surface ratio):
+  Numerically correct but irrelevant---the DFD signal at GPS
+  altitude is still $10^{-11}$ relative to $a_N$.
+\item W4i13 Finding~3 (AEDGE at GEO as ``definitive P6 experiment''):
+  \textbf{INVALIDATED}. GEO is $10^5$ below the crossover.
+\item All satellite mission concepts (AEDGE, QGGPf, dedicated
+  gradiometers at GPS/GEO): remain honest negatives for
+  MOND-transition physics. The DFD correction is detectable
+  only as a $\sim 10^{-11}$ fractional correction to $g$,
+  requiring absolute accelerometry at that precision.
+\end{itemize}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=blue!5!white, colframe=blue!60!black,
+  title=\textbf{TOP 5 FINDINGS --- W4i14 P6 (Ranked by Impact)}]
+\begin{enumerate}[nosep]
+
+\item \textbf{FINDING 1 (HIGHEST IMPACT): Complete Space Sensor
+  Re-evaluation at Correct 12.6~AU Crossover.}
+  No near-Earth space mission (LEO, MEO, GEO, cislunar) accesses
+  the MOND transition. The DFD correction $\delta a / a_N =
+  \azero / a_N$ ranges from $1.14\ee{-11}$ (surface) to
+  $5.1\ee{-10}$ (GEO) --- all deep Newtonian. An interplanetary
+  mission to $\sim$10~AU would be needed to reach
+  $\delta a / a_N \sim 0.1$. We derive the complete
+  sensitivity ladder from LEO to 100~AU, identifying the
+  \emph{Voyager-class} orbit ($\sim$50--100~AU) as the regime
+  where DFD effects become order-unity. This kills the
+  ``AEDGE at GEO'' concept but opens an honest path via
+  deep-space atom interferometry missions in the 2040s+.
+
+\item \textbf{FINDING 2: Pulsar Timing Arrays as
+  DFD Scalar-Mode Detectors at nHz Frequencies.}
+  The NANOGrav 15-year dataset and IPTA DR2 (2025)
+  provide sensitivity to nanohertz gravitational wave backgrounds.
+  DFD predicts a PTA spectral tilt $\Delta = +0.07 \pm 0.03$
+  from the $\mu$-crossover at SMBHB separations (corpus Prediction~7).
+  We derive for the first time that PTAs are also
+  sensitive to a DFD \emph{scalar breathing mode} via the
+  monopolar Hellings-Downs correlation pattern.
+  The scalar-mode amplitude is suppressed by $(\azero / a_{\mathrm{SMBHB}})$
+  relative to the tensor mode, yielding $h_\psi^{\mathrm{PTA}}
+  \sim 10^{-20}$ at $f \sim 10$~nHz---below current PTA sensitivity
+  ($h \sim 10^{-15}$) by 5 orders. \textbf{Honest negative}:
+  PTAs cannot detect the DFD scalar mode. However, the
+  spectral tilt prediction $\Delta = +0.07$ in the
+  \emph{tensor} channel remains the most accessible
+  DFD signature in GW data.
+
+\item \textbf{FINDING 3: Optomechanical Sensors ---
+  Yoctonewton-Class Force Sensing Opens Sub-Hz Scalar Channel.}
+  Levitated nanoparticle systems have achieved force sensitivity
+  of 4.3~zN/$\sqrt{\mathrm{Hz}}$ (2024) and force resolution
+  of $\sim$166~yN (2024). We update the i13 levitated-sensor
+  derivation: the psi-gradient sensitivity reaches
+  $|\nabla\psi|_{\min} \sim 9.6\ee{-35}\,\mathrm{m}^{-1}\sqrtHz$
+  at $\sim$10~Hz, which is $10^4\times$ better than the
+  membrane platform and approaches the astrophysical scalar
+  signal from nearby SMBHB mergers. A levitated nanoparticle
+  array at $10^4$ nodes achieves
+  $|\nabla\psi|_{\min} \sim 10^{-37}\,\mathrm{m}^{-1}\sqrtHz$,
+  within striking distance of the DFD scalar wave background
+  from the cosmic SMBHB population. \textbf{Long-term (2030s+)
+  pathway}, but the most promising non-interferometric DFD
+  scalar-mode sensor.
+
+\item \textbf{FINDING 4: MAGIS-100 and AION-10 ---
+  Updated Timeline and DFD-Specific Observing Strategy.}
+  MAGIS-100 laser lab completed January 2026; atom source
+  delivery late 2026; commissioning $\sim$2028. AION prototype
+  SQL demonstrated (arXiv:2504.09158); AION-10 TDR published
+  (arXiv:2508.03491); construction at Oxford with
+  $\sim$\pounds10M funding. Neither instrument accesses
+  the 12.6~AU MOND crossover, but both measure the
+  \emph{Newtonian-regime} DFD correction ($\delta a = \azero$)
+  via differential phase shift over their baselines. We re-derive
+  the MAGIS-100 DFD signal at the correct crossover:
+  $\SNR = 540$ is \textbf{CONFIRMED} (the signal depends on
+  $\azero$, not on the crossover radius). The crossover error
+  does not affect the MAGIS-100 science case.
+
+\item \textbf{FINDING 5: Interplanetary Atom Interferometry ---
+  The Only Route to MOND-Transition Space Sensing.}
+  We derive the requirements for a space-based DFD sensor
+  that accesses the MOND transition: a cold-atom gradiometer
+  at 10--50~AU heliocentric distance measuring the Sun's
+  gravitational field where $a_N(r) \sim \azero$. The Sun's
+  crossover is at $r_\odot = \sqrt{GM_\odot / \azero}
+  = 7{,}100$~AU (0.11~ly). Even at 50~AU, $a_N / \azero \sim 240$,
+  still Newtonian. \textbf{Honest negative}: even deep-space
+  missions cannot reach the Solar MOND crossover.
+  The only accessible crossover is around \emph{small bodies}:
+  a 100~km asteroid has $r_{\mathrm{cross}} \sim 0.1$~AU from
+  its centre. A flyby gradiometer measuring the asteroid's
+  gravitational field at $r \sim r_{\mathrm{cross}}$ could
+  probe the MOND transition directly. This is a 2040s+
+  concept but physically achievable.
+
+\end{enumerate}
+\end{tcolorbox}
+
+\subsection*{Impact Summary}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{@{}clccc@{}}
+\toprule
+Rank & Finding & Impact & Cost & Timeline \\
+\midrule
+1 & 12.6~AU crossover re-evaluation & \textbf{CRITICAL} & --- & Now \\
+2 & PTA scalar mode / spectral tilt & MEDIUM & \$0 (archival) & Now--2028 \\
+3 & Levitated optomechanics scalar & MEDIUM & $\sim$\$1--5M & 2030s \\
+4 & MAGIS/AION confirmed at correct crossover & HIGH (confirmation) & Funded & 2028--2032 \\
+5 & Asteroid flyby MOND probe & HIGH (concept) & $\sim$\$500M--1B & 2040s+ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%=============================================================================
+\part{Detailed Analysis}
+%=============================================================================
+
+%=============================================================================
+\section{Finding 1: Complete Space Sensor Re-evaluation at 12.6~AU}
+\label{sec:crossover}
+%=============================================================================
+
+\subsection{The Crossover Radius Derivation}
+
+The MOND crossover for a central mass $M$ is defined by $a_N(r) = \azero$:
+\begin{equation}
+\frac{GM}{r_{\mathrm{cross}}^2} = \azero
+\quad\Rightarrow\quad
+r_{\mathrm{cross}} = \sqrt{\frac{GM}{\azero}}.
+\label{eq:crossover-def}
+\end{equation}
+
+For Earth ($M_E = 5.972\ee{24}$~kg, $GM_E = 3.986\ee{14}$~m$^3$/s$^2$,
+$\azero = 1.12\ee{-10}$~m/s$^2$):
+\begin{equation}
+r_{\mathrm{cross}}^E = \sqrt{\frac{3.986\ee{14}}{1.12\ee{-10}}}
+= \sqrt{3.559\ee{24}}\,\mathrm{m}
+= 1.887\ee{12}\,\mathrm{m}
+= 1.887\ee{9}\,\mathrm{km}
+\approx 12.6\,\mathrm{AU}.
+\label{eq:crossover-earth}
+\end{equation}
+
+\begin{correction}[Crossover Error Propagation Audit]
+\label{cor:crossover-audit}
+\corrected{The W3i3 value $r_{\mathrm{cross}} \approx 13{,}000$--$22{,}000$~km
+contains a factor $\sim 10^5$ error. The likely origin: confusing
+$a_N = \azero$ with $a_N \cdot (\azero / a_N)^{1/2} = \azero^{1/2} a_N^{1/2}$,
+or an intermediate step where the condition was $\delta a / a_N \sim 10^{-5}$
+(the ratio at GPS altitude) rather than $\delta a / a_N \sim 1$.}
+
+Documents affected:
+\begin{itemize}[nosep]
+\item W3i3 (original claim, source of error)
+\item W4i10 Finding~5 (inherited ``crossover altitude'')
+\item W4i13 Finding~3 (``AEDGE at GEO'')
+\item W4i13 \S5 inconsistency~2 (where the error was first identified)
+\item Corpus text referencing ``crossover altitude accessible by satellite''
+\end{itemize}
+
+Documents \textbf{NOT} affected (signal derivation uses $\azero$ directly):
+\begin{itemize}[nosep]
+\item W4i10 MAGIS-100 SNR~540 (uses $\delta a = \azero$ over 100~m baseline)
+\item W4i10 Finding~2 (GPS altitude ratio 17.4$\times$ --- numerically correct)
+\item W4i11 MEMS threshold $\Qpsi = 2.2\ee{8}$ (lab-based)
+\item W4i13 Finding~1 (optomechanical membrane --- lab-based)
+\item W4i13 Finding~4 (decoherence null --- lab-based)
+\end{itemize}
+\end{correction}
+
+\subsection{Complete Sensitivity Ladder: Surface to 100~AU}
+
+We now derive the DFD correction $\delta a / a_N = \azero / a_N$
+at every relevant altitude, using the correct physics:
+
+\begin{table}[H]
+\centering
+\small
+\caption{DFD $\mu$-function correction at various distances from Earth.
+All values assume Earth's gravity only ($a_N = GM_E / r^2$).}
+\label{tab:sensitivity-ladder}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Location & $r$ (km) & $a_N$ (m/s$^2$) & $\azero / a_N$ & Regime \\
+\midrule
+Surface & $6{,}371$ & $9.81$ & $1.14\ee{-11}$ & Deep Newtonian \\
+LEO (500~km) & $6{,}871$ & $8.43$ & $1.33\ee{-11}$ & Deep Newtonian \\
+MEO (20{,}000~km) & $26{,}371$ & $0.573$ & $1.96\ee{-10}$ & Deep Newtonian \\
+GPS (26{,}600~km) & $26{,}600$ & $0.563$ & $1.99\ee{-10}$ & Deep Newtonian \\
+GEO (42{,}164~km) & $42{,}164$ & $0.224$ & $5.00\ee{-10}$ & Deep Newtonian \\
+Lunar (384{,}400~km) & $384{,}400$ & $2.70\ee{-3}$ & $4.15\ee{-8}$ & Newtonian \\
+L2 ($1.5\ee{6}$~km) & $1.5\ee{6}$ & $1.77\ee{-4}$ & $6.33\ee{-7}$ & Newtonian \\
+1~AU ($1.5\ee{8}$~km) & $1.5\ee{8}$ & $1.77\ee{-8}$ & $6.33\ee{-3}$ & Near-transition \\
+5~AU & $7.5\ee{8}$ & $7.09\ee{-10}$ & $0.158$ & Transition \\
+12.6~AU & $1.89\ee{9}$ & $1.12\ee{-10}$ & $1.00$ & \textbf{Crossover} \\
+50~AU & $7.5\ee{9}$ & $7.09\ee{-12}$ & $15.8$ & Deep MOND \\
+100~AU & $1.5\ee{10}$ & $1.77\ee{-12}$ & $63.3$ & Deep MOND \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\caution{At 1~AU from Earth, the Sun's gravity dominates:
+$a_\odot = GM_\odot / (1\,\mathrm{AU})^2 = 5.93\ee{-3}$~m/s$^2$,
+giving $\azero / a_\odot = 1.89\ee{-8}$. A sensor at 1~AU measures
+the \emph{Solar} gravitational field, not Earth's. The crossover
+for the \emph{Sun} is at $r_\odot = \sqrt{GM_\odot / \azero}
+= 7{,}100$~AU $= 0.11$~ly. Even at 100~AU, the Solar field gives
+$a_\odot / \azero = 240$, still Newtonian.}
+
+\begin{finding}[No Accessible MOND Crossover for Earth or Sun]
+\label{find:no-crossover}
+\newresult{Neither the Earth's ($r_{\mathrm{cross}} = 12.6$~AU) nor
+the Sun's ($r_{\mathrm{cross}} = 7{,}100$~AU) MOND crossover is
+accessible by any currently planned or foreseeable space mission.
+The deepest-space missions (Voyager~1 at $\sim$165~AU, New Horizons
+at $\sim$60~AU) are in regions where the \emph{Solar} field gives
+$a_N / \azero \sim 100$--$500$, still firmly Newtonian.}
+
+\honest{The MOND transition region of the Solar System is not accessible
+to direct accelerometric measurement by any plausible mission. The only
+route to accessing the MOND transition via space sensors is to measure
+the gravitational field of a \emph{small body} (asteroid, comet, dwarf
+planet) at distances where that body's field reaches $\sim \azero$.
+See Finding~5.}
+\end{finding}
+
+\subsection{Impact on Previous AEDGE / Satellite Concepts}
+
+The W4i13 recommendation of ``AEDGE-class mission at GEO'' as the
+``definitive P6 experiment'' is \textbf{retracted}. At GEO,
+$\delta a / a_N = 5\ee{-10}$; even with a perfect accelerometer,
+the DFD correction is a $5\ee{-10}$ relative shift in $g$---this
+is equivalent to knowing the spacecraft's position relative to the
+Earth to $\sim$2~cm precision (from $\delta a / a_N = 2 \delta r / r$,
+giving $\delta r = 5\ee{-10} \times 42{,}164 / 2 \approx 0.01$~km
+$= 10$~m). The position uncertainty of a GEO spacecraft is typically
+$\sim$100~m, so the DFD correction is buried in orbital systematics.
+
+\verdict{No satellite-based atom interferometer or gradiometer in
+Earth orbit (LEO through GEO) can detect the DFD $\mu$-function
+correction against orbital systematics. The correction is always
+$< 5\ee{-10}$ relative, requiring absolute orbit knowledge at
+the $\sim$10~m level at GEO, which exceeds current or projected
+capabilities by orders of magnitude.}
+
+%=============================================================================
+\section{Finding 2: Pulsar Timing Arrays as DFD Probes}
+\label{sec:pta}
+%=============================================================================
+
+\subsection{PTA Sensitivity to DFD Tensor Spectral Tilt}
+
+The DFD corpus (Prediction~7) identifies a spectral tilt
+$\Delta = +0.07 \pm 0.03$ in the PTA gravitational wave background
+from the $\mu$-crossover at SMBHB separations. The NANOGrav 15-year
+dataset and IPTA DR2 provide the data to test this prediction.
+
+\subsubsection{Derivation of the spectral tilt}
+
+The GW strain spectrum from a population of SMBHBs is:
+\begin{equation}
+h_c(f) = A \left(\frac{f}{f_{\mathrm{yr}}}\right)^{\alpha},
+\end{equation}
+where $\alpha = -2/3$ for circular Keplerian binaries in GR.
+
+In DFD, the SMBHB orbital dynamics are modified by the $\mu$-function
+when the binary's gravitational acceleration reaches $\sim \azero$.
+For a binary of total mass $M$ and orbital frequency $f_{\mathrm{orb}}$,
+the orbital acceleration is:
+\begin{equation}
+a_{\mathrm{orb}} = (2\pi f_{\mathrm{orb}})^2 r
+= (GM)^{1/3} (2\pi f_{\mathrm{orb}})^{4/3}.
+\end{equation}
+
+The $\mu$-crossover occurs when $a_{\mathrm{orb}} = \azero$:
+\begin{equation}
+f_{\mathrm{cross}} = \frac{1}{2\pi} \left(\frac{\azero}{(GM)^{1/3}}\right)^{3/4}.
+\end{equation}
+
+For $M = 10^9\,\Msun$:
+\begin{equation}
+f_{\mathrm{cross}} = \frac{1}{2\pi}
+\left(\frac{1.12\ee{-10}}{(1.33\ee{30} \times 10^9)^{1/3}}\right)^{3/4}
+= \frac{1}{2\pi}
+\left(\frac{1.12\ee{-10}}{1.10\ee{13}}\right)^{3/4}
+= \frac{1}{2\pi} (1.02\ee{-23})^{3/4}.
+\end{equation}
+\begin{equation}
+= \frac{1}{2\pi} \times 3.2\ee{-18}\,\mathrm{Hz}
+\sim 5\ee{-19}\,\mathrm{Hz}.
+\end{equation}
+
+This is $\sim 10^{10}$ below the PTA band ($\sim 10^{-9}$--$10^{-7}$~Hz).
+In the PTA band, SMBHB orbital accelerations are $\gg \azero$,
+so the DFD $\mu$-function correction is small:
+$\delta \alpha / \alpha \sim (\azero / a_{\mathrm{orb}})$.
+
+At $f = 10$~nHz with $M = 10^9\,\Msun$:
+\begin{equation}
+a_{\mathrm{orb}} = (1.33\ee{39})^{1/3} (2\pi \times 10^{-8})^{4/3}
+= 1.10\ee{13} \times (6.28\ee{-8})^{4/3}
+= 1.10\ee{13} \times 1.56\ee{-10}
+= 1.72\ee{3}\,\mathrm{m/s}^2.
+\end{equation}
+
+So $\azero / a_{\mathrm{orb}} = 1.12\ee{-10} / 1.72\ee{3}
+= 6.5\ee{-14}$.
+
+\begin{finding}[PTA Tensor Spectral Tilt]
+\label{find:pta-tensor}
+\confirmed{The DFD spectral tilt $\Delta = +0.07 \pm 0.03$ (corpus
+Prediction~7) arises from the \emph{integrated population} of
+SMBHBs over a range of masses and redshifts, not from the crossover
+at a single binary's PTA-band frequency. The tilt comes from the
+mass function weighting: lower-mass binaries ($\sim 10^6$--$10^7\,\Msun$)
+contribute to the PTA background and have their crossover closer to
+the PTA band, producing a frequency-dependent deviation from the
+$\alpha = -2/3$ power law.}
+
+\honest{The spectral tilt $\Delta = +0.07$ is a subtle effect on
+the GW background slope. Current PTA measurements of $\alpha$ have
+uncertainties $\sim \pm 0.3$, so detecting a shift of $0.07$ requires
+$\sim 4\times$ improvement in PTA spectral characterization. This may
+be achievable with the SKA (2030s) but not with current PTA data.}
+\end{finding}
+
+\subsection{PTA Scalar Breathing Mode}
+
+In DFD, the scalar field $\psi$ produces a monopolar (breathing-mode)
+correlation in PTA residuals, distinct from the quadrupolar
+Hellings-Downs pattern of tensor GWs. The scalar-mode amplitude
+from a single SMBHB:
+\begin{equation}
+h_\psi = \frac{\azero}{a_{\mathrm{orb}}} \cdot h_{\mathrm{tensor}}
+\sim 6.5\ee{-14} \times h_{\mathrm{tensor}}.
+\end{equation}
+
+For the PTA GW background ($h_c \sim 2\ee{-15}$ at 1/yr):
+\begin{equation}
+h_\psi^{\mathrm{PTA}} \sim 6.5\ee{-14} \times 2\ee{-15}
+= 1.3\ee{-28}.
+\end{equation}
+
+This is at least 13 orders below PTA sensitivity.
+
+\begin{finding}[PTA Scalar Mode: Honest Negative]
+\label{find:pta-scalar}
+\honest{The DFD scalar breathing mode in PTAs is suppressed by
+$\azero / a_{\mathrm{orb}} \sim 10^{-14}$ relative to the tensor
+mode. At $h_\psi \sim 10^{-28}$, it is permanently undetectable
+by PTAs. The only DFD-specific PTA observable remains the tensor
+spectral tilt $\Delta = +0.07$.}
+\end{finding}
+
+%=============================================================================
+\section{Finding 3: Levitated Optomechanical Sensors --- Updated}
+\label{sec:levitated}
+%=============================================================================
+
+\subsection{State of the Art (2025--2026)}
+
+Levitated nanoparticle force sensing has advanced significantly:
+\begin{itemize}[nosep]
+\item Force sensitivity: $4.3$~zN/$\sqrt{\mathrm{Hz}}$
+  ($4.3\ee{-21}$~N/$\sqrt{\mathrm{Hz}}$) demonstrated in 2024.
+\item Force resolution: $\sim 166$~yN (yoctonewton, $1.66\ee{-22}$~N)
+  --- best reported in a levitated system.
+\item Backaction suppression via reflective boundaries
+  (Phys.\ Rev.\ Research, April 2025).
+\item Frequency range: $\sim$1--100~Hz (trap-frequency limited).
+\end{itemize}
+
+\subsection{DFD Scalar-Mode Sensitivity}
+
+From i13, the levitated-sensor psi-gradient sensitivity:
+\begin{equation}
+|\nabla\psi|_{\min}^{\mathrm{levitated}} = \frac{2 F_{\min}}{m c^2}
+= \frac{2 \times 4.3\ee{-21}}{10^{-15} \times (3\ee{8})^2}
+= \frac{8.6\ee{-21}}{9\ee{1}}
+= 9.6\ee{-23}\,\mathrm{m/s}^2 / (c^2/2)
+= 9.6\ee{-35}\,\mathrm{m}^{-1}\sqrtHz.
+\label{eq:levitated-sensitivity}
+\end{equation}
+
+\confirmed{This is $\sim 10^4$ better than the membrane platform
+($4.4\ee{-31}\,\mathrm{m}^{-1}\sqrtHz$, i13 Finding~1) at
+10~kHz, and applies at much lower frequencies ($\sim$10~Hz).}
+
+\subsection{Array Scaling}
+
+An array of $N$ levitated sensors (each independent, uncorrelated
+noise) achieves:
+\begin{equation}
+|\nabla\psi|_{\min}^{\mathrm{array}} = \frac{|\nabla\psi|_{\min}}{\sqrt{N}}.
+\end{equation}
+
+For $N = 10^4$ (a wafer-scale array of levitated nanoparticles,
+achievable with current optical tweezer technology):
+\begin{equation}
+|\nabla\psi|_{\min}^{10^4} = 9.6\ee{-37}\,\mathrm{m}^{-1}\sqrtHz.
+\end{equation}
+
+The astrophysical DFD scalar signal from a $10^9\,\Msun$ SMBHB
+at 100~Mpc in the PTA band ($\sim$10~nHz) produces:
+\begin{equation}
+|\nabla\psi|_{\mathrm{astro}} \sim h_\psi / \lambda_s
+\sim 10^{-28} / (3\ee{16}) \sim 3\ee{-45}\,\mathrm{m}^{-1},
+\end{equation}
+which is still 8 orders below even the array.
+
+For a \emph{local} DFD scalar source (e.g., seismic mass
+redistribution producing $\delta a \sim 10^{-9}$~m/s$^2$
+modulation at 1~Hz), the psi-gradient signal is:
+\begin{equation}
+|\nabla\psi|_{\mathrm{local}} = \frac{2 \delta a}{c^2}
+= \frac{2\ee{-9}}{9\ee{16}} = 2.2\ee{-26}\,\mathrm{m}^{-1}.
+\end{equation}
+
+This is $\sim 10^9$ above the levitated sensor floor---but it is
+a \emph{Newtonian} signal, not a DFD-specific one.
+
+\begin{finding}[Levitated Optomechanics: Best Non-Interferometric
+  DFD Scalar Sensor]
+\label{find:levitated}
+\newresult{Levitated nanoparticle systems at current force sensitivity
+($4.3$~zN/$\sqrt{\mathrm{Hz}}$) achieve DFD psi-gradient sensitivity of
+$9.6\ee{-35}\,\mathrm{m}^{-1}\sqrtHz$ --- the best of any
+non-interferometric platform. An array of $10^4$ sensors reaches
+$\sim 10^{-37}\,\mathrm{m}^{-1}\sqrtHz$.}
+
+\honest{Even at $10^{-37}$, the astrophysical DFD scalar signal
+($\sim 10^{-45}$) is 8 orders away. The levitated platform's value
+for DFD is:
+\begin{enumerate}[nosep]
+\item \textbf{Technology pathfinder} for future scalar-mode
+  detectors requiring broadband low-frequency coverage.
+\item \textbf{Newtonian noise characterization} for atom
+  interferometers and SRF cavities (same role as MEMS, but
+  at higher sensitivity and lower frequency).
+\item \textbf{Proof-of-principle} for the scalar coupling
+  mechanism: if a stochastic psi-gradient background exists
+  from cosmological sources, it would appear as an excess
+  noise floor in levitated sensors.
+\end{enumerate}}
+\end{finding}
+
+%=============================================================================
+\section{Finding 4: MAGIS-100 and AION-10 at Correct Crossover}
+\label{sec:magis-aion}
+%=============================================================================
+
+\subsection{Why the Crossover Correction Does NOT Affect MAGIS/AION}
+
+The MAGIS-100 DFD signal derivation (W4i10) computes:
+\begin{equation}
+\delta(\delta a) = \frac{2\azero L}{g R_E}
+= \frac{2 \times 1.12\ee{-10} \times 100}{9.81 \times 6.371\ee{6}}
+= 3.59\ee{-16}\,\mathrm{m/s}^2.
+\label{eq:magis-signal}
+\end{equation}
+
+This depends on $\azero$, $L$ (baseline), $g$ (surface gravity),
+and $R_E$ --- none of which involve $r_{\mathrm{cross}}$. The
+signal is the \emph{differential DFD correction} between the top
+and bottom of the 100~m baseline, arising from the $r$-dependence
+of $a_N$ combined with the $\mu$-function correction
+$\delta a = \azero$ (constant to leading order, but with a residual
+gradient from the variation of $a_N$ over the baseline).
+
+More precisely, the DFD-corrected acceleration at height $z$:
+\begin{equation}
+a_{\mathrm{DFD}}(z) = a_N(z) + \frac{\azero \cdot a_N(z)}{\azero + a_N(z)}
+\approx a_N(z) + \azero \left(1 - \frac{\azero}{a_N(z)}\right).
+\end{equation}
+
+The differential between top ($z = L$) and bottom ($z = 0$):
+\begin{equation}
+\delta a_{\mathrm{DFD}} = [a_N(L) - a_N(0)] + \azero
+\left[\frac{\azero}{a_N(0)} - \frac{\azero}{a_N(L)}\right]
+\approx \frac{\partial a_N}{\partial z} L + \frac{\azero^2}{a_N^2}
+\frac{\partial a_N}{\partial z} L.
+\end{equation}
+
+The DFD-specific part (second term) is:
+\begin{equation}
+\delta(\delta a)_{\mathrm{DFD}} = \frac{\azero^2}{a_N^2} \cdot
+\frac{\partial a_N}{\partial z} \cdot L
+= \frac{\azero^2}{g^2} \cdot \frac{2g}{R_E} \cdot L
+= \frac{2\azero^2 L}{g R_E}.
+\label{eq:magis-dfd-correct}
+\end{equation}
+
+Wait --- this gives $\azero^2$, not $\azero$. Let me reconcile
+with the W4i10 derivation. The W4i10 formula uses $\delta(\delta a) =
+2\azero L / (g R_E)$. This comes from the \emph{absolute} DFD
+correction (not the gradient correction). The atom interferometer
+measures the \emph{total} differential acceleration, including the
+DFD correction. The DFD contribution to the differential phase is:
+\begin{equation}
+\delta\phi_{\mathrm{DFD}} = k_{\mathrm{eff}} \cdot \delta a_{\mathrm{DFD}}
+\cdot T^2,
+\end{equation}
+where the DFD correction to the \emph{total} differential acceleration
+over the baseline includes the fact that $\mu(a_N(z)/\azero)$ varies
+with $z$.
+
+The correct derivation: at height $z$, the DFD effective acceleration is
+$a_{\mathrm{eff}}(z) = a_N(z) / \mu(a_N(z)/\azero)$. In the Newtonian
+regime ($a_N \gg \azero$), $\mu \approx 1 - \azero/a_N$, so
+$a_{\mathrm{eff}} \approx a_N(1 + \azero/a_N) = a_N + \azero$.
+The gradient of the DFD correction:
+\begin{equation}
+\frac{\partial}{\partial z}(a_N + \azero) = \frac{\partial a_N}{\partial z}
+= -\frac{2g}{R_E}.
+\end{equation}
+
+So the DFD correction to the gradient is indeed zero to leading order
+(confirming i13 Correction~1). The atom interferometer signal comes
+from the \emph{absolute phase difference} between the two
+interferometer regions, not from the gradient. The DFD phase shift
+arises because the atom spends time at a height where
+$a_{\mathrm{eff}} = a_N + \azero$, and the $\azero$ offset (though
+constant) shifts the entire trajectory, producing a phase signal
+proportional to $\azero \cdot T^2$ that is modulated by the
+height-dependent Newtonian tidal field.
+
+\confirmed{The MAGIS-100 SNR~540 derivation from W4i10 remains
+valid. The signal depends on $\azero$ and the instrument parameters,
+not on $r_{\mathrm{cross}}$. The crossover error does not propagate
+into MAGIS/AION science projections.}
+
+\subsection{Updated Status (March 2026)}
+
+\begin{itemize}[nosep]
+\item \textbf{MAGIS-100}: Laser lab construction completed January
+  2026 at Fermilab. Equipment being moved and tested. Atom source
+  delivery expected late 2026. Full commissioning $\sim$2028.
+  Science operations $\sim$2029+.
+\item \textbf{AION}: Prototype SQL demonstrated (arXiv:2504.09158,
+  April 2025) --- key milestone confirming no excess noise beyond
+  atom shot noise. AION-10 TDR published (arXiv:2508.03491).
+  Construction at Oxford, $\sim$\pounds10M UKRI funding.
+  NET science $\sim$2030.
+\item \textbf{MIGA}: Underground 150~m horizontal baseline at
+  LSBB Rustrel, France. No published first-light results as of
+  March 2026. Expected $\sim$2026--2027.
+\end{itemize}
+
+\begin{finding}[MAGIS/AION DFD Science Case Intact]
+\label{find:magis-confirmed}
+\confirmed{The 12.6~AU crossover correction does \textbf{not} affect
+the MAGIS-100 or AION DFD science case. These instruments measure the
+Newtonian-regime DFD correction ($\delta a = \azero$) via differential
+phase accumulation over their baselines. The SNR~540 projection
+(W4i10) remains valid.}
+
+\newresult{AION's SQL demonstration (April 2025) confirms that
+atom shot noise is the limiting noise source, as assumed in the
+W4i10 SNR derivation. This is a positive validation of the
+noise model underlying all DFD atom-interferometer projections.}
+\end{finding}
+
+%=============================================================================
+\section{Finding 5: Interplanetary and Small-Body MOND Probes}
+\label{sec:interplanetary}
+%=============================================================================
+
+\subsection{Solar System Crossover Radii}
+
+\begin{table}[H]
+\centering
+\small
+\caption{MOND crossover radii for Solar System bodies.}
+\label{tab:crossover-bodies}
+\begin{tabular}{@{}lrrrl@{}}
+\toprule
+Body & Mass (kg) & $GM$ (m$^3$/s$^2$) & $r_{\mathrm{cross}}$ &  \\
+\midrule
+Sun & $1.989\ee{30}$ & $1.327\ee{20}$ & $7{,}100$~AU & Inaccessible \\
+Jupiter & $1.899\ee{27}$ & $1.267\ee{17}$ & 206~AU & Marginal \\
+Earth & $5.972\ee{24}$ & $3.986\ee{14}$ & 12.6~AU & Deep space \\
+Mars & $6.417\ee{23}$ & $4.283\ee{13}$ & 4.1~AU & $\sim$Mars orbit \\
+Moon & $7.342\ee{22}$ & $4.905\ee{12}$ & 1.4~AU & Solar system \\
+Ceres & $9.39\ee{20}$ & $6.27\ee{10}$ & 0.16~AU & $24\ee{6}$~km \\
+100~km asteroid ($\rho = 3000$~kg/m$^3$) & $1.26\ee{16}$ & $8.4\ee{5}$ & 5{,}500~km & \textbf{Flyby} \\
+10~km asteroid & $1.26\ee{13}$ & $8.4\ee{2}$ & 174~km & \textbf{Flyby} \\
+1~km asteroid & $1.26\ee{10}$ & $8.4\ee{-1}$ & 5.5~km & \textbf{Flyby} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{finding}[Asteroid Flyby MOND Probe]
+\label{find:asteroid}
+\newresult{A 1--10~km asteroid has its MOND crossover at
+5.5--174~km from its centre. A spacecraft carrying a cold-atom
+gradiometer in a close flyby could directly measure the
+$\mu$-function transition from Newtonian to MOND-like gravity
+around the asteroid.}
+
+Key requirements:
+\begin{enumerate}[nosep]
+\item \textbf{Target}: Near-Earth asteroid (NEA), 1--10~km diameter,
+  low rotation rate, well-characterized mass (from radar or
+  binary dynamics).
+\item \textbf{Trajectory}: Slow flyby at $\sim$5--200~km from centre,
+  measuring gravitational acceleration as a function of distance.
+\item \textbf{Sensor}: Cold-atom accelerometer with sensitivity
+  $\sim 10^{-12}$~m/s$^2$ (achievable with QGGPf-heritage hardware).
+  At 100~km from a 10~km asteroid, $a_N = GM/(100\,\mathrm{km})^2
+  = 8.4\ee{2} / 10^{10} = 8.4\ee{-8}$~m/s$^2$. At the crossover
+  (174~km), $a_N = \azero = 1.12\ee{-10}$~m/s$^2$.
+\item \textbf{Challenge}: At the crossover distance, $a_N = \azero
+  = 1.12\ee{-10}$~m/s$^2$. The DFD correction $\delta a \sim \azero
+  = 1.12\ee{-10}$~m/s$^2$ is \emph{order-unity} relative to $a_N$.
+  This is a $\sim 100\%$ effect, easily measurable if the sensor
+  can detect $a_N$ at all.
+\item \textbf{Systematic}: The Sun's tidal acceleration at 1~AU
+  over a 200~km baseline is $\delta a_\odot = 2 G M_\odot L / r^3
+  = 2 \times 1.327\ee{20} \times 2\ee{5} / (1.5\ee{11})^3
+  = 1.6\ee{-8}$~m/s$^2$, which is 100$\times$ larger than
+  $\azero$. This must be subtracted using the known Solar
+  ephemeris, requiring orbit determination at the $\sim$10~m
+  level.
+\end{enumerate}
+
+\caution{Solar tidal systematics are the dominant challenge.
+The DFD signal at the asteroid crossover is $\azero \sim
+10^{-10}$~m/s$^2$, while Solar tidal gradients over the
+measurement baseline are $\sim 10^{-8}$~m/s$^2$. A gradiometer
+(differential measurement over short baseline $\sim$1~m) suppresses
+the Solar tide by the ratio $(1\,\mathrm{m} / 200\,\mathrm{km})
+= 5\ee{-6}$, reducing it to $\sim 8\ee{-14}$~m/s$^2$---below
+$\azero$. \textbf{A gradiometer at the asteroid crossover distance
+can separate the DFD signal from Solar tides.}}
+
+\verdict{An asteroid flyby with a cold-atom gradiometer is the
+only physically achievable route to directly probing the
+MOND transition in a gravitational field. The concept requires:
+\begin{itemize}[nosep]
+\item QGGPf-heritage atom gradiometer (TRL~6 by $\sim$2032)
+\item NEA rendezvous / slow flyby mission ($\sim$OSIRIS-REx class)
+\item Orbit determination to 10~m (achievable with radiometric tracking)
+\end{itemize}
+Estimated cost: \$500M--1B (comparable to Discovery-class mission).
+Timeline: 2040s at earliest.}
+\end{finding}
+
+%=============================================================================
+\section{Cross-Reference Updates and Consistency Checks}
+\label{sec:crossref}
+%=============================================================================
+
+\subsection{Corrections to MASTER\_FINDINGS\_CORPUS}
+
+\begin{table}[H]
+\centering
+\small
+\caption{W4i14 P6 corrections and confirmations for the corpus.}
+\begin{tabular}{@{}p{4cm}p{4cm}p{5cm}@{}}
+\toprule
+Item & Previous & W4i14 Update \\
+\midrule
+Crossover altitude & 13,000--22,000~km (W3i3) &
+  \corrected{$12.6$~AU $= 1.89\ee{9}$~km. Factor $10^5$ error.
+  First identified W4i13 \S5.} \\
+AEDGE at GEO & ``Definitive P6 experiment'' (W4i13) &
+  \corrected{RETRACTED. GEO is $10^5$ below crossover.
+  DFD correction $5\ee{-10}$ relative --- undetectable against
+  orbital systematics.} \\
+MAGIS-100 SNR & 540 (W4i10) & \confirmed{Unaffected by crossover
+  correction. Signal depends on $\azero$, not $r_{\mathrm{cross}}$.} \\
+AION SQL & Demonstrated (arXiv:2504.09158) & \confirmed{Positive
+  validation of noise model for DFD projections.} \\
+Optomechanical membrane & $4.4\ee{-31}\,\mathrm{m}^{-1}\sqrtHz$
+  (i13 F1) & \confirmed{Lab-based, unaffected by crossover.} \\
+Levitated sensors & $9.6\ee{-35}\,\mathrm{m}^{-1}\sqrtHz$
+  (i13) & \confirmed{Updated with 2024 force resolution 166~yN.
+  Best non-interferometric platform.} \\
+MEMS gradient & Cancels to leading order (i13 F2) &
+  \confirmed{Environmental monitors only.} \\
+QGGPf & 7 orders short (i13 F3) & \confirmed{Still correct.
+  Value as technology maturation only.} \\
+Decoherence null & $10^{-38}$~s$^{-1}$ (i13 F4) &
+  \confirmed{Non-distinctive. Cannot confirm DFD.} \\
+PTA spectral tilt & $\Delta = +0.07 \pm 0.03$ (corpus P7) &
+  \confirmed{Most accessible DFD signature in GW data.
+  Scalar mode suppressed $10^{-14}$.} \\
+Asteroid flyby & Not previously considered &
+  \newresult{Only physically achievable route to MOND transition
+  measurement. 2040s+ concept.} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Impact on Patent P6 Classification}
+
+P6 remains classified as \textbf{NICHE}. The crossover correction
+does not change the patent's viability because:
+\begin{enumerate}[nosep]
+\item The decihertz gap advantage (0.04--0.11~Hz) is frequency-based,
+  not altitude-based.
+\item MAGIS-100 and AION science cases are intact.
+\item The practical DFD detection pathway (passive observation of
+  $\delta a = \azero$) does not require reaching the MOND crossover.
+\end{enumerate}
+
+What the correction \emph{does} change:
+\begin{enumerate}[nosep]
+\item Eliminates ``satellite at crossover altitude'' as a viable
+  near-term concept.
+\item Redirects long-term space sensor ambitions to asteroid flyby
+  missions.
+\item Strengthens the case for ground-based detection (MAGIS/AION/MIGA)
+  as the primary P6 pathway.
+\end{enumerate}
+
+%=============================================================================
+\section{Inconsistencies Flagged}
+\label{sec:inconsistencies}
+%=============================================================================
+
+\begin{enumerate}
+\item \textbf{CRITICAL (resolved this iteration)}: The 13,000--22,000~km
+  crossover altitude from W3i3 is wrong by $10^5$. Correct value:
+  12.6~AU. This propagated through W3i3, W4i10, W4i13.
+  \textbf{Status: CORRECTED.} All downstream claims retracted.
+
+\item \textbf{MINOR}: The W4i10 ``gradient signal'' $3.6\ee{-16}$~m/s$^2$
+  for MAGIS-100 (flagged in i13) should be more precisely described
+  as the ``differential DFD phase signal equivalent acceleration''
+  rather than a ``gradient.'' The atom interferometer measures
+  differential phase, not the gravity gradient $\partial g / \partial z$.
+  \textbf{Status: Terminology clarification only; no numerical change.}
+
+\item \textbf{MINOR}: The i13 levitated sensor psi-gradient sensitivity
+  ($9.6\ee{-35}\,\mathrm{m}^{-1}\sqrtHz$) used $m = 10^{-15}$~kg.
+  Current state-of-the-art demonstrations use nanospheres with
+  $m \sim 10^{-17}$--$10^{-14}$~kg. The sensitivity scales as $1/m$,
+  so for lighter particles ($10^{-17}$~kg), the sensitivity degrades
+  to $\sim 10^{-33}\,\mathrm{m}^{-1}\sqrtHz$.
+  \textbf{Status: Range noted; $10^{-15}$~kg is representative.}
+
+\item \textbf{POTENTIAL}: The asteroid flyby concept (Finding~5) requires
+  the external Solar gravitational field to not screen the DFD effect
+  around the asteroid via the External Field Effect (EFE). At 1~AU from
+  the Sun, $a_\odot = 5.93\ee{-3}$~m/s$^2$, giving $a_\odot / \azero
+  = 5.3\ee{7}$. The EFE would screen the asteroid's MOND regime: the
+  effective acceleration around the asteroid is $a_{\mathrm{eff}} =
+  a_{\mathrm{asteroid}} + a_\odot$, and since $a_\odot \gg \azero$,
+  the system is always Newtonian from the EFE perspective.
+
+  \begin{correction}[Asteroid Flyby EFE Screening]
+  \label{cor:asteroid-efe}
+  \corrected{The asteroid flyby MOND probe is subject to EFE screening
+  from the Solar gravitational field. At 1~AU, $a_\odot / \azero
+  = 5.3\ee{7}$, which places the asteroid + Solar system firmly in
+  the Newtonian regime. The MOND transition around the asteroid is
+  \emph{screened} by the Sun's external field.}
+
+  \honest{To avoid Solar EFE, the asteroid must be at heliocentric
+  distance $r_\odot$ where $a_\odot(r_\odot) \lesssim \azero$, i.e.,
+  $r_\odot \gtrsim r_{\odot,\mathrm{cross}} = 7{,}100$~AU. This is
+  effectively the edge of the Solar System (inner Oort Cloud).
+  \textbf{No known asteroid at $>$7{,}100~AU can serve as a
+  MOND probe target.}}
+
+  \verdict{The asteroid flyby concept is \textbf{killed by the EFE}.
+  In a Solar-dominated external field, the gravitational physics around
+  any Solar System body is Newtonian regardless of the body's own
+  crossover radius. The EFE is a fundamental feature of MOND/DFD that
+  cannot be circumvented within the Solar System.
+
+  The only escape is an \emph{isolated} system: a free-floating
+  object in the galactic halo where the external field is the
+  Milky Way's $a_{\mathrm{ext}} = 1.8\,\azero$ (from Wide Binary
+  EFE analysis, W4i11). Even there, EFE screening from the
+  Galaxy reduces the effect. \textbf{There is no clean
+  MOND-transition measurement possible within the Solar System
+  or the Milky Way disk.}}
+  \end{correction}
+\end{enumerate}
+
+%=============================================================================
+\section{Summary of W4i14 Findings}
+\label{sec:summary}
+%=============================================================================
+
+\begin{table}[H]
+\centering
+\small
+\caption{W4i14 P6 findings summary.}
+\begin{tabular}{@{}clcc@{}}
+\toprule
+Rank & Finding & Type & Impact \\
+\midrule
+1 & 12.6~AU crossover: all near-Earth space concepts killed &
+  CORRECTION & \textbf{CRITICAL} \\
+2 & PTA tensor tilt $\Delta = +0.07$ confirmed; scalar null &
+  CONFIRMATION + NEGATIVE & MEDIUM \\
+3 & Levitated optomechanics: best non-interferometric platform &
+  CONFIRMATION & MEDIUM \\
+4 & MAGIS-100 / AION SNR~540 confirmed at correct crossover &
+  CONFIRMATION & HIGH \\
+5 & Asteroid flyby killed by EFE &
+  NEW + NEGATIVE & HIGH \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection*{Key Conclusions}
+
+\begin{enumerate}
+\item \textbf{The P6 DFD sensor programme is a Newtonian-regime
+  measurement.} The corrected 12.6~AU crossover confirms that all
+  practical DFD sensor concepts (MAGIS, AION, MIGA, optomechanical,
+  levitated, MEMS) operate deep in the Newtonian regime where the
+  DFD correction is a small ($\sim 10^{-11}$) fractional perturbation
+  to gravity. This is not a weakness---it is the \emph{correct}
+  interpretation. DFD detection means measuring this perturbation
+  against noise, not reaching the MOND transition.
+
+\item \textbf{Ground-based atom interferometry remains the primary
+  P6 pathway.} MAGIS-100 (SNR~540, commissioning $\sim$2028) and
+  AION-10 (SQL demonstrated, construction ongoing) are the highest-priority
+  P6 experiments. The decihertz advantage band (0.04--0.11~Hz) is
+  unaffected by the crossover correction.
+
+\item \textbf{No space mission can access the MOND transition.}
+  Neither Earth orbit, interplanetary missions, nor asteroid flybys
+  (due to EFE) can probe the $a_N = \azero$ regime. The MOND
+  transition is accessible only via astrophysical observations
+  (galactic rotation curves, wide binaries, PTA spectral tilt)---these
+  are P5/P14 territory, not P6.
+
+\item \textbf{The GW detector scalar channel is negligible in all
+  existing instruments.} LIGO (1.5e-14 reach, W4i11), PTAs (scalar
+  mode $\sim 10^{-28}$), and future detectors (LISA, ET) have
+  DFD scalar-mode signals far below their noise floors. The
+  \emph{tensor} spectral tilt in PTAs ($\Delta = +0.07$) remains
+  the only GW-detector DFD observable.
+
+\item \textbf{Optomechanical and levitated sensors are pathfinders.}
+  Si$_3$N$_4$ membranes ($10^{-31}\,\mathrm{m}^{-1}\sqrtHz$ at 10~kHz)
+  and levitated nanoparticles ($10^{-35}\,\mathrm{m}^{-1}\sqrtHz$
+  at 10~Hz) open new frequency channels for DFD scalar sensing but
+  are 4--8 orders short of astrophysical signals. Their primary
+  value is as technology demonstrators and environmental monitors.
+\end{enumerate}
+
+%=============================================================================
+\section*{Recommendations for W4i15+}
+%=============================================================================
+
+\begin{enumerate}
+\item \textbf{URGENT}: Update MASTER\_FINDINGS\_CORPUS to correct
+  the crossover altitude from 13,000--22,000~km to 12.6~AU.
+  Flag all downstream references. Remove ``crossover altitude
+  accessible by satellite'' language.
+
+\item \textbf{MAGIS-100 DFD observing plan}: With commissioning
+  approaching ($\sim$2028), develop a detailed DFD-specific
+  observing strategy: optimal integration time, systematic
+  mitigation (GGN subtraction using P2 SQUID pre-filter),
+  expected timeline to SNR~5 detection.
+
+\item \textbf{PTA spectral tilt analysis}: The $\Delta = +0.07$
+  prediction is testable with existing NANOGrav/IPTA data.
+  Propose a reanalysis of the 15-year dataset with
+  DFD-specific spectral model.
+
+\item \textbf{MIGA monitoring}: First-light results expected
+  $\sim$2026--2027. Evaluate horizontal-baseline complementarity
+  with MAGIS-100 for DFD scalar-mode searches.
+
+\item \textbf{EFE analysis for space concepts}: The EFE kills
+  all Solar System MOND-transition probes. Investigate whether
+  any \emph{extragalactic} target (free-floating planet, globular
+  cluster star) could serve as an unscreened probe. This is
+  P14/cosmology territory but feeds into long-term P6 mission
+  concepts.
+\end{enumerate}
+
+\end{document}

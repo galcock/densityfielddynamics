@@ -1,0 +1,228 @@
+%=============================================================================
+% CROSS-REFERENCE: THE LATTICE beta -> kappa MAP IN DFD's U(1) THEORY
+% Generated: 2026-03-22
+% Source files: Ab_Initio_Derivation...pdf (Eqs. 11-13, 19-20),
+%   appendix_K.tex, section_quantum.tex, section_alpha_locked.tex,
+%   appendix_G.tex
+%=============================================================================
+
+\section{The $\beta \to \kappa$ Map: How DFD Extracts Physics from the Lattice}
+
+\subsection{Executive Summary}
+
+DFD does \textbf{not} use any standard analytic $\beta \to \kappa$ renormalization formula
+(neither mean-field, nor perturbative, nor Toeplitz-based).
+Instead, $\kappa$ is a \textbf{non-perturbative Monte Carlo measurement} extracted
+from the lattice via the background-field method. The relationship
+$\kappa(\beta)$ is determined entirely numerically; no closed-form expression
+connects $\beta_{U(1)}$ to $\kappa_{U(1)}$.
+
+\medskip
+\noindent\textbf{Key distinction (PDF Eq.~11):}
+\begin{equation}
+\beta_{U(1)} = \frac{1}{g_1^2} \approx 3.80 \quad \text{(bare lattice input)},
+\qquad
+\kappa_{U(1)} \approx 7.25 \quad \text{(measured output)}.
+\end{equation}
+These are \emph{not} the same quantity. The paper explicitly states:
+``The relationship between them is non-perturbative and lattice-size dependent,
+which is precisely why the simulation is needed.''
+
+%-----------------------------------------------------------------------------
+\subsection{The Three Layers of the DFD Lattice Calculation}
+%-----------------------------------------------------------------------------
+
+The DFD $\alpha$-derivation involves three logically distinct layers:
+
+\paragraph{Layer 1: Topological inputs $\to$ bare lattice couplings $\beta$.}
+Four constraints, all derived from topology with zero continuous free parameters:
+\begin{enumerate}
+\item $k_{\max} = \chi(\mathbb{C}P^2, \mathcal{O}(9) \oplus \mathcal{O}^{\oplus 5}) = 60$
+      \quad [Spin$^c$ index, Bridge Lemma]
+\item $\beta_{U(1)} = \langle k_{\rm eff} \rangle_{k_{\max}=60}
+      = \frac{\sum_{k=0}^{59}(k+2)\,w(k)}{\sum_{k=0}^{59}w(k)} = 3.7969 \approx 3.80$
+      \quad [CS vacuum expectation]
+\item $\beta_{SU(2)}/\beta_{U(1)} = (n_2/n_1) \times N_{\rm gen} = 2 \times 3 = 6$
+      \quad [Frame Stiffness Theorem $\times$ index theorem]
+\item $\beta_{SU(2)} = 6 \times 3.80 = 22.80$ \quad [derived]
+\end{enumerate}
+Here $w(k) = \frac{2}{k+2}\sin^2\!\bigl(\frac{\pi}{k+2}\bigr)$ are the SU(2) Chern--Simons
+weights and $k_{\rm eff} \equiv k + 2$ is the shifted level (dual Coxeter number $h^\vee = 2$
+for SU(2)).
+
+\paragraph{Layer 2: Monte Carlo simulation $\to$ measured stiffnesses $\kappa$.}
+The lattice action (PDF Eq.~19) couples the gauge sector to the microsector
+via the $\psi(k)$ field:
+\begin{equation}
+S = \sum_x [-\log w(k_x)]
+  + \frac{K_\psi}{2}\sum_{\langle xy \rangle}(\psi_x - \psi_y)^2
+  - \sum_p \beta\, e^{-\psi_p} \cos(\theta_p + \theta_{\rm bg}\,\Omega_p),
+\end{equation}
+where $\psi_x = \psi(k_x)$ is the coarse-graining map and $\Omega_p$ marks
+background-field plaquettes. Metropolis updates generate equilibrated
+configurations at the input $(\beta_{U(1)}, \beta_{SU(2)})$.
+
+The renormalized stiffness is then extracted via the \textbf{background-field method}
+(PDF Eq.~20):
+\begin{equation}\label{eq:kappa-extraction}
+\boxed{\kappa = \frac{F''(0)}{V}}, \qquad
+F''(0) = \langle S'' \rangle - \langle (S')^2 \rangle + \langle S' \rangle^2,
+\end{equation}
+where primes denote derivatives with respect to background field strength
+$\theta_{\rm bg}$ evaluated at $\theta_{\rm bg} = 0$, and $V = L^3$.
+This is the standard susceptibility/free-energy curvature method used in
+lattice gauge theory. It captures all non-perturbative effects including
+quantum fluctuations, confinement/deconfinement physics, and finite-size
+corrections.
+
+\paragraph{Layer 3: Measured stiffnesses $\to$ $\alpha$.}
+Given the measured $\kappa_{U(1)}$ and $\kappa_{SU(2)}$, the gauge couplings are
+extracted via Wilson's normalization conventions (PDF Eqs.~12--13):
+\begin{align}
+g_1^2 &= \frac{1}{\kappa_{U(1)}}, \qquad
+g_2^2 = \frac{4}{\kappa_{SU(2)}}, \\[6pt]
+\frac{1}{e^2} &= \frac{1}{g_1^2} + \frac{1}{g_2^2}
+              = \kappa_{U(1)} + \frac{\kappa_{SU(2)}}{4}, \\[6pt]
+\alpha_W &= \frac{e^2}{4\pi}
+          = \frac{(1/\kappa_{U(1)})(4/\kappa_{SU(2)})}
+                 {(1/\kappa_{U(1)}) + (4/\kappa_{SU(2)})}
+            \cdot \frac{1}{4\pi}.
+\end{align}
+The factor of 4 in $g_2^2 = 4/\kappa_{SU(2)}$ is the standard Wilson action
+normalization for SU(2): with $\mathrm{Tr}(T^a T^b) = \frac{1}{2}\delta^{ab}$,
+the Wilson plaquette action gives $\beta_{SU(2)} = 4/g^2$.
+
+%-----------------------------------------------------------------------------
+\subsection{Why No Analytic $\beta \to \kappa$ Formula Exists}
+%-----------------------------------------------------------------------------
+
+In standard compact U(1) lattice gauge theory, the relationship between
+the bare coupling $\beta = 1/g^2$ and the renormalized stiffness $\kappa$
+is complicated by:
+
+\begin{itemize}
+\item \textbf{Confinement/Coulomb phase transition:} Compact U(1) on a
+      finite lattice has a first-order phase transition near $\beta_c \approx 1.01$
+      (4D). DFD operates at $\beta = 3.80$, well into the Coulomb phase,
+      but finite-size effects from the lattice sizes $L = 6$--$16$ are
+      non-negligible.
+
+\item \textbf{Non-perturbative renormalization:} The perturbative expansion
+      $\kappa = \beta(1 + c_1/\beta + \ldots)$ is an asymptotic series that
+      does not converge at $\beta = 3.80$. Mean-field estimates
+      $\kappa \approx \beta \langle P \rangle$ (where $\langle P \rangle$ is the
+      plaquette expectation value) give only a rough approximation.
+
+\item \textbf{DFD microsector coupling:} The DFD action (Eq.~19) is
+      \emph{not} the standard compact U(1) Wilson action. The additional
+      $\psi(k)$ field and its nearest-neighbor coupling $K_\psi$ modify
+      the effective dynamics. No analytic result exists for this coupled system.
+\end{itemize}
+
+The numerical result $\kappa_{U(1)} \approx 7.25$ at $\beta_{U(1)} = 3.80$
+represents a renormalization factor of $\kappa/\beta \approx 1.9$, which is
+substantially larger than unity. This large ratio reflects the non-perturbative
+quantum fluctuation enhancement in the Coulomb phase of the microsector-coupled
+lattice theory.
+
+%-----------------------------------------------------------------------------
+\subsection{Role of the Toeplitz Truncation}
+%-----------------------------------------------------------------------------
+
+The Toeplitz truncation enters at \textbf{Layer 1}, not Layer 2. Specifically:
+
+\begin{itemize}
+\item The Toeplitz quantization at level $m = k + 3$ on $\mathbb{C}P^1$ sets
+      $d = k + 4 = 64$ (for $k = k_{\max} = 60$).
+\item This determines the BOOST factor
+      $\varepsilon_{\rm adj} = d^2/(d^2 - 1) = 4096/4095$ in the
+      convention-locked $\alpha$ derivation (Section~8C of the unified review).
+\item It does \emph{not} enter the $\beta \to \kappa$ map.
+      The lattice simulation at Layer 2 knows nothing about the Toeplitz
+      truncation; it simply runs at the input $\beta$ values and measures
+      $\kappa$ from fluctuations.
+\end{itemize}
+
+The spectral cutoff $\Lambda^3 = k \cdot (k+3)/(k+4)$ from the Toeplitz
+truncation enters only in the analytical (non-lattice) derivation path
+that achieves sub-ppm precision (Section~8C, $\alpha^{-1} = 137.03599985$).
+The lattice path achieves $\sim 1\%$ precision independently.
+
+%-----------------------------------------------------------------------------
+\subsection{Comparison with Standard Lattice Gauge Theory}
+%-----------------------------------------------------------------------------
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Feature} & \textbf{Standard lattice U(1)} & \textbf{DFD lattice} \\
+\midrule
+Action & Wilson plaquette & Wilson + microsector $\psi(k)$ \\
+$\beta$ meaning & $1/g^2_{\rm bare}$ & $\langle k_{\rm eff} \rangle$ from CS vacuum \\
+$\beta$ value & Free parameter & Fixed: $3.80$ from topology \\
+$\kappa$ extraction & Background field / susceptibility & Same method (Eq.~20) \\
+$\beta \to \kappa$ map & Non-perturbative & Non-perturbative \\
+Analytic approx. & $\kappa \approx \beta \langle P \rangle$ & None available \\
+Measured $\kappa/\beta$ & $\sim 1$ (large $\beta$) & $\approx 1.9$ \\
+Physical observable & $g_{\rm renorm}^2 = 1/\kappa$ & $\alpha_W$ via electroweak mixing \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+%-----------------------------------------------------------------------------
+\subsection{Answer to the Three Posed Questions}
+%-----------------------------------------------------------------------------
+
+\begin{enumerate}
+\item \textbf{Is it $\kappa = \beta \times \langle P \rangle$ (mean-field)?}
+
+No. DFD does not use a mean-field approximation. The stiffness $\kappa$
+is measured non-perturbatively from the free-energy curvature (Eq.~20).
+The measured ratio $\kappa_{U(1)}/\beta_{U(1)} \approx 7.25/3.80 \approx 1.9$
+is much larger than typical mean-field plaquette values.
+
+\item \textbf{Is it $\kappa = \beta \times (1 + c_1/\beta + \ldots)$ (perturbative)?}
+
+No. No perturbative expansion is used. The paper explicitly states that
+the $\beta \to \kappa$ relationship is ``non-perturbative and lattice-size
+dependent, which is precisely why the simulation is needed.''
+
+\item \textbf{Does it involve the Toeplitz truncation?}
+
+No, not at the $\beta \to \kappa$ level. The Toeplitz truncation determines
+the input $\beta$ (Layer 1) and the BOOST factor in the analytical path,
+but does not enter the lattice measurement of $\kappa$ (Layer 2).
+\end{enumerate}
+
+%-----------------------------------------------------------------------------
+\subsection{Summary}
+%-----------------------------------------------------------------------------
+
+\begin{tcolorbox}[colback=blue!5!white, colframe=blue!50!black,
+  title=The $\beta \to \kappa$ Map in DFD]
+
+\textbf{Method:} Non-perturbative Monte Carlo measurement via
+background-field free-energy curvature.
+
+\textbf{Formula:}
+$\kappa = F''(0)/V$ where $F''(0) = \langle S'' \rangle
+- \langle (S')^2 \rangle + \langle S' \rangle^2$
+
+\textbf{Key numbers:}
+\begin{itemize}[nosep]
+\item $\beta_{U(1)} = 3.80$ (bare input from CS vacuum)
+\item $\kappa_{U(1)} \approx 7.25$ (measured output)
+\item $\kappa_{U(1)}/\kappa_{SU(2)} \approx 0.50$ (confirms Frame Stiffness Theorem)
+\item $\alpha_W \approx 1/137$ (extracted via electroweak mixing)
+\end{itemize}
+
+\textbf{Not used:} Mean-field, perturbative expansion, or Toeplitz-based
+analytic continuation. The entire $\beta \to \kappa$ map is numerical.
+
+\textbf{Why this matters:} The simulation is the irreducible non-perturbative
+step that converts topological inputs ($\beta$) into physical outputs ($\alpha$).
+No analytic shortcut exists for the DFD microsector-coupled action.
+\end{tcolorbox}
+
+\end{document}

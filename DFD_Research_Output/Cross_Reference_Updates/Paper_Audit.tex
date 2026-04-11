@@ -1,0 +1,450 @@
+%=============================================================================
+% CRITICAL AUDIT: Ab Initio Paper vs. Verified Pipeline
+% Date: 22 March 2026
+% Auditor: Claude Opus 4.6 (30+ agent cross-reference)
+%=============================================================================
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,booktabs,geometry,xcolor,tcolorbox}
+\geometry{margin=1in}
+
+\definecolor{pass}{rgb}{0,0.5,0}
+\definecolor{fail}{rgb}{0.8,0,0}
+\definecolor{warn}{rgb}{0.8,0.5,0}
+
+\newcommand{\PASS}{\textcolor{pass}{\textbf{PASS}}}
+\newcommand{\FAIL}{\textcolor{fail}{\textbf{FAIL}}}
+\newcommand{\WARN}{\textcolor{warn}{\textbf{WARNING}}}
+
+\title{Critical Audit: Ab Initio Paper Presentation\\
+  vs.\ Verified Numerical Pipeline}
+\author{Cross-Reference Audit (30+ Agent Campaign)}
+\date{22 March 2026}
+
+\begin{document}
+\maketitle
+
+\begin{tcolorbox}[colback=blue!5!white, colframe=blue!50!black, title=Executive Summary]
+\textbf{10 audit items checked. Results:}
+\begin{itemize}
+\item 6 items \PASS{} --- formula, prefactor algebra, boost correction, V\_int,
+  Table~XXVIII, Python code
+\item 2 items \FAIL{} --- residual sign is wrong; CODATA values are inconsistent
+\item 2 items \WARN{} --- factor-origin descriptions have caveats;
+  ``two routes'' independence claim is overstated
+\end{itemize}
+
+\textbf{Bottom line:} The numerical pipeline is correct and reproduces
+$\alpha^{-1} = 137.0359998541\ldots$ from closed-form inputs.
+The paper's \emph{presentation} has two clear errors (residual sign, CODATA
+inconsistency) and two descriptions that need tightening.
+\end{tcolorbox}
+
+%=============================================================================
+\section{Audit Item 1: Master Formula (Eq.\ master\_formula)}
+%=============================================================================
+
+\textbf{Verdict: \PASS}
+
+\medskip
+\noindent Paper states:
+\begin{equation}\label{eq:master}
+\alpha^{-1} = \frac{\pi^{3/2}}{24}\;\mathrm{Tr}(Y^2)\;k_{\max}\;
+  \frac{k_{\max}+3}{k_{\max}+4}\;
+  \biggl[1 + \frac{N_{\rm sp}}{g_F\;\mathrm{Tr}(Y^2)\;\bigl((k_{\max}+4)^2-1\bigr)}\biggr].
+\end{equation}
+
+Pipeline (\texttt{verify\_alpha\_pipeline.py}) computes:
+\[
+\alpha^{-1} = K_{\rm geom} \times f_0 \times \mathrm{Tr}(Y^2)
+  \times \Lambda^3 \times \varepsilon_{\rm weighted},
+\]
+where:
+\begin{align}
+K_{\rm geom} &= \pi^{3/2}/24, \quad f_0 = 1, \\
+\Lambda^3 &= k \cdot (k+3)/(k+4), \\
+\varepsilon_{\rm weighted} &= 1 + w\,\delta_{\rm adj}
+  = 1 + \frac{N_{\rm sp}}{g_F\,\mathrm{Tr}(Y^2)\,\bigl((k+4)^2-1\bigr)}.
+\end{align}
+
+\textbf{These are algebraically identical.} Numerical verification:
+both produce $137.0359998541200$ to 13-digit agreement.
+
+%=============================================================================
+\section{Audit Item 2: Prefactor Derivation}
+%=============================================================================
+
+\textbf{Verdict: \PASS}
+
+\medskip
+\noindent Paper claims:
+\[
+16\pi \times (4\pi)^{-7/2} \times \tfrac{1}{12} \times 4\pi^4
+= \frac{\pi^{3/2}}{24}.
+\]
+
+\textbf{Verification (step by step):}
+\begin{align}
+16\pi \times (4\pi)^{-7/2} \times \tfrac{1}{12} \times 4\pi^4
+&= 16\pi \times 4^{-7/2}\,\pi^{-7/2} \times \tfrac{1}{12} \times 4\,\pi^4 \\
+&= 16 \times 4^{-7/2} \times 4 \times \tfrac{1}{12}
+  \times \pi^{1-7/2+4} \\
+&= 16 \times 4^{-5/2} \times \tfrac{1}{12} \times \pi^{3/2}.
+\end{align}
+Now $4^{5/2} = 32$, so $16/32 = 1/2$, and $(1/2)(1/12) = 1/24$.
+
+\[
+\Rightarrow\quad \frac{\pi^{3/2}}{24} \quad\checkmark
+\]
+
+Numerically: $\pi^{3/2}/24 = 0.232013666534654\ldots$,
+matching $K_{\rm geom}$ from the pipeline to machine precision.
+
+%=============================================================================
+\section{Audit Item 3: Residual Sign}
+%=============================================================================
+
+\textbf{Verdict: \FAIL{} --- sign is wrong in the paper}
+
+\medskip
+\noindent Paper states: ``residual: $-0.006$ ppm.''
+
+\textbf{Numerical facts:}
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{lrl}
+\toprule
+Comparison & Residual (ppm) & Sign \\
+\midrule
+DFD vs CODATA 2018 ($137.035999084$) & $+0.0056$ & DFD is \emph{above} \\
+DFD vs CODATA 2022 ($137.035999177$) & $+0.0049$ & DFD is \emph{above} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The DFD prediction $137.0359998541\ldots$ is \textbf{larger} than experiment
+regardless of which CODATA edition is used. Using standard convention
+$(\alpha^{-1}_{\rm DFD} - \alpha^{-1}_{\rm exp})/\alpha^{-1}_{\rm exp}$,
+the residual is \textbf{positive}, approximately $+0.006$~ppm.
+
+\textbf{Correction needed:} Change ``$-0.006$ ppm'' to ``$+0.006$ ppm''
+throughout the paper (appears in \texttt{section\_alpha\_locked.tex}
+lines 145, 226, 253 and \texttt{section\_quantum.tex} line 226).
+
+%=============================================================================
+\section{Audit Item 4: Boost Correction Consistency}
+%=============================================================================
+
+\textbf{Verdict: \PASS}
+
+\medskip
+\noindent Paper states:
+\[
+\varepsilon_w = 1 + w\,\delta_{\rm adj}
+= 1 + \frac{7}{80} \times \frac{1}{4095}
+= 1 + \frac{7}{80 \times 4095}
+= 1 + \frac{7}{327600}.
+\]
+
+Pipeline (\texttt{verify\_alpha\_pipeline.py}, lines 121--123):
+\begin{verbatim}
+eps_adj    = (d * d) / (d * d - 1.0)
+delta_adj  = 1.0 / (d * d - 1.0)
+eps_weighted = 1.0 + w * delta_adj
+\end{verbatim}
+with $d = 64$, $w = 7/80$, so $\delta_{\rm adj} = 1/(64^2-1) = 1/4095$.
+
+Result: $\varepsilon_{\rm weighted} = 1.0000213675213676\ldots$
+
+\textbf{Paper and pipeline agree exactly.} Note that $\varepsilon_{\rm weighted}$
+is \emph{not} the same as $\varepsilon_{\rm adj} = 4096/4095$. The weighted
+version is smaller: it is $1 + (7/80) \times (1/4095)$, not $1 + 1/4095$.
+The paper correctly distinguishes these.
+
+%=============================================================================
+\section{Audit Item 5: Origin of Each Factor}
+%=============================================================================
+
+\textbf{Verdict: \WARN{} --- descriptions are correct but have important caveats}
+
+\medskip
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{lll}
+\toprule
+Factor & Paper's description & Assessment \\
+\midrule
+$16\pi$ & Coupling definition: $\alpha^{-1} = 16\pi C$ & \PASS \\
+$(4\pi)^{-7/2}$ & Heat kernel normalization & \PASS{} (standard for $d_{\rm int}=7$) \\
+$1/12$ & Gilkey $\Omega^2$ coefficient & \WARN{} (see below) \\
+$4\pi^4$ & Internal volume & \PASS{} (see Item 6) \\
+$\mathrm{Tr}(Y^2)=10$ & SM hypercharge sum & \PASS \\
+$k(k+3)/(k+4)$ & Toeplitz truncation & \PASS \\
+$\varepsilon_{\rm weighted}$ & Adjoint-unimodularity & \PASS \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{The $1/12$ caveat.}
+The paper says $1/12$ comes from the Gilkey $\Omega^2$ coefficient
+($= 30/360$ in the standard $a_4$ expansion). Previous agents verified
+that the standard Gilkey route on the \emph{continuum} $\mathbb{C}P^2 \times S^3$
+gives a different numerical prefactor (the ``Gilkey route gives the wrong answer''
+finding). The resolution is that the \emph{Toeplitz-truncated} geometry modifies
+the effective curvature invariants so that the combination
+$16\pi \times (4\pi)^{-7/2} \times (1/12) \times V_{\rm int}$
+correctly extracts the gauge kinetic coefficient. The paper's description
+is operationally correct (the formula works), but the phrase ``Gilkey $\Omega^2$
+coefficient'' is misleading if read as implying that one simply plugs
+continuum curvature invariants into the Gilkey formula. A clarifying
+sentence would strengthen the paper.
+
+%=============================================================================
+\section{Audit Item 6: $V_{\rm int} = 4\pi^4$}
+%=============================================================================
+
+\textbf{Verdict: \PASS}
+
+\medskip
+\noindent Paper says:
+\[
+V_{\rm int} = \mathrm{Vol}(\mathbb{C}P^2) \times \mathrm{Vol}(S^3)
+= \frac{\pi^2}{2} \times 2\pi^2 = \pi^4,
+\]
+times 4 from $\omega_{\mathbb{C}P^1} = 2\pi$ normalization.
+
+\textbf{Verification:}
+With standard Fubini--Study ($\omega_{\rm FS}$, holomorphic sectional curvature~4):
+\[
+\mathrm{Vol}(\mathbb{C}P^2)_{\rm unit} = \frac{\pi^2}{2}, \quad
+\mathrm{Vol}(S^3)_{\rm unit} = 2\pi^2.
+\]
+Rescaling $\omega \to 2\omega$ so that $A(\mathbb{C}P^1) = 2\pi$:
+volume form on $\mathbb{C}P^2$ is $\omega^2/2$, so
+$\mathrm{Vol} \to 4 \times \pi^2/2 = 2\pi^2$.
+Thus $V_{\rm int} = 2\pi^2 \times 2\pi^2 = 4\pi^4 = 389.636\ldots$
+
+The pipeline confirms: $V_{\rm int} = 389.6363641360097 = 4\pi^4$ exactly.
+
+\paragraph{Minor clarity issue.}
+The paper says ``times 4 from $\omega_{\mathbb{C}P^1} = 2\pi$ normalization.''
+This factor of 4 applies specifically to $\mathrm{Vol}(\mathbb{C}P^2)$
+(because $\omega^2$ appears in the volume form), not to the product as a whole.
+A reader might misinterpret this as multiplying the base product $\pi^4$ by~4
+for some separate reason. The explanation is correct but could be clearer.
+
+%=============================================================================
+\section{Audit Item 7: ``Two Routes'' Independence}
+%=============================================================================
+
+\textbf{Verdict: \WARN{} --- the independence claim is overstated}
+
+\medskip
+The paper presents:
+\begin{itemize}
+\item \textbf{Route 1 (Lattice MC):} $\sim 1\%$ precision verification
+\item \textbf{Route 2 (Spectral action):} sub-ppm closed-form prediction
+\end{itemize}
+and describes them as ``independent routes.''
+
+\textbf{Assessment:}
+\begin{enumerate}
+\item The lattice MC route uses $(\beta_{U(1)}, \beta_{SU(2)}) = (3.80, 22.80)$
+  measured from Wilson loops, then plugs into the electroweak formula.
+  This is genuinely independent of the spectral action.
+
+\item The spectral action route produces the closed-form formula
+  $(\pi^{3/2}/24)\,\mathrm{Tr}(Y^2)\,k\,(k+3)/(k+4)\,\varepsilon_w$.
+  This does NOT depend on the lattice MC simulation.
+
+\item \textbf{However}, both routes share the UV cutoff $k_{\max} = 60$.
+  The Bridge Lemma derivation of $k_{\max}$ is purely algebraic-geometric
+  and independent. But the paper also mentions MC-based selection of $k_{\max}$
+  as a ``consistency check.'' If the lattice MC is used to \emph{select}
+  $k_{\max} = 60$ (rather than derive it from the Bridge Lemma), then
+  the routes are not fully independent.
+
+\item The spectral action route is self-contained: given $k_{\max} = 60$
+  from the Bridge Lemma, the formula produces $137.036\ldots$ with no
+  MC input. So the routes \emph{can be} independent if $k_{\max}$ is
+  derived algebraically.
+\end{enumerate}
+
+\textbf{Recommendation:} The paper should clarify that the spectral action
+route derives $k_{\max}$ from the Bridge Lemma (not from MC), making it
+genuinely independent. The lattice MC then serves as a cross-check.
+
+%=============================================================================
+\section{Audit Item 8: Table XXVIII (Formula Inputs)}
+%=============================================================================
+
+\textbf{Verdict: \PASS}
+
+\medskip
+The derivation chain table in \texttt{section\_alpha\_locked.tex} (Table~2,
+lines 184--207) lists:
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{llll}
+\toprule
+Input & Value & Source & Verified? \\
+\midrule
+$K_{\mathbb{C}P^2}$ & $\mathcal{O}(-3)$ & Algebraic geometry & \PASS \\
+$L_{\rm det}$ & $\mathcal{O}(3)$ & Spin$^c$ & \PASS \\
+$d$ & $64$ & $\dim H^0(\mathcal{O}(63))$ & \PASS \\
+$(d-1)/d$ & $63/64$ & Traceless projection & \PASS \\
+$N_{\rm species}$ & $7$ & SM content & \PASS \\
+$\mathrm{Tr}(Y^2)$ & $10$ & SM hypercharges & \PASS \\
+$g_F$ & $8$ & Spectral triple grading & \PASS \\
+$w$ & $7/80$ & $N_{\rm sp}/(g_F \cdot \mathrm{Tr}(Y^2))$ & \PASS \\
+$\varepsilon_{\rm adj}$ & $4096/4095$ & Regular-module trace & \PASS \\
+$\alpha^{-1}$ & $137.03599985$ & Combined & \PASS \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{All entries match the pipeline.} The table omits explicit mention of
+$V_{\rm int} = 4\pi^4$ and the prefactor $\pi^{3/2}/24$ as separate line items,
+but these are encoded in $K_{\rm geom}$.
+
+\paragraph{Minor omission.}
+The table does not list $k_{\max} = 60$ as a separate locked input, though
+it is implicit in $d = k_{\max} + 4 = 64$. For completeness, $k_{\max}$
+deserves its own row with source ``Bridge Lemma.''
+
+%=============================================================================
+\section{Audit Item 9: Python Code Listings}
+%=============================================================================
+
+\textbf{Verdict: \PASS{} (with one notation caveat)}
+
+\medskip
+The Ab Initio paper contains two code listings:
+
+\paragraph{Listing 1 (CS average).}
+\begin{verbatim}
+def w(k):
+    return (2.0/(k+2)) * (math.sin(math.pi/(k+2)))**2
+
+for k_max in [50, 60, 100, 1000000]:
+    Z = sum(w(k) for k in range(k_max))
+    k_eff = sum((k+2)*w(k) for k in range(k_max)) / Z
+    print(f"k_max={k_max:7d}: <k+2> = {k_eff:.4f}")
+\end{verbatim}
+Output at $k_{\max}=60$: $\langle k+2 \rangle = 3.7969$.
+Pipeline confirms: $\beta_{U(1)} = 3.796945276\ldots$ \PASS
+
+\paragraph{Listing 2 (Wilson $\alpha$).}
+\begin{verbatim}
+def alpha_wilson(ku, ks):
+    g1 = 1.0/ku; g2 = 4.0/ks
+    e2 = g1*g2/(g1+g2)
+    return e2/(4.0*math.pi)
+\end{verbatim}
+This computes $\alpha = e^2/(4\pi)$ where $1/e^2 = \kappa_{U(1)} + \kappa_{SU(2)}/4$.
+\PASS{} --- algebraically correct.
+
+\paragraph{Caveat.}
+Neither listing computes the full pipeline to $137.03599985$. Listing~2 takes
+$\kappa_{U(1)}$ as input. The full closed-form computation is in
+\texttt{verify\_alpha\_pipeline.py}, which is not in the published paper.
+This is a presentation gap, not an error.
+
+%=============================================================================
+\section{Audit Item 10: CODATA Value Consistency}
+%=============================================================================
+
+\textbf{Verdict: \FAIL{} --- inconsistent CODATA values across the corpus}
+
+\medskip
+The v108 Unified Theory uses $\alpha^{-1}_{\rm exp}$ in multiple places:
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{lll}
+\toprule
+Location & Value & Edition \\
+\midrule
+\texttt{appendix\_A.tex} (Table) & $137.035999084(21)$ & CODATA 2018 \\
+\texttt{section\_alpha\_locked.tex} (Table 1) & $137.035999084$ & CODATA 2018 \\
+\texttt{appendix\_X\_neutrino.tex} & $137.035999084$ & CODATA 2018 \\
+\texttt{appendix\_K.tex} & $137.035999084(21)$ & CODATA 2018 \\
+\texttt{appendix\_Z\_complete\_params.tex} & mentions CODATA 2022 & CODATA 2022 \\
+\texttt{verify\_alpha\_pipeline.py} & $137.035999084$ & CODATA 2018 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{The issue.}
+The question states that the paper uses $137.035999177$ (CODATA 2022) ``in one
+place'' and $137.035999084$ (CODATA 2018) in another. In the current v108
+\texttt{section\_alpha\_locked.tex}, the experimental comparison value is
+$137.035999084$ (CODATA 2018). The CODATA 2022 value $137.035999177(12)$ appears
+in \texttt{appendix\_Z\_complete\_params.tex} in a different context (Planck mass).
+
+\textbf{Recommendations:}
+\begin{enumerate}
+\item \textbf{Pick one edition and use it consistently.} CODATA 2022 is more
+  recent and should be preferred: $\alpha^{-1} = 137.035999177(12)$.
+\item The residual changes from $+0.0056$~ppm (vs 2018) to $+0.0049$~ppm
+  (vs 2022). Both are sub-ppm; the claim ``$< 0.01$ ppm'' in Table~2 remains
+  valid either way.
+\item If adopting CODATA 2022, update all comparison tables, appendix~A,
+  appendix~K, appendix~X, and the pipeline scripts.
+\end{enumerate}
+
+%=============================================================================
+\section{Summary of All Findings}
+%=============================================================================
+
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{clcl}
+\toprule
+\# & Audit Item & Verdict & Action Required \\
+\midrule
+1 & Master formula matches pipeline & \PASS & None \\
+2 & Prefactor algebra $\pi^{3/2}/24$ & \PASS & None \\
+3 & Residual sign & \FAIL & Change $-0.006$ to $+0.006$ ppm \\
+4 & Boost correction consistency & \PASS & None \\
+5 & Factor-origin descriptions & \WARN & Clarify $1/12$ Gilkey caveat \\
+6 & $V_{\rm int} = 4\pi^4$ derivation & \PASS & Minor: clarify factor-of-4 target \\
+7 & ``Two routes'' independence & \WARN & Clarify Bridge Lemma independence \\
+8 & Table XXVIII completeness & \PASS & Optional: add $k_{\max}$ row \\
+9 & Python code listings & \PASS & Presentation gap (not error) \\
+10 & CODATA value consistency & \FAIL & Standardize on one edition \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+%=============================================================================
+\section{Errata for Immediate Correction}
+%=============================================================================
+
+\begin{tcolorbox}[colback=red!5!white, colframe=red!50!black, title=Required Corrections]
+
+\textbf{Erratum 1: Residual sign (4 locations).}
+
+In \texttt{section\_alpha\_locked.tex}:
+\begin{itemize}
+\item Line 145 (Table 1, Branch A): Change ``$-0.006$'' to ``$+0.006$''
+\item Line 253 (Summary box): Change ``$-0.006$ ppm'' to ``$+0.006$ ppm''
+\end{itemize}
+
+In \texttt{section\_quantum.tex}:
+\begin{itemize}
+\item Line 226: Change ``residual $-0.006$ ppm'' to ``residual $+0.006$ ppm''
+\end{itemize}
+
+\textbf{Erratum 2: CODATA edition.}
+
+Either:
+\begin{itemize}
+\item[(a)] Standardize on CODATA 2018 ($137.035999084 \pm 0.000000021$) throughout, or
+\item[(b)] Update to CODATA 2022 ($137.035999177 \pm 0.000000012$) throughout.
+\end{itemize}
+Option (b) is recommended. In that case, the residual becomes $+0.005$~ppm.
+
+\end{tcolorbox}
+
+\end{document}

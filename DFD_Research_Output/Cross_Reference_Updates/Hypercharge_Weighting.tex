@@ -1,0 +1,310 @@
+%=============================================================================
+% CROSS-REFERENCE ANALYSIS: Hypercharge Weighting w = 7/80
+% How w = N_species/(g_F * Tr(Y^2)) enters the kappa_{U(1)} computation
+% Generated: 2026-03-22
+%=============================================================================
+
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,booktabs,geometry}
+\geometry{margin=1in}
+
+\begin{document}
+
+\title{How $w = N_{\rm species}/(g_F \cdot \mathrm{Tr}(Y^2)) = 7/80$\\
+Enters the $\kappa_{U(1)}$ Computation in DFD}
+\author{Cross-Reference Analysis}
+\date{22 March 2026}
+\maketitle
+
+%=============================================================================
+\section{Summary of Findings}
+%=============================================================================
+
+After exhaustive search of all \texttt{.tex} files in v108 and the standalone
+PDF ``Ab Initio Derivation of the Fine Structure Constant from Density Field
+Dynamics,'' the following picture emerges.
+
+\paragraph{Key result.}
+The weighting $w = 7/80$ appears \textbf{only in the derivation-chain table}
+of \texttt{section\_alpha\_locked.tex} (Table~1, line~200). It is listed as an
+ingredient of the convention-locked $\alpha^{-1} = 137.03599985$ computation
+but \textbf{no explicit formula of the form
+$\alpha^{-1} = f(\Lambda, w, \varepsilon_{\rm adj}, \ldots)$
+is written anywhere in the codebase}.
+
+The computation proceeds through a \emph{lattice Monte Carlo / spectral-action}
+pipeline, not through a single closed-form expression.  The quantity $w$
+enters indirectly through the Weinberg-angle derivation and the
+electroweak-mixing formula that converts $\kappa_{U(1)}$ and $\kappa_{SU(2)}$
+into $\alpha$.
+
+%=============================================================================
+\section{Where $w = 7/80$ Is Defined}
+%=============================================================================
+
+\texttt{section\_alpha\_locked.tex}, Table ``Complete derivation chain for
+$\alpha^{-1}$'' (lines 188--207):
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{llll}
+\toprule
+Component & Value & Source & Status \\
+\midrule
+$N_{\rm species}$ & $7$ & SM SU(2) components & SM content \\
+$\mathrm{Tr}(Y^2)$ & $10$ & SM hypercharges & SM content \\
+$g_F$ & $8$ & Spectral triple ($J \times \gamma \times \mathbb{C}$) & Derived \\
+$w = N_{\rm species}/(g_F \cdot \mathrm{Tr}(Y^2))$ & $7/80$ & Hypercharge weighting & Derived \\
+$\varepsilon_{\rm adj}$ & $4096/4095$ & Regular-module trace conversion & Forced \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+%=============================================================================
+\section{The Three Constituent Quantities}
+%=============================================================================
+
+\subsection{$N_{\rm species} = 7$: SM SU(2) Components}
+
+The table labels this ``SM SU(2) components.''  Per generation, the SM contains
+the following weak-isospin components (counting each SU(2) doublet component
+separately and each singlet once):
+\begin{itemize}
+\item $Q_L = (u_L, d_L)$: 2 components (color-triplet, but SU(2)-wise = 2)
+\item $L_L = (\nu_L, e_L)$: 2 components
+\item $u_R$: 1 singlet
+\item $d_R$: 1 singlet
+\item $e_R$: 1 singlet
+\end{itemize}
+Total SU(2) components per generation: $2 + 2 + 1 + 1 + 1 = 7$.
+
+This counts the number of \emph{distinct weak-isospin field species} per
+generation, irrespective of color multiplicity.  (If color were included, one
+would count $2\times 3 + 2 + 1\times 3 + 1\times 3 + 1 = 15$ Weyl spinors.)
+
+\textbf{Note:} The right-handed neutrino $\nu_R$ has $Y = 0$ and does not
+contribute to the hypercharge trace; its omission is consistent with
+$N_{\rm species} = 7$ rather than 8.
+
+\subsection{$\mathrm{Tr}(Y^2) = 10$}
+
+Two different normalizations appear in the codebase:
+
+\paragraph{Per-generation with color multiplicity (Appendix Z, PRL supplement):}
+\begin{equation}
+\mathrm{Tr}(Y^2) = \sum_{\text{1 gen}} d_3\, d_2\, Y^2
+= 3\cdot2\cdot\tfrac{1}{36} + 3\cdot1\cdot\tfrac{4}{9}
++ 3\cdot1\cdot\tfrac{1}{9} + 1\cdot2\cdot\tfrac{1}{4}
++ 1\cdot1\cdot1
+= \frac{10}{3}.
+\end{equation}
+This is the standard value used in GUT normalization and the Weinberg-angle
+proof.
+
+\paragraph{In the $w$-definition table:}
+$\mathrm{Tr}(Y^2) = 10$ (not $10/3$).  This corresponds to summing
+$\mathrm{Tr}(Y^2)$ over all three generations:
+$3 \times (10/3) = 10$.
+
+\textbf{Consistency check:}
+$w = N_{\rm species}/(g_F \cdot \mathrm{Tr}(Y^2))
+= 7/(8 \times 10) = 7/80$.
+This is self-consistent only if $\mathrm{Tr}(Y^2)$ in the $w$-formula
+is the 3-generation sum $= 10$.
+
+\subsection{$g_F = 8$: Spectral Triple Dimension}
+
+The table labels this ``Spectral triple ($J \times \gamma \times \mathbb{C}$) ---
+Derived.'' In the Chamseddine--Connes noncommutative geometry framework, the
+finite spectral triple has a KO-dimension of $6 \pmod{8}$, and the finite
+Hilbert space carries a real structure $J$, a chirality $\gamma_F$, and complex
+conjugation, giving $g_F = 2^3 = 8$ real degrees of freedom per complex
+fermion field.
+
+This factor rescales the spectral-action trace: when expanding $\mathrm{Tr}(f(D_A/\Lambda))$
+over the finite geometry, each fermionic degree of freedom contributes
+$g_F = 8$ times due to the particle/antiparticle, left/right, and
+real/imaginary doublings.
+
+%=============================================================================
+\section{How $w$ Enters the $\alpha$ Computation}
+%=============================================================================
+
+\subsection{The Two-Route Structure}
+
+The DFD codebase presents $\alpha$ through two complementary routes:
+
+\paragraph{Route 1: Lattice Monte Carlo (Ab Initio paper, Appendix K).}
+The lattice simulation measures stiffnesses $\kappa_{U(1)}$ and $\kappa_{SU(2)}$
+at the derived parameter point $(\beta_{U(1)}, \beta_{SU(2)}) = (3.80, 22.80)$.
+The fine-structure constant is extracted via Wilson's normalization:
+\begin{equation}\label{eq:alpha-lattice}
+\alpha_W = \frac{e^2}{4\pi}
+= \frac{(1/\kappa_{U(1)})(4/\kappa_{SU(2)})}
+       {(1/\kappa_{U(1)}) + (4/\kappa_{SU(2)})}
+\cdot \frac{1}{4\pi}.
+\end{equation}
+In this route, $w$ does not appear explicitly---the hypercharge structure is
+encoded in the lattice action's $U(1)$ sector, and the factor of 4 in
+$g_2^2 = 4/\kappa_{SU(2)}$ is the standard SU(2) Wilson normalization
+$\mathrm{Tr}(T^a T^b) = \tfrac{1}{2}\delta^{ab}$.
+
+\paragraph{Route 2: Convention-locked microsector
+(Section~\ref*{sec:alpha-locked}).}
+This is the sub-ppm derivation.  Here the spectral action on
+$\mathbb{C}P^2 \times S^3$ produces a raw gauge-kinetic coefficient from
+the $a_4$ Seeley--DeWitt term.  To convert this ``raw spectral action
+coefficient'' into the physical $\kappa_{U(1)}$, one must account for:
+
+\begin{enumerate}
+\item The \textbf{hypercharge trace weight} $\mathrm{Tr}(Y^2)$: how the
+      spectral action distributes kinetic energy among gauge sectors.
+\item The \textbf{spectral triple multiplicity} $g_F = 8$: the total
+      doubling of fermionic degrees of freedom.
+\item The \textbf{species count} $N_{\rm species} = 7$: how many distinct
+      weak-isospin field species contribute per generation.
+\item The \textbf{BOOST factor} $\varepsilon_{\rm adj} = d^2/(d^2 - 1)
+      = 4096/4095$: the regular-module trace conversion.
+\item The \textbf{finite-$k$ cutoff} $\Lambda^3 = k(k+3)/(k+4)$:
+      the Toeplitz truncation factor.
+\end{enumerate}
+
+\subsection{The Inferred Role of $w$}
+
+Although no single formula is written explicitly, the role of $w$ can be
+reconstructed from the Chamseddine--Connes spectral action formalism.  In the
+standard approach, the $a_4$ coefficient of the spectral action expansion gives:
+\begin{equation}
+S_{\rm gauge} \supset \frac{f_0}{2\pi^2}
+\sum_r c_r \int \mathrm{Tr}(F_r^{\mu\nu} F_{r\,\mu\nu})\,d^4x,
+\end{equation}
+where $c_r$ are group-theoretic coefficients.  For the U(1) factor:
+\begin{equation}
+c_{U(1)} \propto \frac{N_{\rm species}}{g_F \cdot \mathrm{Tr}(Y^2)} = w.
+\end{equation}
+
+The physical coupling is then:
+\begin{equation}
+\frac{1}{g_1^2} \propto \kappa_{U(1)} = (\text{raw } a_4 \text{ coefficient})
+\times w \times \varepsilon_{\rm adj} \times (\text{finite-}k \text{ factor}).
+\end{equation}
+
+In other words:
+\begin{equation}
+\boxed{\kappa_{U(1)} = \kappa_{\rm raw} \cdot w \cdot \varepsilon_{\rm adj}
+\cdot \frac{k+3}{k+4}}
+\end{equation}
+where $\kappa_{\rm raw}$ is the universal gauge-kinetic prefactor from the
+spectral action, and $w = 7/80$ is the \textbf{multiplicative weight that
+converts the universal coefficient to the U(1) hypercharge sector}.
+
+\subsection{Comparison with Weinberg Angle Derivation}
+
+In the Weinberg angle proof (Appendix Z), the same hypercharge trace appears
+differently.  There, the ratio of couplings is:
+\begin{equation}
+\frac{g'^2}{g^2}
+= \frac{\kappa_{SU(2)} \cdot \tfrac{1}{2}}
+       {\kappa_{U(1)} \cdot \mathrm{Tr}(Y^2)}
+= \frac{2\kappa_0 \cdot \tfrac{1}{2}}{1 \cdot \kappa_0 \cdot \tfrac{10}{3}}
+= \frac{3}{10},
+\end{equation}
+giving $\sin^2\theta_W = 3/13$.  Here $\mathrm{Tr}(Y^2) = 10/3$ is the
+per-generation value, and the stiffness ratio $\kappa_{SU(2)}/\kappa_{U(1)}
+= n_2/n_1 = 2$ enters.
+
+The $w = 7/80$ formulation packages the \emph{same} physics differently:
+it folds $\mathrm{Tr}(Y^2)$ (3-generation sum), $g_F$, and $N_{\rm species}$
+into a single weight.
+
+%=============================================================================
+\section{Gap Analysis: What Is Missing from the Codebase}
+%=============================================================================
+
+\begin{enumerate}
+\item \textbf{No explicit master formula.}  The codebase never writes
+a single equation of the form
+$\alpha^{-1} = F(k_{\max}, w, \varepsilon_{\rm adj}, \Lambda, \ldots)$.
+The computation is distributed across:
+\begin{itemize}
+\item The Chern--Simons weighted sum $\to \beta_{U(1)} = 3.80$
+\item The Wilson ratio $\to \beta_{SU(2)} = 22.80$
+\item The lattice extraction formula (Eq.~13 in the Ab Initio PDF)
+\item The BOOST factor correction
+\end{itemize}
+
+\item \textbf{$N_{\rm species} = 7$ is not derived.}  It is stated as
+``SM SU(2) components'' and labeled ``SM content'' (not ``Derived'').
+A derivation from the spectral triple structure showing \emph{why} one
+counts 7 species (not 15 Weyl spinors, not 5 multiplet types) is absent.
+
+\item \textbf{The $\mathrm{Tr}(Y^2) = 10$ vs.\ $10/3$ normalization}
+is not explained.  The Weinberg angle proof uses $10/3$ (per generation);
+the $w$-table uses $10$ (three generations).  The text does not state
+which convention is used or why.
+
+\item \textbf{$g_F = 8$ is asserted but not derived.}  The label
+``Spectral triple ($J \times \gamma \times \mathbb{C}$)'' suggests
+$2 \times 2 \times 2 = 8$ from particle/antiparticle $\times$
+left/right $\times$ complex conjugation, but the derivation from the
+finite spectral triple axioms is not given.
+\end{enumerate}
+
+%=============================================================================
+\section{Answer to the Original Question}
+%=============================================================================
+
+\begin{quote}
+\textbf{Q:} Is it $\kappa_{U(1)} = (\text{raw } a_4) \times w$, or
+$\kappa_{U(1)} = (\text{raw } a_4) / \mathrm{Tr}(Y^2)$, or something else?
+\end{quote}
+
+\paragraph{Answer:} It is the first option, extended:
+\begin{equation}
+\kappa_{U(1)} = \kappa_{\rm raw} \times w \times \varepsilon_{\rm adj}
+\times \frac{k+3}{k+4},
+\qquad w = \frac{N_{\rm species}}{g_F \cdot \mathrm{Tr}(Y^2)} = \frac{7}{80}.
+\end{equation}
+
+The weighting $w$ is a \textbf{multiplicative rescaling factor} applied to the
+universal spectral-action gauge-kinetic coefficient to obtain the U(1)
+hypercharge sector's contribution.  It combines:
+\begin{itemize}
+\item $N_{\rm species} = 7$ (how many weak-isospin field species run in
+      the U(1) loop),
+\item $g_F = 8$ (spectral triple fermionic multiplicity), and
+\item $\mathrm{Tr}(Y^2) = 10$ (3-generation hypercharge trace, in the
+      denominator because the trace-normalization of the U(1) kinetic
+      term is $\propto 1/\mathrm{Tr}(Y^2)$).
+\end{itemize}
+
+The factor $\varepsilon_{\rm adj} = 4096/4095$ is the forced BOOST from the
+regular-module microsector, and $(k+3)/(k+4) = 63/64$ is the finite-$k$
+Toeplitz truncation factor.
+
+\paragraph{However:} this reconstruction is \textbf{inferred} from context.
+The codebase does not contain this formula explicitly.  The actual numerical
+result $\alpha^{-1} = 137.03599985$ is obtained through lattice Monte Carlo
+with the sub-ppm BOOST correction applied post-hoc, not through a single
+analytic formula.
+
+%=============================================================================
+\section{Source Files Referenced}
+%=============================================================================
+
+\begin{itemize}
+\item \texttt{section\_alpha\_locked.tex} --- Convention-locked $\alpha$ derivation
+      (lines 188--207: derivation chain table; lines 117--120: BOOST factor)
+\item \texttt{appendix\_Z\_complete\_params.tex} --- Weinberg angle proof
+      (lines 39--53: $\mathrm{Tr}(Y^2) = 10/3$ derivation)
+\item \texttt{appendix\_K.tex} --- Microsector physics: $\alpha$ from CS theory
+      and lattice verification (lines 30--35: CS weighted sum; lines 125--128:
+      stiffness ratio $\kappa_{U(1)}/\kappa_{SU(2)} = 1/2$)
+\item \texttt{appendix\_F.tex} --- Gauge emergence foundations
+      (Theorem F.13: Frame Stiffness from Ricci curvature)
+\item \texttt{supplementary/PRL\_SM\_from\_Topology.tex} --- PRL-style paper
+      (lines 76--93: canonical hypercharge normalization)
+\item Ab Initio PDF, Eq.~(13): lattice $\alpha$ extraction formula
+\end{itemize}
+
+\end{document}

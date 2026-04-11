@@ -1,0 +1,132 @@
+% fig_field_equations.tex - Conceptual physics flow chart
+% Standalone compilation: pdflatex fig_field_equations.tex
+\documentclass[tikz,border=5pt]{standalone}
+\usepackage{tikz}
+\usepackage{amsmath}
+\usetikzlibrary{arrows.meta,calc,positioning,shapes.geometric,fit}
+
+\begin{document}
+\begin{tikzpicture}[
+    >=Stealth,
+    node distance=1.8cm and 2.5cm,
+    % Box styles
+    mainbox/.style={
+        draw=black!70, thick, rounded corners=4pt,
+        minimum width=3.2cm, minimum height=1.1cm,
+        font=\footnotesize\sffamily, align=center,
+        fill=#1!15, text=black
+    },
+    mainbox/.default={blue},
+    enhbox/.style={
+        draw=#1!60!black, thick, rounded corners=3pt,
+        minimum width=3.5cm, minimum height=1.4cm,
+        font=\footnotesize\sffamily, align=center,
+        fill=#1!12, text=black
+    },
+    factorlabel/.style={
+        font=\scriptsize\sffamily\bfseries, text=#1!60!black
+    },
+    arrow/.style={-{Stealth[length=3mm, width=2mm]}, thick, black!70},
+    enharrow/.style={-{Stealth[length=2.5mm, width=2mm]}, thick, #1!60!black},
+]
+
+% ============================================================
+% MAIN CHAIN (left to right)
+% ============================================================
+
+% EM Energy source
+\node[mainbox=orange] (em) {EM Energy\\$u = \frac{1}{2}\mu_0\mu_r|\mathbf{H}|^2$};
+
+% Psi source
+\node[mainbox=red, right=2.5cm of em] (source) {$\psi$ Source Term\\$S = -\kappa\, T^{\mu\nu}_\text{EM}$};
+
+% Psi field
+\node[mainbox=violet, right=2.5cm of source] (psi) {$\psi$ Field\\$\Box\psi = S_\text{eff}$};
+
+% Acceleration
+\node[mainbox=green!60!black, right=2.5cm of psi] (accel) {Acceleration\\$a = -\nabla\psi$};
+
+% Main arrows
+\draw[arrow] (em) -- (source)
+    node[midway, above, font=\scriptsize\sffamily] {coupling $\kappa$};
+\draw[arrow] (source) -- (psi)
+    node[midway, above, font=\scriptsize\sffamily] {wave eq.};
+\draw[arrow] (psi) -- (accel)
+    node[midway, above, font=\scriptsize\sffamily] {gradient};
+
+% ============================================================
+% THREE ENHANCEMENT MECHANISMS (below, branching in)
+% ============================================================
+
+% --- Quantum coherence ---
+\node[enhbox=blue, below left=2.5cm and 0.5cm of source] (qc)
+    {Quantum Coherence\\[3pt]
+     $N$ atoms phase-locked\\
+     in superconductor};
+\node[factorlabel=blue, below=0.1cm of qc]
+    {Enhancement: $\sim N \approx 10^{20}$};
+
+% --- MOND nonlinearity ---
+\node[enhbox=purple, below=2.5cm of source] (mond)
+    {MOND Nonlinearity\\[3pt]
+     $\mu(|\nabla\psi|/a_0) \to 0$\\
+     Deep-MOND regime};
+\node[factorlabel=purple, below=0.1cm of mond]
+    {Enhancement: $\sim 10^{6}$--$10^{10}$};
+
+% --- Parametric amplification ---
+\node[enhbox=teal, below right=2.5cm and 0.5cm of source] (param)
+    {Parametric\\Amplification\\[3pt]
+     Resonant cavity $Q$};
+\node[factorlabel=teal, below=0.1cm of param]
+    {Enhancement: $\sim Q \approx 10^{6}$};
+
+% Enhancement arrows to source/psi
+\draw[enharrow=blue] (qc.north) -- (source.south west);
+\draw[enharrow=purple] (mond.north) -- (source.south);
+\draw[enharrow=teal] (param.north) -- (psi.south east);
+
+% ============================================================
+% COMBINED COUPLING CONSTANT (bottom)
+% ============================================================
+
+\node[draw=red!60!black, very thick, rounded corners=5pt,
+      minimum width=10cm, minimum height=1.3cm,
+      fill=red!5, font=\footnotesize\sffamily, align=center,
+      below=5.5cm of source] (combined)
+    {Combined effective coupling:
+     \quad $\kappa_\text{eff} = \kappa \times N \times \mu^{-1}(a_0) \times Q
+     \;\approx\; 10^{-44} \times 10^{20} \times 10^{8} \times 10^{6}
+     \;=\; 10^{-10}$};
+
+% Arrows from enhancements to combined
+\draw[enharrow=blue, dashed] (qc.south) |- (combined.west);
+\draw[enharrow=purple, dashed] (mond.south) -- (combined.north);
+\draw[enharrow=teal, dashed] (param.south) |- (combined.east);
+
+% ============================================================
+% CLASSICAL BASELINE (top annotation)
+% ============================================================
+\node[draw=black!30, dashed, rounded corners=2pt,
+      fill=yellow!8, font=\scriptsize\sffamily, align=center,
+      above=1.5cm of source] (classical)
+    {Classical DFD coupling:\\
+     $\kappa = 8\pi G/c^4 \approx 2.1 \times 10^{-44}$\,m/J\\[2pt]
+     \textit{Far too weak without enhancement}};
+\draw[dashed, black!40, ->] (classical) -- (source);
+
+% ============================================================
+% RESULT ANNOTATION
+% ============================================================
+\node[font=\scriptsize\sffamily, align=center, text=red!60!black,
+      below=0.3cm of combined]
+    {Sufficient for measurable thrust at MW power levels};
+
+% ============================================================
+% TITLE
+% ============================================================
+\node[font=\normalsize\sffamily\bfseries, anchor=north] at ($(source)+(0,3.5)$)
+    {Physics of Psi-Bubble Propulsion --- Enhancement Mechanisms};
+
+\end{tikzpicture}
+\end{document}

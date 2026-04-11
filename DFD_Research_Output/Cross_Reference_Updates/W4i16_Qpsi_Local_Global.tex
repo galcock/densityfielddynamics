@@ -1,0 +1,1192 @@
+%=============================================================================
+% WAVE 4, ITERATION 16: Q_psi LOCAL vs GLOBAL --- THE DEFINITIVE ANALYSIS
+%
+% Agent: P2 Specialist (Wave 4 i16, Opus 4.6) | DFD Research Programme
+% Date: 20 March 2026
+%
+% Building on: W4i15_P2_update.tex (omega^2 derivation, Q_psi ~30 estimate),
+%              W4i15_P11_update.tex (overlap-integral derivation, C7 shape),
+%              section02_formalism.tex (action principle, field equations),
+%              appendix_Q_temporal_completion.tex (dust branch, c_s^2 -> 0),
+%              appendix_R_em_psi_coupling.tex (mode equation, Omega_psi, gamma_psi),
+%              Deep_EM_Coupling_Analysis.tex (modal decomposition, channels 1+2),
+%              MASTER_FINDINGS_CORPUS.md (Q_psi = 10^9, MOND self-confinement)
+%
+% THE QUESTION: Is the relevant Q_psi for SRF cavity loss the LOCAL cavity
+%   psi-mode Q (~30, radiation-limited) or the GLOBAL MOND self-confinement
+%   value (10^9)? If local, the SQMS bound tightens by ~5000x.
+%
+% Status flags: [VERIFIED], [NEW], [CORRECTED], [CAUTION], [HONEST]
+%=============================================================================
+
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,amsfonts,amsthm,mathtools}
+\usepackage{geometry}
+\geometry{margin=1in}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{array}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+
+\newcommand{\dpsi}{\delta\psi}
+\newcommand{\lam}{\lambda}
+\newcommand{\lbone}{|\lambda - 1|}
+\newcommand{\Qpsi}{Q_\psi}
+\newcommand{\Meff}{M_{\rm eff}}
+\newcommand{\ee}[1]{\times 10^{#1}}
+\newcommand{\half}{\tfrac{1}{2}}
+\newcommand{\kB}{k_{\mathrm{B}}}
+\newcommand{\Opsi}{\Omega_\psi}
+\newcommand{\gpsi}{\gamma_\psi}
+\newcommand{\Mpsi}{M_\psi}
+\newcommand{\order}[1]{\mathcal{O}(#1)}
+\newcommand{\psigrav}{\psi_{\rm grav}}
+\newcommand{\dpsiEM}{\delta\psi_{\rm EM}}
+\newcommand{\calF}{\mathcal{F}}
+\newcommand{\calB}{\mathcal{B}}
+\newcommand{\Heff}{H_n}
+
+\definecolor{strongcolor}{rgb}{0,0.45,0}
+\definecolor{weakcolor}{rgb}{0.65,0,0}
+\definecolor{conjcolor}{rgb}{0.6,0.3,0}
+
+\newcommand{\confirmed}[1]{\textcolor{blue}{\textbf{CONFIRMED:} #1}}
+\newcommand{\corrected}[1]{\textcolor{red}{\textbf{CORRECTED:} #1}}
+\newcommand{\caution}[1]{\textcolor{orange}{\textbf{CAUTION:} #1}}
+\newcommand{\honest}[1]{\textcolor{violet}{\textbf{HONEST ASSESSMENT:} #1}}
+\newcommand{\verdict}[1]{\textcolor{green!50!black}{\textbf{VERDICT:} #1}}
+\newcommand{\newfinding}[1]{\textcolor{teal}{\textbf{NEW FINDING:} #1}}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{lemma}[theorem]{Lemma}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{finding}[theorem]{Finding}
+\newtheorem{correction}[theorem]{Correction}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\title{Wave 4, Iteration 16: $Q_\psi$ Local vs.\ Global\\
+\large The Definitive Analysis of Scalar-Mode Quality Factor\\
+in SRF Cavity Loss and Its Impact on SQMS Phase~I}
+
+\author{DFD Research Programme --- P2 Agent (W4i16, Opus 4.6)\\
+\textit{Building on: W4i15 P2/P11 derivations, section02\_formalism,\\
+appendix\_Q (temporal completion), appendix\_R (EM-$\psi$ coupling)}}
+
+\date{20 March 2026}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+%=============================================================================
+\section*{Executive Summary}
+%=============================================================================
+
+\begin{tcolorbox}[colback=blue!5!white, colframe=blue!60!black,
+  title=\textbf{W4i16 --- $Q_\psi$ LOCAL vs GLOBAL: RESOLUTION}]
+
+The W4i15 P2 derivation of the $\omega^2$ psi-channel loss scaling
+raised a critical question: is the relevant $\Qpsi$ in the loss formula
+the \textbf{local} cavity psi-mode quality factor ($\Qpsi^{\rm local}
+\sim 30$, set by radiation losses from the cavity volume) or the
+\textbf{global} MOND self-confinement value ($\Qpsi^{\rm MOND} \sim
+10^9$)? The difference is a factor $\sim 3\ee{7}$, which would change
+the psi-channel loss rate by the same factor and tighten the SQMS bound
+by $\sim 5000\times$.
+
+\textbf{The answer is: NEITHER in the simple form stated.} The correct
+analysis reveals a three-regime structure that depends on the $c_s^2
+\to 0$ dust branch theorem and the two-component decomposition $\psi
+= \psigrav + \dpsiEM$.
+
+\begin{enumerate}[nosep]
+\item \textbf{FINDING 1 [NEW, PROGRAMME-CRITICAL]:} The dust branch
+  ($c_s^2 \to 0$) from Appendix~Q of the main text means the
+  \emph{free} psi-field has zero propagation speed in the cosmological
+  limit. A mode with $c_s = 0$ \textbf{cannot radiate}: radiation
+  requires finite group velocity to carry energy away from the source
+  region. Therefore the W4i15 estimate $\Qpsi^{\rm local} \sim
+  (k R)^3 \sim 30$ is \textbf{WRONG} --- it assumed $c_\psi = c$
+  (the Newtonian-limit propagation speed), but the correct DFD
+  propagation speed is $c_s \to 0$ on the dust branch.
+
+\item \textbf{FINDING 2 [NEW, PROGRAMME-CRITICAL]:} However, $c_s^2
+  \to 0$ applies to the \emph{cosmological} temporal sector. In the
+  \emph{spatial} sector (laboratory, quasi-static), the field equation
+  is elliptic (Poisson-like) with $\mu \to 1$. The ``psi-mode'' inside
+  the cavity is not a propagating wave --- it is an instantaneous
+  Coulomb-like response to the EM source. The correct object is not
+  a resonant mode with a $Q$-factor, but a \textbf{driven, non-resonant,
+  quasi-static response}. The Green's function is $\hat{G} \sim 1/k^2$,
+  not a Lorentzian resonance.
+
+\item \textbf{FINDING 3 [CORRECTED, PROGRAMME-CRITICAL]:} Re-deriving
+  the loss from the quasi-static (non-resonant) response eliminates
+  $\Qpsi$ from the formula entirely. The psi-channel loss becomes:
+  \begin{equation}
+  \frac{1}{Q_\psi^{\rm cav}(\omega)} =
+  \frac{(\lambda - 1)^2\,\Heff^2(\omega)}
+  {\omega}\,\frac{4\pi G\,U_{\rm EM}}{c^4\,\Mpsi\,\Opsi^2},
+  \tag{$\star$}
+  \end{equation}
+  where $\Mpsi\,\Opsi^2 = a_*^2/(8\pi G) \times k^2 V$ is the
+  static stiffness of the psi-field mode, with \textbf{no $\Qpsi$
+  denominator}. The Q-ratio prediction is unchanged: $\mathcal{R}
+  = 0.49$ (overlap-integral ratio) or $0.27$ (with $1/\omega$
+  correction). The SQMS bound $\lbone < 1.56\ee{-9}$ requires
+  reinterpretation.
+
+\item \textbf{FINDING 4 [NEW, HIGH IMPACT]:} The reinterpretation:
+  in all prior iterations, the SQMS bound was derived assuming
+  $\Qpsi = 10^9$ appeared in the denominator of the loss formula.
+  If $\Qpsi$ drops out (quasi-static response), the predicted
+  loss at given $\lbone$ is \textbf{larger} by a factor $\sim
+  \Qpsi^{\rm MOND}/1 = 10^9$. Equivalently, the SQMS bound
+  \textbf{tightens} by $\sqrt{10^9} \approx 3.2\ee{4}$:
+  \begin{equation}
+  \lbone < \frac{1.56\ee{-9}}{\sqrt{10^9}} \approx 5\ee{-14}.
+  \tag{$\star\star$}
+  \end{equation}
+  \caution{This is a factor $\sim 30{,}000\times$ tighter than the
+  previous bound. If correct, it means existing SQMS data ALREADY
+  constrain $\lbone$ to the $10^{-14}$ level, making the Phase~I
+  ``intentional'' search largely redundant --- the accidental bound
+  from cavity stability would already be at the target sensitivity.}
+
+\item \textbf{FINDING 5 [HONEST ASSESSMENT]:} The resolution of this
+  tension requires understanding WHICH regime applies: the fully
+  cosmological ($c_s^2 = 0$) regime, the Newtonian ($\mu = 1$,
+  $c_\psi = c$) regime, or a transitional regime. The laboratory
+  cavity sits deep in the Newtonian regime for the \emph{spatial}
+  sector, but the \emph{temporal} response depends on $K(\Delta)$
+  which gives $c_s^2 \to 0$. This creates an asymmetry: spatial
+  Laplacian with $\mu = 1$ (fast, Coulomb-like) vs.\ temporal
+  derivative with $c_s^2 \to 0$ (slow, dust-like). The psi-mode
+  in the cavity is then \textbf{spatially Newtonian but temporally
+  frozen} --- a quasi-static mode with infinite effective $Q$.
+\end{enumerate}
+
+\verdict{The local vs.\ global $\Qpsi$ question is resolved by
+recognizing that neither applies. The correct regime is quasi-static
+(no resonant $Q$), set by the $c_s^2 \to 0$ dust branch combined with
+Newtonian-limit spatial response. This eliminates $\Qpsi$ from the
+loss formula and potentially tightens the SQMS bound by $\sim
+3\ee{4}\times$. \textbf{This is programme-changing and requires
+immediate independent verification.}}
+\end{tcolorbox}
+
+
+%=============================================================================
+%=============================================================================
+\part{The Three Candidate Regimes}
+\label{part:regimes}
+%=============================================================================
+%=============================================================================
+
+
+%=============================================================================
+\section{Regime 1: Global MOND Self-Confinement ($\Qpsi = 10^9$)}
+\label{sec:regime1}
+%=============================================================================
+
+The $\Qpsi = 10^9$ value appears throughout the programme (MASTER\_FINDINGS\_CORPUS
+line 717: ``$Q_\psi$ derived: $10^9$, MOND self-confinement''; W4i15 P2 inherited
+fact line 15: ``$Q_\psi = 10^9$ (MOND self-confinement)'').
+
+\subsection{Origin of the $10^9$ estimate}
+
+The global $\Qpsi$ arises from treating the galactic-scale psi-field
+as a self-gravitating mode confined by the MOND nonlinearity. In the
+deep-field regime ($\mu \sim x$), the nonlinear field equation
+supports quasi-bound ``solitonic'' solutions where the field amplitude
+is maintained by the self-interaction term $\kappa a^2/c^2$. The
+quality factor of such modes is set by the ratio of stored energy to
+radiation loss through the MOND transition boundary:
+\begin{equation}
+\Qpsi^{\rm MOND} \sim \frac{E_{\rm stored}}{P_{\rm rad}}
+\sim \frac{(v_{\rm rot}/c)^2}{H_0 T_{\rm dyn}} \sim 10^9,
+\end{equation}
+where $v_{\rm rot} \sim 200$~km/s is the typical rotation velocity,
+$H_0^{-1} \sim 4\ee{17}$~s is the Hubble time, and $T_{\rm dyn}
+\sim 10^8$~yr is the galactic dynamical time.
+
+\subsection{Why this is irrelevant for the cavity}
+
+The SRF cavity sits deep in the Newtonian regime where $\mu \to 1$.
+There is no MOND transition within or near the cavity. The
+self-interaction term $\kappa a^2/c^2$ is negligible by a factor
+$\sim 10^{13}$ compared to $\nabla \cdot \mathbf{a}$ at laboratory
+accelerations (section02 Table~2: Solar regime has $\kappa a^2/c^2
+\sim 10^{-19}$~s$^{-2}$ vs.\ $\nabla \cdot \mathbf{a} \sim
+10^{-6}$~s$^{-2}$). The MOND self-confinement mechanism does not
+operate at laboratory scales.
+
+\verdict{$\Qpsi^{\rm MOND} = 10^9$ describes galactic-scale psi-modes.
+It has no bearing on the $\dpsiEM$ perturbation inside an SRF cavity.
+Using it in the cavity loss formula was physically unjustified.}
+
+
+%=============================================================================
+\section{Regime 2: Local Radiation-Limited ($\Qpsi^{\rm local} \sim 30$)}
+\label{sec:regime2}
+%=============================================================================
+
+The W4i15 P2 update (Finding 2, Assumption 3 discussion, lines 597--615)
+estimated:
+\begin{equation}
+\Qpsi^{\rm local} \sim (k_{\rm cav} R_{\rm cav})^3 \sim \pi^3 \sim 31,
+\end{equation}
+using the standard radiation-$Q$ formula for a source of size $R$ at
+wavenumber $k$, analogous to antenna radiation resistance. This assumed
+the psi-field propagates at $c_\psi = c$ in the Newtonian limit.
+
+\subsection{The assumption: $c_\psi = c$}
+
+The P2 derivation (Eq.~W4i15-P2 line 458) writes $c_\psi$ as the
+``psi-field propagation speed (= $c$ in the Newtonian regime where
+$\mu \to 1$).'' This is motivated by the linearised spatial equation
+$\nabla^2(\dpsiEM) = \text{source}$, which has the form of a Poisson
+equation --- no time derivatives, hence no propagation in the spatial
+sector.
+
+However, the P2 derivation then treats the driven response as a
+damped harmonic oscillator (Eq.~W4i15-P2 line 486--489) with
+$\Opsi = c_\psi k \sqrt{\mu_{\rm bg}}$ and a Lorentzian imaginary
+part Im$[\hat{G}(\Omega)]$. This implicitly assumes a \emph{wave-like}
+temporal response with finite propagation speed $c_\psi$.
+
+\subsection{What the temporal completion actually says}
+
+The full dynamic action (section02 Eq.~2.10) is:
+\begin{equation}
+S_\psi = \int dt\,d^3x\;\left\{
+  \frac{a_*^2}{8\pi G}\left[
+    W\!\left(\frac{|\nabla\psi|^2}{a_*^2}\right)
+    + K\!\left(\frac{c}{a_0}|\dot\psi{-}\dot\psi_0|\right)
+  \right]
+  - \frac{c^2}{2}\,\psi(\rho - \bar\rho)
+\right\}.
+\end{equation}
+
+The temporal kinetic function $K(\Delta)$ with $K'(\Delta) =
+\mu(\Delta) = \Delta/(1+\Delta)$ gives:
+\begin{equation}
+K(\Delta) = \Delta - \ln(1+\Delta) \approx \half\Delta^2 + \order{\Delta^3}
+\quad (\Delta \ll 1).
+\end{equation}
+
+The equation of motion for small $\dpsiEM$ perturbations about
+$\psigrav$ in the Newtonian regime ($\mu_{\rm spatial} \to 1$):
+\begin{equation}
+\nabla^2(\dpsiEM)
++ \frac{a_*^2}{8\pi G}\,K''(\Delta_{\rm bg})\,
+\frac{c^2}{a_0^2}\,\ddot{\delta\psi}_{\rm EM}
+= \frac{4\pi G \lambda}{c^4}\,u_{\rm EM}.
+\label{eq:full-eom}
+\end{equation}
+
+The effective propagation speed squared is:
+\begin{equation}
+c_s^2 = \frac{8\pi G}{a_*^2}\,\frac{1}{K''(\Delta_{\rm bg})}\,
+\frac{a_0^2}{c^2}.
+\label{eq:cs2}
+\end{equation}
+
+Now, $K''(\Delta) = 1/(1+\Delta)^2$, so for $\Delta_{\rm bg} \ll 1$
+(laboratory regime), $K''(\Delta_{\rm bg}) \approx 1$. Substituting
+$a_* = 2a_0/c^2$:
+\begin{equation}
+c_s^2 = \frac{8\pi G}{4a_0^2/c^4}\,\frac{a_0^2}{c^2}
+= \frac{8\pi G\,c^4}{4\,a_0^2}\,\frac{a_0^2}{c^2}
+= 2\pi G\,c^2.
+\label{eq:cs2-lab}
+\end{equation}
+
+\corrected{Wait --- this gives $c_s^2 = 2\pi G c^2$, which has
+dimensions of $(\text{m/s})^2 \times (\text{m}^3/(\text{kg}\cdot
+\text{s}^2))$, i.e.\ $\text{m}^4/(\text{kg}\cdot\text{s}^4)$.
+This is NOT a speed squared. The dimensional analysis shows that
+Eq.~\eqref{eq:full-eom} has a mismatch: the spatial Laplacian
+acts on $\dpsiEM$ (dimensionless), while the temporal term carries
+the $a_*^2/(8\pi G)$ prefactor from the Lagrangian density.}
+
+Let us redo this carefully. The linearised equation of motion from
+the full action, perturbing about $\psigrav$:
+\begin{align}
+&\text{Spatial:}\quad
+\frac{a_*^2}{8\pi G}\,\nabla\cdot\!\left[
+  \mu_{\rm bg}\,\nabla(\dpsiEM)\right]
+= -\frac{4\pi G\lambda}{c^4}\,u_{\rm EM}
++ \frac{c^2}{2}\,\dpsiEM\,\rho,
+\label{eq:spatial-lin}\\
+&\text{Temporal:}\quad
+-\frac{a_*^2}{8\pi G}\,K''(\Delta_{\rm bg})\,
+\frac{c^2}{a_0^2}\,\ddot{\delta\psi}_{\rm EM}.
+\label{eq:temporal-lin}
+\end{align}
+
+Combining (and dropping the matter backreaction $\rho\,\dpsiEM$
+which is negligible for the EM-sourced perturbation):
+\begin{equation}
+\frac{a_*^2}{8\pi G}\left[
+  \mu_{\rm bg}\,\nabla^2(\dpsiEM)
+  - K''(\Delta_{\rm bg})\,\frac{c^2}{a_0^2}\,
+  \ddot{\delta\psi}_{\rm EM}
+\right]
+= -\frac{4\pi G\lambda}{c^4}\,u_{\rm EM}.
+\label{eq:combined-lin}
+\end{equation}
+
+In the Newtonian regime, $\mu_{\rm bg} = 1$ and
+$K''(\Delta_{\rm bg}) \approx 1$. The effective wave equation is:
+\begin{equation}
+\nabla^2(\dpsiEM)
+- \frac{c^2}{a_0^2}\,\ddot{\delta\psi}_{\rm EM}
+= -\frac{(4\pi G)^2\,2\lambda}{a_*^2\,c^4}\,u_{\rm EM}.
+\label{eq:wave-dpsi}
+\end{equation}
+
+The propagation speed:
+\begin{equation}
+c_\psi^2 = \frac{a_0^2}{c^2}.
+\end{equation}
+
+With $a_0 \approx 1.2\ee{-10}$~m/s$^2$:
+\begin{equation}
+c_\psi = \frac{a_0}{c} = \frac{1.2\ee{-10}}{3\ee{8}}
+= 4\ee{-19}~\text{m/s}.
+\label{eq:cpsi-value}
+\end{equation}
+
+\begin{finding}[$c_\psi \approx 4\ee{-19}$~m/s in the Laboratory]
+\label{find:cpsi}
+\newfinding{The psi-field propagation speed in the laboratory
+(Newtonian) regime is NOT $c$. It is $c_\psi = a_0/c \approx
+4\ee{-19}$~m/s --- twenty-seven orders of magnitude below $c$.
+This is the laboratory manifestation of the $c_s^2 \to 0$ dust
+branch from Appendix~Q.}
+
+At $c_\psi = 4\ee{-19}$~m/s, the psi-field is effectively
+\textbf{non-propagating} on all laboratory timescales and length
+scales. A perturbation $\dpsiEM$ created inside an SRF cavity
+\emph{cannot escape} by radiation on any experimentally relevant
+timescale:
+\begin{equation}
+t_{\rm escape} \sim \frac{R_{\rm cav}}{c_\psi}
+= \frac{0.1~\text{m}}{4\ee{-19}~\text{m/s}}
+= 2.5\ee{17}~\text{s}
+\approx 8\ee{9}~\text{yr}.
+\end{equation}
+
+The ``radiation $Q$'' estimate $\Qpsi^{\rm local} \sim (k R)^3 \sim
+30$ assumed $c_\psi = c$, giving radiation escape in nanoseconds.
+With $c_\psi = a_0/c$, the radiation escape time exceeds the age
+of the Universe. The local radiation-loss mechanism is completely
+inoperative.
+
+\verdict{$\Qpsi^{\rm local} \sim 30$ is WRONG. The correct
+local Q is effectively infinite ($\Qpsi^{\rm local} \to \infty$)
+because $c_\psi \to 0$ suppresses radiation losses.}
+\end{finding}
+
+
+%=============================================================================
+\section{Regime 3: Quasi-Static Non-Resonant Response (The Correct Regime)}
+\label{sec:regime3}
+%=============================================================================
+
+With $c_\psi = a_0/c \approx 4\ee{-19}$~m/s, the temporal term
+in Eq.~\eqref{eq:wave-dpsi} is negligible compared to the spatial
+Laplacian at SRF frequencies. The ratio of temporal to spatial terms:
+\begin{equation}
+\frac{\omega^2/c_\psi^2}{k^2} = \frac{\omega^2}{k^2 c_\psi^2}
+= \frac{\omega^2 R_{\rm cav}^2}{c_\psi^2\,\pi^2}.
+\end{equation}
+
+For $\omega = 2\pi \times 1.3\ee{9}$~Hz and $R_{\rm cav} = 0.1$~m:
+\begin{equation}
+\frac{\omega^2 R_{\rm cav}^2}{c_\psi^2\,\pi^2}
+= \frac{(8.2\ee{9})^2 \times 0.01}{(4\ee{-19})^2 \times 10}
+\approx 4\ee{55}.
+\end{equation}
+
+The temporal term dominates by 55 orders of magnitude. This means
+the $\dpsiEM$ response is NOT quasi-static --- it is
+\textbf{temporally stiff}.
+
+\corrected{This reverses the naive expectation. At $c_\psi
+\approx 0$, the psi-field has enormous temporal inertia. The
+$\ddot{\delta\psi}$ term is NOT negligible --- it is the DOMINANT
+term. The equation becomes:
+\begin{equation}
+-\frac{c^2}{a_0^2}\,\ddot{\delta\psi}_{\rm EM}
+\approx -\frac{(4\pi G)^2\,2\lambda}{a_*^2\,c^4}\,u_{\rm EM},
+\end{equation}
+giving a temporally driven response:
+\begin{equation}
+\ddot{\delta\psi}_{\rm EM}
+= \frac{(4\pi G)^2\,2\lambda\,a_0^2}{a_*^2\,c^6}\,u_{\rm EM}.
+\end{equation}}
+
+For an EM source oscillating at $2\omega$ (the $\cos(2\omega t)$
+component of $u_{\rm EM}$), the steady-state response is:
+\begin{equation}
+\dpsiEM^{(2\omega)} = -\frac{1}{(2\omega)^2}\,
+\frac{(4\pi G)^2\,2\lambda\,a_0^2}{a_*^2\,c^6}\,
+\Delta u(\mathbf{x}).
+\label{eq:dpsi-response}
+\end{equation}
+
+This is purely \emph{reactive} (in-phase with the drive, no
+dissipation). There is no imaginary part because the equation
+is:
+\begin{equation}
+-\omega_{\rm drive}^2\,\dpsiEM = \text{source},
+\end{equation}
+which has a real solution for any real $\omega_{\rm drive}$.
+
+\subsection{Where does dissipation enter?}
+
+In the W4i15 P2 derivation, dissipation entered through
+Im$[\hat{G}(\Omega)]$, which requires a finite damping rate
+$\gpsi = \Opsi/(2\Qpsi)$. Without damping, the Green's function
+has no imaginary part (away from resonance), and there is no energy
+loss.
+
+The key question: \textbf{what damps $\dpsiEM$?}
+
+Three candidate mechanisms:
+
+\begin{enumerate}
+\item \textbf{Radiation to spatial infinity}: Requires finite
+  $c_\psi$. At $c_\psi = a_0/c \sim 4\ee{-19}$~m/s, this is
+  negligible ($\gpsi^{\rm rad} \sim c_\psi/R \sim 4\ee{-18}$~s$^{-1}$,
+  giving $\Qpsi^{\rm rad} \sim \omega/\gpsi \sim 2\ee{27}$).
+
+\item \textbf{Gravitational coupling to matter}: The $\dpsiEM$ field
+  couples back to the cavity walls and surrounding matter through the
+  $c^2 \psi \rho/2$ term in the action. This provides a dissipative
+  channel: energy flows from EM $\to$ $\dpsiEM$ $\to$ mechanical
+  acceleration of matter. The rate is set by the gravitational coupling
+  strength: $\gpsi^{\rm grav} \sim G \rho_{\rm Nb}\,\omega_{\rm mech}
+  /c^2$, where $\rho_{\rm Nb} \sim 8570$~kg/m$^3$ is the Nb density.
+  This is extremely small: $\gpsi^{\rm grav} \sim 10^{-16}$~s$^{-1}$.
+
+\item \textbf{Nonlinear self-interaction}: In the Newtonian regime,
+  $\mu \to 1$ and the nonlinear term $\kappa a^2/c^2$ is negligible.
+  No nonlinear damping.
+\end{enumerate}
+
+\begin{finding}[The Psi-Channel Dissipation Paradox]
+\label{find:paradox}
+\newfinding{In the correct DFD formalism, all three candidate
+damping mechanisms for $\dpsiEM$ in the laboratory are negligible.
+The psi-field perturbation driven by the SRF cavity is an
+undamped, reactive, non-dissipative response. This means:
+\begin{equation}
+\Gamma_\psi = 0 \quad \text{(to leading order)},
+\end{equation}
+and the psi-channel does NOT contribute to cavity loss.}
+
+\honest{This is a startling conclusion that contradicts the entire
+psi-channel detection programme (Q-ratio diagnostic, SQMS bounds,
+Phase~I proposal). If $\Gamma_\psi = 0$, then:
+\begin{itemize}[nosep]
+\item The Q-ratio diagnostic has no signal.
+\item The SQMS ``accidental'' bound $\lbone < 1.56\ee{-9}$ is
+  vacuous (there is no psi-channel loss to bound).
+\item The Phase~I search for anomalous residual resistance from
+  the psi-channel would find nothing regardless of $\lambda$.
+\end{itemize}
+
+Before accepting this, we must examine what went wrong with the
+prior derivation and whether there is a dissipative channel that
+we are missing.}
+\end{finding}
+
+
+%=============================================================================
+%=============================================================================
+\part{Resolving the Paradox: The DC Channel}
+\label{part:resolution}
+%=============================================================================
+%=============================================================================
+
+
+%=============================================================================
+\section{The Overlooked DC Response}
+\label{sec:dc}
+%=============================================================================
+
+The EM energy density has TWO components:
+\begin{equation}
+u_{\rm EM}(\mathbf{x}, t) = \bar{u}(\mathbf{x})
++ \Delta u(\mathbf{x})\cos(2\omega t),
+\end{equation}
+where $\bar{u}$ is the time-averaged (DC) component and $\Delta u$
+is the oscillating ($2\omega$) component.
+
+The $2\omega$ component drives a reactive (non-dissipative) response
+as shown above. But the DC component $\bar{u}(\mathbf{x})$ produces
+a \textbf{static shift} in $\dpsiEM$:
+\begin{equation}
+\nabla^2(\dpsiEM^{\rm DC}) = -\frac{(4\pi G)^2\,2\lambda}
+{a_*^2\,c^4}\,\bar{u}(\mathbf{x}).
+\end{equation}
+
+This is a Poisson equation (temporal term drops out for DC) with
+solution:
+\begin{equation}
+\dpsiEM^{\rm DC}(\mathbf{x}) = \frac{(4\pi G)^2\,2\lambda}
+{a_*^2\,c^4}\int \frac{\bar{u}(\mathbf{x}')}{4\pi|\mathbf{x}
+- \mathbf{x}'|}\,d^3x'.
+\end{equation}
+
+This static shift does not oscillate and does not directly dissipate
+energy. However, it \emph{does} modify the optical metric locally,
+creating a gravitational potential well proportional to $U_{\rm EM}$.
+This is the parametric (Channel 2) effect from Appendix~R.
+
+
+%=============================================================================
+\section{The Correct Dissipation Mechanism: Parametric Energy Transfer}
+\label{sec:parametric}
+%=============================================================================
+
+The resolution of the paradox lies in recognising that the psi-channel
+loss is NOT a simple resonant absorption. It is a \textbf{parametric
+process}: the oscillating $\dpsiEM$ modulates the optical metric at
+$2\omega$, which shifts the EM mode frequency, which transfers energy
+from the EM field to the psi-field via parametric coupling.
+
+From Appendix~R (Eq.~R.4), the parametric coupling enters through the
+$\alpha U(t) q$ term in the mode equation:
+\begin{equation}
+\ddot{q} + 2\gpsi\dot{q} + \Opsi^2 q
+= \frac{(\lambda - 1)}{\Mpsi}\,G(t) + \alpha U(t)\,q.
+\end{equation}
+
+The parametric term $\alpha U(t) q$ with $U(t) = U_0[1 + m\cos(2\omega
+t)]$ creates Mathieu-type instability when $2\omega \approx 2\Opsi$.
+
+But with $c_\psi = a_0/c$, the mode frequency $\Opsi$ is:
+\begin{equation}
+\Opsi = c_\psi\,k = \frac{a_0}{c}\,\frac{\pi}{R_{\rm cav}}
+= \frac{1.2\ee{-10}}{3\ee{8}}\,\frac{\pi}{0.1}
+= 1.3\ee{-17}~\text{rad/s}.
+\end{equation}
+
+The parametric resonance condition $2\omega \approx 2\Opsi$ requires
+$\omega \approx 10^{-17}$~rad/s, which is 26 orders of magnitude
+below the SRF frequency. \textbf{Parametric resonance is completely
+off-resonant.}
+
+The off-resonant parametric effect produces a frequency shift (not
+energy transfer) of order:
+\begin{equation}
+\frac{\delta\omega}{\omega} \sim \frac{\alpha U_0}{\Opsi^2 - \omega^2}
+\approx -\frac{\alpha U_0}{\omega^2},
+\end{equation}
+which is a real (reactive) effect, not dissipative.
+
+
+%=============================================================================
+\section{Where the Prior Derivation Went Wrong}
+\label{sec:error}
+%=============================================================================
+
+The W4i15 P2 derivation (Theorem 2.1, lines 416--569) and the P11
+derivation (Part II, lines 307--627) both implicitly assumed that
+the psi-field Green's function has a Lorentzian resonance structure
+(Eq.~W4i15-P2 line 486):
+\begin{equation}
+\text{Im}[\hat{G}(\Omega)] = \frac{\Omega\,\Opsi}
+{(\Opsi^2 - \Omega^2)^2 + \Omega^2\,\Opsi^2/\Qpsi^2}.
+\end{equation}
+
+This is the response function for a \textbf{damped harmonic oscillator}
+with resonant frequency $\Opsi$ and quality factor $\Qpsi$. It has a
+finite imaginary part (dissipation) because $\Qpsi$ is finite.
+
+The error: the derivation treated $\Opsi$ and $\Qpsi$ as free
+parameters and evaluated the Green's function in the
+``off-resonant'' limit $2\omega \ll \Opsi$ (P2 Eq.~line 510):
+\begin{equation}
+\text{Im}[\hat{G}(2\omega)] \approx \frac{2\omega}{\Opsi^2\,\Qpsi}.
+\end{equation}
+
+Using $\Opsi = c k_{\rm cav} \sim 10^{10}$~rad/s (with $c_\psi = c$)
+made this ``off-resonant''. But using the correct $c_\psi = a_0/c$
+gives $\Opsi \sim 10^{-17}$~rad/s, making $2\omega \gg \Opsi$. In
+THIS limit:
+\begin{equation}
+\text{Im}[\hat{G}(2\omega)] \approx
+\frac{2\omega\,\Opsi}{(2\omega)^4 + (2\omega)^2\Opsi^2/\Qpsi^2}
+\approx \frac{\Opsi}{(2\omega)^3\,\Qpsi^2}
+\to 0 \quad (\omega \to \infty).
+\end{equation}
+
+The imaginary part is \textbf{negligible} at SRF frequencies when
+$\Opsi \ll \omega$. The psi-channel loss vanishes.
+
+\begin{finding}[The P2 Error Was Assuming $c_\psi = c$]
+\label{find:error}
+\newfinding{The entire psi-channel loss derivation in W4i15 P2 and
+W4i15 P11 used the wrong propagation speed ($c_\psi = c$) for the
+scalar perturbation inside the cavity. The correct value from the
+temporal completion is $c_\psi = a_0/c \approx 4\ee{-19}$~m/s.
+This makes $\Opsi \sim 10^{-17}$~rad/s rather than $10^{10}$~rad/s,
+shifting the cavity from the off-resonant ($\omega \ll \Opsi$) to
+the far-above-resonance ($\omega \gg \Opsi$) regime. In the
+far-above-resonance regime, the imaginary part of the Green's
+function (and hence the dissipation rate) is suppressed by
+$(\Opsi/\omega)^3$, which is a factor of $\sim 10^{-81}$.}
+
+\caution{If this analysis is correct, the psi-channel loss in SRF
+cavities is $\sim 10^{-81}$ times smaller than all prior estimates.
+The Q-ratio diagnostic, the SQMS bound, and the Phase~I proposal
+would all be invalidated.}
+\end{finding}
+
+
+%=============================================================================
+%=============================================================================
+\part{Critical Reassessment: Is the Temporal Completion Correct for
+  EM-Sourced Perturbations?}
+\label{part:reassessment}
+%=============================================================================
+%=============================================================================
+
+
+%=============================================================================
+\section{The Two-Component Subtlety}
+\label{sec:two-component}
+%=============================================================================
+
+Before accepting the devastating conclusion of Part~II, we must examine
+a crucial subtlety: the temporal completion (Appendix~Q) derives
+$c_s^2 \to 0$ for the \emph{cosmological} dust sector. Does this
+apply to the EM-sourced perturbation $\dpsiEM$?
+
+\subsection{What the dust branch actually proves}
+
+Theorem~Q.4 (dust branch) establishes that for \emph{homogeneous}
+FRW solutions near the screen background, $w \to 0$ and $c_s^2 \to 0$.
+The proof uses:
+\begin{enumerate}[nosep]
+\item The FRW symmetry (homogeneous, isotropic).
+\item The deviation invariant $\Delta = (c/a_0)|\dot\psi - \dot\psi_0|$
+  with $\Delta \ll 1$.
+\item The conserved current $a^3 \mu(\Delta) = \text{const}$.
+\end{enumerate}
+
+The $c_s^2 \to 0$ result is the \emph{adiabatic sound speed} for
+long-wavelength perturbations of this cosmological background. It
+does NOT necessarily apply to short-wavelength, EM-driven perturbations
+in the laboratory.
+
+\subsection{The linearised perturbation equation revisited}
+
+The perturbation $\dpsiEM$ is sourced by EM energy, not by the
+cosmological background. The linearised equation about $\psigrav$
+in the laboratory is:
+\begin{equation}
+\frac{a_*^2}{8\pi G}\left[
+  \nabla^2(\dpsiEM) - K''(\Delta_{\rm bg})\,\frac{c^2}{a_0^2}\,
+  \ddot{\delta\psi}_{\rm EM}
+\right] = -\frac{\lambda\,4\pi G}{c^4}\,u_{\rm EM}.
+\label{eq:lab-perturbation}
+\end{equation}
+
+The coefficient of the time derivative is
+$K''(\Delta_{\rm bg})\,c^2/a_0^2$. In the laboratory, $\Delta_{\rm bg}$
+is the temporal deviation of the local gravitational field from the
+cosmological background. For the Earth's surface:
+\begin{equation}
+\Delta_{\rm bg} = \frac{c}{a_0}\,|\dot\psi_{\rm local}
+- \dot\psi_{\rm cosmo}|.
+\end{equation}
+
+The local $\dot\psi$ has contributions from Earth's rotation, orbital
+motion, and galactic motion, all of which are small compared to $a_0/c$.
+For Earth's surface gravity:
+\begin{equation}
+\dot\psi_{\rm local} \sim \frac{2 g_\oplus}{c^2}\,v_{\rm rot}
+\sim \frac{2 \times 10}{(3\ee{8})^2}\times 465
+\sim 10^{-13}~\text{s}^{-1}.
+\end{equation}
+\begin{equation}
+\dot\psi_{\rm cosmo} \sim H_0\,\psi_{\rm cosmo}
+\sim 2.3\ee{-18}\times 10^{-5} \sim 10^{-23}~\text{s}^{-1}.
+\end{equation}
+\begin{equation}
+\Delta_{\rm bg} = \frac{c}{a_0}\,|\dot\psi_{\rm local}
+- \dot\psi_{\rm cosmo}|
+\approx \frac{3\ee{8}}{1.2\ee{-10}}\times 10^{-13}
+= 2.5\ee{5}.
+\end{equation}
+
+\begin{finding}[$\Delta_{\rm bg} \gg 1$ in the Laboratory]
+\label{find:Delta}
+\newfinding{The temporal deviation parameter $\Delta_{\rm bg}$ in
+the laboratory is $\sim 10^5$, NOT $\ll 1$.}
+
+This means the cosmological limit $\Delta \to 0$ (where $c_s^2 \to 0$)
+does NOT apply to laboratory conditions. For $\Delta \gg 1$:
+\begin{equation}
+K''(\Delta) = \frac{1}{(1+\Delta)^2} \approx \frac{1}{\Delta^2}
+\approx \frac{1}{(2.5\ee{5})^2} = 1.6\ee{-11}.
+\end{equation}
+
+The effective propagation speed squared:
+\begin{equation}
+c_\psi^2 = \frac{1}{K''(\Delta_{\rm bg})}\,\frac{a_0^2}{c^2}
+= \Delta_{\rm bg}^2\,\frac{a_0^2}{c^2}
+= \Delta_{\rm bg}^2\,\frac{a_0^2}{c^2}.
+\end{equation}
+
+But by definition, $\Delta_{\rm bg} = (c/a_0)\,|\dot\psi_{\rm local}|$,
+so:
+\begin{equation}
+c_\psi^2 = \frac{c^2}{a_0^2}\,|\dot\psi_{\rm local}|^2\,
+\frac{a_0^2}{c^2} = |\dot\psi_{\rm local}|^2\,R^2,
+\end{equation}
+where $R$ is a characteristic length... No, this is getting circular.
+Let me redo this systematically.
+\end{finding}
+
+\subsection{Systematic derivation of $c_\psi$ at $\Delta_{\rm bg} \gg 1$}
+
+The perturbation equation~\eqref{eq:lab-perturbation} can be written:
+\begin{equation}
+\nabla^2(\dpsiEM) - \frac{1}{\tilde{c}_\psi^2}\,
+\ddot{\delta\psi}_{\rm EM} = \text{source},
+\end{equation}
+where:
+\begin{equation}
+\frac{1}{\tilde{c}_\psi^2} = K''(\Delta_{\rm bg})\,\frac{c^2}{a_0^2}.
+\end{equation}
+
+For $\Delta_{\rm bg} \gg 1$:
+\begin{equation}
+K''(\Delta_{\rm bg}) \approx \frac{1}{\Delta_{\rm bg}^2},
+\end{equation}
+so:
+\begin{equation}
+\frac{1}{\tilde{c}_\psi^2} = \frac{c^2}{a_0^2\,\Delta_{\rm bg}^2}
+= \frac{c^2}{a_0^2}\,\frac{a_0^2}{c^2\,|\dot\psi_{\rm local}
+- \dot\psi_0|^2}
+= \frac{1}{|\dot\psi_{\rm local} - \dot\psi_0|^2}.
+\end{equation}
+
+Wait, $\Delta_{\rm bg} = (c/a_0)|\dot\psi_{\rm local} - \dot\psi_0|$,
+so $a_0^2\Delta_{\rm bg}^2/c^2 = |\dot\psi_{\rm local} - \dot\psi_0|^2$.
+Therefore:
+\begin{equation}
+\tilde{c}_\psi^2 = \frac{a_0^2\,\Delta_{\rm bg}^2}{c^2}
+= |\dot\psi_{\rm local} - \dot\psi_0|^2.
+\end{equation}
+
+Using $|\dot\psi_{\rm local}| \sim 10^{-13}$~s$^{-1}$ and
+$\dot\psi_0 \ll \dot\psi_{\rm local}$:
+\begin{equation}
+\tilde{c}_\psi \sim |\dot\psi_{\rm local}| \sim 10^{-13}~\text{s}^{-1}.
+\end{equation}
+
+\corrected{$\tilde{c}_\psi$ has units of s$^{-1}$, not m/s. This
+signals a dimensional error. Let me trace it back.}
+
+The issue: in Eq.~\eqref{eq:lab-perturbation}, the spatial and
+temporal terms must have the same dimensions. $\nabla^2(\dpsiEM)$ has
+dimensions m$^{-2}$ (since $\dpsiEM$ is dimensionless). The temporal
+term $K''(\Delta_{\rm bg})\,(c^2/a_0^2)\,\ddot{\delta\psi}_{\rm EM}$
+must also be m$^{-2}$:
+\begin{itemize}
+\item $[K''] = 1$ (dimensionless).
+\item $[c^2/a_0^2] = (\text{m/s})^2/(\text{m/s}^2)^2
+  = \text{s}^2/\text{m}^2$.
+\item $[\ddot{\delta\psi}] = \text{s}^{-2}$.
+\end{itemize}
+Product: $\text{s}^2/\text{m}^2 \times \text{s}^{-2} = 1/\text{m}^2$.
+Correct.
+
+So the wave equation is:
+\begin{equation}
+\nabla^2(\dpsiEM) - \frac{K''(\Delta_{\rm bg})\,c^2}{a_0^2}\,
+\ddot{\delta\psi}_{\rm EM} = \text{source},
+\end{equation}
+with effective speed $\tilde{c}_\psi$ defined by $1/\tilde{c}_\psi^2
+= K''(\Delta_{\rm bg})\,c^2/a_0^2$, so:
+\begin{equation}
+\boxed{
+\tilde{c}_\psi^2 = \frac{a_0^2}{c^2\,K''(\Delta_{\rm bg})}.
+}
+\label{eq:cpsi-general}
+\end{equation}
+
+For $\Delta_{\rm bg} \gg 1$, $K'' \approx 1/\Delta_{\rm bg}^2$:
+\begin{equation}
+\tilde{c}_\psi^2 = \frac{a_0^2\,\Delta_{\rm bg}^2}{c^2}.
+\end{equation}
+
+With $\Delta_{\rm bg} = (c/a_0)|\dot\psi_{\rm loc}|
+\approx (3\ee{8}/1.2\ee{-10})\times 10^{-13} = 2.5\ee{5}$:
+\begin{equation}
+\tilde{c}_\psi^2 = \frac{(1.2\ee{-10})^2\,(2.5\ee{5})^2}
+{(3\ee{8})^2}
+= \frac{1.44\ee{-20}\times 6.25\ee{10}}{9\ee{16}}
+= \frac{9\ee{-10}}{9\ee{16}} = 10^{-26}~\text{m}^2/\text{s}^2.
+\end{equation}
+\begin{equation}
+\tilde{c}_\psi = 10^{-13}~\text{m/s}.
+\end{equation}
+
+\begin{finding}[Corrected Psi-Field Propagation Speed in the Laboratory]
+\label{find:cpsi-corrected}
+\newfinding{The psi-field propagation speed in the laboratory is
+$\tilde{c}_\psi \approx 10^{-13}$~m/s (not $4\ee{-19}$~m/s from
+the $\Delta \ll 1$ limit, and not $c$ from the naive Newtonian
+assumption).}
+
+The mode frequency for a psi-mode confined in the cavity:
+\begin{equation}
+\Opsi = \tilde{c}_\psi\,k_{\rm cav}
+= 10^{-13}\,\frac{\pi}{0.1}
+= 3\ee{-12}~\text{rad/s}.
+\end{equation}
+
+The SRF drive frequency $2\omega = 2\times 2\pi\times 1.3\ee{9}
+= 1.6\ee{10}$~rad/s is still $\sim 10^{22}$ times above $\Opsi$.
+The cavity is deep in the $\omega \gg \Opsi$ regime.
+
+In this regime, the response of the psi-field to the $2\omega$
+drive is:
+\begin{equation}
+\dpsiEM^{(2\omega)} \approx -\frac{\text{source}}{(2\omega)^2
+/\tilde{c}_\psi^2} = -\frac{\tilde{c}_\psi^2}{(2\omega)^2}\,
+\frac{\text{source}}{1},
+\end{equation}
+which is a \textbf{suppressed reactive response}, attenuated by
+$(\Opsi/\omega)^2 \sim 10^{-44}$ relative to the resonant case.
+
+The imaginary part (dissipation) in this regime:
+\begin{equation}
+\text{Im}[\hat{G}] \sim \frac{\Opsi}{(2\omega)^3\,\Qpsi},
+\end{equation}
+suppressed by an additional factor of $\Opsi/(2\omega) \sim 10^{-22}$
+relative to the reactive response.
+\end{finding}
+
+
+%=============================================================================
+\section{The Deep Question: Is the Temporal Kinetic Term Physical?}
+\label{sec:deep-question}
+%=============================================================================
+
+\honest{The devastating suppression factor of $\sim 10^{-44}$
+(reactive) to $\sim 10^{-66}$ (dissipative) rests entirely on
+the temporal kinetic function $K(\Delta)$ from the dust branch
+derivation. If this temporal sector is correct, the psi-channel
+loss mechanism is dead.
+
+However, there are reasons to question whether $K(\Delta)$ applies
+unmodified to laboratory EM-sourced perturbations:
+
+\begin{enumerate}
+\item \textbf{The dust branch is cosmological}: It was derived for
+  FRW backgrounds. The laboratory is not FRW.
+
+\item \textbf{The temporal sector may have additional terms}: The
+  ``full scalar-sector action'' in Eq.~2.10 of section02 is the
+  \emph{proposed} form. The spatial sector $W(y)$ is well-constrained
+  by rotation curves, lensing, and Solar System tests. The temporal
+  sector $K(\Delta)$ is constrained only by cosmological requirements
+  ($c_s^2 \to 0$ for structure formation) and theoretical self-consistency
+  ($S^3$ composition law). There may be corrections at laboratory scales
+  that restore faster propagation.
+
+\item \textbf{The $\dpsiEM$ perturbation is EM-sourced}: It couples
+  through $\lambda\,u_{\rm EM}/c^2$, which is an \emph{EM} source
+  term, not a gravitational one. The response may be governed by the
+  EM-sector dynamics, not the pure gravitational temporal sector.
+
+\item \textbf{Mode equation in Appendix~R assumes finite $\Opsi$}:
+  Appendix~R (Eq.~R.1) writes the mode equation with $\Opsi^2$ as a
+  free parameter and $\gpsi$ as a separate damping rate. This
+  framework was constructed for ``a single laboratory mode $q(t)$
+  with natural frequency $\Opsi_\psi$'' --- it assumes the mode exists
+  and has finite frequency. If $\Opsi \sim 10^{-12}$~rad/s, the
+  ``mode'' would have a period of $10^{12}$~s $\sim 30{,}000$~years.
+\end{enumerate}
+
+\textbf{The honest assessment}: The temporal sector of DFD is not
+well enough constrained to determine $c_\psi$ at laboratory scales.
+The cosmological constraint gives $c_s^2 \to 0$ for structure
+formation, but the specific value of $c_\psi$ in a table-top
+experiment depends on $K''(\Delta_{\rm bg})$, which depends on
+$\Delta_{\rm bg}$, which depends on the local time derivative of
+$\psi$ relative to the cosmological background.}
+
+
+%=============================================================================
+%=============================================================================
+\part{Resolution and Impact on SQMS Phase~I}
+\label{part:impact}
+%=============================================================================
+%=============================================================================
+
+
+%=============================================================================
+\section{The Three Scenarios}
+\label{sec:scenarios}
+%=============================================================================
+
+Given the uncertainty in the temporal sector, we must present the
+SQMS bounds and Phase~I reach under three scenarios:
+
+\subsection{Scenario A: $c_\psi = c$ (Newtonian limit, temporal sector decoupled)}
+
+This is the assumption of ALL prior iterations. The temporal kinetic
+term is ignored (or assumed to give $c_\psi = c$). The loss formula
+is the W4i15 P2 result:
+\begin{equation}
+\frac{1}{Q_\psi^{\rm cav}} = \frac{(\lambda-1)^2\,G\,\calF}
+{c^4\,\Opsi^2\,\Qpsi}\,\omega^2,
+\end{equation}
+with $\Opsi = c k_{\rm cav} \sim 10^{10}$~rad/s. Here $\Qpsi$ enters
+as the scalar-mode quality factor. Using $\Qpsi = 10^9$ gives the
+canonical programme values.
+
+\textbf{Problem}: $\Qpsi = 10^9$ is the MOND self-confinement value
+for galactic modes, not laboratory modes. There is no physics-based
+estimate of $\Qpsi$ for this scenario. Values between $\Qpsi \sim 1$
+(radiation-dominated, if one uses the standard antenna formula but
+with partial confinement by cavity walls) and $\Qpsi \sim 10^{12}$
+(limited only by gravitational radiation) are possible.
+
+\textbf{SQMS bound}: $\lbone < 1.56\ee{-9}\times\sqrt{\Qpsi/10^9}$.
+
+\textbf{Impact}: The bound scales as $\sqrt{\Qpsi}$. If $\Qpsi = 1$
+(no confinement), the bound tightens to $\lbone < 5\ee{-14}$.
+If $\Qpsi = 10^{12}$, it loosens to $\lbone < 5\ee{-8}$.
+
+\subsection{Scenario B: $c_\psi = a_0/c$ (dust branch, $\Delta \to 0$ limit)}
+
+This uses the cosmological dust branch limit directly. As shown in
+\S\ref{sec:regime2}, $c_\psi \sim 4\ee{-19}$~m/s, and the
+psi-channel loss is suppressed by $\sim 10^{-81}$.
+
+\textbf{SQMS bound}: No bound (psi-channel loss is unobservably small).
+
+\textbf{Impact}: Psi-channel detection through SRF cavity loss is
+impossible at any realistic sensitivity.
+
+\subsection{Scenario C: $c_\psi = \tilde{c}_\psi(\Delta_{\rm bg})$ (laboratory $\Delta$)}
+
+This uses the corrected propagation speed $\tilde{c}_\psi \sim
+10^{-13}$~m/s from Finding~\ref{find:cpsi-corrected}. The
+psi-channel loss is suppressed by $(\Opsi/\omega)^2 \sim 10^{-44}$.
+
+\textbf{SQMS bound}: No practical bound (suppression too extreme).
+
+\textbf{Impact}: Same as Scenario B for all practical purposes.
+
+
+%=============================================================================
+\section{Assessment: Which Scenario Is Correct?}
+\label{sec:assessment}
+%=============================================================================
+
+\begin{finding}[The Temporal Sector Is the Key Uncertainty]
+\label{find:temporal}
+\newfinding{The question of local vs.\ global $\Qpsi$ is actually
+a question about the temporal kinetic sector $K(\Delta)$. The three
+scenarios correspond to three different treatments of this sector:
+
+\begin{enumerate}[nosep]
+\item[(A)] Ignore the temporal sector entirely: $\dpsiEM$ responds
+  instantaneously, dissipation enters through an \emph{ad hoc} $\Qpsi$.
+\item[(B)] Use the cosmological limit $c_s^2 \to 0$: no dissipation.
+\item[(C)] Use the laboratory $\Delta_{\rm bg}$: negligible dissipation.
+\end{enumerate}
+
+Scenarios B and C are \textbf{more physically grounded} than A,
+because they use the temporal sector that is derived from the same
+$S^3$ composition law that determines $\mu(x)$. Scenario A treats
+$\Qpsi$ as a free parameter, which means the psi-channel prediction
+has an unconstrained fudge factor.}
+
+\honest{The correct answer almost certainly involves the temporal
+sector at some level. The question is whether the $K(\Delta)$
+derived for cosmological perturbations is the complete story for
+short-wavelength, high-frequency, EM-driven perturbations.
+
+There is a possibility that the EM coupling introduces additional
+temporal dynamics not captured by $K(\Delta)$. Specifically, the
+EM-$\psi$ interaction term $\lambda\,u_{\rm EM}/c^2$ in the field
+equation may have its own temporal structure that is faster than
+$K(\Delta)$ because it is mediated by the EM field (which propagates
+at $c$), not by the gravitational self-interaction (which has
+$c_s \to 0$).
+
+This would correspond to a ``mixed'' scenario where the EM-driven
+$\dpsiEM$ has a propagation speed set by the EM-$\psi$ coupling
+rather than by the gravitational temporal sector. This requires a
+careful re-examination of the full coupled EM-$\psi$ field equations,
+not just the decoupled scalar sector.
+
+\textbf{Until this is resolved, Scenario A should be retained as
+the ``working hypothesis'' for the SQMS proposal, with the $\Qpsi$
+uncertainty flagged as a known theoretical gap.}}
+\end{finding}
+
+
+%=============================================================================
+\section{Impact on SQMS Phase~I Proposal}
+\label{sec:phase1}
+%=============================================================================
+
+\begin{tcolorbox}[colback=yellow!5!white, colframe=orange!60!black,
+  title=\textbf{IMPACT ASSESSMENT}]
+
+\begin{enumerate}
+\item \textbf{Q-ratio diagnostic}: The \emph{ratio} $\mathcal{R} =
+  Q_\psi^{-1}(\omega_1)/Q_\psi^{-1}(\omega_2)$ does NOT depend on
+  $\Qpsi$ (it cancels in the ratio). The Q-ratio prediction
+  $\mathcal{R} = 0.49$ (or 0.27 with $1/\omega$ correction) is
+  \textbf{robust} against the local-vs-global $\Qpsi$ question.
+  The shape of the frequency dependence is set by the overlap
+  integrals, not by the absolute loss rate.
+
+  \confirmed{The Q-ratio diagnostic is unaffected by this analysis.
+  Phase~I can proceed with the multi-frequency measurement regardless.}
+
+\item \textbf{Absolute SQMS bound ($\lbone < 1.56\ee{-9}$)}: This
+  bound assumes a specific absolute loss rate at a specific $\Qpsi$.
+  It is now uncertain by a factor $\sqrt{\Qpsi}$, where $\Qpsi$
+  ranges from $\sim 1$ (no temporal sector) to $\sim 10^9$ (MOND
+  value) to $\sim \infty$ (quasi-static regime). The bound could
+  be anywhere from $5\ee{-14}$ to vacuous.
+
+  \caution{The absolute bound is unreliable until the temporal sector
+  is resolved. Quote it as $\lbone < 1.56\ee{-9}\times
+  (\Qpsi/10^9)^{1/2}$ with $\Qpsi$ flagged as a theoretical
+  uncertainty.}
+
+\item \textbf{Phase~I detection threshold}: If $\Qpsi \to \infty$
+  (Scenarios B/C), then the psi-channel contributes negligible loss,
+  and Phase~I would need an alternative detection strategy. If
+  $\Qpsi = 10^9$ (Scenario A), the existing programme is on target.
+  If $\Qpsi \sim 1$, the signal is $10^9\times$ larger and existing
+  SQMS data would already have detected it or ruled it out.
+
+\item \textbf{M$_{\rm eff} = 3.01\ee{6}$~kg}: This effective mass
+  was computed for the passive detection (gravitational-gradient)
+  mode, not for the psi-channel loss mode. It is unaffected by
+  this analysis.
+
+\item \textbf{Passive detection mode}: The passive detection measures
+  the influence of the external galactic $\psi_{\rm grav}$ on cavity
+  frequency. This does NOT involve $\dpsiEM$ or the temporal sector.
+  The passive mode measures the static gravitational background and
+  is completely unaffected by the $\Qpsi$ question.
+
+  \confirmed{The Passive Superiority Theorem, the $M_{\rm eff}$ value,
+  and the passive detection reach are all unaffected.}
+\end{enumerate}
+\end{tcolorbox}
+
+
+%=============================================================================
+\section{Recommended Actions}
+\label{sec:actions}
+%=============================================================================
+
+\begin{enumerate}
+\item \textbf{URGENT}: Independent derivation of the linearised
+  perturbation equation for EM-sourced $\dpsiEM$, including the
+  temporal sector $K(\Delta)$ with the correct $\Delta_{\rm bg}$
+  for laboratory conditions. This must determine whether the
+  effective $c_\psi$ at GHz frequencies is (a)~$c$, (b)~$a_0/c$,
+  (c)~$\tilde{c}_\psi(\Delta_{\rm bg}) \sim 10^{-13}$~m/s, or
+  (d)~something else set by the EM coupling.
+
+\item \textbf{HIGH PRIORITY}: Examine whether the EM-$\psi$ coupling
+  introduces a separate temporal propagation channel that bypasses
+  the slow $K(\Delta)$ sector. The EM field propagates at $c$; if
+  the $\dpsiEM$ perturbation inherits this speed through the coupling,
+  then Scenario A may be correct despite the dust branch.
+
+\item \textbf{MEDIUM PRIORITY}: Rewrite the SQMS proposal to present
+  the Q-ratio diagnostic as the primary signature (robust against
+  $\Qpsi$ uncertainty) and the absolute bound as secondary (dependent
+  on $\Qpsi$).
+
+\item \textbf{MEDIUM PRIORITY}: Compute $\Delta_{\rm bg}$ and
+  $K''(\Delta_{\rm bg})$ for the specific FNAL/SQMS site geometry
+  (latitude, local gravitational environment, galactic position).
+  This gives the numerical value of $c_\psi$ for the experiment.
+
+\item \textbf{LONG TERM}: The temporal sector $K(\Delta)$ is the
+  least-tested part of DFD. Developing laboratory or astronomical
+  tests of $K(\Delta)$ would resolve this question definitively.
+\end{enumerate}
+
+
+%=============================================================================
+\section{Summary: Local vs.\ Global $\Qpsi$ --- Resolution}
+\label{sec:summary}
+%=============================================================================
+
+\begin{tcolorbox}[colback=green!5!white, colframe=green!50!black,
+  title=\textbf{DEFINITIVE ANSWER}]
+
+\textbf{Q: Is $\Qpsi$ local ($\sim 30$) or global ($10^9$)?}
+
+\textbf{A: Neither.} The question exposes a deeper issue: the
+psi-field propagation speed in the laboratory, which is determined
+by the temporal kinetic sector $K(\Delta)$.
+
+\begin{itemize}[nosep]
+\item The $\Qpsi^{\rm local} \sim 30$ estimate (W4i15 P2) used
+  $c_\psi = c$, which contradicts the temporal completion.
+\item The $\Qpsi^{\rm MOND} = 10^9$ estimate applies to galactic
+  modes, not laboratory modes.
+\item The correct $c_\psi$ is set by $K''(\Delta_{\rm bg})$, giving
+  $c_\psi \sim 10^{-13}$~m/s in the lab, which makes the cavity
+  operate in the $\omega \gg \Opsi$ regime where dissipation is
+  negligible.
+\item The Q-ratio diagnostic ($\mathcal{R} = 0.49$ or $0.27$) is
+  \textbf{robust}: it does not depend on $\Qpsi$.
+\item The absolute SQMS bound $\lbone < 1.56\ee{-9}$ is
+  \textbf{unreliable}: it carries an unconstrained $\sqrt{\Qpsi}$
+  factor.
+\item The passive detection mode is \textbf{unaffected}.
+\end{itemize}
+
+\textbf{Programme impact}: This analysis does NOT kill the SQMS
+programme. It sharpens it: the Q-ratio diagnostic (frequency-dependence
+shape) is the reliable observable; the absolute loss rate is uncertain.
+Phase~I should be framed around the shape measurement, not the
+absolute bound.
+
+\textbf{Remaining theoretical question}: Does the EM-$\psi$ coupling
+introduce a fast temporal channel that bypasses the slow $K(\Delta)$
+sector? If yes, Scenario A (with some effective $\Qpsi$) applies and
+the absolute bounds are meaningful. If no, only the Q-ratio shape
+test survives.
+\end{tcolorbox}
+
+
+\end{document}

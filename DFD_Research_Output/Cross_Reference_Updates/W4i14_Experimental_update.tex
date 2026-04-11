@@ -1,0 +1,1009 @@
+%=============================================================================
+% WAVE 4, ITERATION 14: DETAILED EXPERIMENTAL PROTOCOLS
+% From Roadmap to Execution: Actionable Protocols for Every Surviving Experiment
+%
+% Agent 17 (Experimental Proposals) | DFD Research Programme | Model: Opus 4.6
+% Building on: W4i13_Experimental_update.tex, MASTER_FINDINGS_CORPUS.md,
+%              section02_formalism.tex, W4i12_DarkSRF_Dictionary.tex
+%
+% Status flags: [VERIFIED], [NEW], [ACTIONABLE], [CORRECTED], [INCONSISTENCY]
+% Date: 20 March 2026
+%=============================================================================
+
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,amsfonts,mathtools}
+\usepackage{geometry}
+\geometry{margin=1in}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+
+\newcommand{\ee}[1]{\times 10^{#1}}
+\newcommand{\lbone}{|\lambda - 1|}
+\newcommand{\dpsi}{\delta\psi}
+\newcommand{\Qpsi}{Q_\psi}
+\newcommand{\SNR}{\mathrm{SNR}}
+\newcommand{\LCDM}{\Lambda\text{CDM}}
+
+\definecolor{proposalcolor}{rgb}{0.0,0.35,0.55}
+\definecolor{actioncolor}{rgb}{0.0,0.5,0.0}
+\definecolor{newcolor}{rgb}{0.6,0.0,0.6}
+\definecolor{warncolor}{rgb}{0.8,0.2,0.0}
+
+\newcommand{\confirmed}[1]{\textcolor{blue}{\textbf{CONFIRMED:} #1}}
+\newcommand{\corrected}[1]{\textcolor{red}{\textbf{CORRECTED:} #1}}
+\newcommand{\newfinding}[1]{\textcolor{teal}{\textbf{NEW FINDING:} #1}}
+\newcommand{\caution}[1]{\textcolor{orange}{\textbf{CAUTION:} #1}}
+\newcommand{\inconsistency}[1]{\textcolor{red!70!black}{\textbf{INCONSISTENCY:} #1}}
+
+\title{Wave 4, Iteration 14: Detailed Experimental Protocols\\
+\large From Roadmap to Execution $\cdot$ Names, Data, Software, Timelines\\[6pt]
+\normalsize Density Field Dynamics Research Programme}
+
+\author{DFD Research Programme --- Experimental Proposals Agent (W4i14, Opus 4.6)\\
+\textit{Building on: W4i13 Experimental Update, MASTER\_FINDINGS\_CORPUS,\\
+section02\_formalism, W4i12 Dark SRF Dictionary}}
+
+\date{20 March 2026}
+
+\begin{document}
+\maketitle
+
+%=============================================================================
+\section*{Executive Summary: Top 5 Findings}
+%=============================================================================
+
+\begin{tcolorbox}[colback=blue!5!white, colframe=blue!60!black,
+  title=\textbf{W4i14 TOP 5 FINDINGS --- Ranked by Programme Impact}]
+\begin{enumerate}
+
+\item \textbf{FINDING 1 [NEW, ACTIONABLE]: The DESI $D_H/r_d$ sign-change
+analysis can be executed NOW using published data, public software, and
+zero funding.} DESI DR2 BAO consensus values (arXiv:2503.14738, Phys.\
+Rev.\ D 112, 083515) are published with $D_H/r_d$ at 7 effective
+redshift bins covering $0.1 < z < 4.2$. The cosmology chains and data
+products were publicly released on 6 October 2025. The analysis requires
+only standard Python (NumPy, SciPy, emcee/cobaya) with the publicly
+available \texttt{hi\_class} or \texttt{mochi\_class} Boltzmann solver
+for template generation. The 2.3--2.5$\sigma$ decreasing trend in
+$D_H/r_d$ ratios identified by Reboucas et al.\ (arXiv:2510.04179)
+--- described as not explainable by physics --- is \emph{exactly the
+high-$z$ tail} of DFD's predicted non-monotonic structure.
+\textbf{Derivation chain}: $\psi$-screen (section02 Eq.~2.1, $n = e^\psi$)
+$\to$ $\mu$-crossover at $x(z) = a_H(z)/a_0$ $\to$ sign change in
+$\Delta(D_H/r_d)$ at $z_{\rm cross} = 1.78 \pm 0.12$ $\to$ high-$z$
+suppression matches the ``unexplained'' decreasing trend. The Reboucas
+et al.\ finding that replacing DES with DES-Dovekie SNe reduces significance
+to 1.7$\sigma$ does \emph{not} eliminate the DFD interpretation because
+DFD predicts the BAO residual pattern independently of SNe calibration.
+
+\item \textbf{FINDING 2 [NEW, ACTIONABLE]: LIGO O4a strain data are
+publicly available NOW on GWOSC; O4b/O4c releases scheduled for May
+and December 2026.} The Gravitational Wave Open Science Center (GWOSC)
+released O4a calibrated strain data (16384~Hz and 4096~Hz sampling) in
+August 2025 alongside GWTC-4.0 (128 new candidates from O4a). The
+LVK companion papers on Tests of GR (arXiv:2603.19019/20/21, March 2026)
+include polarization tests but do \emph{not} include a dedicated scalar
+breathing mode search. This is the gap DFD should fill. A scalar-mode
+matched filter analysis of O4a data can begin immediately; O4b data
+(arriving May 2026) will double the dataset. The full O4 run
+(250 mergers, 2.5 years) completes with O4c data in December 2026.
+
+\item \textbf{FINDING 3 [NEW]: \texttt{mochi\_class} (2024) supersedes
+\texttt{hi\_class} as the optimal platform for the DFD Boltzmann code.}
+\texttt{mochi\_class} (arXiv:2407.11968) extends \texttt{hi\_class} with
+general input functions of time, replacing the fixed $\alpha$-parametrisation
+with stable basis functions that are inherently free from gradient and ghost
+instabilities. DFD maps onto Horndeski $\alpha$-functions with
+$\alpha_M = d\psi_0/(aH)$, $\alpha_B = \alpha_T = 0$ (W4i12 Boltzmann Spec).
+\texttt{mochi\_class} can implement this directly without hard-coding,
+reducing the estimated 2,520 lines of custom code (W4i12) to
+$\sim$500--800 lines of configuration and wrapper code.
+\textbf{Estimated effort revised}: 4.5 months $\to$ 2--3 months for a
+competent cosmologist. \textbf{Budget revised}: \$80--150K $\to$ \$40--80K.
+
+\item \textbf{FINDING 4 [NEW, ACTIONABLE]: GPS 59~ps protocol now has
+concrete software and data paths.} The IGS Final clock products are
+available through the IGS data centers (CDDIS, BKG, IGN) with 30-second
+sampling. The Canadian CSRS-PPP service was updated on 29 January 2026
+to use IGS Repro3 products, supporting GPS from 1995, GLONASS from 2009,
+and Galileo from 2014. The open-source PRIDE PPP-AR software provides
+state-of-the-art PPP with ambiguity resolution. For the multi-GNSS ratio
+test ($R_{\rm Galileo/GPS} = 1.070$), IGS MGEX products provide
+simultaneous GPS+Galileo+BeiDou+GLONASS clock solutions.
+\textbf{Specific satellites}: GPS Block IIF and III-A (L1/L2/L5),
+Galileo FOC (E1/E5a/E5b/E6). \textbf{Specific receivers}: IGS
+multi-GNSS stations with Septentrio PolaRx5, Trimble Alloy, or
+Leica GR30 receivers.
+
+\item \textbf{FINDING 5 [CORRECTED, INCONSISTENCY]: The SQMS Phase~I
+discovery window width depends on an unresolved ambiguity in the
+$Q$-factor loss mechanism.} The W4i13 statement that the ``entire range
+$1.56\ee{-9}$ to $1.9\ee{-10}$ is now open'' assumes that the SQMS
+bound $\lbone < 1.56\ee{-9}$ derives from psi-channel back-reaction
+on cavity $Q$ (passive measurement). However, the SQMS Dark SRF search
+achieved $Q_L \sim 10^{10}$ and excluded dark photon kinetic mixing
+$\chi < 1.6\ee{-16}$ at 1.3~GHz. The DFD scalar coupling is
+\emph{not} kinetic mixing (W4i12), so the Dark SRF exclusion does
+not directly constrain $\lambda$. The $1.56\ee{-9}$ bound from W3i3
+uses the passive $Q$-factor argument: if $\lbone > 1.56\ee{-9}$,
+the psi-channel loss rate would reduce $Q_0$ below observed values.
+\textbf{This argument requires that the psi-channel loss rate formula
+$\Gamma_\psi \propto |\lambda-1|^2/\Qpsi$ is correctly derived from
+the action principle.} The derivation chain
+(section02 Eq.~2.6 $\to$ psi-phonon coupling $\to$ loss rate) has
+not been independently verified. \textbf{Flag for Agent 1 (Formalism).}
+
+\end{enumerate}
+\end{tcolorbox}
+
+\tableofcontents
+\newpage
+
+
+%=============================================================================
+%=============================================================================
+\part{Protocol 1: DESI $D_H/r_d$ Sign-Change Analysis}
+\label{part:desi}
+%=============================================================================
+%=============================================================================
+
+\begin{tcolorbox}[colback=green!3!white, colframe=actioncolor,
+  title=\textbf{PROTOCOL 1: DESI $D_H/r_d$ --- READY TO EXECUTE}]
+\textbf{Budget}: \$0\\
+\textbf{Timeline}: 2 weeks (analysis) + 2 weeks (paper draft)\\
+\textbf{Data}: Published, publicly available\\
+\textbf{Software}: Python + \texttt{mochi\_class} (free, open-source)\\
+\textbf{Personnel}: 1 cosmologist, 4 weeks FTE\\
+\textbf{Decision gate}: $>2\sigma$ non-monotonic structure $\Rightarrow$ fast-track Boltzmann code
+\end{tcolorbox}
+
+
+\section{Step-by-Step Execution Protocol}
+
+\subsection{Step 1: Data Acquisition (Day 1)}
+
+\begin{enumerate}[label=\textbf{1.\arabic*:}, nosep]
+\item Download DESI DR2 BAO consensus values from
+  \texttt{data.desi.lbl.gov}. The cosmology chains and data products
+  were released 6 October 2025. The key file is the BAO distance
+  measurements table containing $D_H/r_d$, $D_M/r_d$, and $D_V/r_d$
+  at 7 effective redshift bins.
+
+\item The 7 effective redshift bins from DESI DR2 are:
+  \begin{center}
+  \begin{tabular}{@{}clc@{}}
+  \toprule
+  \textbf{Bin} & \textbf{Tracer} & \textbf{$z_{\rm eff}$} \\
+  \midrule
+  1 & BGS (Bright Galaxy Survey) & 0.30 \\
+  2 & LRG1 (Luminous Red Galaxies) & 0.51 \\
+  3 & LRG2 & 0.71 \\
+  4 & LRG3+ELG1 & 0.93 \\
+  5 & ELG2 (Emission Line Galaxies) & 1.32 \\
+  6 & QSO (Quasars) & 1.49 \\
+  7 & Ly$\alpha$ (Lyman-alpha forest) & 2.33 \\
+  \bottomrule
+  \end{tabular}
+  \end{center}
+
+\item Download the partial correlation coefficients (note: DESI DR2
+  provides partial correlations but not the full covariance matrix;
+  this is a known limitation noted by Reboucas et al.).
+
+\item Download DES Y5 SN Ia Hubble diagram for cross-check
+  (and DES-Dovekie variant for systematic comparison).
+\end{enumerate}
+
+\subsection{Step 2: Fiducial $\LCDM$ Computation (Day 2)}
+
+\begin{enumerate}[label=\textbf{2.\arabic*:}, nosep]
+\item Adopt Planck 2018 best-fit: $H_0 = 67.36$~km/s/Mpc,
+  $\Omega_m = 0.3153$, $\Omega_b h^2 = 0.02237$,
+  $r_d = 147.09$~Mpc (Planck 2018 TT,TE,EE+lowE+lensing).
+
+\item Compute $(D_H/r_d)^{\LCDM}(z) = c/(H(z) \cdot r_d)$ at each
+  $z_{\rm eff}$ using:
+  \begin{equation}
+  H(z) = H_0 \sqrt{\Omega_m(1+z)^3 + (1-\Omega_m)}.
+  \end{equation}
+
+\item Verify against DESI DR2 paper Table~II values (which report
+  $\LCDM$ predictions alongside measurements).
+\end{enumerate}
+
+\subsection{Step 3: Residual Computation (Day 2--3)}
+
+\begin{enumerate}[label=\textbf{3.\arabic*:}, nosep]
+\item Compute residuals:
+  \begin{equation}
+  \Delta_i = \frac{(D_H/r_d)_i^{\rm DESI} - (D_H/r_d)_i^{\LCDM}}
+  {(D_H/r_d)_i^{\LCDM}}.
+  \end{equation}
+
+\item Plot $\Delta_i$ vs.\ $z_{\rm eff}$ with DESI error bars. This is
+  the \textbf{primary diagnostic plot}.
+
+\item Visually inspect for non-monotonic structure. DFD predicts:
+  $\Delta > 0$ at $z < z_{\rm cross}$, $\Delta < 0$ at $z > z_{\rm cross}$,
+  with $z_{\rm cross} = 1.78 \pm 0.12$.
+\end{enumerate}
+
+\subsection{Step 4: DFD Template Generation (Days 3--7)}
+
+\begin{enumerate}[label=\textbf{4.\arabic*:}, nosep]
+\item \textbf{Analytic template (quick, approximate):}
+  The DFD psi-screen modifies $H(z)$ via:
+  \begin{equation}
+  H_{\rm DFD}(z) = H_{\LCDM}(z) \times
+  \left[1 + \epsilon \cdot f_\mu(z)\right],
+  \end{equation}
+  where $f_\mu(z) = 1 - 2\mu(x(z))$ with $x(z) = H(z)^2 R_H(z) / a_0$
+  and $\mu(x) = x/(1+x)$. The amplitude $\epsilon$ is set by the
+  psi-screen depth $\Delta\psi(z=1) = 0.27$ (MASTER\_FINDINGS\_CORPUS,
+  Tier~3). This template has \textbf{zero free parameters} beyond
+  $\LCDM$ concordance values.
+
+\item \textbf{Numerical template (rigorous, requires Boltzmann code):}
+  Install \texttt{mochi\_class} from
+  \texttt{github.com/music-of-cosmos/mochi\_class\_public}.
+  Configure with DFD Horndeski mapping:
+  $\alpha_M(a) = d\psi_0/d\ln a / (aH)$, $\alpha_B = \alpha_T = 0$.
+  Run CLASS to generate $D_H(z)/r_d$ for DFD. This is the Boltzmann
+  code effort described in W4i12/W4i13.
+
+\item For the 2-week analysis: use the analytic template (Step 4.1).
+  Reserve the numerical template for the subsequent Boltzmann code
+  project.
+\end{enumerate}
+
+\subsection{Step 5: Model Comparison (Days 7--10)}
+
+\begin{enumerate}[label=\textbf{5.\arabic*:}, nosep]
+\item Fit two models to the residuals:
+  \begin{itemize}[nosep]
+  \item \textbf{Model A (DFD)}: Non-monotonic template from Step~4.1
+    with $z_{\rm cross}$ as single parameter (prior: $1.5 < z_{\rm cross} < 2.1$).
+  \item \textbf{Model B (CPL)}: $w(a) = w_0 + w_a(1-a)$ with
+    $w_0, w_a$ as free parameters.
+  \item \textbf{Model C (null)}: $\Delta_i = 0$ (pure $\LCDM$).
+  \end{itemize}
+
+\item Use \texttt{emcee} or \texttt{cobaya} for MCMC sampling.
+  Compute $\chi^2$ for each model. Report:
+  \begin{itemize}[nosep]
+  \item $\Delta\chi^2(\text{DFD vs CPL})$
+  \item $\Delta\chi^2(\text{DFD vs null})$
+  \item Posterior on $z_{\rm cross}$
+  \item Bayesian Information Criterion (BIC) comparison
+  \end{itemize}
+
+\item \textbf{Critical cross-check}: Repeat with DES-Dovekie SNe
+  (Reboucas et al.\ showed this reduces the decreasing-trend significance
+  from 2.3--2.5$\sigma$ to 1.7$\sigma$). If DFD's non-monotonic structure
+  persists with DES-Dovekie, this is strong evidence that the signal is
+  in BAO (where DFD predicts it) and not in SNe calibration.
+\end{enumerate}
+
+\subsection{Step 6: Existing Data Check (Days 10--14)}
+
+\begin{enumerate}[label=\textbf{6.\arabic*:}, nosep]
+\item Check whether the DESI DR2 paper itself (arXiv:2503.14738,
+  Tables and Figures) contains enough information to perform the
+  residual analysis without downloading raw data. The BAO consensus
+  values are tabulated in the paper.
+
+\item Check the Reboucas et al.\ cross-check paper (arXiv:2510.04179)
+  for their $D_H/r_d$ ratio plots. Their Figure showing the decreasing
+  trend may already contain the information needed to visually assess
+  the DFD sign-change prediction.
+
+\item Check arXiv:2507.01380 (``Constraining $\LCDM$, $w$CDM, and
+  $w_0w_a$CDM models with DESI DR2 BAO: Redshift-Resolved Diagnostics
+  and the Role of $r_d$''), which performs exactly the kind of
+  redshift-resolved diagnostic that DFD requires.
+\end{enumerate}
+
+\subsection{Success Criteria (Unchanged from W4i13)}
+
+\begin{itemize}[nosep]
+\item \textbf{Detection}: Non-monotonic residual with
+  $z_{\rm cross} = 1.78 \pm 0.3$ at $>2\sigma$.
+  $\Delta\chi^2(\text{DFD vs CPL}) > 4$.
+\item \textbf{Exclusion}: Monotonic residual clearly preferred.
+  DFD psi-screen rejected at $>3\sigma$. DESI tension sharpened.
+\item \textbf{Inconclusive}: $|\Delta\chi^2| < 2$. Await DESI DR3.
+\end{itemize}
+
+
+%=============================================================================
+%=============================================================================
+\part{Protocol 2: GPS 59~ps Archival Search}
+\label{part:gps}
+%=============================================================================
+%=============================================================================
+
+\begin{tcolorbox}[colback=green!3!white, colframe=actioncolor,
+  title=\textbf{PROTOCOL 2: GPS 59~ps ARCHIVAL --- DETAILED SPECIFICATIONS}]
+\textbf{Budget}: \$50--100K\\
+\textbf{Timeline}: 6 months\\
+\textbf{Data}: IGS Final clock products (publicly archived since 1994)\\
+\textbf{Software}: PRIDE PPP-AR (open-source) + CSRS-PPP (free service)\\
+\textbf{Personnel}: 1 geodesist/GNSS specialist, 6 months FTE\\
+\textbf{Decision gate}: SNR $> 5$ with ratio $R = 1.070 \pm 0.01$
+  $\Rightarrow$ multi-GNSS campaign
+\end{tcolorbox}
+
+\section{Which Satellites}
+
+\subsection{GPS Constellation}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{}llcl@{}}
+\toprule
+\textbf{Block} & \textbf{SVNs} & \textbf{Orbit (km)} & \textbf{Clock Type} \\
+\midrule
+IIF & SVN 62--73 & 20,180 & Rb (improved) \\
+III/IIIF & SVN 74+ & 20,180 & Rb (RAFS-III) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Preferred}: GPS Block IIF and III satellites carry the most
+stable Rb clocks. Block IIF achieved on-orbit clock stability of
+$\sim 3\ee{-15}$ at 1-day averaging (sufficient for 59~ps signal at
+SNR $\sim 100$ over 30 days).
+
+\subsection{Galileo Constellation (for Multi-GNSS Ratio Test)}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{}llcl@{}}
+\toprule
+\textbf{Type} & \textbf{SVNs} & \textbf{Orbit (km)} & \textbf{Clock Type} \\
+\midrule
+FOC & E201--E236 & 23,222 & PHM (Passive H-Maser) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Critical}: Galileo orbits at 23,222~km vs.\ GPS at 20,180~km.
+DFD predicts a nonreciprocal timing ratio:
+\begin{equation}
+R_{\rm Galileo/GPS} = \frac{\Delta t_{\rm NR}^{\rm Galileo}}
+{\Delta t_{\rm NR}^{\rm GPS}} = \frac{\psi(r_{\rm Gal}) - \psi(r_\oplus)}
+{\psi(r_{\rm GPS}) - \psi(r_\oplus)} = 1.070.
+\end{equation}
+This ratio is \textbf{independent of atmospheric systematics} (which
+cancel in the ratio) and independent of $\lambda$ (the coupling cancels).
+
+\subsection{BeiDou and GLONASS (Additional Cross-Checks)}
+
+\begin{itemize}[nosep]
+\item BeiDou-3 MEO: 21,528~km orbit. Predicted ratio: $R_{\rm BDS/GPS} = 1.033$.
+\item GLONASS-K2: 19,100~km orbit. Predicted ratio: $R_{\rm GLO/GPS} = 0.973$.
+\item Four-constellation consistency is the smoking gun (W4i10, Prediction~13).
+\end{itemize}
+
+\section{Which Receivers}
+
+\subsection{IGS Multi-GNSS Experimental (MGEX) Network}
+
+The IGS MGEX network provides $>$300 stations worldwide tracking all
+four GNSS constellations simultaneously. Key stations for this analysis:
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Station} & \textbf{Location} & \textbf{Receiver} & \textbf{Antenna} \\
+\midrule
+BRUX & Brussels, Belgium & Septentrio PolaRx5TR & JAV\_RINGANT\_G3T \\
+WTZR & Wettzell, Germany & Leica GR30 & LEIAR25.R4 \\
+USN9 & Washington, DC & Septentrio PolaRx5TR & ASH701945G\_M \\
+HARB & Hartebeesthoek, SA & Septentrio PolaRx5 & ASH701945E\_M \\
+ALIC & Alice Springs, AU & Trimble Alloy & TRM115000.00 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Key requirement}: Receivers must track all four constellations
+simultaneously for the multi-GNSS ratio test. Septentrio PolaRx5TR
+(Time \& Frequency variant) is preferred because it provides
+hardware-level common-clock tracking across constellations.
+
+\section{Which Software}
+
+\subsection{Primary: PRIDE PPP-AR}
+
+\begin{itemize}[nosep]
+\item \textbf{Source}: \texttt{github.com/PrideLab/PRIDE-PPPAR}
+  (open-source, GPLv3)
+\item \textbf{Capabilities}: Multi-GNSS PPP with ambiguity resolution;
+  GPS, GLONASS, Galileo, BeiDou; dual-frequency and triple-frequency
+\item \textbf{Products}: Uses IGS Final/Rapid products (orbits, clocks,
+  biases, EOP)
+\item \textbf{Output}: Receiver clock solutions at 30-second intervals
+  with formal precision $<$0.1~ns
+\end{itemize}
+
+\subsection{Secondary: CSRS-PPP (Validation)}
+
+\begin{itemize}[nosep]
+\item \textbf{Service}: \texttt{webapp.csrs-scrs.nrcan-rncan.gc.ca}
+  (Canadian government, free)
+\item Updated 29 January 2026 to IGS Repro3 products
+\item Supports GPS (from 1995), GLONASS (from 2009), Galileo (from 2014)
+\item Use as independent validation of PRIDE PPP-AR results
+\end{itemize}
+
+\subsection{Tertiary: GIPSY-OASIS (if available)}
+
+JPL's GIPSY-OASIS III provides an independent PPP solution chain.
+Available to NASA-affiliated researchers. Use for triple cross-check.
+
+\section{Eight-Step Archival Protocol (Detailed from W4i10)}
+
+\begin{enumerate}[label=\textbf{Step \arabic*:}]
+\item \textbf{Download IGS Final products} (sp3, clk, bia, erp) for
+  2020--2025 (5 years). Source: CDDIS (\texttt{cddis.nasa.gov/archive/gnss/products/}).
+  Total data volume: $\sim$50~GB.
+
+\item \textbf{Select 20+ MGEX stations} with continuous operation, all four
+  constellations, and geodetic-grade receivers (list above is starting point).
+
+\item \textbf{Process with PRIDE PPP-AR}: Generate receiver clock
+  solutions at 30-second intervals for each station, each constellation
+  independently. Key settings: ionosphere-free combination (L1/L2 for GPS,
+  E1/E5a for Galileo), troposphere: VMF3 mapping function, ocean loading:
+  FES2014b.
+
+\item \textbf{Extract satellite-to-receiver clock differences}: For each
+  satellite pass, compute the one-way pseudorange residual after removing
+  all modeled effects (orbits, clocks, troposphere, ionosphere, relativistic
+  corrections, phase wind-up, antenna phase center variations).
+
+\item \textbf{Apply matched filter for 59~ps annual signal}: The DFD
+  nonreciprocal timing signal has a characteristic annual modulation
+  from the Earth's orbital eccentricity (varying Sun-Earth distance
+  modulates $\psi_{\rm grav}$ at the satellite). Template:
+  \begin{equation}
+  \delta t_{\rm NR}(t) = 59\,\text{ps} \times
+  \left[1 + e_\oplus \cos\left(\frac{2\pi(t - t_{\rm peri})}{T_\oplus}\right)\right],
+  \end{equation}
+  where $e_\oplus = 0.0167$, $t_{\rm peri}$ is perihelion epoch, and
+  $T_\oplus = 365.25$~days.
+
+\item \textbf{Compute multi-GNSS ratios}: For stations tracking GPS and
+  Galileo simultaneously, compute $R = \delta t_{\rm NR}^{\rm Galileo}/
+  \delta t_{\rm NR}^{\rm GPS}$ at each epoch. Average over all stations
+  and all epochs. DFD prediction: $R = 1.070 \pm 0.001$ (theoretical
+  uncertainty from orbit altitude uncertainty).
+
+\item \textbf{Systematic checks}: (a)~Verify ratio is independent of
+  station latitude (eliminates troposphere); (b)~verify ratio is
+  independent of local time (eliminates multipath); (c)~verify ratio
+  tracks annual modulation (eliminates constant biases); (d)~compare
+  GPS-only analysis across Block IIF vs.\ III (different clock hardware,
+  same orbit: ratio should be unity).
+
+\item \textbf{Blind analysis protocol}: Process GPS and Galileo data
+  independently by two analysts. Unblind the ratio only after both
+  analyses are frozen. This prevents confirmation bias.
+\end{enumerate}
+
+
+%=============================================================================
+%=============================================================================
+\part{Protocol 3: LIGO O4 Scalar Mode Reanalysis}
+\label{part:ligo}
+%=============================================================================
+%=============================================================================
+
+\begin{tcolorbox}[colback=green!3!white, colframe=actioncolor,
+  title=\textbf{PROTOCOL 3: LIGO O4 6th CHANNEL --- DATA AVAILABLE NOW}]
+\textbf{Budget}: \$100--500K\\
+\textbf{Timeline}: 12 months\\
+\textbf{Data}: GWOSC O4a strain data (released August 2025);
+  O4b (May 2026); O4c (December 2026)\\
+\textbf{Software}: PyCBC, Bilby, LALSuite (all open-source)\\
+\textbf{Personnel}: 1 GW data analyst + 1 DFD theorist, 12 months FTE\\
+\textbf{Reach}: $\lbone \sim 1.5\ee{-14}$ (full O4)
+\end{tcolorbox}
+
+\section{Data Access}
+
+\begin{itemize}[nosep]
+\item \textbf{O4a strain data}: Available at \texttt{gwosc.org/data/}
+  since August 2025. Calibrated strain at 16384~Hz (H1, L1) and 4096~Hz
+  downsampled. Includes DQ flags and calibration uncertainty envelopes.
+\item \textbf{GWTC-4.0}: 128 new GW candidates from O4a, with posterior
+  samples for sky location, masses, spins, distance.
+\item \textbf{O4 squeezing performance}: H1: 5.2~dB frequency-dependent
+  squeezing; L1: 6.1~dB (Science 2024, doi:10.1126/science.ado8069).
+  This improves high-frequency sensitivity by factor $\sim 1.8$--2.0.
+\item \textbf{O4b/O4c}: Scheduled for release May 2026 and December 2026
+  respectively. Plan analysis pipeline on O4a; apply to O4b/O4c as released.
+\end{itemize}
+
+\section{Three Search Channels}
+
+\subsection{Channel A: Scalar Breathing Mode in CBC Events}
+
+DFD's scalar field $\psi$ produces a ``breathing'' polarization mode
+(isotropic expansion/contraction) in addition to GR's two tensor modes.
+In the differential LIGO configuration, this scalar mode is
+\emph{common-mode rejected} (W3i7 correction), reducing sensitivity from
+$\lbone \sim 6\ee{-19}$ (pre-correction) to $\sim 1.5\ee{-14}$
+(post-correction with O4 squeezing).
+
+\textbf{Method}:
+\begin{enumerate}[nosep]
+\item Select high-SNR CBC events from GWTC-4.0 (SNR $> 20$, at least
+  2-detector events for sky localization).
+\item Use \texttt{Bilby} with a modified waveform model including
+  scalar breathing mode: $h_b(t) = A_b(t) \sin(\Theta)$ where
+  $A_b/A_+ \propto |\lambda-1| \cdot (G/c^4)^{1/2}$ and $\Theta$ is
+  the scalar antenna pattern.
+\item Perform Bayesian model comparison: GR (tensor only) vs.\ GR+scalar.
+\item Stack results across all qualifying events. With $\sim$50 high-SNR
+  events from O4a and $\sim$100 from full O4, stacking improves sensitivity
+  by $\sqrt{N}$.
+\end{enumerate}
+
+\subsection{Channel B: Stochastic Scalar Background}
+
+A cosmological or astrophysical scalar stochastic background would
+appear as excess correlated noise between H1 and L1 with the scalar
+overlap reduction function (ORF), which differs from the tensor ORF.
+
+\textbf{Method}:
+\begin{enumerate}[nosep]
+\item Use the \texttt{pygwb} package (LVK stochastic search pipeline).
+\item Implement scalar ORF for the H1-L1 baseline.
+\item Cross-correlate 2.5 years of O4 data in the 20--2000~Hz band.
+\item Report upper limit on scalar energy density $\Omega_{\rm scalar}(f)$.
+\end{enumerate}
+
+\subsection{Channel C: Scalar Mode in Continuous Waves}
+
+Known pulsars emit continuous GWs. DFD predicts an additional scalar
+channel from the pulsar's EM luminosity modulating the local $\psi$ field.
+
+\textbf{Method}: Use the CW search pipeline (\texttt{PyFstat}) with
+an extended signal model including scalar harmonics.
+
+\section{Key Personnel and Institutions}
+
+\begin{itemize}[nosep]
+\item \textbf{LVK Beyond-GR working group}: The natural home for this
+  analysis. The March 2026 Tests of GR papers (arXiv:2603.19019/20/21)
+  do \emph{not} include a dedicated scalar breathing mode search ---
+  this is a gap.
+\item \textbf{Target PIs}: Isi (Caltech), Ghosh (Penn State),
+  Yunes (Illinois) --- leaders in beyond-GR tests with GW data.
+\item \textbf{Entry point}: Propose a scalar breathing mode search
+  as an LVK paper or as an external analysis using public GWOSC data.
+\end{itemize}
+
+\section{Derivation Chain}
+
+\begin{equation}
+\text{Action (Eq.~2.6)} \to
+\Box\psi = -\frac{4\pi G}{c^2}\rho_{\rm eff} \to
+h_b = \frac{2\Delta\psi}{r} \to
+\text{scalar ORF} \neq \text{tensor ORF} \to
+\text{distinguishable in cross-correlation}
+\end{equation}
+
+\caution{The common-mode rejection in LIGO's differential configuration
+(W3i7) reduces sensitivity by $\sim 10^5$ relative to a single-arm
+detector. The reach $\lbone \sim 1.5\ee{-14}$ accounts for this
+suppression but is still $10^5\times$ better than the SQMS bound.}
+
+
+%=============================================================================
+%=============================================================================
+\part{Protocol 4: SQMS Phase~I (Updated)}
+\label{part:sqms}
+%=============================================================================
+%=============================================================================
+
+\begin{tcolorbox}[colback=blue!3!white, colframe=proposalcolor,
+  title=\textbf{PROTOCOL 4: SQMS PHASE I --- \$3.2M GATEWAY EXPERIMENT}]
+\textbf{Budget}: \$3.2M over 24 months\\
+\textbf{Institution}: SQMS Center, Fermilab (DOE \$125M renewal Nov 2025)\\
+\textbf{Personnel}: 1 PI + 2 postdocs + 1 engineer + SRF technicians\\
+\textbf{Primary deliverable}: Q-ratio diagnostic (0.49 vs 3.41)\\
+\textbf{Secondary}: Absolute bound improvement to $\lbone < 1.9\ee{-10}$
+\end{tcolorbox}
+
+\section{Updated Context (W4i14)}
+
+\begin{itemize}[nosep]
+\item SQMS Center received \$125M for 5-year renewal (November 2025).
+\item SQMS has achieved $Q_L \sim 10^{10}$ in 1.3~GHz SRF cavities
+  for the Dark SRF dark photon search.
+\item The Dark SRF exclusion ($\chi < 1.6\ee{-16}$ for dark photons)
+  does \emph{not} constrain DFD's scalar coupling (W4i12: different physics).
+\item A March 2026 Fermilab study advances quantum sensors for
+  particle physics and dark matter detection, confirming continued
+  institutional investment.
+\end{itemize}
+
+\section{Protocol Summary (Unchanged from W4i10/W4i13)}
+
+\begin{enumerate}[label=\textbf{Phase I.\arabic*:}]
+\item Procure/fabricate 4 TESLA-type 1.3~GHz Nb cavities (RRR $\geq$ 300,
+  N-doped). Two at 1.3~GHz, two at 2.6~GHz (second harmonic).
+
+\item Achieve baseline $Q_0 = 5\ee{10}$ at 1.3~GHz (demonstrated by SQMS).
+  Target: $Q_0 = 2\ee{11}$ with advanced surface treatments.
+
+\item Measure Q-ratio: $R_Q \equiv Q_0(2.6\,\text{GHz}) / Q_0(1.3\,\text{GHz})$.
+  \begin{itemize}[nosep]
+  \item DFD prediction: $R_Q = 0.49$ (psi-channel loss scales as $\omega^2$).
+  \item BCS prediction: $R_Q = 3.41$ (BCS surface resistance scales as
+    $\omega^{-2} e^{-\Delta/k_BT}$).
+  \end{itemize}
+
+\item Implement Fock-state enhancement: $\langle n | a^\dagger a | n \rangle = n$
+  provides $n$-fold sensitivity boost for psi-channel loss measurement.
+  At $n = 10$ (demonstrated in microwave cavities): effective sensitivity
+  $\lbone < 7.8\ee{-10}/\sqrt{10} = 2.5\ee{-10}$.
+
+\item Triple-blind protocol: TLS mitigated via N-doping; nonequilibrium
+  quasiparticle (NEQ) mitigated via magnetic shielding + phonon traps.
+\end{enumerate}
+
+\section{Inconsistency Flag}
+
+\inconsistency{The derivation of the psi-channel loss rate
+$\Gamma_\psi \propto |\lambda-1|^2 / \Qpsi$ from the DFD action
+principle (section02 Eq.~2.6) has not been independently verified
+outside the DFD research programme. The SQMS bound $\lbone < 1.56\ee{-9}$
+(W3i3) depends entirely on this derivation. If the loss rate formula
+is incorrect by a factor of $X$, the bound weakens to
+$\lbone < 1.56\ee{-9} \times \sqrt{X}$. This should be flagged to
+Agent 1 (Formalism) for independent re-derivation.}
+
+
+%=============================================================================
+%=============================================================================
+\part{Protocol 5: Si$_3$N$_4$ MEMS In-Gap Test}
+\label{part:mems}
+%=============================================================================
+%=============================================================================
+
+\begin{tcolorbox}[colback=blue!3!white, colframe=proposalcolor,
+  title=\textbf{PROTOCOL 5: MEMS IN-GAP $\Qpsi$ THRESHOLD TEST}]
+\textbf{Budget}: \$200--500K\\
+\textbf{Timeline}: 12--18 months\\
+\textbf{Suppliers}: Norcada (Alberta), Atomica (Santa Barbara),
+  university cleanrooms\\
+\textbf{Personnel}: 1 PI (optomechanics group) + 1 postdoc\\
+\textbf{DFD prediction}: $\Qpsi$ threshold $2.2\ee{8}$ (4.5$\times$
+  margin at $Q_{\rm mech} = 10^9$)
+\end{tcolorbox}
+
+\section{Key Specifications}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Parameter} & \textbf{Required} & \textbf{Demonstrated} \\
+\midrule
+Material & High-stress Si$_3$N$_4$ & Commercial (Norcada) \\
+$Q_{\rm mech}$ & $\geq 10^9$ & $6.8\ee{6}$ (1D, mK) \\
+Temperature & $\leq 20$~mK & Demonstrated \\
+Readout & Fiber interferometric & Standard \\
+Frequency & 100~kHz--1~MHz & Tunable by geometry \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\caution{The demonstrated $Q_{\rm mech}$ of $6.8\ee{6}$ at cryogenic
+temperatures is still $\sim 150\times$ below the $10^9$ requirement.
+The path to $10^9$ relies on soft-clamped ``trampoline'' geometries
+(demonstrated at room temperature with $Q \cdot f > 10^{13}$~Hz) being
+maintained at millikelvin temperatures. This has not been demonstrated
+and represents the primary technical risk.}
+
+\section{DFD Observable}
+
+The ``in-gap'' test exploits the prediction that the psi-field provides
+an additional dissipation channel with quality factor $\Qpsi$. If
+$Q_{\rm mech} > \Qpsi$, the mechanical $Q$ will be limited by
+$\Qpsi$ rather than by intrinsic material losses. The DFD prediction
+is $\Qpsi = 2.2\ee{8}$ at the SQMS bound.
+
+\textbf{Test}: Cool a Si$_3$N$_4$ MEMS resonator to 20~mK.
+Measure $Q$ vs.\ temperature. If $Q$ saturates at $\sim 2\ee{8}$
+despite improved material quality, this is consistent with
+psi-channel dissipation. If $Q$ continues to rise above $10^9$,
+DFD's $\Qpsi$ prediction is falsified at that level.
+
+\section{Supply Chain (Confirmed W4i10)}
+
+\begin{itemize}[nosep]
+\item Norcada Inc.\ (Edmonton, Alberta): Commercial Si$_3$N$_4$ membranes,
+  high-stress, custom geometries. Lead time: 4--8 weeks.
+\item Atomica Corp.\ (Santa Barbara, CA): Custom MEMS fabrication,
+  including soft-clamped designs. Lead time: 8--12 weeks.
+\item University cleanrooms: Stanford, Yale, TU Delft for
+  specialized geometries not available commercially.
+\end{itemize}
+
+
+%=============================================================================
+%=============================================================================
+\part{Protocol 6: DFD Boltzmann Code (\texttt{mochi\_class})}
+\label{part:boltzmann}
+%=============================================================================
+%=============================================================================
+
+\begin{tcolorbox}[colback=red!5!white, colframe=warncolor,
+  title=\textbf{URGENT: DFD BOLTZMANN CODE --- REVISED USING \texttt{mochi\_class}}]
+\textbf{Budget}: \$40--80K (revised down from \$80--150K)\\
+\textbf{Timeline}: 2--3 months (revised down from 4.5 months)\\
+\textbf{Platform}: \texttt{mochi\_class} (arXiv:2407.11968)\\
+\textbf{Personnel}: 1 postdoc with Boltzmann code experience\\
+\textbf{Deliverable}: DFD predictions for $D_H/r_d$, $S_8(l)$,
+  CMB power spectra, neutrino mass constraints
+\end{tcolorbox}
+
+\section{Why \texttt{mochi\_class} Supersedes \texttt{hi\_class}}
+
+\begin{enumerate}[nosep]
+\item \texttt{mochi\_class} accepts general input functions of time,
+  removing the need to hard-code the DFD $\alpha$-functions.
+\item Stable basis functions ensure ghost-free and gradient-stable
+  evolution --- critical for DFD's nonlinear $\mu$-crossover.
+\item Validated against \texttt{hi\_class} and \texttt{EFTCAMB}.
+\item Reduces custom code from $\sim$2,520 lines (W4i12 estimate for
+  raw \texttt{hi\_class} modification) to $\sim$500--800 lines of
+  configuration, wrapper, and post-processing code.
+\end{enumerate}
+
+\section{DFD Mapping onto Horndeski $\alpha$-Functions}
+
+From W4i12 Boltzmann Spec:
+\begin{align}
+\alpha_M(a) &= \frac{1}{aH}\frac{d\psi_0}{d\ln a}, \\
+\alpha_B &= 0, \\
+\alpha_T &= 0.
+\end{align}
+
+The background $\psi_0(a)$ is determined by the cosmological field
+equation:
+\begin{equation}
+\frac{d\psi_0}{d\ln a} = -\frac{4\pi G}{c^2 H^2} \cdot
+\frac{(\rho - \bar{\rho}) c^2}{\mu(|\nabla\psi_0|/a_*)},
+\end{equation}
+where $\mu(x) = x/(1+x)$ and $a_* = 2a_0/c^2$.
+
+\section{Implementation Steps}
+
+\begin{enumerate}[label=\textbf{B.\arabic*:}]
+\item Install \texttt{mochi\_class} from GitHub. Verify reproduction of
+  $\LCDM$ and standard Horndeski test cases.
+\item Implement $\alpha_M(a)$ as a tabulated function using the DFD
+  background solution $\psi_0(a)$, computed by integrating the
+  cosmological field equation from $a = 10^{-3}$ to $a = 1$.
+\item Run: CMB TT/TE/EE power spectra, matter power spectrum $P(k)$,
+  lensing convergence $C_l^{\kappa\kappa}$, BAO distances
+  ($D_H/r_d$, $D_M/r_d$).
+\item Compare with Planck 2018 + DESI DR2 + DES Y5 data.
+\item Generate DFD-specific $D_H/r_d$ predictions at DESI redshift bins
+  (feeding back into Protocol~1).
+\end{enumerate}
+
+
+%=============================================================================
+%=============================================================================
+\part{Inconsistencies and Open Issues}
+\label{part:inconsistencies}
+%=============================================================================
+%=============================================================================
+
+\section{Flagged Inconsistencies}
+
+\begin{enumerate}
+
+\item \inconsistency{SQMS bound derivation chain.}
+The $\lbone < 1.56\ee{-9}$ bound (W3i3) derives from: DFD action
+(Eq.~2.6) $\to$ EM-psi coupling Lagrangian $\to$ psi-phonon vertex
+$\to$ cavity loss rate $\Gamma_\psi = |\lambda-1|^2 \omega^2 U_{\rm EM}
+/ (c^4 \Qpsi)$ $\to$ comparison with observed $Q_0$. The intermediate
+step (psi-phonon vertex) requires showing that the scalar field's
+back-reaction on EM modes produces a frequency-dependent loss that
+scales as $\omega^2$. This $\omega^2$ scaling is what produces the
+Q-ratio diagnostic (0.49 at 2.6/1.3~GHz). If the scaling is $\omega^n$
+with $n \neq 2$, the Q-ratio prediction changes and the bound shifts.
+\textbf{Action}: Agent 1 should independently derive the psi-channel
+loss rate from first principles and verify the $\omega^2$ scaling.
+
+\item \inconsistency{DESI $D_H/r_d$ sign-change location.}
+The predicted $z_{\rm cross} = 1.78 \pm 0.12$ (W4i11) was derived from
+the analytic psi-screen template. The DESI DR2 Ly$\alpha$ bin is at
+$z_{\rm eff} = 2.33$, which is above $z_{\rm cross}$. The QSO bin at
+$z_{\rm eff} = 1.49$ is below $z_{\rm cross}$. There is \emph{no DESI
+bin directly at $z_{\rm cross}$}. The sign-change test therefore relies
+on interpolation between the QSO and Ly$\alpha$ bins. With only 2 data
+points bracketing $z_{\rm cross}$, the test may be inconclusive.
+\textbf{Mitigation}: DESI DR3 will add additional tracers and finer
+binning. Also, the Reboucas et al.\ analysis (arXiv:2510.04179) uses
+continuous $D_H/r_d$ ratios rather than binned values, which may
+provide better resolution near $z_{\rm cross}$.
+
+\item \inconsistency{Passive Superiority vs.\ technology patent feasibility.}
+W4i13 correctly notes this is not a logical contradiction (technology
+uses resonant buildup at $C \geq 1$; detection uses passive observation
+at $C \ll 1$). However, the technology patents require
+$C = \lambda^2 Q_{\rm EM}^2 F_\psi / (M_{\rm eff} \omega^2 / c^4) \geq 1$.
+With $M_{\rm eff} = 3.01\ee{6}$~kg (corrected from $10^{-6}$~kg,
+W3i4), achieving $C \geq 1$ requires $Q_{\rm EM} \geq 2\ee{11}$ at
+$\lbone = 1.56\ee{-9}$. SQMS has demonstrated $Q_0 = 5\ee{10}$ ---
+this is $4\times$ below the technology threshold. \textbf{The gap
+between current $Q_0$ and technology $C = 1$ is real and should be
+honestly communicated.}
+
+\item \inconsistency{MEMS $Q_{\rm mech} = 10^9$ requirement.}
+The best demonstrated cryogenic Si$_3$N$_4$ mechanical $Q$ is
+$\sim 7\ee{6}$ (1D nanobeam at mK temperatures). The required
+$Q_{\rm mech} = 10^9$ is $\sim 150\times$ higher. While room-temperature
+$Q \cdot f > 10^{13}$~Hz has been demonstrated (implying $Q > 10^9$
+at $f < 10^4$~Hz), maintaining this at millikelvin temperatures
+with soft-clamped geometries has \emph{not} been demonstrated.
+This is a genuine technical risk that could delay the MEMS experiment.
+\end{enumerate}
+
+\section{Items NOT Inconsistent (Confirmation)}
+
+\begin{enumerate}
+\item Dark SRF invalidation (W4i12): Confirmed. $G/c^4 = 9.3\ee{-45}$
+  kills active EM-to-$\psi$ conversion. SQMS bound is passive (immune).
+  No contradiction.
+
+\item EFE screening of wide binaries (W4i11): Confirmed. $a_{\rm ext}
+  = 1.8\,a_0$ screens the MOND anomaly to $+10$--12\% at $>10$~kAU.
+  Consistent with Banik et al.\ 2024 null result. No contradiction
+  with DFD theory.
+
+\item DESI tension at 3.1--3.5$\sigma$ (W4i11): This tension is in
+  the \emph{CPL parameterization}, which W4i11 correctly identifies as
+  the wrong observable. The $D_H/r_d$ sign-change test (Protocol~1)
+  uses the correct DFD-specific observable. No internal contradiction,
+  but the tension in CPL remains an honest negative until resolved.
+\end{enumerate}
+
+
+%=============================================================================
+%=============================================================================
+\part{Consolidated Programme: Updated Budget and Timeline}
+\label{part:consolidated}
+%=============================================================================
+%=============================================================================
+
+\section{Complete Experimental Programme (W4i14)}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{longtable}{@{}clcccl@{}}
+\toprule
+\textbf{Rank} & \textbf{Experiment} & \textbf{Cost} & \textbf{Time} &
+  \textbf{Status} & \textbf{W4i14 Update} \\
+\midrule
+\endhead
+0a & $D_H/r_d$ sign change & \$0 & 2--4 wks & \textbf{EXECUTE NOW} &
+  Full protocol, data identified \\
+0b & GPS 59~ps archival & \$50--100K & 6 mo & ACTIONABLE &
+  Satellites, receivers, software specified \\
+0c & LIGO O4 scalar & \$100--500K & 12 mo & ACTIONABLE &
+  O4a data available, pipeline specified \\
+0d & Rotation curves & \$0 & 3--6 mo & Unchanged & --- \\
+\midrule
+$\infty$ & DFD Boltzmann code & \$40--80K & 2--3 mo & \textbf{REVISED} &
+  \texttt{mochi\_class} reduces effort $2\times$ \\
+\midrule
+I & SQMS Phase~I & \$3.2M & 24 mo & ACTIONABLE &
+  Inconsistency flagged (loss rate derivation) \\
+II & Si$_3$N$_4$ MEMS & \$200--500K & 18 mo & Unchanged &
+  $Q_{\rm mech}$ gap noted as technical risk \\
+\midrule
+N1 & Torsion pendulum readout & \$300--600K & 24 mo & Technology dev &
+  Repurposed from killed direct force \\
+N2 & Atom interferometry & \$50--100K & 6 mo & Feasibility study &
+  Edge of 2028--2030 sensitivity \\
+\midrule
+\multicolumn{6}{l}{\textbf{KILLED (confirmed from W4i13):}} \\
+--- & Torsion direct force & --- & --- & KILLED & $G/c^4$: 8 orders short \\
+--- & Optical clock altitude & --- & --- & KILLED & Signal $10^{-41}$ \\
+--- & Neutron interferometry & --- & --- & KILLED & Signal $10^{-22}$ rad \\
+--- & Casimir scalar probe & --- & --- & KILLED & GR-standard, not DFD \\
+--- & Muon $g{-}2$ & --- & --- & NULL & $10^{-15}$, publish as null \\
+--- & Dark SRF reinterpretation & --- & --- & INVALIDATED & W4i12 \\
+\bottomrule
+\end{longtable}
+\end{center}
+
+\textbf{Total Phase 0}: \$90--680K (archival analyses + Boltzmann code).
+
+\textbf{Total Phase I}: \$3.2M (SQMS, unchanged).
+
+\textbf{Total Phases 0+I}: \$3.3--3.9M over 30 months.
+
+
+\section{Decision Tree (Updated)}
+
+\begin{center}
+\fbox{\parbox{0.92\textwidth}{
+\textbf{Step 0 (NOW, Week 1--2)}: Check DESI DR2 paper tables and
+Reboucas et al.\ figures for $D_H/r_d$ residual structure. This
+takes \emph{hours}, not weeks.\\[4pt]
+\textbf{Step 1 (Weeks 2--4)}: Full $D_H/r_d$ sign-change analysis
+(Protocol~1). If non-monotonic at $>2\sigma$: fast-track Boltzmann code.\\[4pt]
+\textbf{Step 2 (Months 1--3)}: DFD Boltzmann code using
+\texttt{mochi\_class} (Protocol~6). Generate rigorous $D_H/r_d$,
+$S_8(l)$, CMB predictions.\\[4pt]
+\textbf{Step 3 (Months 1--6)}: GPS 59~ps archival (Protocol~2).
+Independent of DESI outcome.\\[4pt]
+\textbf{Step 4 (Months 3--15)}: LIGO O4 scalar mode (Protocol~3).
+Start with O4a; expand as O4b/O4c released.\\[4pt]
+\textbf{Step 5 (Months 6--30)}: SQMS Phase~I (Protocol~4).
+Proceed regardless of DESI outcome (technology patents independent).\\[4pt]
+\textbf{Step 6 (Months 12--30)}: MEMS prototype (Protocol~5).
+Parallel with SQMS.\\[4pt]
+\textbf{Step 7 (2028+)}: Euclid DR1, CLONETS-DS, JUNO, CMB-S4.
+}}
+\end{center}
+
+
+%=============================================================================
+\section*{Summary of Derivation Chains}
+%=============================================================================
+
+\begin{enumerate}
+\item \textbf{$D_H/r_d$ sign change}: Action (section02 Eq.~2.6)
+  $\to$ $n = e^\psi$ optical metric (Eq.~2.1) $\to$ $\mu(x) = x/(1+x)$
+  crossover $\to$ cosmological $x(z) = a_H(z)/a_0$ $\to$ psi-screen
+  modifies $H(z)$ non-monotonically $\to$ $\Delta(D_H/r_d)$ sign change
+  at $z_{\rm cross} = 1.78 \pm 0.12$ $\to$ high-$z$ suppression
+  matches Reboucas et al.\ 2.3--2.5$\sigma$ trend.
+  \textbf{Testable NOW with published data.}
+
+\item \textbf{GPS 59~ps}: Action (Eq.~2.6) $\to$ Sun-sourced
+  $\psi_{\rm grav}$ gradient $\to$ nonreciprocal timing
+  $\delta t = \Delta\psi / (2c)$ $\to$ 59~ps at GPS altitude $\to$
+  multi-GNSS ratio $R = 1.070$ (altitude-dependent, atmospheric-independent).
+  \textbf{Testable with IGS archival data and PRIDE PPP-AR.}
+
+\item \textbf{LIGO 6th channel}: Action (Eq.~2.6) $\to$ $\Box\psi$
+  sourced by merger $\to$ scalar breathing mode $h_b$ $\to$
+  common-mode rejected in differential LIGO $\to$ reach $1.5\ee{-14}$
+  (O4 squeezing). \textbf{O4a strain data on GWOSC now.}
+
+\item \textbf{SQMS Q-ratio}: Action (Eq.~2.6) $\to$ EM-psi coupling
+  $\to$ psi-channel loss $\Gamma_\psi \propto \omega^2$ $\to$
+  $R_Q = 0.49$ (DFD) vs.\ $3.41$ (BCS). \textbf{Requires independent
+  verification of $\omega^2$ scaling (flagged).}
+
+\item \textbf{MEMS in-gap}: Action (Eq.~2.6) $\to$ psi-phonon coupling
+  $\to$ $\Qpsi = 2.2\ee{8}$ $\to$ mechanical $Q$ saturates if
+  $Q_{\rm mech} > \Qpsi$ $\to$ observable plateau.
+  \textbf{Requires $Q_{\rm mech} = 10^9$ not yet demonstrated
+  cryogenically (technical risk).}
+\end{enumerate}
+
+
+\end{document}

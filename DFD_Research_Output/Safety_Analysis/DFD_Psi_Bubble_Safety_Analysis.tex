@@ -1,0 +1,1499 @@
+%=============================================================================
+% DFD PSI-BUBBLE PROPULSION DEVICE
+% COMPREHENSIVE SAFETY ANALYSIS
+% Agent 12: Safety, Radiation, and Failure Mode Specialist
+%
+% Document: DFD-SAFE-001 Revision 1.0
+% Classification: PROPRIETARY / ENGINEERING REVIEW BOARD
+% Date: March 2026
+%=============================================================================
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{siunitx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{tcolorbox}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{colortbl}
+\usepackage{rotating}
+
+\pagestyle{fancy}
+\fancyhead[L]{\small DFD-SAFE-001 Rev 1.0}
+\fancyhead[C]{\small PROPRIETARY}
+\fancyhead[R]{\small Psi-Bubble Safety Analysis}
+\fancyfoot[C]{\thepage}
+
+%--- Risk colour coding ---
+\definecolor{risk-critical}{RGB}{200,0,0}
+\definecolor{risk-high}{RGB}{240,100,0}
+\definecolor{risk-medium}{RGB}{220,180,0}
+\definecolor{risk-low}{RGB}{0,160,0}
+\definecolor{dfdblue}{RGB}{0,51,102}
+
+\newtcolorbox{critbox}{colback=red!5!white,colframe=risk-critical,
+  title=\textbf{CRITICAL HAZARD},fonttitle=\bfseries}
+\newtcolorbox{warnbox}{colback=orange!5!white,colframe=risk-high,
+  title=\textbf{HIGH HAZARD},fonttitle=\bfseries}
+\newtcolorbox{notebox}{colback=blue!3!white,colframe=dfdblue,
+  title=\textbf{Engineering Note},fonttitle=\bfseries}
+\newtcolorbox{mitigbox}{colback=green!4!white,colframe=risk-low,
+  title=\textbf{Mitigation Strategy},fonttitle=\bfseries}
+
+%--- Severity / Risk colours in tables ---
+\newcommand{\Scrit}[1]{\cellcolor{risk-critical!40}\textbf{#1}}
+\newcommand{\Shigh}[1]{\cellcolor{risk-high!40}\textbf{#1}}
+\newcommand{\Smed}[1]{\cellcolor{risk-medium!40}{#1}}
+\newcommand{\Slow}[1]{\cellcolor{risk-low!20}{#1}}
+
+\title{
+  \textbf{\Huge DFD Psi-Bubble Propulsion Device}\\[8pt]
+  \textbf{\large Comprehensive Safety Analysis}\\[6pt]
+  \normalsize Failure Mode and Effects Analysis (FMEA)\\
+  Quench Protection $\cdot$ Radiation Environment $\cdot$ Psi Field Safety\\
+  Environmental Impact $\cdot$ Regulatory Framework $\cdot$ Abort Systems\\[8pt]
+  \normalsize Document Number: DFD-SAFE-001\\
+  Revision 1.0 --- March 2026\\[4pt]
+  \small Prepared for: Engineering Review Board
+}
+
+\author{
+  Agent 12 --- Safety, Radiation, and Failure Mode Specialist\\
+  \small Density Field Dynamics Research Programme\\
+  \small Inventor: Gary Thomas Alcock
+}
+
+\date{March 2026}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\begin{tcolorbox}[colback=gray!10, colframe=black]
+\textbf{Document Status:} Engineering Review Draft \\
+\textbf{Classification:} Proprietary / Engineering Review Board\\
+\textbf{Scope:} Full-scale psi-bubble propulsion device incorporating
+ferrite-superconducting shell (stored EM energy $\geq 1$\,GJ),
+nuclear power plant, cryogenic systems at 2\,K, and active
+gravitational field modification via the DFD psi mechanism. \\
+\textbf{Baseline architecture:} Spheroidal shell $\sim$10\,m
+characteristic dimension; superconducting niobium inner layer;
+sintered ferrite outer layer; SRF cavity array for EM energy storage;
+compact nuclear reactor ($\leq 100$\,MW\textsubscript{th}); closed-cycle
+cryogenic plant; redundant digital control.
+\end{tcolorbox}
+
+\newpage
+\tableofcontents
+\newpage
+
+%=============================================================================
+\section{Executive Summary and Safety Philosophy}
+%=============================================================================
+
+The DFD psi-bubble propulsion device is without precedent in human
+engineering. It concentrates multiple independently catastrophic
+hazard categories into a single vehicle: gigajoule-class electromagnetic
+energy storage in brittle superconducting ceramics, cryogenic systems
+at superfluid helium temperature, a nuclear fission reactor, and an
+actively maintained local modification of the gravitational coupling
+constant. The co-location of these hazards creates compounding failure
+pathways that have no analogue in existing aerospace, nuclear, or
+high-energy physics safety codes.
+
+\textbf{Central safety principle:} No single failure shall be capable
+of producing a catastrophic outcome. Where this ``single-failure safe''
+criterion cannot be satisfied by physics alone (specifically: superconductor
+quench is an inherently single-point catastrophic event for GJ-class
+systems), the design must (a)~prevent the triggering event through
+redundancy, (b)~detect the event with sufficient lead time to initiate
+controlled energy dissipation, and (c)~ensure controlled dissipation
+channels absorb the energy without structural failure.
+
+\textbf{Safety standard hierarchy adopted:}
+\begin{enumerate}[nosep]
+  \item IEC 61508 SIL-3 (Safety Integrity Level 3) for all
+    critical control and interlock functions
+  \item IAEA Safety Standards SSR-2/1 Rev.1 for reactor safety
+  \item CERN LHC Quench Protection Engineering (EDMS 335706) as
+    the closest analogue for superconducting magnet quench protection
+    at comparable energy scales
+  \item ICNIRP 2020 for EM radiation exposure limits
+  \item 10 CFR Part 50 (NRC) for reactor design basis
+  \item MIL-STD-882E for system safety programme requirements
+\end{enumerate}
+
+\begin{critbox}
+\textbf{Governing constraint:} A 1\,GJ quench releasing into
+the superconducting shell in $\leq 1$\,s is equivalent to
+$\approx 240$\,kg TNT. This is the design-limiting event for
+the entire vehicle. Every other hazard analysis is secondary.
+The quench protection system is not an add-on; it is the
+architectural core of the device.
+\end{critbox}
+
+%=============================================================================
+\section{System Architecture for Safety Analysis}
+%=============================================================================
+
+\subsection{Hazard Inventory}
+
+\begin{longtable}{p{0.05\tw}p{0.30\tw}p{0.20\tw}p{0.35\tw}}
+\toprule
+\textbf{ID} & \textbf{Hazard Category} & \textbf{Energy Scale} &
+\textbf{Primary Consequence} \\
+\midrule
+\endhead
+H-1 & Superconducting quench & $1$--$10\,\si{GJ}$ &
+  Structural destruction, fire, radiation release \\
+H-2 & Ferrite mechanical failure & $1$--$10\,\si{GJ}$ EM release &
+  Shrapnel, EM pulse, quench cascade \\
+H-3 & Cryogenic system failure & Thermal $\to$ quench & ODH, quench cascade \\
+H-4 & Nuclear reactor accident & $\leq 100\,\si{MW_{th}}$ & Radiation, fission
+  product release \\
+H-5 & Psi-field asymmetry & Gravitational & Uncontrolled acceleration,
+  tidal forces \\
+H-6 & RF/EM radiation & $\leq 1\,\si{GW}$ radiated & Crew dose, electronics \\
+H-7 & Control system failure & N/A & Loss of navigation, psi collapse \\
+H-8 & Power bus failure & N/A & Loss of cryogenics $\to$ quench \\
+H-9 & Multiple simultaneous failures & Compounded & Catastrophic loss of vehicle \\
+\bottomrule
+\end{longtable}
+
+\subsection{Risk Matrix Framework}
+
+Severity and probability are scored on 1--10 scales. Risk Priority Number
+(RPN) = Severity $\times$ Probability $\times$ (11 $-$ Detectability),
+where Detectability 1 = undetectable, 10 = always detected.
+
+\begin{longtable}{p{0.18\tw}p{0.12\tw}p{0.12\tw}p{0.48\tw}}
+\toprule
+\textbf{RPN Range} & \textbf{Risk Level} & \textbf{Colour} &
+\textbf{Required Action} \\
+\midrule
+\endhead
+$> 400$ & \Scrit{CRITICAL} & Red & Design elimination required;
+  programme stop if unresolved \\
+$200$--$400$ & \Shigh{HIGH} & Orange & Mandatory mitigation prior to
+  prototype testing \\
+$100$--$200$ & \Smed{MEDIUM} & Yellow & Mitigation required prior to
+  operational approval \\
+$< 100$ & \Slow{LOW} & Green & Monitor; review at each design iteration \\
+\bottomrule
+\end{longtable}
+
+%=============================================================================
+\section{Failure Mode and Effects Analysis (FMEA)}
+%=============================================================================
+
+\subsection{FM-01: Superconductor Quench}
+
+\begin{longtable}{p{0.25\tw}p{0.65\tw}}
+\toprule
+\multicolumn{2}{l}{\textbf{FM-01 --- Superconductor Quench (Sudden Transition
+  to Normal State)}} \\
+\midrule
+\endhead
+\textbf{Description} &
+  The superconducting niobium shell transitions from superconducting to
+  normal (resistive) state. At operating stored energy $\geq 1\,\si{GJ}$,
+  the resistive dissipation of this energy in the shell is catastrophic
+  unless managed. \\[4pt]
+\textbf{Causes} &
+  (a) Localised heating from mechanical disturbance (flux jump, acoustic
+  vibration, impact); (b) Cryogenic failure warming the shell above
+  $T_c \approx 9.3$\,K (niobium); (c) Degradation of superconductor under
+  sustained high EM field ($H > H_{c2}$); (d) Cosmic ray or neutron
+  flux heating normal-conducting spot; (e) RF input fault producing
+  ohmic heating at surface defect; (f) Asymmetric psi gradient producing
+  local current density exceeding $J_c$. \\[4pt]
+\textbf{Effect} &
+  If unmitigated: all stored EM energy ($\sim 10^9$\,J) dissipated in
+  shell within $\sim 0.1$--$10$\,s. Peak hot-spot temperature $T_{\rm hs}
+  \sim 2000$\,K. Structural failure of shell. Shrapnel ejection.
+  Secondary explosion from cryogen. Reactor shielding breach potential.
+  Total loss of vehicle. \\[4pt]
+\textbf{Severity} & \Scrit{10/10} --- Catastrophic loss of vehicle and crew \\[4pt]
+\textbf{Probability (unmitigated)} & 6/10 --- Quench at these energy scales
+  is a known and expected event in SRF physics without active protection \\[4pt]
+\textbf{Detectability} & 8/10 --- Quench produces detectable voltage and
+  temperature signatures $>10$\,ms before mechanical damage \\[4pt]
+\textbf{RPN (unmitigated)} & $10 \times 6 \times (11-8) = $ \Scrit{180}
+  --- requires mitigation \\[4pt]
+\textbf{RPN (mitigated)} & $10 \times 2 \times (11-9) = $ \Smed{40} \\[4pt]
+\textbf{Detection Methods} &
+  (1) Voltage tap array across shell segments; any $V > 100\,\si{\mu V}$
+  triggers Level 1 alarm at $t < 1\,\si{ms}$. (2) Distributed temperature
+  sensors (Cernox/RuO$_2$) at $< 50$\,mm spacing; threshold
+  $T > T_c - 2$\,K. (3) Second-sound acoustic sensors in He-II bath
+  detect thermal perturbations preceding quench by $10$--$100$\,ms.
+  (4) Quench Antenna (pickup coil array) detects flux motion. \\[4pt]
+\textbf{Mitigation} & See Section~\ref{sec:quench} for full Quench
+  Protection System design. Primary: Energy dump to external resistive
+  load in $< 100$\,ms. Secondary: Inductive redistribution across
+  bypass network. Tertiary: Controlled quench propagation via heater
+  system to distribute dissipation uniformly. \\
+\bottomrule
+\end{longtable}
+
+\subsection{FM-02: Ferrite Shell Fracture}
+
+\begin{longtable}{p{0.25\tw}p{0.65\tw}}
+\toprule
+\multicolumn{2}{l}{\textbf{FM-02 --- Ferrite Outer Shell Mechanical Failure}} \\
+\midrule
+\endhead
+\textbf{Description} &
+  Sintered polycrystalline ferrite is a brittle ceramic with fracture
+  toughness $K_{Ic} \approx 1$--$2\,\si{MPa\,m^{1/2}}$, far below
+  structural metals. Under operating EM stress, thermal cycling, and
+  vibrational loading, fracture is a credible failure mode. \\[4pt]
+\textbf{Causes} &
+  (a) Hoop stress from magnetic pressure exceeds modulus of rupture;
+  (b) Thermal shock during cryocooldown or warmup (CTE mismatch
+  ferrite/Nb); (c) Resonant vibration at acoustic eigenfrequencies;
+  (d) Fatigue from repeated EM stress cycling; (e) Quench-induced
+  thermal shock from FM-01; (f) Microcrack propagation from
+  manufacturing defects. \\[4pt]
+\textbf{Effect} &
+  Fragment ejection at high velocity. Sudden loss of EM containment
+  geometry leads to field redistribution and potential quench cascade.
+  If shell fracture precedes quench protection activation: FM-01
+  consequences. Loss of psi-field symmetry produces uncontrolled
+  thrust (see FM-07). \\[4pt]
+\textbf{Severity} & \Scrit{9/10} --- Potentially catastrophic; outcome
+  depends on whether quench protection responds before energy release \\[4pt]
+\textbf{Probability} & 4/10 --- Brittle fracture under combined EM +
+  thermal stress; analogous to ceramic magnet failures in
+  accelerator technology \\[4pt]
+\textbf{Detectability} & 6/10 --- Acoustic emission sensors detect crack
+  propagation; EM field monitoring detects cavity geometry change \\[4pt]
+\textbf{RPN} & \Shigh{$9 \times 4 \times (11-6) = 180$} \\[4pt]
+\textbf{Mitigation} &
+  (1) \textit{Design}: Operating EM stress $< 30\%$ of modulus of rupture
+  with $3\times$ safety margin. (2) \textit{Composite structure}: Ferrite
+  tiles bonded to metallic substrate; tile failure does not propagate.
+  (3) \textit{Pre-stress}: Compressive hooping from outer metallic band
+  counteracts EM tensile hoop stress. (4) \textit{NDE}: Acoustic emission
+  monitoring in real time; threshold crack detection $\geq 1$\,mm.
+  (5) \textit{Containment vessel}: Outer pressure vessel contains
+  fragments and directs blast away from crew and reactor. \\
+\bottomrule
+\end{longtable}
+
+\subsection{FM-03: Cryogenic System Failure}
+
+\begin{longtable}{p{0.25\tw}p{0.65\tw}}
+\toprule
+\multicolumn{2}{l}{\textbf{FM-03 --- Loss of Cryogenic Cooling}} \\
+\midrule
+\endhead
+\textbf{Description} &
+  Loss of liquid helium flow to the superconducting shell cryostat,
+  causing thermal rise of the shell toward $T_c$. \\[4pt]
+\textbf{Causes} &
+  (a) Cryogenic transfer line rupture; (b) Helium compressor failure;
+  (c) Cryostat vacuum breach (sudden thermal load increase);
+  (d) Accelerated boiloff from EM ohmic heating at defect site;
+  (e) Power bus failure cutting cryogenic pumps. \\[4pt]
+\textbf{Effect} &
+  Time to quench depends on cryostat thermal mass and stored LHe.
+  Conservative estimate: with $500$\,L LHe reserve and $50$\,W heat load,
+  time to shell warmup to $T_c \approx 9$\,K is $\sim 100$\,s from
+  cooling loss. This is recoverable IF EM energy is dumped within
+  $\leq 90$\,s of cooling loss. With high ohmic input, time compresses
+  to $\leq 10$\,s. \\[4pt]
+\textbf{Severity} & 9/10 --- If cascade to quench (FM-01) occurs \\[4pt]
+\textbf{Probability} & 5/10 --- Cryogenic systems fail; rate depends
+  on redundancy \\[4pt]
+\textbf{Detectability} & 9/10 --- Temperature and He level monitors
+  provide ample warning \\[4pt]
+\textbf{RPN (mitigated)} & $9 \times 2 \times (11-9) = $ \Slow{36} \\[4pt]
+\textbf{Mitigation} &
+  (1) \textit{Redundant cryo-plants}: 2N cryogenic cooling (two
+  independent He circuits, either sufficient alone). (2) \textit{He
+  inventory}: $2000$\,L LHe reserve extends safe window to $\sim 600$\,s.
+  (3) \textit{Automatic energy dump}: Temperature rise $> 0.5$\,K/s
+  triggers immediate dump protocol (see Section~\ref{sec:quench}).
+  (4) \textit{Cryo-alarm cascade}: He level $< 50\%$ initiates EM power
+  reduction; $< 20\%$ initiates full dump. Hardwired interlocks, not
+  software-dependent (IEC 61508 SIL-3). \\
+\bottomrule
+\end{longtable}
+
+\subsection{FM-04: RF Feed and Resonance Failure}
+
+\begin{longtable}{p{0.25\tw}p{0.65\tw}}
+\toprule
+\multicolumn{2}{l}{\textbf{FM-04 --- RF Feed Failure and Loss of Resonance}} \\
+\midrule
+\endhead
+\textbf{Description} &
+  The SRF cavity array stores energy only when driven at resonance.
+  Loss of resonance or RF feed failure causes energy redistribution
+  within the cavity network and the psi-field structure. \\[4pt]
+\textbf{Causes} &
+  (a) Klystron/amplifier failure; (b) Waveguide arc discharge;
+  (c) Piezo tuner failure (cavity detuning from Lorentz force);
+  (d) Coupling coupler failure (reflection mismatch $\to$ arc);
+  (e) Frequency reference (oscillator) failure. \\[4pt]
+\textbf{Effect} &
+  Without drive, stored energy rings down with $\tau = Q/(\pi f)$.
+  For $Q_0 = 10^{10}$, $f = 1.3$\,GHz: $\tau \approx 2.5$\,s.
+  Energy dissipation in shell walls: potential local hot-spot and
+  quench initiation. Psi-field collapses on timescale $\sim c_s / R$
+  where $c_s$ is the psi-field propagation speed and $R$ is shell
+  radius. \\[4pt]
+\textbf{Severity} & 7/10 --- Controlled ringdown is survivable; if
+  triggering quench severity becomes 10/10 \\[4pt]
+\textbf{Probability} & 4/10 --- RF system failures are common in
+  accelerator operations \\[4pt]
+\textbf{Detectability} & 9/10 --- Forward/reflected power monitoring
+  detects fault at $< 1\,\mu$s \\[4pt]
+\textbf{RPN} & \Smed{$7 \times 4 \times (11-9) = 56$} \\[4pt]
+\textbf{Mitigation} &
+  (1) \textit{Redundant RF chains}: N+1 architecture per cavity.
+  (2) \textit{Fast detuning}: On RF fault, piezo tuners immediately
+  detune cavity by $> 100$ bandwidths, converting resonant storage to
+  travelling-wave dissipation at matched load.
+  (3) \textit{Circulator isolation}: High-power circulators prevent
+  reflected power from damaging sources.
+  (4) \textit{Controlled dump}: RF failure triggers energy dump
+  protocol before ringdown can initiate hot-spot. \\
+\bottomrule
+\end{longtable}
+
+\subsection{FM-05: Control System Failure}
+
+\begin{longtable}{p{0.25\tw}p{0.65\tw}}
+\toprule
+\multicolumn{2}{l}{\textbf{FM-05 --- Control System Failure (Loss of Thrust Vectoring)}} \\
+\midrule
+\endhead
+\textbf{Description} &
+  Loss of the psi-field shaping control that produces directed thrust.
+  The psi-bubble is formed by spatial gradients in the shell EM energy
+  distribution; control failure means the gradient cannot be directed. \\[4pt]
+\textbf{Causes} &
+  (a) Flight computer hardware fault; (b) Software fault / exception;
+  (c) Power bus failure to control hardware; (d) Sensor fusion failure
+  providing incorrect state to controller; (e) Electromagnetic
+  interference from EM field transients. \\[4pt]
+\textbf{Effect} &
+  If control is lost while psi-bubble is active: vehicle follows
+  last-commanded trajectory with no ability to steer or decelerate.
+  In atmosphere, collision risk. In deep space, benign drift.
+  If the fault causes asymmetric cavity shutdown, see FM-07. \\[4pt]
+\textbf{Severity} & 7/10 --- In atmosphere or proximity to structures \\[4pt]
+\textbf{Probability} & 3/10 --- With redundant computing architecture \\[4pt]
+\textbf{Detectability} & 8/10 --- Watchdog timers and health monitors \\[4pt]
+\textbf{RPN} & \Smed{$7 \times 3 \times (11-8) = 63$} \\[4pt]
+\textbf{Mitigation} &
+  (1) \textit{Triple-modular redundant (TMR) computing} with Byzantine
+  fault tolerance and $2$-of-$3$ voting. (2) \textit{Fail-safe default}:
+  control system loss triggers immediate psi-field symmetric collapse
+  (equal energy all sectors, zero net gradient). (3) \textit{Hardware
+  backup}: Analog thrust-vector trim channels not software-dependent.
+  (4) \textit{EMI hardening}: All control electronics in mu-metal plus
+  copper Faraday enclosure rated for the operating EM environment. \\
+\bottomrule
+\end{longtable}
+
+\subsection{FM-06: Nuclear Reactor SCRAM}
+
+\begin{longtable}{p{0.25\tw}p{0.65\tw}}
+\toprule
+\multicolumn{2}{l}{\textbf{FM-06 --- Nuclear Reactor Unplanned SCRAM}} \\
+\midrule
+\endhead
+\textbf{Description} &
+  Unplanned shutdown (SCRAM) of the nuclear reactor that powers
+  the cryogenic plant, RF systems, and all vehicle power. \\[4pt]
+\textbf{Causes} &
+  (a) High neutron flux trip; (b) Loss of coolant accident (LOCA);
+  (c) Control rod ejection; (d) Turbine/generator trip; (e) Seismic
+  or vibration trip; (f) Psi-field induced modulation of neutron
+  cross-sections (speculative but must be bounded --- see
+  Section~\ref{sec:psi_nuclear}). \\[4pt]
+\textbf{Effect} &
+  Loss of primary power. Cryogenic plant loses power $\to$ He boiloff
+  begins. Stored EM energy in SRF cavities provides buffer (ringdown
+  $\tau \sim 2.5$\,s). Battery/flywheel backup must bridge gap until
+  reactor restart or controlled shutdown. Unplanned SCRAM in
+  atmosphere: vehicle loses propulsion, enters freefall. \\[4pt]
+\textbf{Severity} & 8/10 --- Loss of propulsion in atmosphere is
+  life-threatening \\[4pt]
+\textbf{Probability} & 3/10 --- SCRAMs are infrequent in well-designed
+  reactors \\[4pt]
+\textbf{Detectability} & 10/10 --- Immediate instrumentation \\[4pt]
+\textbf{RPN} & \Smed{$8 \times 3 \times (11-10) = 24$} \\[4pt]
+\textbf{Mitigation} &
+  (1) \textit{30-second flywheel UPS}: Inertial energy storage bridging
+  power to cryogenics and quench protection for 30\,s post-SCRAM.
+  (2) \textit{Reactor restart protocol}: Fast restart within $30$\,s
+  for loss-of-power events not involving core damage.
+  (3) \textit{Atmospheric abort procedure}: Automatic engagement of
+  backup propulsion (retro-rockets or aerodynamic glide) on SCRAM
+  detect (see Section~\ref{sec:abort}).
+  (4) \textit{Reactor design}: Use passively safe small modular reactor
+  (SMR) with negative temperature and void coefficients --- reactor
+  is physically incapable of runaway. \\
+\bottomrule
+\end{longtable}
+
+\subsection{FM-07: Asymmetric Quench}
+
+\begin{longtable}{p{0.25\tw}p{0.65\tw}}
+\toprule
+\multicolumn{2}{l}{\textbf{FM-07 --- Asymmetric Quench (Most Dangerous Failure Mode)}} \\
+\midrule
+\endhead
+\textbf{Description} &
+  One sector of the superconducting shell quenches while the other
+  sectors remain superconducting and continue to generate psi-field
+  gradient. This is the single most dangerous failure mode unique to
+  the psi-bubble propulsion concept. \\[4pt]
+\textbf{Causes} &
+  (a) Any of the FM-01 causes acting on a single shell sector;
+  (b) Non-uniform cryogenic cooling leaving one sector warmer;
+  (c) Localised ferrite crack (FM-02) disrupting EM field in one sector;
+  (d) RF feed fault to one sector only (FM-04). \\[4pt]
+\textbf{Effect} &
+  \textbf{This is the ``thrusting quench'' scenario.} The intact sectors
+  continue to generate psi-field gradient pointing away from the
+  quenched sector. The psi gradient produces net force on the vehicle
+  in the direction of the quenched sector. Simultaneously, the quenched
+  sector undergoes uncontrolled energy dissipation (FM-01 consequences
+  localised to one side of the vehicle). The combined effect: uncontrolled
+  acceleration in one direction while the vehicle is partially destroyed.
+  Maximum thrust before structural failure could reach $\sim 10^4$\,g
+  on the vehicle frame before mechanical limits intervene. \\[4pt]
+\textbf{Severity} & \Scrit{10/10} --- Guaranteed vehicle loss and
+  high probability of crew death \\[4pt]
+\textbf{Probability} & 4/10 --- Localised quench initiation is more
+  probable than simultaneous full-shell quench \\[4pt]
+\textbf{Detectability} & 7/10 --- Differential voltage monitoring across
+  sectors provides $\sim 5$\,ms warning \\[4pt]
+\textbf{RPN (unmitigated)} & \Scrit{$10 \times 4 \times (11-7) = 160$} \\[4pt]
+\textbf{RPN (mitigated)} & $10 \times 1 \times (11-9) = $ \Smed{20} \\[4pt]
+\textbf{Mitigation} &
+  \textbf{This failure mode drives the entire safety architecture.}
+  (1) \textit{Sector-resolved quench detection}: Each shell sector has
+  independent voltage tap and temperature monitoring with trip threshold
+  and $<1$\,ms response. (2) \textit{Immediate full dump}: First sign
+  of asymmetry triggers dump of ALL sectors simultaneously, not just the
+  quenching sector. The dump must initiate before psi-asymmetry
+  generates $> 10\,\si{m/s^2}$ net acceleration, which requires
+  acting within $\sim 2$\,ms of quench onset. (3) \textit{Dump
+  architecture}: See Section~\ref{sec:quench}. (4) \textit{Cross-sector
+  equalisation}: Passive equalisation resistors between sectors ensure
+  that quench propagation is encouraged, not suppressed, once initiated;
+  a full symmetric quench is safer than an asymmetric one. \\
+\bottomrule
+\end{longtable}
+
+\subsection{FM-08: Power Bus Failure}
+
+\begin{longtable}{p{0.25\tw}p{0.65\tw}}
+\toprule
+\multicolumn{2}{l}{\textbf{FM-08 --- Main Power Bus Failure}} \\
+\midrule
+\endhead
+\textbf{Description} &
+  Loss of the main DC or AC power distribution bus, cutting power
+  to cryogenics, RF drives, control systems, and safety systems. \\[4pt]
+\textbf{Severity} & 8/10 (cascades to FM-03 then FM-01) \\[4pt]
+\textbf{Probability} & 2/10 with redundant bus architecture \\[4pt]
+\textbf{RPN} & \Smed{$8 \times 2 \times (11-9) = 32$} \\[4pt]
+\textbf{Mitigation} &
+  (1) Dual redundant power buses, independent from reactor to loads.
+  (2) Safety system (quench detection + dump) powered from independent
+  battery-backed UPS rated for $> 300$\,s, entirely separate from
+  main bus. (3) Quench heater firing circuit uses capacitor bank;
+  no external power required once charged (charges from main bus
+  during normal operation; holds charge for $> 1$\,h). \\
+\bottomrule
+\end{longtable}
+
+\subsection{FM-09: Multiple Simultaneous Failures}
+
+\begin{longtable}{p{0.25\tw}p{0.65\tw}}
+\toprule
+\multicolumn{2}{l}{\textbf{FM-09 --- Multiple Simultaneous Failures
+  (Common-Cause Events)}} \\
+\midrule
+\endhead
+\textbf{Description} &
+  Catastrophic external events (collision, high-g manoeuvre, hostile
+  action) or severe common-cause failures (manufacturing defect
+  batch) can trigger multiple failure modes simultaneously. \\[4pt]
+\textbf{Scenarios} &
+  (a) High-g impact: mechanical shock triggers FM-02 + FM-01 + FM-06
+  simultaneously. (b) Power loss: FM-08 triggers FM-03 + FM-05 + FM-06
+  cascade. (c) Psi anomaly: large transient psi gradient from external
+  source (near massive body) exceeds $J_c$ in shell triggering FM-07.
+  (d) Adversarial: deliberate targeting of vehicle. \\[4pt]
+\textbf{Severity} & \Scrit{10/10} \\[4pt]
+\textbf{Probability} & 2/10 during design life \\[4pt]
+\textbf{Mitigation} &
+  (1) \textit{Fault tree analysis (FTA)}: Mandatory FTA for all
+  identified common-cause failure pathways; design targets $P < 10^{-7}$
+  per flight hour for catastrophic outcomes. (2) \textit{Passive
+  safety}: Reactor passively safe (no power required to maintain
+  subcriticality). (3) \textit{Physical separation}: Safety systems
+  physically separated and use different technologies to avoid
+  common-mode failure. (4) \textit{Blast containment}: Outer vehicle
+  shell designed as containment vessel for worst-case quench energy. \\
+\bottomrule
+\end{longtable}
+
+%=============================================================================
+\section{Quench Protection System}
+\label{sec:quench}
+%=============================================================================
+
+\subsection{Problem Statement and Energy Scale}
+
+The fundamental challenge of quench protection for the DFD psi-bubble
+is identical in character but larger in scale than the LHC main dipole
+magnets, which store $\sim 10$\,MJ per magnet and $\sim 11$\,GJ total.
+The DFD vehicle shell stores $\sim 1$--$10$\,GJ in a single continuous
+superconducting structure. The critical engineering parameters:
+
+\begin{itemize}
+  \item \textbf{Stored energy} $U_0 \sim 10^9$\,J (1\,GJ baseline, Phase 3)
+  \item \textbf{Normal-zone propagation velocity} $v_q \sim 1$--$20$\,m/s
+    (characteristic of bulk Nb at operating field)
+  \item \textbf{Adiabatic temperature rise} in quenching zone:
+    $\Delta T \sim U_0 / (c_p \cdot m_{\rm shell})$; for $m = 5000$\,kg
+    Nb, $c_p \sim 50$\,J/kg/K at 4\,K $\to$ $\Delta T_{\rm adiabatic}
+    = 4000$\,K \textit{if all energy deposits in shell}.
+    This is far above the $\sim 300$\,K maximum safe hot-spot temperature.
+  \item \textbf{Required dump time}: $< 100$\,ms to keep peak hot-spot
+    below $T_{\rm max} = 300$\,K with margin
+  \item \textbf{Available detection time}: $\sim 5$--$50$\,ms from
+    quench initiation to runaway (depending on initial normal-zone size)
+\end{itemize}
+
+\begin{critbox}
+The arithmetic is unambiguous: 1\,GJ cannot be deposited in 5000\,kg of
+niobium and remain below the melting point. The energy \textit{must} be
+transferred out of the shell to an external dump load within $\leq 100$\,ms.
+There is no alternative. The quench protection system is not a
+``safety feature'' that can be added later; it is a load-bearing
+element of the propulsion concept.
+\end{critbox}
+
+\subsection{Quench Detection Architecture}
+
+\subsubsection{Detection Layer 1: Voltage Tap Network}
+
+\begin{itemize}
+  \item Shell divided into $N_{\rm seg} \geq 200$ individually monitored
+    segments
+  \item Each segment: two voltage tap electrodes at $\leq 50$\,mm spacing
+  \item Threshold: $V_{\rm trip} = 100\,\mu$V (resistive component only;
+    inductive background subtracted by bridge circuit)
+  \item Response time: $< 500\,\mu$s from threshold crossing to trip signal
+  \item Discrimination: inductive/resistive bridge ensures no false trips
+    from normal EM transients
+  \item Redundancy: each segment monitored by two independent channels;
+    either channel trips
+\end{itemize}
+
+\subsubsection{Detection Layer 2: Distributed Temperature Sensing}
+
+\begin{itemize}
+  \item $N_T \geq 500$ Cernox resistive temperature sensors bonded
+    to shell exterior
+  \item Resolution: $\pm 5$\,mK; response time $< 10$\,ms
+  \item Spatial coverage: $< 100$\,mm between sensors
+  \item Trip threshold: $T > T_c - 1$\,K (i.e., $T > 8.3$\,K for Nb)
+  \item Secondary threshold: $dT/dt > 0.5$\,K/s (predictive trip)
+\end{itemize}
+
+\subsubsection{Detection Layer 3: Second-Sound Acoustic Detection (He-II)}
+
+Operating the shell in superfluid He-II ($T < 2.17$\,K) enables
+second-sound acoustic detection, as used in LEP and early LHC:
+\begin{itemize}
+  \item Second-sound wave velocity in He-II: $v_2 \approx 20$\,m/s
+  \item Thermal pulse from quench nucleus propagates as second-sound wave
+  \item Second-sound sensors (oscillating superleak transducers) around
+    shell perimeter
+  \item Time-of-flight triangulation localises quench to $\pm 20$\,mm
+    within $\sim 50$\,ms
+  \item Primary advantage: detects energy deposition BEFORE
+    normal zone reaches $T_c$ --- precursor detection time $\sim 100$\,ms
+    versus $\sim 5$\,ms for voltage taps
+\end{itemize}
+
+\subsubsection{Detection Layer 4: Quench Antenna}
+
+\begin{itemize}
+  \item Inductive pickup coil array outside the cryostat
+  \item Detects flux motion (``flux jumping'') that precedes quench
+  \item Sensitivity to local $B$-field changes $> 10^{-6}$\,T
+  \item No threshold setting required; signal processed by matched filter
+    against known quench flux-jump signature
+\end{itemize}
+
+\subsection{Energy Dump System}
+
+\subsubsection{Option Comparison}
+
+\begin{longtable}{p{0.18\tw}p{0.25\tw}p{0.25\tw}p{0.22\tw}}
+\toprule
+\textbf{Method} & \textbf{Description} & \textbf{Pros} & \textbf{Cons} \\
+\midrule
+\endhead
+Resistive dump & Energy extracted to external dump resistor via
+  switched network &
+  Proven (LHC); fast; energy absorbed in controlled location &
+  Requires $< 10$\,m$\Omega$ leads; switch arcing at GJ scale is
+  challenging \\[4pt]
+Inductive bypass & Cross-coupled inductors distribute energy from
+  quenching sector to non-quenching sectors &
+  No external switches; passive redistribution &
+  Extends total dump time; all sectors eventually quench \\[4pt]
+Controlled radiation & EM energy ``switched out'' of resonance to
+  propagating mode radiating outward &
+  No mechanical switches; energy dissipated at speed of light &
+  Requires very rapid ($<1$\,ms) detuning; radiated EM pulse is
+  intense hazard within $\sim 100$\,m \\[4pt]
+Active quench heaters & Deliberately propagate quench to entire
+  shell uniformly before energy exceeds hot-spot limit &
+  Distributes dissipation; proven technique &
+  Increases total energy deposited in shell; requires shell to
+  survive uniform quench \\
+\bottomrule
+\end{longtable}
+
+\subsubsection{Recommended Architecture: Three-Layer Dump}
+
+\begin{enumerate}
+  \item \textbf{Primary: Controlled RF dump} (first 10\,ms).
+    On quench detection, piezo tuners on all SRF cavities detune
+    to $> 100 \times$ bandwidth ($> 100$\,kHz offset from resonance)
+    within $< 1$\,ms. Simultaneously, high-power RF loads (water-cooled
+    matched terminations at 1\,GW rating) are switched into all
+    cavity input couplers. The stored cavity energy rings down into
+    these loads with $\tau_{\rm dump} = Q_{\rm loaded}/(\pi f)$. With
+    $Q_{\rm loaded}$ reduced to $10^4$ by the matched load: $\tau \approx
+    2.4\,\mu$s. This approach removes the RF energy component of the
+    stored field in $\sim 25\,\mu$s (10 time constants).
+
+  \item \textbf{Secondary: Quench heater propagation} (10--100\,ms).
+    After RF dump, residual magnetic energy in the DC persistent-current
+    component of the shell is dissipated by firing quench heaters
+    (resistive strips on shell surface, $\sim 50$\,W/cm$^2$ for 100\,ms)
+    to drive the entire shell normal simultaneously. This distributes
+    remaining magnetic energy ($\sim 10\%$ of total) uniformly,
+    limiting hot-spot to $\leq 300$\,K.
+
+  \item \textbf{Tertiary: External resistive dump} (100\,ms -- 10\,s).
+    For any residual magnetic flux that cannot be cleared by heaters,
+    a copper dump resistor bank (pre-cooled, immersed in oil-filled
+    tank, rated 100\,MJ) is connected via low-inductance bus.
+    Energy is deposited into resistors at controlled rate.
+    Resistor bank mass $\sim 10$\,t; oil bath provides thermal mass.
+\end{enumerate}
+
+\subsubsection{LHC Comparison}
+
+The LHC quench protection system (QPS) handles $\sim 10$\,MJ per magnet
+and $11.7$\,GJ total across $\sim 1700$ magnet circuits. Key parallels:
+\begin{itemize}[nosep]
+  \item LHC dump resistor: $0.05$\,m$\Omega$, absorbs $10$\,MJ per circuit
+  \item LHC dump time: $\sim 100$\,ms
+  \item LHC quench detection threshold: $100\,\mu$V, $< 1$\,ms response
+\end{itemize}
+
+The DFD vehicle stores $100\times$ the per-element energy of an LHC
+dipole in a single structure. The LHC approach is therefore the correct
+engineering baseline, scaled and adapted. The primary difference is
+the RF component of stored energy (absent in LHC): the RF dump via
+detuning is a new technique not required in LHC.
+
+\subsubsection{Hot-Spot Temperature Analysis}
+
+The adiabatic hot-spot temperature after a complete quench is:
+\begin{equation}
+  T_{\rm hs} = T_0 + \frac{J^2 \rho(T) \, t_{\rm dump}}{C_p(T)}
+\end{equation}
+where $J$ is current density, $\rho$ is resistivity of normal-state Nb,
+and $C_p$ is heat capacity. Integrating over the dump trajectory:
+
+\begin{longtable}{p{0.20\tw}p{0.20\tw}p{0.20\tw}p{0.30\tw}}
+\toprule
+\textbf{Scenario} & \textbf{Dump time} & \textbf{Peak $T_{\rm hs}$} &
+\textbf{Assessment} \\
+\midrule
+\endhead
+No protection & $\infty$ (adiabatic) & $\sim 4000$\,K & Catastrophic;
+  shell melts/evaporates \\
+Heaters only & $500$\,ms & $\sim 800$\,K & Unacceptable;
+  structural damage \\
+RF dump + heaters & $100$\,ms & $\sim 280$\,K & Acceptable;
+  within Nb limit \\
+RF dump only (fast) & $< 10$\,ms & $\sim 50$\,K & Safe;
+  below annealing threshold \\
+\bottomrule
+\end{longtable}
+
+Target: RF dump clears $> 90\%$ of energy in $< 10$\,ms, with heaters
+handling residual magnetic component in the following $100$\,ms. Peak
+hot-spot $\leq 300$\,K in all credible scenarios.
+
+%=============================================================================
+\section{Radiation Environment}
+\label{sec:radiation}
+%=============================================================================
+
+\subsection{Nuclear Reactor Shielding}
+
+The vehicle reactor is a compact SMR ($\leq 100$\,MW\textsubscript{th},
+comparable to MEGAPOWER/NTP designs). Radiation sources:
+
+\subsubsection{Gamma Radiation}
+
+\begin{itemize}
+  \item Prompt fission gamma: $\sim 8$\,MeV per fission; total source
+    strength $\sim 3 \times 10^{19}$\,gamma/s at 100\,MW\textsubscript{th}
+  \item Decay gamma from fission products: persists after shutdown
+    (``decay heat'': 7\% of rated power immediately, dropping as
+    $t^{-0.2}$ over days)
+  \item Shielding requirement to achieve $< 5$\,mSv/h at crew compartment
+    boundary:
+    \begin{itemize}
+      \item Water plus lead composite: $\sim 80$\,cm total (water 50\,cm
+        + lead 30\,cm)
+      \item Borated polyethylene for neutron moderation + gamma capture
+      \item Total shield mass: $\sim 15$\,t (acceptable for vehicle scale)
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Neutron Radiation}
+
+\begin{itemize}
+  \item Fast neutron flux at reactor boundary: $\sim 10^{14}$\,n/cm$^2$/s
+  \item Shielding: hydrogenous material (water, polyethylene) for fast
+    neutron moderation; boron-10 for thermal neutron capture
+  \item Critical concern: neutron activation of structural materials
+    near reactor. All structural components within 2\,m of core use
+    low-activation alloys (e.g., V-4Cr-4Ti, ferritic steels).
+  \item Superconducting shell location must be $> 5$\,m from reactor core;
+    neutron dose at shell $< 10^{10}$\,n/cm$^2$ per flight-hour
+    (below flux-jump threshold for Nb)
+\end{itemize}
+
+\subsubsection{Psi-Field Interaction with Reactor}
+\label{sec:psi_nuclear}
+
+DFD modifies the effective refractive index $n = e^\psi$ of the vacuum
+surrounding the vehicle. A pertinent question: does $\psi \neq 0$ modify
+neutron cross-sections? In DFD, the psi field modifies the electromagnetic
+sector; the strong force sector is either unaffected or affected via the
+multi-sector formalism. However:
+
+\begin{notebox}
+\textbf{Conservative design requirement:} Until theoretical bounds on
+psi-field effects on neutron cross-sections are established, reactor
+operation within the psi-bubble must be analysed assuming a potential
+$\pm 1\%$ variation in $k_{\rm eff}$ correlated with psi-field
+amplitude. The reactor control system must have authority to compensate
+$\Delta k_{\rm eff} = \pm 1\%$ in $< 100$\,ms. All safety analyses
+must bound this uncertainty. Experimental measurement of neutron flux
+as a function of psi-field amplitude is a mandatory pre-flight test.
+\end{notebox}
+
+\subsection{EM Radiation Leakage through Ferrite Layer}
+
+The ferrite outer shell is non-superconducting and lossy at RF frequencies.
+Analysis of EM leakage:
+
+\begin{itemize}
+  \item Ferrite at 1.3\,GHz: complex permeability $\mu_r = \mu' - j\mu''$;
+    for polycrystalline YIG-type, $\mu'' / \mu' \sim 0.1$--$0.3$
+  \item Skin depth in ferrite: $\delta = \sqrt{2\rho/(\omega\mu)} \sim 1$\,mm
+  \item For 50\,mm ferrite layer: attenuation $\approx 50$\,dB at 1.3\,GHz
+  \item Residual leakage power at ferrite outer surface:
+    $P_{\rm leak} \sim 10^{-5} \times P_{\rm stored}$. For 1\,GJ stored
+    over 10\,s ringdown: $P_{\rm leak} \sim 10\,\si{kW/m^2}$ (order of
+    magnitude; requires detailed field simulation)
+  \item This exceeds ICNIRP limits at the shell surface; a conductive
+    outer cage/faraday shield is required for occupant safety in
+    ground operations
+\end{itemize}
+
+\subsection{Crew Radiation Dose}
+
+\begin{longtable}{p{0.30\tw}p{0.20\tw}p{0.30\tw}p{0.10\tw}}
+\toprule
+\textbf{Source} & \textbf{Unshielded dose rate} & \textbf{Mitigation} &
+\textbf{Residual} \\
+\midrule
+\endhead
+Reactor prompt gamma & $\sim 10^4$\,Sv/h & 80\,cm H$_2$O + Pb shield &
+  $< 5$\,mSv/h \\
+Reactor fast neutrons & $\sim 10^3$\,Sv/h & Polyethylene + B-10 &
+  $< 1$\,mSv/h \\
+Activation products (post-SCRAM) & Decaying, $\sim 100$\,mSv/h at 1\,h &
+  Crew stays shielded for $> 24$\,h & $< 50$\,mSv/h \\
+RF leakage (1.3\,GHz, GJ-class) & $>100$\,W/m$^2$ at shell & Faraday cage
+  outer shell + no-entry zone & $< 2$\,W/m$^2$ \\
+Cosmic rays (deep space) & $\sim 0.5$\,mSv/day & Psi-bubble
+  (speculative: psi modification of cosmic ray flux?) &
+  TBD \\
+\bottomrule
+\end{longtable}
+
+\textbf{Annual occupational limit}: 50\,mSv (NRC/IAEA). With reactor
+shielding as above, crew dose $\sim 6$\,mSv/month operational.
+Acceptable for long-duration missions within NRC limits.
+
+%=============================================================================
+\section{Psi Field Safety}
+\label{sec:psi_safety}
+%=============================================================================
+
+\subsection{Effect on Nearby Persons and Structures}
+
+The psi-bubble propulsion concept operates by creating a spatial gradient
+in the psi field $\psi(x)$ which modifies the effective speed of light
+$c(x) = c_0 e^\psi$. The gravitational tidal force experienced by an
+object in the psi gradient is:
+
+\begin{equation}
+  \mathbf{F}_{\rm tidal} = m \, c^2 \nabla\psi
+\end{equation}
+
+For the vehicle to accelerate at $a_{\rm vehicle}$:
+\begin{equation}
+  |\nabla\psi|_{\rm drive} = a_{\rm vehicle} / c^2
+  \approx a_{\rm vehicle} \times 1.1 \times 10^{-17} \; \text{m}^{-1}
+  \; \text{per} \; \text{m/s}^2
+\end{equation}
+
+The psi field produced by the vehicle shell falls off with distance.
+Modelling the shell as a spherical source of radius $R$ with surface
+psi amplitude $\psi_0$:
+\begin{equation}
+  \psi(r) \approx \psi_0 \left(\frac{R}{r}\right)^2
+  \quad (r \gg R, \text{ dipole far field})
+\end{equation}
+
+\subsubsection{Tidal Force on a Bystander}
+
+A human body ($L = 2$\,m, oriented radially) at distance $r$ experiences
+differential acceleration:
+\begin{equation}
+  \Delta a_{\rm tidal} = L \cdot |\nabla^2 \psi| \cdot c^2
+  = L \cdot \left|\frac{d^2\psi}{dr^2}\right| c^2
+\end{equation}
+
+For shell acceleration $a = 10\,\si{m/s^2}$ ($\approx 1$\,g):
+
+\begin{longtable}{p{0.15\tw}p{0.20\tw}p{0.20\tw}p{0.35\tw}}
+\toprule
+\textbf{Distance $r$ (m)} & \textbf{$|\nabla\psi|$ (m$^{-1}$)} &
+\textbf{Tidal $\Delta a$ on body} & \textbf{Hazard Assessment} \\
+\midrule
+\endhead
+10 (shell surface) & $\sim 10^{-17}$\,m$^{-1}$ & $< 10^{-14}$\,m/s$^2$
+  & Imperceptible \\
+100 & $\sim 10^{-21}$ & $< 10^{-18}$ & Zero physiological effect \\
+1000 & $\sim 10^{-25}$ & $< 10^{-22}$ & Unmeasurable \\
+\bottomrule
+\end{longtable}
+
+\begin{notebox}
+The tidal force from the psi-bubble on external observers is negligible
+for all practical purposes when the vehicle operates at $\leq 1$\,g
+acceleration. The field gradient falls off steeply with distance.
+The gravitational effect on bystanders is not a primary safety concern.
+This contrasts with the Alcubierre metric, where the warp bubble walls
+have extreme curvature; the DFD psi-bubble uses distributed smooth
+gradients.
+\end{notebox}
+
+However, several non-trivial psi hazards do exist:
+
+\subsection{Psi Gradient at Shell Surface (Crew)}
+
+Inside the psi-bubble, the crew experiences the psi-field modification.
+The tidal stress across the crew compartment depends on psi-gradient
+\textit{uniformity}:
+\begin{itemize}
+  \item If psi gradient is uniform across the crew compartment: no tidal
+    stress (all of compartment falls freely in the psi-driven metric)
+  \item If psi gradient is \textit{non-uniform} across compartment scale
+    ($\sim 5$\,m): differential acceleration between head and feet
+  \item Required uniformity: $\Delta(\nabla\psi)/\nabla\psi < 10^{-4}$
+    across the crew module for $\Delta a < 10^{-3}$\,g differential
+    (negligible physiological effect)
+  \item This places requirements on the shell field uniformity;
+    see Section~\ref{sec:psi_nuclear}
+\end{itemize}
+
+\subsection{Weaponisation Prevention}
+
+A psi-bubble of sufficient amplitude and asymmetry could, in principle,
+project a psi-gradient onto an external target. The force on a target
+of mass $M$ at distance $r$ from the shell:
+\begin{equation}
+  F_{\rm target} = M \cdot c^2 \cdot |\nabla\psi(r)|
+\end{equation}
+
+For this to constitute a meaningful weapon (say, $F > 10^4$\,N on
+a 1000\,kg object):
+\begin{equation}
+  |\nabla\psi(r)| > 10^4 / (1000 \cdot c^2) \approx 10^{-13}\,\text{m}^{-1}
+\end{equation}
+
+This is approximately $10^4\times$ larger than the gradient required
+for 1\,g vehicle acceleration, which itself requires $\sim 10^{17}$\,m$^{-1}$
+at the shell surface falling to $\sim 10^{-25}$\,m$^{-1}$ at 1\,km.
+The psi field from a vehicle-scale device cannot project meaningful
+mechanical force onto external objects at ranges $> 10$\,m.
+
+\textbf{The more credible weaponisation concern} is using the vehicle
+as a kinetic impactor (nuclear-powered, unlimited delta-v vehicle) rather
+than via psi-field projection. This is an export control and arms control
+issue, not a psi-field physics issue.
+
+\begin{mitigbox}
+\textbf{Technical weaponisation prevention measures:}
+(1) Psi-field asymmetry limit: hardware interlock prevents any shell
+sector from exceeding $2\times$ the mean energy density, limiting
+maximum directional psi-gradient to propulsion-safe levels.
+(2) No provision for psi-field projection beyond the vehicle envelope;
+all cavities are designed to couple energy \textit{inward}, not outward.
+(3) Operational limit: vehicle cannot generate useful external psi
+force on objects at $> 10$\,m range with less than 100\,GJ stored energy
+--- orders of magnitude beyond any planned operational capacity.
+\end{mitigbox}
+
+\subsection{Emergency Psi-Field Shutdown Time}
+
+Psi-field collapse time is governed by the EM energy dump time
+(which sets how fast the source of psi perturbation is removed)
+plus the psi-field propagation time across the bubble:
+\begin{itemize}
+  \item EM dump time: $< 25\,\mu$s (RF dump, Section~\ref{sec:quench})
+  \item Psi-field propagation speed: bounded below by $c$ (cannot
+    propagate faster than light) and above by $c_s$ (DFD scalar wave
+    speed, which is model-dependent but $\leq c$ by causality)
+  \item For shell radius $R = 5$\,m: psi-field collapse time
+    $\sim R/c \sim 17$\,ns (lower bound) to $R/c_s$ (upper bound)
+  \item \textbf{Practical collapse time}: $\leq 1$\,ms
+    (conservative upper estimate including EM dump and psi propagation)
+\end{itemize}
+
+The psi-bubble cannot be ``trapped on'' if power is removed; it is
+not a persistent state. Field collapse is rapid and passive.
+
+%=============================================================================
+\section{Environmental Impact}
+\label{sec:environment}
+%=============================================================================
+
+\subsection{Propellant and Exhaust}
+
+The DFD psi-bubble creates no exhaust and consumes no propellant.
+This eliminates the primary environmental hazard of conventional
+rocket propulsion (combustion products, ozone layer impact from
+water vapour at altitude, perchlorate contamination from solid
+propellant). Environmental score: vastly superior to all existing
+propulsion systems.
+
+\subsection{Nuclear Waste and Cryogen Handling}
+
+\begin{itemize}
+  \item \textbf{Spent nuclear fuel}: After vehicle retirement, the
+    reactor core constitutes spent nuclear fuel requiring geological
+    repository disposal per standard nuclear waste regulations.
+    Volume is small ($\sim 1$\,m$^3$ of fuel assembly) but high-level
+    waste protocols apply. Design must facilitate core removal without
+    crew radiation exposure.
+  \item \textbf{Activated structural materials}: Materials within
+    2\,m of reactor become activated. Disposal as radioactive waste.
+    Low-activation alloy selection minimises this.
+  \item \textbf{Tritium}: Some SMR designs produce tritium (especially
+    those using $^6$Li or heavy water moderator). Assess tritium
+    inventory; if $> 10^{15}$\,Bq, requires NRC licensing.
+  \item \textbf{Helium cryogen}: He-4 released to atmosphere on
+    venting; benign, but represents loss of rare resource. Closed-loop
+    recovery system required (He recovery efficiency $> 95\%$).
+\end{itemize}
+
+\subsection{Sonic Boom Analysis}
+
+In atmospheric operation, the psi-bubble modifies the local refractive
+index for EM radiation \textit{and} acoustic propagation. The question
+is whether the psi-bubble suppresses or enhances sonic boom:
+
+\begin{itemize}
+  \item \textbf{DFD psi-field and acoustic waves}: In DFD, $n_{\rm EM}
+    = e^\psi$, but the speed of sound depends on different material
+    properties. The psi-field is primarily an EM refractive effect;
+    acoustic wave speed is set by fluid density and compressibility,
+    which are not directly modified by $\psi$ (unless psi couples to
+    matter density, which is the source term in DFD -- this requires
+    detailed analysis of psi backreaction on matter sector).
+  \item \textbf{Conventional sonic boom mechanism}: Pressure waves from
+    vehicle boundary layer, projected as Mach cone.
+  \item \textbf{DFD modification}: If the psi-bubble creates a smooth
+    ``density gradient'' shell in the surrounding air (via EM-induced
+    local heating? The mechanism here requires specification), sonic
+    boom could be suppressed. However this is speculative at TRL 2;
+    the conservative design assumption is: \textit{sonic boom is not
+    suppressed by psi-field}. Vehicle must comply with FAA sonic boom
+    regulations during atmospheric transit above Mach 1.
+  \item \textbf{Practical note}: A nuclear-powered psi-bubble vehicle
+    is unlikely to operate at Mach 1 in commercial airspace. Atmospheric
+    transit will likely be on designated test corridors or above
+    commercial airspace ($> 60,000$\,ft).
+\end{itemize}
+
+\subsection{Gravitational Wake}
+
+The vehicle modifies the gravitational potential locally while the
+psi-bubble is active. After the bubble collapses, is there a
+``gravitational wake'' that affects nearby structures?
+
+\begin{itemize}
+  \item The psi-field perturbation from a 10\,m vehicle at 1\,g
+    acceleration is $\delta\psi \sim a_{\rm drive} R^2 / (c^2 \cdot r^2)$
+    at distance $r$
+  \item At $r = 100$\,m: $\delta\psi \sim 10^{-13}$; gravitational
+    acceleration perturbation $\sim 10^{-13} \cdot c^2 / R \sim 10^{-4}$\,m/s$^2$
+  \item This is $10^{-5}$\,g: below the threshold for any structural effect
+    on buildings or human perception
+  \item No gravitational wake concern for ground operations or populated areas
+\end{itemize}
+
+%=============================================================================
+\section{Regulatory Framework}
+\label{sec:regulatory}
+%=============================================================================
+
+\subsection{Classification Challenge}
+
+The DFD psi-bubble vehicle fits no existing certification category:
+\begin{itemize}
+  \item Not an ``aircraft'' (no lift surface, operates outside atmosphere)
+  \item Not a ``launch vehicle'' (no propellant, no exhaust)
+  \item Not a ``spacecraft'' in the conventional sense (nuclear-powered,
+    reusable, potentially operates throughout the atmosphere)
+  \item Not a ``nuclear facility'' (mobile, airborne)
+\end{itemize}
+
+A new regulatory category is required. Based on the nearest analogues,
+the following framework applies:
+
+\subsection{FAA / EASA (Atmospheric Operations)}
+
+\begin{itemize}
+  \item \textbf{Applicable framework}: FAA 14 CFR Part 460
+    (Human Space Flight Requirements) for crewed operations above
+    60,000\,ft; FAA 14 CFR Part 101 for uncrewed
+  \item \textbf{Sonic boom}: 14 CFR Part 91 Subchapter F prohibits
+    supersonic flight over populated areas; this applies during
+    atmospheric transit below 60,000\,ft
+  \item \textbf{Vehicle certification path}: Novel category under
+    FAA Order 8110.4C; requires pre-application meeting and
+    issue papers for each novel feature
+  \item \textbf{Recommended approach}: Work with FAA Office of
+    Commercial Space Transportation (AST) from the beginning;
+    seek experimental permit (14 CFR Part 437) for development
+    phase; negotiate special condition (SC) for nuclear propulsion
+\end{itemize}
+
+\subsection{Nuclear Regulatory (US NRC / DOE)}
+
+\begin{itemize}
+  \item \textbf{NRC jurisdiction}: Reactors operating within US
+    territory fall under 10 CFR Part 50 (operating license) or
+    10 CFR Part 52 (combined construction and operating license)
+  \item \textbf{Nuclear-powered aircraft precedent}: SNAP-10A
+    (space nuclear power, 1965); NTP (Nuclear Thermal Propulsion,
+    NASA/DARPA ongoing) --- both provide precedent for
+    non-stationary nuclear systems
+  \item \textbf{Launch approval}: FAA/AST coordinates with NRC
+    for nuclear-powered launch vehicles; requires environmental
+    impact statement (NEPA) and nuclear risk analysis
+  \item \textbf{Isotope inventory}: Core must be characterised for
+    NRC regulatory purposes; SNAP-derived safety analysis required
+  \item \textbf{International}: IAEA Safety Standards for nuclear
+    propulsion in space (Safety Reports Series No.~40)
+\end{itemize}
+
+\subsection{Electromagnetic Compatibility (EMC)}
+
+\begin{itemize}
+  \item \textbf{Primary concern}: GJ-class SRF system at 1.3\,GHz
+    is a high-power intentional radiator. In ground operation,
+    must comply with FCC Part 18 (Industrial, Scientific, Medical
+    equipment) or obtain experimental licence under FCC Part 5
+  \item \textbf{Airborne interference}: The vehicle EM leakage (see
+    Section~\ref{sec:radiation}) could interfere with GNSS receivers,
+    air traffic control radar, and communication systems at ranges
+    $> 1$\,km. Required: FCC waiver and coordination with FAA
+    ATC spectrum management
+  \item \textbf{HEMP risk}: A full-energy quench (worst-case scenario)
+    with uncontrolled EM radiation into free space produces a localized
+    High-altitude Electromagnetic Pulse (HEMP)-like event. This must
+    be bounded and classified for military coordination
+  \item \textbf{Mitigation}: Outer Faraday enclosure on vehicle
+    suppresses leakage to $< -60$\,dBc of stored energy at
+    1\,km distance
+\end{itemize}
+
+\subsection{Export Control and ITAR}
+
+\begin{itemize}
+  \item \textbf{ITAR classification}: Nuclear propulsion + advanced
+    propulsion technology places this firmly under ITAR Category XV
+    (Spacecraft Systems and Related Articles) and Category VI
+    (Surface Vessels of War and Special Naval Equipment --- for
+    underwater variant)
+  \item \textbf{EAR dual-use}: Superconducting shell technology;
+    high-power RF systems; precision cryogenics --- all have CCL
+    entries under EAR. Export licence required for any technology
+    transfer
+  \item \textbf{Psi-field technology specifically}: Novel technology
+    with no existing export control category; likely classified under
+    ``600 series'' ECCN for military end-use; CJ (Commodity
+    Jurisdiction) determination required from State Department
+  \item \textbf{Weapons Applicability Determination}: Nuclear-powered,
+    unlimited-delta-v vehicle is inherently dual-use. DOD/DOE weapons
+    applicability review required before any international disclosure
+  \item \textbf{Recommendation}: Engage National Security Council
+    staff early; seek Fundamental Research Exclusion (FRE) for
+    academic research phase; protect engineering details as
+    proprietary until CJ determination complete
+\end{itemize}
+
+%=============================================================================
+\section{Abort and Emergency Escape Systems}
+\label{sec:abort}
+%=============================================================================
+
+\subsection{Abort Scenarios by Mission Phase}
+
+\begin{longtable}{p{0.20\tw}p{0.25\tw}p{0.45\tw}}
+\toprule
+\textbf{Phase} & \textbf{Trigger} & \textbf{Primary Abort Action} \\
+\midrule
+\endhead
+Ground, pre-launch & Any safety interlock trip & Power down; crew evacuation
+  via ground egress; fire suppression activation \\
+Atmospheric ascent (< 20 km) & Propulsion loss; control loss & Aerodynamic
+  glide + retro-rockets; parachute if velocity $< 200$\,m/s; crew capsule
+  ejection \\
+High altitude (20--100 km) & Same & Retro-rocket only (air too thin for
+  aerodynamic glide) + parachute deployment at $< 15$\,km \\
+Orbit / deep space & Loss of propulsion & Vehicle enters elliptical drift;
+  emergency life support extends to 72\,h; recovery vehicle rendezvous \\
+Near massive body & Uncontrolled psi asymmetry & Immediate symmetric dump;
+  retro-rocket for gravity escape; emergency psi restart at reduced power \\
+\bottomrule
+\end{longtable}
+
+\subsection{Crew Escape System}
+
+\begin{itemize}
+  \item \textbf{Escape capsule}: Self-contained pressure vessel,
+    independent life support 72\,h, independent retro-rocket
+    ($\Delta v = 200$\,m/s), parachute + airbag landing
+  \item \textbf{Ejection envelope}: Can separate from vehicle at
+    any altitude from ground to orbit; works in atmosphere (aerodynamic
+    drag deceleration) and space (retro-rockets)
+  \item \textbf{Radiation shielding}: Capsule shielded against reactor
+    accident radiation dose; crew dose $< 250$\,mGy for 72-hour stay
+    after LOCA
+  \item \textbf{Initiation}: Manual (crew) or automatic (triggered by
+    quench protection activation, structural failure sensor, or
+    loss of cabin pressure); $< 500$\,ms from initiation to separation
+  \item \textbf{Vehicle separation distance}: Capsule retro-rockets
+    provide $\geq 200$\,m separation within 5\,s, placing crew
+    beyond structural fragment range
+\end{itemize}
+
+\subsection{Controlled Crash Landing Procedures}
+
+If power is lost in atmosphere at low altitude (insufficient time
+for crew capsule ejection):
+
+\begin{enumerate}
+  \item Immediate: All non-essential loads shed; all available power
+    to retro-rockets
+  \item $t + 0$--$5$\,s: Vehicle auto-orients to maximise retro-thrust
+    vector against gravity
+  \item $t + 5$\,s: If altitude $> 5000$\,m, crew capsule ejects
+  \item $t + 5$\,s: If altitude $< 5000$\,m, \textit{vehicle} deploys
+    drag surface (variable-geometry delta-wing panels folded for normal
+    flight, deployed for emergency landing)
+  \item $t + 30$\,s: If below $3000$\,m, vehicle parachute system deploys
+    (main + drogue, rated for vehicle mass)
+  \item $t + 60$\,s: Airbag impact attenuators inflate to protect reactor
+    containment on ground contact
+  \item On ground: Reactor emergency SCRAM confirmed; containment
+    integrity check; emergency locator transmitter activates
+\end{enumerate}
+
+\subsection{Emergency Locator and Communication}
+
+\begin{itemize}
+  \item 406\,MHz ELT (Emergency Locator Transmitter), Cospas-Sarsat
+    compatible, activated on impact or manual trigger
+  \item Backup HF communication: 5--30\,MHz emergency frequencies,
+    independent of main communication system
+  \item GNSS tracking: Independent from main navigation; battery backup
+    $> 120$\,h
+  \item Crew survival kit: 7-day supply, designed for polar/maritime
+    environments given likely test sites
+\end{itemize}
+
+%=============================================================================
+\section{Consolidated Risk Matrix}
+\label{sec:risk}
+%=============================================================================
+
+\begin{longtable}{p{0.06\tw}p{0.22\tw}p{0.06\tw}p{0.06\tw}p{0.06\tw}p{0.06\tw}p{0.06\tw}p{0.30\tw}}
+\toprule
+\textbf{ID} & \textbf{Failure Mode} &
+\textbf{Sev} & \textbf{Prob} & \textbf{Det} &
+\textbf{RPN} & \textbf{Risk} & \textbf{Key Mitigation} \\
+\midrule
+\endhead
+FM-01 & Superconductor quench &
+  \Scrit{10} & 6 & 8 &
+  \Smed{40$^*$} & MED &
+  3-layer RF+heater+dump system \\
+FM-02 & Ferrite fracture &
+  \Scrit{9} & 4 & 6 &
+  \Smed{60$^*$} & MED &
+  Composite tile + containment vessel \\
+FM-03 & Cryogenic failure &
+  9 & 2 & 9 &
+  \Slow{36} & LOW &
+  2N cryoplant + He reserve \\
+FM-04 & RF feed failure &
+  7 & 4 & 9 &
+  \Slow{56} & LOW &
+  N+1 RF chains + circulator + dump \\
+FM-05 & Control failure &
+  7 & 3 & 8 &
+  \Slow{63} & LOW &
+  TMR computing + fail-safe default \\
+FM-06 & Reactor SCRAM &
+  8 & 3 & 10 &
+  \Slow{24} & LOW &
+  Flywheel UPS + passive safe reactor \\
+FM-07 & Asymmetric quench &
+  \Scrit{10} & 4 & 7 &
+  \Smed{20$^*$} & MED &
+  Sector-resolved detection + full dump \\
+FM-08 & Power bus failure &
+  8 & 2 & 9 &
+  \Slow{32} & LOW &
+  Dual bus + independent safety UPS \\
+FM-09 & Multiple simultaneous &
+  \Scrit{10} & 2 & 5 &
+  \Smed{120} & MED &
+  FTA; physical separation; containment \\
+\bottomrule
+\multicolumn{8}{l}{\small $^*$ RPN shown post-mitigation. Pre-mitigation
+  FM-01 = 180, FM-07 = 160 (HIGH). Mitigation is mandatory before operation.} \\
+\end{longtable}
+
+%=============================================================================
+\section{Open Safety Issues Requiring Resolution Before TRL 4}
+\label{sec:open}
+%=============================================================================
+
+The following safety issues are identified as blocking for progression
+to prototype testing. They require experimental data or design closure
+before TRL 4 (Technology Demonstration) can be claimed:
+
+\begin{enumerate}
+  \item \textbf{Quench propagation velocity in the shell geometry}: The
+    DFD shell is not a solenoid or dipole magnet; $v_q$ in a large-area
+    spheroidal shell has not been measured. Required: measurement of $v_q$
+    in prototype shell segments. Critical for setting quench heater spacing.
+
+  \item \textbf{Ferrite fracture toughness under combined EM + cryogenic
+    loading}: No data exists for ferrite at 4\,K under combined magnetic
+    and mechanical stress at the proposed operating conditions. Required:
+    cryogenic mechanical testing of candidate ferrite grades.
+
+  \item \textbf{Psi-field effect on neutron cross-sections}: A potential
+    $\pm 1\%$ $k_{\rm eff}$ variation from psi-field has been identified
+    as bounding assumption (Section~\ref{sec:psi_nuclear}). Required:
+    dedicated experiment measuring neutron multiplication in a sub-critical
+    assembly as a function of local psi-field amplitude.
+
+  \item \textbf{Asymmetric quench dynamics timing}: The 2\,ms window
+    identified for FM-07 mitigation must be validated by simulation and
+    experiment. If quench propagation is faster than modelled, the
+    mitigation strategy must be revised.
+
+  \item \textbf{EM leakage from ferrite layer during full-energy operation}:
+    Order-of-magnitude estimate above needs detailed EM simulation with
+    as-built ferrite properties.
+
+  \item \textbf{Psi-field gradient uniformity inside crew compartment}:
+    Mapping the internal psi-field distribution at operating conditions
+    is required to confirm differential crew acceleration is within
+    physiological limits.
+\end{enumerate}
+
+%=============================================================================
+\section{Recommended Safety Programme}
+\label{sec:programme}
+%=============================================================================
+
+\subsection{Phase Gating}
+
+\begin{longtable}{p{0.10\tw}p{0.18\tw}p{0.62\tw}}
+\toprule
+\textbf{TRL} & \textbf{Safety Gate} & \textbf{Required Evidence} \\
+\midrule
+\endhead
+3 & Laboratory demo & QPS hardware demonstrated on prototype shell segment;
+  quench detected and energy dumped within 100\,ms \\
+4 & Component demo & Ferrite fracture tests at 4\,K completed; FM-07 timing
+  validated; psi-nuclear experiment data available \\
+5 & Subscale system & Full quench protection on subscale vehicle ($\sim 1$\,m,
+  kJ energy); reactor SCRAM abort tested in ground rig \\
+6 & System prototype & Full-scale quench protection on engineering model;
+  abort procedures rehearsed; regulatory pre-application filed \\
+7 & Operational demo & All FM-01 through FM-09 mitigations demonstrated
+  on flight article; crew escape system tested \\
+\bottomrule
+\end{longtable}
+
+\subsection{Safety Verification Plan}
+
+For each failure mode (FM-01 to FM-09), the following verification
+activities are required before operational clearance:
+
+\begin{itemize}[nosep]
+  \item \textbf{Analysis}: Physics-based models predicting failure onset,
+    propagation, and damage
+  \item \textbf{Simulation}: Numerical (FEA, CFD, MHD) models validated
+    against test data
+  \item \textbf{Test}: Deliberate fault injection tests on test articles
+    (not flight hardware) at subscale and full scale
+  \item \textbf{Review}: Independent review board (IRB) sign-off
+    on each mitigation strategy before progression
+\end{itemize}
+
+%=============================================================================
+\section{Conclusions}
+%=============================================================================
+
+The DFD psi-bubble propulsion vehicle presents a safety challenge
+unprecedented in transport engineering. The combination of:
+(1)~gigajoule electromagnetic energy storage in brittle superconducting
+ceramics, (2)~nuclear power, (3)~superfluid cryogenic systems, and
+(4)~active gravitational field modification creates a multi-dimensional
+hazard landscape where standard aerospace or nuclear safety frameworks
+are insufficient alone.
+
+The following primary conclusions are reached:
+
+\begin{enumerate}
+  \item \textbf{The quench protection system is the single most critical
+    safety element.} A three-layer architecture (RF dump $<10$\,ms,
+    quench heaters $\leq 100$\,ms, resistive dump bank) can maintain
+    peak hot-spot temperature $\leq 300$\,K for a 1\,GJ quench, making
+    the vehicle survivable.
+
+  \item \textbf{Asymmetric quench (FM-07) is the most dangerous failure
+    mode unique to psi-bubble propulsion.} It must be prevented by
+    sector-resolved quench detection ($< 1$\,ms response) and immediate
+    full-shell dump on any asymmetry detection. This is the primary
+    driver of detection system design.
+
+  \item \textbf{The psi field itself is not a primary external hazard.}
+    Tidal forces on bystanders and structures are negligible at $> 10$\,m
+    range for $\leq 1$\,g acceleration. Weaponisation via psi-field
+    projection is physically implausible at vehicle-scale energy budgets.
+
+  \item \textbf{Nuclear reactor safety is manageable with proven SMR
+    technology.} The psi-nuclear coupling uncertainty (potential
+    $\pm 1\%$ $k_{\rm eff}$ variation) must be bounded experimentally
+    before reactor operation within the psi-bubble.
+
+  \item \textbf{No existing regulatory category applies.} A new
+    framework is required; engagement with FAA AST, NRC, and ITAR
+    authorities must begin at TRL 3--4, not at operational readiness.
+
+  \item \textbf{Six open safety issues block TRL 4 progression.}
+    These are tractable with focused experimental programmes; none
+    requires new theoretical breakthroughs. Estimated programme
+    cost to resolve: 2--3 years, \$50--150M in dedicated safety R\&D.
+\end{enumerate}
+
+The DFD psi-bubble is not inherently unsafe. Every identified
+failure mode has a credible mitigation strategy grounded in
+existing engineering practice (LHC quench protection, SMR safety,
+aerospace abort systems). The challenge is integration: all mitigations
+must work simultaneously, under mutual interference, in an extreme
+multi-hazard environment. This demands a dedicated, well-resourced
+safety programme from the earliest design stages, not as an afterthought.
+
+%=============================================================================
+\appendix
+\section{Acronym and Symbol Reference}
+%=============================================================================
+
+\begin{longtable}{p{0.15\tw}p{0.75\tw}}
+\toprule
+\textbf{Term} & \textbf{Definition} \\
+\midrule
+\endhead
+DFD & Density Field Dynamics \\
+EMC & Electromagnetic Compatibility \\
+ELT & Emergency Locator Transmitter \\
+FMEA & Failure Mode and Effects Analysis \\
+FTA & Fault Tree Analysis \\
+GJ & Gigajoule ($10^9$ J) \\
+HEMP & High-altitude Electromagnetic Pulse \\
+ICNIRP & International Commission on Non-Ionizing Radiation Protection \\
+ITAR & International Traffic in Arms Regulations \\
+LHC & Large Hadron Collider \\
+LOCA & Loss of Coolant Accident \\
+MJ & Megajoule ($10^6$ J) \\
+NDE & Non-Destructive Evaluation \\
+NRC & US Nuclear Regulatory Commission \\
+ODH & Oxygen Deficiency Hazard \\
+QPS & Quench Protection System \\
+RPN & Risk Priority Number \\
+SCRAM & Safety Control Rod Axe Man (reactor emergency shutdown) \\
+SIL & Safety Integrity Level \\
+SMR & Small Modular Reactor \\
+SRF & Superconducting Radio Frequency \\
+TMR & Triple-Modular Redundant \\
+TRL & Technology Readiness Level \\
+UPS & Uninterruptible Power Supply \\
+$J_c$ & Critical current density of superconductor \\
+$T_c$ & Critical temperature of superconductor \\
+$v_q$ & Quench propagation velocity \\
+$\psi$ & DFD scalar density field \\
+$\lambda$ & EM--psi back-reaction coupling parameter \\
+\bottomrule
+\end{longtable}
+
+\end{document}

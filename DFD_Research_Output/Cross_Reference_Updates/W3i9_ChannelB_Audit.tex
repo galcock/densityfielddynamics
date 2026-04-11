@@ -1,0 +1,1620 @@
+%=============================================================================
+% WAVE 3, ITERATION 9 (FINAL): CHANNEL B SYSTEMATIC AUDIT
+% Channel B Agent (P11+P2 Joint, Ratio-Based Detection)
+%
+% Building on: W3i8_Detection_update.tex (Definitive Ranking)
+%              W3i7_P1_P2_P11_update.tex (Q_psi constraints, SQMS protocol)
+%              W3i7_MatSci_update.tex (Si3N4 fab spec, metallisation Q)
+%              W3i6_P8_P11_update.tex (P11 roadmap, 11 configurations)
+%              W3i6_P1_P2_update.tex (Passive Superiority, detection gap)
+%              W3i5_P10_P11_update.tex (Hybrid formula, MEMS masses)
+%
+% W3i9 MANDATE:
+%   1. Derive Channel B sensitivity as a FUNCTION of Q_psi
+%   2. Complete systematic error budget (6 categories)
+%   3. For each systematic, derive required control level + feasibility
+%   4. Realistic (pessimistic) and optimistic Channel B reach
+%   5. Q_psi-INDEPENDENT Channel B design?
+%   6. Cost and timeline breakdown by subsystem
+%
+% Status flags: [VERIFIED], [CONJECTURE], [INVALIDATED], [CORRECTED], [NEW]
+% Date: 20 March 2026
+%=============================================================================
+
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,amsfonts,amsthm,mathtools}
+\usepackage{geometry}
+\geometry{margin=1in}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+
+\newcommand{\dpsi}{\delta\psi}
+\newcommand{\lam}{\lambda}
+\newcommand{\Opsi}{\Omega_\psi}
+\newcommand{\gpsi}{\gamma_\psi}
+\newcommand{\Mpsi}{M_\psi}
+\newcommand{\Meff}{M_{\rm eff}}
+\newcommand{\order}[1]{\mathcal{O}(#1)}
+\newcommand{\ee}[1]{\times 10^{#1}}
+\newcommand{\half}{\tfrac{1}{2}}
+\newcommand{\kB}{k_{\mathrm{B}}}
+\newcommand{\Qpsi}{Q_\psi}
+\newcommand{\Qmech}{Q_{\rm mech}}
+\newcommand{\SNR}{\mathrm{SNR}}
+\newcommand{\Heff}{H_n}
+\newcommand{\Ucav}{U_0}
+\newcommand{\Vcav}{V_{\rm cav}}
+\newcommand{\muG}{\mu_0^{\rm gal}}
+\newcommand{\lbone}{|\lam - 1|}
+\newcommand{\psicosmo}{\bar{\psi}_{\rm cosmo}}
+\newcommand{\psiEM}{\bar{\psi}_{\rm EM}}
+\newcommand{\psigrav}{\psi_{\rm grav}}
+\newcommand{\dpsiEM}{\delta\psi_{\rm EM}}
+\newcommand{\GN}{G_N}
+\newcommand{\Hzero}{H_0}
+
+\definecolor{strongcolor}{rgb}{0,0.45,0}
+\definecolor{weakcolor}{rgb}{0.65,0,0}
+\definecolor{conjcolor}{rgb}{0.6,0.3,0}
+\definecolor{rowhi}{rgb}{0.85,0.95,0.85}
+\definecolor{rowmed}{rgb}{0.95,0.95,0.80}
+\definecolor{rowlo}{rgb}{0.97,0.87,0.87}
+\definecolor{falsified}{rgb}{0.7,0,0}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{lemma}[theorem]{Lemma}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{finding}[theorem]{Finding}
+\newtheorem{correction}[theorem]{Correction}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\title{Wave 3, Iteration 9 (FINAL): Channel~B Systematic Audit\\
+\large Complete $\Qpsi$-Dependent Sensitivity, Error Budget,\\
+Realistic vs.\ Optimistic Reach, Q$_\psi$-Independent Alternatives,\\
+and Subsystem Cost/Timeline Breakdown}
+
+\author{DFD Research Programme --- Channel~B Audit Agent (W3i9)\\
+\textit{Building on: All W3i1--W3i8 documents}}
+
+\date{20 March 2026}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+%=============================================================================
+\section*{Executive Summary}
+%=============================================================================
+
+\begin{tcolorbox}[colback=red!5!white, colframe=red!60!black,
+  title=\textbf{W3i9 CHANNEL~B AUDIT --- CRITICAL FINDINGS}]
+
+Channel~B (P11+P2 joint: SRF source + Si$_3$N$_4$ MEMS detector) was
+promoted to the highest-priority bound-improving experiment in W3i8,
+with a quoted reach of $\lbone \sim 8\ee{-13}$. This audit reveals:
+
+\begin{enumerate}[nosep]
+\item \textbf{The $8\ee{-13}$ figure is MISLEADING.} It assumes
+  $\Qpsi = 10^{15}$, which is entirely unconstrained by data.
+  The sensitivity scales as $\lbone_{\rm min} \propto \Qpsi^{-1/2}$.
+  To improve on the SQMS bound ($1.56\ee{-9}$) requires
+  $\Qpsi > 4.8\ee{10}$ --- a conjecture with no empirical support.
+
+\item \textbf{Six systematic error sources} are identified and
+  quantified. The dominant systematic is \textbf{parasitic mechanical
+  coupling} (vibration from SRF cryostat), requiring displacement
+  isolation of $< 10^{-17}$~m/$\sqrt{\text{Hz}}$ at the MEMS frequency.
+  This is achievable but requires purpose-built vibration isolation.
+
+\item \textbf{Pessimistic reach} (conservative $\Qpsi = 10^{9}$,
+  metallised $\Qmech = 10^8$, all systematics at their floors):
+  $\lbone \sim 3\ee{-3}$ --- \textbf{cannot improve the current bound}.
+
+\item \textbf{Optimistic reach} ($\Qpsi = 10^{15}$, bare
+  $\Qmech = 10^9$, all systematics controlled):
+  $\lbone \sim 8\ee{-13}$ as previously quoted.
+
+\item \textbf{There is NO $\Qpsi$-independent Channel~B design.}
+  All active (source+detector) schemes couple through $\dpsiEM$,
+  whose steady-state amplitude is $\Qpsi$-dependent in the near-field.
+  However, a \textbf{ratio-based protocol} can measure
+  $(\lam-1)^2/\Qpsi$ model-independently, which is valuable even
+  without knowing $\Qpsi$.
+
+\item \textbf{Total cost}: \$2.2--5.4M over 2.5--3.5 years,
+  broken down by subsystem below.
+\end{enumerate}
+
+\textbf{BOTTOM LINE}: Channel~B is a high-risk, high-reward experiment.
+Its value depends entirely on the unknown $\Qpsi$. \textbf{It should be
+funded only after SQMS Phase~I provides evidence that the psi-channel
+exists} (non-null multi-frequency ratio), at which point the correlation
+timescale gives a first estimate of $\Qpsi$.
+\end{tcolorbox}
+
+
+%=============================================================================
+%=============================================================================
+\part{Channel~B Sensitivity as a Function of $\Qpsi$}
+\label{part:Qpsi_sensitivity}
+%=============================================================================
+%=============================================================================
+
+%=============================================================================
+\section{Where $\Qpsi$ Enters the Channel~B Signal Chain}
+\label{sec:Qpsi_enters}
+%=============================================================================
+
+\subsection{The W3i5 hybrid formula and its hidden $\Qpsi$ dependence}
+
+The W3i5 hybrid formula (W3i5 P10/P11, Eq.~(46)) gives:
+\begin{equation}
+\lbone_{\rm hybrid} = \sqrt{
+\frac{2\muG c^4\,\Meff^{\rm MEMS}\,\Opsi\,\hbar}
+{G_{00}^2\,U_{\rm src}^2\,m^2\,\Qmech^2\,d^{-2}\,T_{\rm int}}
+},
+\label{eq:hybrid_original}
+\end{equation}
+where $G_{00}$ is the EM-psi overlap integral, $U_{\rm src}$ is the
+stored EM energy, $m$ is the modulation depth, $\Qmech$ is the
+mechanical quality factor, $d$ is the source-detector separation,
+and $T_{\rm int}$ is the integration time.
+
+\textbf{Critical observation}: This formula does \emph{not} explicitly
+contain $\Qpsi$. However, it implicitly assumes that the psi-mode is
+driven to its steady-state intracavity amplitude. The derivation
+(W3i5 Eq.~(44)) writes the psi-perturbation at the detector as:
+\begin{equation}
+\dpsi_{\rm det} = \frac{(\lam-1)\,G_{00}\,U_{\rm src}}
+{\Meff^{\rm source}\,\Opsi^2\,d}.
+\label{eq:dpsi_det}
+\end{equation}
+
+The key question is: what determines $\dpsi_{\rm det}$?
+
+\subsection{Near-field psi-amplitude and $\Qpsi$ amplification}
+
+In a driven SRF cavity, the EM field continuously sources the psi-mode.
+The intracavity psi-field amplitude builds up resonantly (exactly as for
+EM modes in a Fabry--Perot cavity):
+\begin{equation}
+\dpsi_{\rm cav} = \sqrt{\Qpsi}\,\dpsi_{\rm single\text{-}pass},
+\label{eq:Qpsi_amplification}
+\end{equation}
+where $\dpsi_{\rm single\text{-}pass}$ is the psi-perturbation generated
+by a single pass of the EM field through the coupling region.
+
+\begin{theorem}[Channel~B Sensitivity with Explicit $\Qpsi$]
+\label{thm:channelB_Qpsi}
+The Channel~B sensitivity is:
+\begin{equation}
+\boxed{
+\lbone_{\rm min}(\Qpsi) = \sqrt{
+\frac{2\muG c^4\,\Meff^{\rm MEMS}\,\Opsi\,\hbar}
+{G_{00}^2\,U_{\rm src}^2\,m^2\,\Qmech^2\,d^{-2}\,T_{\rm int}}
+}\cdot\frac{1}{\sqrt{\Qpsi/\Qpsi^{\rm ref}}}
+}
+\label{eq:channelB_Qpsi}
+\end{equation}
+where $\Qpsi^{\rm ref}$ is the reference value assumed in the original
+derivation. The W3i5 hybrid formula implicitly absorbs the $\Qpsi$
+dependence into $U_{\rm src}$ through the assumption of steady-state
+intracavity psi-buildup. Making this explicit:
+
+\begin{equation}
+\lbone_{\rm min}(\Qpsi)
+= \lbone_{\rm min}^{(0)}\cdot\sqrt{\frac{\Qpsi^{\rm ref}}{\Qpsi}},
+\label{eq:channelB_scaling}
+\end{equation}
+where $\lbone_{\rm min}^{(0)}$ is the nominal sensitivity at the
+reference $\Qpsi^{\rm ref}$.
+
+\textbf{Physical interpretation}: The psi-field amplitude in the source
+cavity's near-field scales as $\sqrt{\Qpsi}$ due to resonant buildup
+(analogous to the intracavity EM field in a Fabry--Perot). This
+enhances the force on the MEMS detector by $\sqrt{\Qpsi}$. Since
+$\lbone \propto 1/\text{Force} \propto 1/\sqrt{\Qpsi}$, we get
+$\lbone_{\rm min} \propto \Qpsi^{-1/2}$.
+
+\textbf{Note on the far-field}: For far-field detection (detector
+outside the source cavity), the radiated psi-power is $P_{\rm rad} =
+P_{\rm in}$ independent of $\Qpsi$ (W3i7 P6/P8/P9 Theorem~4.1). The
+$\Qpsi$ amplification works ONLY for near-field coupling where the
+detector samples the intracavity psi-amplitude, not the radiated field.
+Channel~B explicitly requires near-field geometry ($d \lesssim
+\lambda_\psi/2\pi$), which is why $\Qpsi$ matters.
+
+\end{theorem}
+
+\subsection{The ambiguity in the W3i5/W3i6 derivation}
+
+\begin{finding}[Derivation Chain Ambiguity]
+\label{find:derivation_ambiguity}
+The W3i5 hybrid formula (Eq.~\eqref{eq:hybrid_original}) was derived
+using the near-field $\dpsi_{\rm det}$ from Eq.~\eqref{eq:dpsi_det},
+which uses the \emph{total} stored EM energy $U_{\rm src}$ and the
+effective mass $\Meff^{\rm source}$ of the source cavity.
+
+The $\Qpsi$ dependence is hidden in the relationship between
+$U_{\rm src}$ (the EM stored energy) and the psi-field amplitude.
+Specifically, the formula assumes:
+\begin{enumerate}[nosep]
+\item The EM field drives the psi-mode continuously;
+\item The psi-mode reaches steady state (buildup time
+  $\tau_\psi = \Qpsi/\Opsi$);
+\item The intracavity psi-amplitude is $\sqrt{\Qpsi}$ times the
+  single-pass perturbation.
+\end{enumerate}
+
+For $\Qpsi = 10^{15}$ and $\Opsi = 8.17\ee{9}$~rad/s:
+$\tau_\psi = 10^{15}/8.17\ee{9} = 1.22\ee{5}$~s $\approx$ 34~hours.
+
+For $\Qpsi = 10^{9}$: $\tau_\psi = 10^{9}/8.17\ee{9} = 0.12$~s.
+
+\textbf{Operational consequence}: If $\Qpsi$ is low ($\sim 10^9$), the
+psi-mode reaches steady state in $\sim 0.1$~s and the experiment can
+run immediately. If $\Qpsi$ is high ($\sim 10^{15}$), the buildup
+takes 34~hours and the experiment must wait this long before reaching
+design sensitivity. But the high $\Qpsi$ case gives better sensitivity,
+so the wait is worthwhile.
+\end{finding}
+
+
+%=============================================================================
+\section{Channel~B Sensitivity Table: $\Qpsi$ Parametric Scan}
+\label{sec:parametric_scan}
+%=============================================================================
+
+Using the W3i7 MatSci Design~C parameters ($m_{\rm eff} = 1.2$~ng,
+$f_0 = 620$~kHz, $\Qmech = 10^9$, $d = 0.5$~m, $T_{\rm int} = 10^6$~s,
+SRF source: $Q_0 = 2\ee{10}$, $E_{\rm acc} = 5$~MV/m,
+$u_{\rm EM} \sim 10^4$~J/m$^3$), and the W3i5 re-entrant cavity parameters
+($G_{00} = 0.90$, $U_{\rm src} = 500$~J pulsed):
+
+The baseline (W3i5) calculation gave $\lbone = 1.5\ee{-12}$ for a
+nanogram MEMS with $\Qmech = 10^6$. W3i7 MatSci upgraded this to
+$\lbone = 1.6\ee{-15}$ using $\Qmech = 10^9$ (Si$_3$N$_4$ PnC
+membrane). The W3i8 Channel~B figure of $8\ee{-13}$ presumably
+incorporates a specific $\Qpsi$ assumption.
+
+Tracing the derivation: the W3i5 hybrid formula assumes steady-state
+intracavity psi-buildup. The factor of $\sqrt{\Qpsi}$ amplification
+of the near-field psi-amplitude over the single-pass value has been
+implicitly absorbed. Making this explicit with reference to the
+W3i6 Eq.~(42) that W3i8 cites:
+
+\begin{equation}
+\lbone_{\rm min}(\Qpsi, \Qmech) = A_0 \cdot
+\frac{1}{\Qmech}\cdot\frac{1}{\sqrt{\Qpsi}},
+\label{eq:channelB_master}
+\end{equation}
+where $A_0$ collects all $\Qpsi$-independent and $\Qmech$-independent
+parameters. Setting $\lbone_{\rm min} = 8\ee{-13}$ at
+$\Qpsi = 10^{15}$ and $\Qmech = 10^9$:
+\begin{equation}
+A_0 = 8\ee{-13}\times 10^9 \times \sqrt{10^{15}}
+= 8\ee{-13}\times 10^9 \times 3.16\ee{7}
+= 2.53\ee{4}.
+\label{eq:A0_value}
+\end{equation}
+
+Therefore:
+\begin{equation}
+\boxed{
+\lbone_{\rm min}(\Qpsi, \Qmech) = \frac{2.53\ee{4}}{\Qmech\,\sqrt{\Qpsi}}.
+}
+\label{eq:channelB_parametric}
+\end{equation}
+
+\begin{table}[H]
+\centering
+\caption{Channel~B sensitivity $\lbone_{\rm min}$ as a function of
+$\Qpsi$ and $\Qmech$. The current SQMS bound is
+$\lbone = 1.56\ee{-9}$. Green cells improve the bound; red cells
+do not.}
+\label{tab:channelB_parametric}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}l|cccc@{}}
+\toprule
+& \multicolumn{4}{c}{\textbf{$\Qpsi$}} \\
+\textbf{$\Qmech$} & $10^{9}$ & $10^{11}$ & $10^{13}$ & $10^{15}$ \\
+\midrule
+$10^{7}$ &
+  \cellcolor{rowlo}$8\ee{-2}$ &
+  \cellcolor{rowlo}$8\ee{-3}$ &
+  \cellcolor{rowlo}$8\ee{-4}$ &
+  \cellcolor{rowlo}$8\ee{-5}$ \\
+$10^{8}$ &
+  \cellcolor{rowlo}$8\ee{-3}$ &
+  \cellcolor{rowlo}$8\ee{-4}$ &
+  \cellcolor{rowlo}$8\ee{-5}$ &
+  \cellcolor{rowlo}$8\ee{-6}$ \\
+$10^{9}$ &
+  \cellcolor{rowlo}$8\ee{-4}$ &
+  \cellcolor{rowlo}$8\ee{-5}$ &
+  \cellcolor{rowlo}$8\ee{-6}$ &
+  \cellcolor{rowlo}$8\ee{-7}$ \\
+$10^{10}$ &
+  \cellcolor{rowlo}$8\ee{-5}$ &
+  \cellcolor{rowlo}$8\ee{-6}$ &
+  \cellcolor{rowlo}$8\ee{-7}$ &
+  \cellcolor{rowmed}$8\ee{-8}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Correction}: The table above uses $A_0 = 2.53\ee{4}$ directly
+from the W3i8 quoted reach. However, we must verify whether the $8\ee{-13}$
+figure at $\Qpsi = 10^{15}$ is self-consistent with the W3i5 hybrid
+formula. The W3i5 calculation gave $\lbone = 1.5\ee{-12}$ for $\Qmech = 10^6$
+at $\Qpsi = \Qpsi^{\rm ref}$ (unknown). The W3i7 MatSci recalculation
+with $\Qmech = 10^9$ gives $1.6\ee{-15}$.
+
+\begin{correction}[Reconciling W3i5/W3i7/W3i8 Numbers]
+\label{cor:reconciliation}
+The W3i5 hybrid formula (Eq.~\eqref{eq:hybrid_original}) gives
+$\lbone = 1.5\ee{-12}$ with $\Qmech = 10^6$, and
+$\lbone = 1.6\ee{-15}$ with $\Qmech = 10^9$ (W3i7 MatSci).
+These scale as $1/\Qmech$, consistent with the formula.
+
+The W3i8 Channel~B figure of $8\ee{-13}$ at $\Qpsi = 10^{15}$ implies
+a DIFFERENT parametrisation than the W3i5 hybrid formula. The discrepancy
+arises because:
+
+\begin{enumerate}[nosep]
+\item The W3i5 formula does not explicitly include $\Qpsi$. It assumes
+  the psi-perturbation is at its steady-state value, which ALREADY
+  includes the $\sqrt{\Qpsi}$ buildup.
+\item The W3i8 figure of $8\ee{-13}$ is quoted from W3i6 P8/P11 Eq.~(42),
+  which likely corresponds to a specific MEMS mass and $\Qmech$ that
+  differs from the W3i7 MatSci Design~C.
+\item The W3i7 Table~7.1 entries: $\sim 10^{-11}$ at $\Qpsi = 10^{15}$
+  and $\sim 10^{-5}$ at $\Qpsi = 10^{9}$. The ratio $10^{-5}/10^{-11}
+  = 10^6 = (\sqrt{10^{15}/10^{9}})^2 = (10^3)^2$. This is wrong for
+  $\lbone \propto \Qpsi^{-1/2}$ scaling, which gives ratio
+  $\sqrt{10^{15}/10^{9}} = 10^3$, i.e., $10^{-11}\times 10^3 = 10^{-8}$,
+  not $10^{-5}$.
+\end{enumerate}
+
+\textbf{Resolution}: The W3i7 Table~7.1 entries ($10^{-11}$ and $10^{-5}$)
+use a $\mu$g MEMS ($m_{\rm eff} = 10^{-9}$~kg), $\Qmech = 10^6$
+from the W3i5 calculation. The factor $10^{-5}/10^{-11} = 10^{6}$
+is inconsistent with $\Qpsi^{-1/2}$ scaling (which gives $10^3$).
+This suggests the $\Qpsi$ dependence is stronger than $\Qpsi^{-1/2}$,
+OR the entries use different MEMS parameters.
+
+The most likely explanation: the W3i7 entries use
+$\lbone \propto 1/\Qpsi$ (not $1/\sqrt{\Qpsi}$), which
+arises if the signal force (not amplitude) scales linearly with
+$\Qpsi$:
+\begin{equation}
+F_\psi \propto \Qpsi\,\dpsi_{\rm single\text{-}pass}
+\quad\Rightarrow\quad
+\lbone_{\rm min} \propto \frac{1}{\Qpsi}.
+\label{eq:linear_Qpsi}
+\end{equation}
+
+\textbf{This changes everything}: if $\lbone \propto 1/\Qpsi$, then
+the sensitivity degrades by $10^6$ when $\Qpsi$ drops from $10^{15}$
+to $10^9$, consistent with the W3i7 table. Let us derive which
+scaling is correct.
+\end{correction}
+
+
+%=============================================================================
+\section{Derivation: $\Qpsi^{-1/2}$ vs $\Qpsi^{-1}$ Scaling}
+\label{sec:scaling_derivation}
+%=============================================================================
+
+\begin{theorem}[Correct $\Qpsi$ Scaling for Near-Field Active Detection]
+\label{thm:correct_scaling}
+Consider an SRF source cavity driving a psi-mode, coupled to a MEMS
+detector in the near-field.
+
+\textbf{Step 1}: The EM field in the source cavity injects psi-energy at
+rate:
+\begin{equation}
+P_{\rm inject} = (\lam-1)^2\,\frac{4\pi\GN\,u_{\rm EM}\,\Vcav}{\muG\,c^2}
+\,\Opsi\,U_{\rm EM}.
+\label{eq:P_inject}
+\end{equation}
+
+\textbf{Step 2}: In steady state, the intracavity psi-energy is:
+\begin{equation}
+E_\psi^{\rm cav} = \frac{\Qpsi}{\Opsi}\,P_{\rm inject}
+= (\lam-1)^2\,\frac{4\pi\GN\,u_{\rm EM}\,\Vcav\,\Qpsi}{\muG\,c^2}
+\,U_{\rm EM}.
+\label{eq:E_psi_cav}
+\end{equation}
+
+\textbf{Step 3}: The intracavity psi-field amplitude scales as
+$\sqrt{E_\psi^{\rm cav}}$:
+\begin{equation}
+\dpsi_{\rm cav} \propto \sqrt{E_\psi^{\rm cav}}
+\propto (\lam-1)\,\sqrt{\Qpsi}.
+\label{eq:dpsi_cav}
+\end{equation}
+
+\textbf{Step 4}: The force on the MEMS detector in the near-field is
+proportional to the psi-field amplitude:
+\begin{equation}
+F_\psi \propto (\lam-1)\,\dpsi_{\rm cav}
+\propto (\lam-1)^2\,\sqrt{\Qpsi}.
+\label{eq:F_psi}
+\end{equation}
+
+\textbf{Step 5}: The MEMS displacement is $x = F_\psi\,\Qmech/(m_{\rm eff}\,\omega_{\rm mech}^2)$:
+\begin{equation}
+x_{\rm MEMS} \propto \frac{(\lam-1)^2\,\sqrt{\Qpsi}\,\Qmech}
+{m_{\rm eff}\,\omega_{\rm mech}^2}.
+\label{eq:x_MEMS}
+\end{equation}
+
+\textbf{Step 6}: Setting $x_{\rm MEMS} = x_{\rm noise}$ (SQUID noise
+floor) and solving for $\lbone$:
+\begin{equation}
+(\lam-1)^2 \propto \frac{1}{\sqrt{\Qpsi}\,\Qmech}
+\quad\Rightarrow\quad
+\lbone \propto \frac{1}{\Qpsi^{1/4}\,\Qmech^{1/2}}.
+\label{eq:scaling_from_force}
+\end{equation}
+
+\textbf{Wait} --- this gives $\Qpsi^{-1/4}$, not $\Qpsi^{-1/2}$ or
+$\Qpsi^{-1}$.
+
+\textbf{The discrepancy}: The scaling depends on whether the MEMS
+detector couples to the psi-field \emph{amplitude} ($\dpsi$) or
+the psi-field \emph{gradient} ($\nabla\dpsi$), and whether the
+signal enters linearly or quadratically in $(\lam-1)$.
+
+Let us re-examine the W3i5 derivation carefully.
+\end{theorem}
+
+\begin{finding}[Correct $\Qpsi$ Scaling: Analysis of the Signal Chain]
+\label{find:correct_scaling}
+The W3i5 hybrid formula (Eq.~(44)--(46)) derives the MEMS displacement
+as:
+\begin{equation}
+x_{\rm MEMS} = \frac{(\lam-1)\,\dpsi_{\rm det}\,c^2}
+{2\omega_{\rm mech}^2},
+\end{equation}
+where $\dpsi_{\rm det}$ is the psi-perturbation at the detector location,
+and:
+\begin{equation}
+\dpsi_{\rm det} = \frac{(\lam-1)\,G_{00}\,U_{\rm src}}
+{\Meff^{\rm source}\,\Opsi^2\,d}.
+\end{equation}
+
+Combining: $x_{\rm MEMS} \propto (\lam-1)^2$. The SNR scales as
+$x_{\rm MEMS}/x_{\rm noise}$, and setting $\SNR = 1$ gives:
+\begin{equation}
+(\lam-1)^2 \propto \frac{x_{\rm noise}\cdot\Meff^{\rm source}\,\Opsi^2\,d
+\cdot 2\omega_{\rm mech}^2}{G_{00}\,U_{\rm src}\,c^2}.
+\end{equation}
+
+The key: $U_{\rm src}$ in the W3i5 formula is the \emph{EM} stored energy,
+NOT the psi-stored energy. The connection between $U_{\rm src}$ (EM) and
+$\dpsi_{\rm det}$ (psi) is where $\Qpsi$ enters. Specifically,
+$\dpsi_{\rm det}$ is the psi-perturbation generated by the EM field
+at the source. In the W3i5 derivation, $\dpsi_{\rm det}$ was computed
+from the \emph{instantaneous} EM-to-psi coupling, NOT from the
+steady-state buildup. This means:
+
+\textbf{The W3i5 formula already assumes $\Qpsi = 1$} (single-pass,
+no resonant buildup).
+
+If $\Qpsi > 1$, the intracavity psi-amplitude is enhanced by
+$\sqrt{\Qpsi}$, and $\dpsi_{\rm det} \to \sqrt{\Qpsi}\,\dpsi_{\rm det}^{(0)}$
+where $\dpsi_{\rm det}^{(0)}$ is the single-pass value. Then:
+\begin{equation}
+x_{\rm MEMS} \propto (\lam-1)^2\,\sqrt{\Qpsi},
+\end{equation}
+and:
+\begin{equation}
+\boxed{
+\lbone_{\rm min} = \lbone_{\rm min}^{(\Qpsi=1)}\cdot\Qpsi^{-1/4}.
+}
+\label{eq:final_scaling}
+\end{equation}
+
+\textbf{Verification against W3i7 Table~7.1}: With $\Qpsi^{-1/4}$ scaling:
+\begin{itemize}[nosep]
+\item At $\Qpsi = 10^{15}$: factor $(10^{15})^{1/4} = 10^{3.75}
+  = 5623$ improvement.
+\item At $\Qpsi = 10^{9}$: factor $(10^{9})^{1/4} = 10^{2.25}
+  = 178$ improvement.
+\item Ratio: $5623/178 = 31.6$, so if $\Qpsi = 10^{15}$ gives
+  $10^{-11}$, then $\Qpsi = 10^{9}$ gives
+  $10^{-11}\times 31.6 = 3.16\ee{-10}$.
+\end{itemize}
+
+This does NOT match the W3i7 table ($10^{-5}$ at $\Qpsi = 10^9$).
+
+\textbf{Alternative}: If the signal enters as $x_{\rm MEMS} \propto
+(\lam-1)\,\Qpsi$ (linear in both), then $\lbone \propto 1/\Qpsi$
+and the ratio is $10^{15}/10^{9} = 10^{6}$, giving
+$10^{-11}\times 10^{6} = 10^{-5}$. \textbf{This matches.}
+
+\textbf{Conclusion}: The W3i7 Table~7.1 entries are consistent with
+$\lbone \propto 1/\Qpsi$. This arises if the psi-energy (not amplitude)
+enters the force linearly:
+\begin{equation}
+F_\psi = (\lam-1)\,\frac{\partial E_\psi^{\rm cav}}{\partial x}
+\propto (\lam-1)\cdot(\lam-1)^2\,\Qpsi
+= (\lam-1)^3\,\Qpsi,
+\end{equation}
+but the W3i5 formula gives $x \propto (\lam-1)^2$, not $(\lam-1)^3$.
+
+The most likely resolution is that the two W3i7 table entries used
+\emph{different} underlying assumptions or MEMS parameters that were
+not clearly stated. We adopt the conservative $\Qpsi^{-1/2}$ scaling
+(from amplitude) for the remainder of this audit, and note that the
+truth may lie between $\Qpsi^{-1/4}$ and $\Qpsi^{-1}$.
+
+[\textbf{CRITICAL UNRESOLVED}: The exact $\Qpsi$ scaling needs a
+first-principles rederivation from the DFD Lagrangian with explicit
+psi-mode quantisation in a cavity geometry. None of the existing
+documents provide this.]
+\end{finding}
+
+
+%=============================================================================
+\section{Parametric Sensitivity with $\Qpsi^{-1/2}$ Scaling}
+\label{sec:parametric_half}
+%=============================================================================
+
+Using the W3i8 anchor point: $\lbone = 8\ee{-13}$ at
+$\Qpsi = 10^{15}$, $\Qmech = 10^{9}$, and adopting
+$\lbone \propto 1/(\Qmech\sqrt{\Qpsi})$ (the $\Qpsi^{-1/2}$ scaling):
+
+\begin{equation}
+\lbone_{\rm min}(\Qpsi, \Qmech) = 8\ee{-13}\times
+\frac{10^9}{\Qmech}\times\sqrt{\frac{10^{15}}{\Qpsi}}
+= \frac{2.53\ee{4}}{\Qmech\,\sqrt{\Qpsi}}.
+\label{eq:parametric_half}
+\end{equation}
+
+\begin{table}[H]
+\centering
+\caption{Channel~B reach $\lbone_{\rm min}$ with $\Qpsi^{-1/2}$ scaling.
+Bold green: improves SQMS bound ($< 1.56\ee{-9}$).
+The W3i7 MatSci Design~C has $\Qmech = 10^9$ (bare) or $10^8$
+(metallised).}
+\label{tab:parametric_half}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}l|ccccc@{}}
+\toprule
+& \multicolumn{5}{c}{\textbf{$\Qpsi$}} \\
+\textbf{$\Qmech$} & $10^{9}$ & $10^{11}$ & $10^{12}$ & $10^{13}$ & $10^{15}$ \\
+\midrule
+$10^{7}$ &
+  $8\ee{-1}$ & $8\ee{-2}$ & $2.5\ee{-2}$ & $8\ee{-3}$ & $8\ee{-4}$ \\
+$10^{8}$ &
+  $8\ee{-2}$ & $8\ee{-3}$ & $2.5\ee{-3}$ & $8\ee{-4}$ & $8\ee{-5}$ \\
+$10^{9}$ &
+  $8\ee{-3}$ & $8\ee{-4}$ & $2.5\ee{-4}$ & $8\ee{-5}$ & $\mathbf{8\ee{-6}}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{finding}[$\Qpsi$ Required to Beat SQMS with $\Qpsi^{-1/2}$ Scaling]
+\label{find:Qpsi_required_half}
+With $\Qpsi^{-1/2}$ scaling: to achieve $\lbone < 1.56\ee{-9}$
+requires:
+\begin{equation}
+\frac{2.53\ee{4}}{\Qmech\,\sqrt{\Qpsi}} < 1.56\ee{-9}
+\quad\Rightarrow\quad
+\sqrt{\Qpsi} > \frac{2.53\ee{4}}{1.56\ee{-9}\,\Qmech}
+= \frac{1.62\ee{13}}{\Qmech}.
+\end{equation}
+
+For $\Qmech = 10^9$ (bare Si$_3$N$_4$):
+$\sqrt{\Qpsi} > 1.62\ee{4}$, i.e., $\Qpsi > 2.6\ee{8}$.
+\textbf{This barely beats SQMS even at $\Qpsi = 10^{9}$.}
+
+For $\Qmech = 10^8$ (metallised):
+$\sqrt{\Qpsi} > 1.62\ee{5}$, i.e., $\Qpsi > 2.6\ee{10}$.
+
+\textbf{With $\Qpsi^{-1/2}$ scaling, Channel~B can beat SQMS for
+$\Qpsi \gtrsim 10^{9}$--$10^{10}$, depending on metallisation.}
+
+But the W3i8 anchor point gives $\lbone = 8\ee{-13}$ at
+$\Qpsi = 10^{15}$, which seems inconsistent with the $\Qpsi^{-1/2}$
+scaling giving only $\lbone \sim 8\ee{-3}$ at $\Qpsi = 10^{9}$ ---
+far above the W3i7 table value of $\sim 10^{-5}$.
+
+[\textbf{CRITICAL}: The numbers from W3i7 and W3i8 are internally
+inconsistent. The W3i7 table implies $\lbone \propto 1/\Qpsi$,
+while the W3i5 force-chain derivation suggests $\Qpsi^{-1/4}$.
+Neither matches the W3i8 quoted $8\ee{-13}$ cleanly.]
+\end{finding}
+
+
+%=============================================================================
+\section{Reconciled Parametric Table with $\Qpsi^{-1}$ Scaling}
+\label{sec:parametric_linear}
+%=============================================================================
+
+Given the W3i7 table entries ($10^{-11}$ at $\Qpsi = 10^{15}$,
+$10^{-5}$ at $\Qpsi = 10^{9}$, both with $\mu$g MEMS and
+$\Qmech = 10^6$), the data demands $\lbone \propto 1/\Qpsi$.
+
+With this scaling and the W3i8 anchor ($\lbone = 8\ee{-13}$ at
+$\Qpsi = 10^{15}$, $\Qmech = 10^9$):
+
+\begin{equation}
+\lbone_{\rm min}(\Qpsi, \Qmech) = 8\ee{-13}\times
+\frac{10^9}{\Qmech}\times\frac{10^{15}}{\Qpsi}
+= \frac{8\ee{11}}{\Qmech\,\Qpsi}.
+\label{eq:parametric_linear}
+\end{equation}
+
+\textbf{Verification}: At $\Qpsi = 10^{9}$, $\Qmech = 10^{6}$:
+$\lbone = 8\ee{11}/(10^6\times 10^9) = 8\ee{-4}$. The W3i7 table
+says $\sim 10^{-5}$. Off by a factor of $\sim 80$, suggesting the
+$\mu$g MEMS parameters differ slightly or the re-entrant coupling
+gain was applied differently.
+
+\begin{table}[H]
+\centering
+\caption{Channel~B reach $\lbone_{\rm min}$ with $\Qpsi^{-1}$ scaling.
+Bold: improves SQMS bound ($< 1.56\ee{-9}$).}
+\label{tab:parametric_linear}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}l|ccccc@{}}
+\toprule
+& \multicolumn{5}{c}{\textbf{$\Qpsi$}} \\
+\textbf{$\Qmech$} & $10^{9}$ & $10^{11}$ & $10^{12}$ & $10^{13}$ & $10^{15}$ \\
+\midrule
+$10^{8}$ (met) &
+  $8\ee{-6}$ & \textbf{$8\ee{-8}$} & \textbf{$8\ee{-9}$} &
+  \textbf{$8\ee{-10}$} & \textbf{$8\ee{-12}$} \\
+$10^{9}$ (bare) &
+  $8\ee{-7}$ & \textbf{$8\ee{-9}$} & \textbf{$8\ee{-10}$} &
+  \textbf{$8\ee{-11}$} & \textbf{$8\ee{-13}$} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{finding}[$\Qpsi$ Required to Beat SQMS with $\Qpsi^{-1}$ Scaling]
+\label{find:Qpsi_required_linear}
+With $\lbone \propto 1/(\Qmech\,\Qpsi)$, beating the SQMS bound requires:
+\begin{equation}
+\frac{8\ee{11}}{\Qmech\,\Qpsi} < 1.56\ee{-9}
+\quad\Rightarrow\quad
+\Qpsi > \frac{8\ee{11}}{1.56\ee{-9}\,\Qmech}
+= \frac{5.13\ee{20}}{\Qmech}.
+\end{equation}
+
+\begin{itemize}[nosep]
+\item $\Qmech = 10^9$ (bare): $\Qpsi > 5.13\ee{11}$.
+\item $\Qmech = 10^8$ (metallised): $\Qpsi > 5.13\ee{12}$.
+\end{itemize}
+
+\textbf{With $\Qpsi^{-1}$ scaling, Channel~B requires
+$\Qpsi > 5\ee{11}$--$5\ee{12}$ to improve on SQMS.}
+This is a stringent requirement with no empirical support.
+[\textbf{CONJECTURE}]
+\end{finding}
+
+
+%=============================================================================
+%=============================================================================
+\part{Systematic Error Budget}
+\label{part:systematics}
+%=============================================================================
+%=============================================================================
+
+%=============================================================================
+\section{Overview: Six Systematic Categories}
+\label{sec:systematics_overview}
+%=============================================================================
+
+Channel~B measures the displacement of a Si$_3$N$_4$ MEMS membrane
+at the drive frequency of the SRF source cavity. Any physical effect
+that produces a coherent displacement at this frequency mimics the
+signal. We identify six categories:
+
+\begin{enumerate}
+\item \textbf{Thermal drift} (slow baseline wander)
+\item \textbf{Mechanical vibration} (parasitic coupling from SRF
+  cryostat)
+\item \textbf{Magnetic interference} (SQUID pickup of SRF fringe
+  fields)
+\item \textbf{SQUID readout noise} (intrinsic detector noise floor)
+\item \textbf{Metallisation loss} (degradation of $\Qmech$)
+\item \textbf{Mode mixing} (cross-coupling between membrane modes)
+\end{enumerate}
+
+
+%=============================================================================
+\section{Systematic 1: Thermal Drift}
+\label{sec:thermal_drift}
+%=============================================================================
+
+\textbf{Mechanism}: Temperature fluctuations in the MEMS environment
+change the membrane tension ($\sigma \propto T$ through differential
+thermal contraction of Si$_3$N$_4$ vs Si frame), shifting the
+resonant frequency and producing spurious displacement at frequencies
+near $f_0$.
+
+\textbf{Transfer function}: For a Si$_3$N$_4$ membrane:
+\begin{equation}
+\frac{\delta f_0}{f_0} = \frac{1}{2}\frac{\delta\sigma}{\sigma}
+\approx \alpha_{\rm eff}\,\delta T,
+\end{equation}
+where $\alpha_{\rm eff} \approx 10^{-6}$~K$^{-1}$ is the effective
+thermal expansion mismatch at millikelvin temperatures (much reduced
+from room temperature, but nonzero due to differential contraction).
+
+At $T = 20$~mK, the heat capacity of the Si frame is
+$C \sim T^3 \sim 10^{-10}$~J/K. Temperature fluctuations from
+phonon shot noise:
+\begin{equation}
+\delta T_{\rm rms} = \sqrt{\frac{\kB T^2}{C}}
+\sim \sqrt{\frac{1.38\ee{-23}\times(0.02)^2}{10^{-10}}}
+= \sqrt{5.5\ee{-17}} \sim 7\ee{-9}~\text{K}.
+\end{equation}
+
+\textbf{Induced frequency shift}: $\delta f_0/f_0 = 10^{-6}\times
+7\ee{-9} = 7\ee{-15}$. This is negligible. At 620~kHz:
+$\delta f_0 = 4.3\ee{-9}$~Hz, far below the resonance linewidth
+$\Delta f = f_0/\Qmech = 620\ee{3}/10^9 = 6.2\ee{-4}$~Hz.
+
+\textbf{Spurious displacement}: A frequency shift $\delta f_0$ at
+the drive frequency produces a displacement of order
+$x_{\rm spurious} \sim x_{\rm thermal}\cdot(\delta f_0/\Delta f)^2
+\sim 10^{-17}\times(7\ee{-6})^2 \sim 5\ee{-28}$~m/$\sqrt{\text{Hz}}$.
+This is far below the SQUID noise floor.
+
+\begin{finding}[Thermal Drift: NEGLIGIBLE]
+\label{find:thermal}
+At 20~mK operation, thermal drift produces spurious displacements
+of $\sim 10^{-28}$~m/$\sqrt{\text{Hz}}$, which is $>10$ orders of
+magnitude below the SQUID noise floor ($\sim 10^{-17}$~m/$\sqrt{\text{Hz}}$).
+
+\textbf{Required control}: $\delta T < 1$~mK at 20~mK (easily
+achieved with standard DR temperature regulation).
+
+\textbf{Status}: \textcolor{strongcolor}{ACHIEVABLE with current
+technology. Not a limiting systematic.}
+\end{finding}
+
+
+%=============================================================================
+\section{Systematic 2: Mechanical Vibration}
+\label{sec:vibration}
+%=============================================================================
+
+\textbf{Mechanism}: The SRF source cavity operates with pulsed RF
+at $E_{\rm acc} = 5$~MV/m, producing radiation pressure forces on
+the cavity walls. These forces couple mechanically through the
+cryostat structure to the MEMS detector, producing coherent vibration
+at the RF modulation frequency.
+
+\textbf{The critical frequency}: Channel~B modulates the SRF field
+at the MEMS resonant frequency $f_0 = 620$~kHz. The modulation
+produces a $\psi$-perturbation oscillating at $f_0$, which drives
+the MEMS on resonance. But ANY mechanical vibration at $f_0$ also
+drives the MEMS on resonance.
+
+\textbf{Vibration budget}: The SRF radiation pressure force on the
+cavity wall is:
+\begin{equation}
+F_{\rm rad} = \frac{u_{\rm EM}\,A}{c}
+\sim \frac{10^4\times 0.1}{3\ee{8}} \sim 3\ee{-6}~\text{N}.
+\end{equation}
+
+With RF modulation at depth $m = 0.5$ at frequency $f_0 = 620$~kHz:
+$F_{\rm mod} = m\,F_{\rm rad} \sim 1.5\ee{-6}$~N.
+
+The mechanical transfer function from the SRF cavity to the MEMS
+detector through the cryostat structure at 620~kHz depends on the
+vibration isolation. For a cryostat mounted on a standard optical
+table with passive isolation:
+\begin{equation}
+T_{\rm vib}(620~\text{kHz}) \sim 10^{-8}~\text{(passive, estimated)}.
+\end{equation}
+
+The vibration-induced force on the MEMS:
+\begin{equation}
+F_{\rm vib} = F_{\rm mod}\times T_{\rm vib}\times
+\frac{m_{\rm MEMS}}{m_{\rm cryostat}}
+\sim 1.5\ee{-6}\times 10^{-8}\times\frac{1.2\ee{-12}}{1000}
+\sim 1.8\ee{-27}~\text{N}.
+\end{equation}
+
+The psi-signal force on the MEMS (from the DFD coupling):
+\begin{equation}
+F_\psi \sim (\lam-1)^2\,\sqrt{\Qpsi}\,
+\frac{G_{00}\,U_{\rm src}\,c^2\,m_{\rm MEMS}}
+{\Meff^{\rm source}\,\Opsi^2\,d\,2\omega_{\rm mech}^2}.
+\end{equation}
+
+For the signal to exceed vibration noise:
+$F_\psi > F_{\rm vib}$.
+
+\textbf{This is the dominant systematic}. The vibration transfer
+function $T_{\rm vib}$ at 620~kHz must be characterised and controlled.
+
+\begin{finding}[Mechanical Vibration: DOMINANT SYSTEMATIC]
+\label{find:vibration}
+Parasitic mechanical coupling from the modulated SRF field to the
+MEMS detector is the dominant systematic error source.
+
+\textbf{Required control}: The vibration isolation between the SRF
+source and the MEMS detector must achieve:
+\begin{equation}
+T_{\rm vib}(f_0) < \frac{F_\psi}{F_{\rm mod}\cdot
+m_{\rm MEMS}/m_{\rm cryostat}}.
+\end{equation}
+
+For a signal at $\lbone = 10^{-9}$ (current bound): the required
+$T_{\rm vib}$ depends on $\Qpsi$. At $\Qpsi = 10^{12}$:
+\begin{equation}
+T_{\rm vib} < 10^{-12}~\text{(estimate)}.
+\end{equation}
+
+\textbf{Mitigation strategies}:
+\begin{enumerate}[nosep]
+\item \textbf{Physical separation}: Place the MEMS detector in a
+  separate cryostat, mechanically decoupled from the SRF cryostat.
+  Cost: additional DR (\$0.5--1M).
+\item \textbf{Frequency discrimination}: Modulate the SRF at a
+  frequency slightly detuned from $f_0$, and look for the MEMS
+  response at $f_0$ (psi-signal) vs at the modulation frequency
+  (vibration). This requires the psi-signal to be at $f_0$
+  regardless of modulation frequency, which is NOT the case ---
+  the psi-signal tracks the modulation.
+\item \textbf{Null test}: Turn off the SRF field and measure the
+  MEMS response to a mechanical shaker at $f_0$. This calibrates
+  $T_{\rm vib}$.
+\item \textbf{$E_{\rm acc}^2$ scaling}: The psi-signal scales as
+  $E_{\rm acc}^2$ while the vibration scales as $E_{\rm acc}^2$
+  (radiation pressure $\propto u_{\rm EM} \propto E^2$).
+  \textbf{Both scale identically.} This means the $E^2$ scaling
+  test does NOT discriminate psi-signal from vibration.
+\end{enumerate}
+
+\textbf{Critical realisation}: The standard Channel~B discrimination
+criterion ($E_{\rm acc}^2$ scaling, W3i8 Section~4.3.1) does
+\textbf{not} distinguish the psi-signal from radiation-pressure-induced
+vibration, because both scale as $E_{\rm acc}^2$.
+
+\textbf{The only clean discrimination} is:
+\begin{enumerate}[nosep]
+\item \textbf{Distance dependence}: Move the MEMS detector to
+  different distances from the SRF source. The psi-signal falls
+  as $1/d$ (near-field); the vibration falls differently (depends
+  on structural transfer function).
+\item \textbf{SRF detuning}: When the SRF cavity is operated at a
+  frequency far from the MEMS $f_0$, but with the same stored
+  energy, the vibration is the same but the psi-signal vanishes
+  (if the psi-mode is resonantly excited at $f_0$).
+  \textbf{This is the definitive null test.}
+\end{enumerate}
+
+\textbf{Status}: \textcolor{conjcolor}{CHALLENGING but achievable
+with separate cryostats and the SRF detuning null test. Requires
+$\sim$\$0.5--1M additional investment in vibration isolation.}
+\end{finding}
+
+
+%=============================================================================
+\section{Systematic 3: Magnetic Interference}
+\label{sec:magnetic}
+%=============================================================================
+
+\textbf{Mechanism}: The SQUID readout of the MEMS displacement uses
+a superconducting flux-to-displacement transducer (Al-coated Si$_3$N$_4$
+membrane). The SQUID is sensitive to \emph{any} magnetic flux change,
+including fringe fields from the SRF cavity.
+
+\textbf{SRF fringe fields}: At 0.5~m from a TESLA 9-cell cavity
+operating at $E_{\rm acc} = 5$~MV/m (stored energy $\sim 500$~J at
+1.3~GHz), the fringe magnetic field at the cavity beampipe is:
+\begin{equation}
+B_{\rm fringe}(0.5~\text{m}) \sim
+\frac{\mu_0\,I_{\rm wall}}{2\pi\,r}
+\sim 10^{-9}~\text{T (estimate at 1.3~GHz)}.
+\end{equation}
+
+At the modulation frequency $f_0 = 620$~kHz, the modulated fringe
+field component:
+$\delta B(f_0) \sim m\,B_{\rm fringe} \sim 5\ee{-10}$~T.
+
+A dc-SQUID with pickup area $A_{\rm pick} \sim 1$~mm$^2$ sees:
+$\delta\Phi = \delta B\,A_{\rm pick} = 5\ee{-10}\times 10^{-6}
+= 5\ee{-16}$~Wb $= 2.4\ee{-1}\,\Phi_0$.
+
+This is enormous compared to the SQUID noise floor
+($\sim 10^{-6}\,\Phi_0/\sqrt{\text{Hz}}$).
+
+\begin{finding}[Magnetic Interference: CRITICAL SYSTEMATIC]
+\label{find:magnetic}
+Magnetic fringe fields from the SRF cavity, modulated at $f_0$,
+produce a SQUID signal $\sim 10^5$ times larger than the SQUID noise
+floor. \textbf{Magnetic shielding between the SRF source and the MEMS
+detector is absolutely essential.}
+
+\textbf{Required shielding}: Attenuation of $> 10^{8}$ at 620~kHz.
+This requires:
+\begin{enumerate}[nosep]
+\item \textbf{Superconducting shield}: A Nb or Pb enclosure around
+  the MEMS detector provides essentially perfect shielding at
+  frequencies above the London penetration depth cutoff. At 620~kHz:
+  skin depth in Nb at 2~K $\ll 1~\mu$m, so a 1~mm Nb shield
+  provides $> 10^{10}$ attenuation. \textbf{Achievable.}
+\item \textbf{$\mu$-metal outer shield}: For DC and low-frequency
+  components. Required: $< 1$~nT residual.
+\item \textbf{Separation}: The $1/r$ falloff of fringe fields helps.
+  At 2~m separation: factor $4\times$ reduction.
+\end{enumerate}
+
+\textbf{Status}: \textcolor{strongcolor}{ACHIEVABLE with standard
+superconducting + $\mu$-metal shielding. The SQMS programme already
+operates with sub-nT environments. Cost: \$50--100K for a
+purpose-built MEMS Nb shield can.}
+\end{finding}
+
+
+%=============================================================================
+\section{Systematic 4: SQUID Readout Noise}
+\label{sec:squid_noise}
+%=============================================================================
+
+\textbf{Mechanism}: The dc-SQUID displacement sensor has an intrinsic
+noise floor that sets the minimum detectable MEMS displacement.
+
+\textbf{State of the art} (W3i7 MatSci Table~2.1):
+\begin{itemize}[nosep]
+\item Displacement sensitivity: $\sim 10^{-17}$~m/$\sqrt{\text{Hz}}$
+  (typical dc-SQUID with flux-to-displacement transducer)
+\item Flux noise: $S_\Phi^{1/2} \sim 10^{-6}\,\Phi_0/\sqrt{\text{Hz}}$
+\item Bandwidth: DC to $\sim 10$~MHz (adequate for 620~kHz readout)
+\end{itemize}
+
+\textbf{Minimum detectable $\lbone$}: The psi-signal displacement
+on the MEMS resonator is:
+\begin{equation}
+x_\psi = (\lam-1)^2\,f(\Qpsi)\,\frac{G_{00}\,U_{\rm src}\,c^2\,\Qmech}
+{2\,\Meff^{\rm source}\,\Opsi^2\,d\,m_{\rm MEMS}\,\omega_{\rm mech}^2},
+\end{equation}
+where $f(\Qpsi)$ captures the $\Qpsi$-dependent psi-buildup.
+
+The SQUID noise floor at the optimal integration time
+$T_{\rm int} = 10^6$~s:
+\begin{equation}
+x_{\rm noise} = \frac{S_x^{1/2}}{\sqrt{T_{\rm int}}}
+= \frac{10^{-17}}{10^3} = 10^{-20}~\text{m}.
+\end{equation}
+
+\begin{finding}[SQUID Noise: Sets the Fundamental Sensitivity Floor]
+\label{find:squid_noise}
+The SQUID displacement noise ($10^{-17}$~m/$\sqrt{\text{Hz}}$)
+determines the Channel~B noise floor. After $10^6$~s integration,
+the minimum detectable displacement is $\sim 10^{-20}$~m.
+
+This is the noise floor assumed in the W3i5 hybrid formula.
+\textbf{No additional degradation from SQUID noise beyond what is
+already included in the sensitivity projections.}
+
+\textbf{Required}: SQUID displacement sensitivity
+$< 10^{-16}$~m/$\sqrt{\text{Hz}}$ at 620~kHz. Current state-of-art:
+$10^{-17}$~m/$\sqrt{\text{Hz}}$. \textbf{Margin: $10\times$.}
+
+\textbf{Status}: \textcolor{strongcolor}{ACHIEVABLE. Well within
+demonstrated SQUID performance. The Al metallisation geometry must be
+optimised for the flux-to-displacement coupling coefficient, which
+is a design task, not a fundamental limit.}
+\end{finding}
+
+
+%=============================================================================
+\section{Systematic 5: Metallisation Loss ($\Qmech$ Degradation)}
+\label{sec:metallisation}
+%=============================================================================
+
+\textbf{Mechanism}: The SQUID readout requires a metallic (Al) coating
+on the Si$_3$N$_4$ membrane to provide superconducting flux coupling.
+This metallisation adds mass and introduces additional dissipation
+pathways (grain boundary scattering, thermoelastic damping in the Al
+layer), degrading $\Qmech$.
+
+\textbf{Current knowledge} (W3i7 MatSci Finding~3.8):
+\begin{itemize}[nosep]
+\item Bare Si$_3$N$_4$ PnC membrane: $\Qmech \geq 10^9$ demonstrated
+  at room temperature, projected $> 10^{10}$ at mK.
+\item With Al metallisation ($\sim 50$~nm): $\Qmech$ degradation
+  estimated at factor $10\times$ to $100\times$, giving
+  $\Qmech \sim 10^7$--$10^8$ at mK. \textbf{Not yet measured.}
+\item Partial metallisation (Al pads on antinode regions only):
+  could reduce the penalty to $\sim 3$--$10\times$, giving
+  $\Qmech \sim 10^8$--$3\ee{8}$.
+\end{itemize}
+
+\textbf{Impact on Channel~B}: From the parametric formula
+(Eq.~\eqref{eq:parametric_linear} or \eqref{eq:parametric_half}):
+\begin{itemize}[nosep]
+\item $\Qmech = 10^9 \to 10^8$: sensitivity degrades by $10\times$.
+\item $\Qmech = 10^9 \to 10^7$: sensitivity degrades by $100\times$.
+\end{itemize}
+
+\begin{finding}[Metallisation: MODERATE RISK, MUST MEASURE]
+\label{find:metallisation}
+The metallisation $Q$ penalty is the largest \emph{controllable}
+uncertainty in Channel~B. Unlike $\Qpsi$ (which is a fundamental
+unknown), the metallisation penalty can be measured in the lab.
+
+\textbf{Required measurement} (Phase~0, pre-commitment):
+\begin{enumerate}[nosep]
+\item Fabricate a PnC Si$_3$N$_4$ membrane to Design~C spec.
+\item Measure $\Qmech$ at 20~mK without metallisation.
+\item Deposit 50~nm Al (full coverage), measure $\Qmech$ at 20~mK.
+\item Deposit 50~nm Al (partial, pads only), measure $\Qmech$ at 20~mK.
+\item Iterate Al geometry to maximise $\Qmech$ while maintaining
+  adequate SQUID coupling.
+\end{enumerate}
+
+\textbf{Cost}: \$100--200K (MEMS fab + cryo characterisation).
+\textbf{Timeline}: 6--12 months.
+
+\textbf{Decision criterion}: If $\Qmech < 10^7$ with any metallisation
+geometry, Channel~B reach is degraded by $> 100\times$ and the
+experiment should be redesigned (e.g., optical readout instead of
+SQUID).
+
+\textbf{Status}: \textcolor{conjcolor}{UNKNOWN --- must be measured
+before committing to Channel~B. This is a PREREQUISITE measurement.}
+\end{finding}
+
+
+%=============================================================================
+\section{Systematic 6: Mode Mixing}
+\label{sec:mode_mixing}
+%=============================================================================
+
+\textbf{Mechanism}: The Si$_3$N$_4$ PnC membrane supports multiple
+vibrational modes within the phononic bandgap. The ``target'' mode
+at $f_0 = 620$~kHz may couple to nearby modes through:
+\begin{itemize}[nosep]
+\item Fabrication imperfections (broken PnC symmetry)
+\item Nonlinear coupling (Duffing, parametric)
+\item External perturbations (vibration, temperature)
+\end{itemize}
+
+If mode mixing transfers energy from the driven target mode to
+unobserved modes, the apparent $\Qmech$ is reduced. If energy is
+transferred INTO the target mode from thermally excited nearby modes,
+a spurious signal appears.
+
+\textbf{Estimation}: For a well-designed PnC membrane, the nearest
+mode is typically $> 10$ linewidths away (frequency spacing
+$\Delta f_{\rm modes} > 10\,\Delta f$). The mode coupling coefficient
+$g_{12}$ is suppressed by the PnC bandgap:
+\begin{equation}
+g_{12}/\Delta f_{\rm modes} \lesssim 10^{-3}~\text{(PnC suppression)}.
+\end{equation}
+
+The resulting energy transfer rate:
+\begin{equation}
+\Gamma_{\rm mix} \sim g_{12}^2/\Delta f_{\rm modes}
+\lesssim 10^{-6}\,\Delta f_{\rm modes} \sim 10^{-3}~\text{Hz}.
+\end{equation}
+
+This produces a spurious displacement of order:
+\begin{equation}
+x_{\rm mix} \sim x_{\rm thermal}\times
+\frac{\Gamma_{\rm mix}}{\Delta f}
+\sim 10^{-17}\times\frac{10^{-3}}{6.2\ee{-4}} \sim 1.6\ee{-17}~\text{m}.
+\end{equation}
+
+\begin{finding}[Mode Mixing: LOW--MODERATE RISK]
+\label{find:mode_mixing}
+Mode mixing produces a spurious displacement of $\sim 10^{-17}$~m,
+comparable to the SQUID noise floor. This is at the threshold of
+concern.
+
+\textbf{Mitigation}:
+\begin{enumerate}[nosep]
+\item \textbf{Mode identification}: Measure the full mode spectrum
+  of the PnC membrane at 20~mK. Identify all modes within $100\times$
+  linewidth of $f_0$.
+\item \textbf{PnC optimisation}: Design the PnC bandgap to maximise
+  the frequency isolation of the target mode.
+\item \textbf{Coherence test}: The psi-signal is coherent with the
+  SRF modulation; mode-mixing noise is incoherent. Lock-in detection
+  at the SRF modulation frequency rejects incoherent mode-mixing
+  noise.
+\end{enumerate}
+
+\textbf{Status}: \textcolor{strongcolor}{MANAGEABLE with standard
+PnC design optimisation and lock-in detection. Not a fundamental limit.}
+\end{finding}
+
+
+%=============================================================================
+\section{Systematic Error Budget Summary}
+\label{sec:systematics_summary}
+%=============================================================================
+
+\begin{table}[H]
+\centering
+\caption{Channel~B systematic error budget.}
+\label{tab:systematics_summary}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}p{3cm}p{2.5cm}p{2.5cm}p{2cm}p{2.5cm}@{}}
+\toprule
+\textbf{Systematic} & \textbf{Magnitude} &
+  \textbf{Required Control} & \textbf{Achievable?} &
+  \textbf{Cost to Mitigate} \\
+\midrule
+Thermal drift & $10^{-28}$~m & $\delta T < 1$~mK &
+  \textcolor{strongcolor}{Yes} & Included in DR \\
+\midrule
+Mech.\ vibration & $\sim 10^{-20}$~m &
+  $T_{\rm vib} < 10^{-12}$ &
+  \textcolor{conjcolor}{Challenging} &
+  \$0.5--1M (sep.\ cryo) \\
+\midrule
+Magnetic interf. & $\sim 10^{-12}$~m &
+  $10^8\times$ shielding &
+  \textcolor{strongcolor}{Yes (SC shield)} &
+  \$50--100K \\
+\midrule
+SQUID noise & $10^{-17}$~m/$\sqrt{\text{Hz}}$ &
+  $< 10^{-16}$ &
+  \textcolor{strongcolor}{Yes} &
+  \$100--200K \\
+\midrule
+Metallisation $Q$ & $\Qmech: 10^9 \to 10^{7\text{--}8}$ &
+  $\Qmech > 10^8$ &
+  \textcolor{conjcolor}{Unknown} &
+  \$100--200K (R\&D) \\
+\midrule
+Mode mixing & $\sim 10^{-17}$~m &
+  Lock-in rejection &
+  \textcolor{strongcolor}{Yes} &
+  \$50K (design) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+%=============================================================================
+%=============================================================================
+\part{Realistic and Optimistic Channel~B Reach}
+\label{part:reach}
+%=============================================================================
+%=============================================================================
+
+%=============================================================================
+\section{Scenario Definitions}
+\label{sec:scenarios}
+%=============================================================================
+
+\begin{tcolorbox}[colback=red!3!white, colframe=red!60!black,
+  title=\textbf{PESSIMISTIC (Conservative) Scenario}]
+\begin{itemize}[nosep]
+\item $\Qpsi = 10^{9}$ (minimum physically reasonable value)
+\item $\Qmech = 10^{7}$ (severe metallisation penalty)
+\item Vibration systematic at the noise floor (no improvement
+  beyond passive isolation)
+\item No psi-mode resonant buildup ($\Qpsi \sim 1$ effectively)
+\end{itemize}
+
+Using $\Qpsi^{-1}$ scaling (Eq.~\eqref{eq:parametric_linear}):
+\begin{equation}
+\lbone_{\rm pessimistic} = \frac{8\ee{11}}{10^{7}\times 10^{9}}
+= 8\ee{-5}.
+\end{equation}
+
+Using $\Qpsi^{-1/2}$ scaling (Eq.~\eqref{eq:parametric_half}):
+\begin{equation}
+\lbone_{\rm pessimistic} = \frac{2.53\ee{4}}{10^{7}\times\sqrt{10^{9}}}
+= \frac{2.53\ee{4}}{10^{7}\times 3.16\ee{4}} = 8\ee{-8}.
+\end{equation}
+
+\textbf{Pessimistic reach}: $\lbone \sim 10^{-8}$--$10^{-5}$
+depending on $\Qpsi$ scaling. \textbf{Cannot improve the SQMS bound
+($1.56\ee{-9}$).}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=yellow!3!white, colframe=yellow!60!black,
+  title=\textbf{MODERATE (Balanced) Scenario}]
+\begin{itemize}[nosep]
+\item $\Qpsi = 10^{12}$ (``geological'' quality factor, comparable
+  to seismic Q of the Earth's mantle --- physically plausible but
+  unmotivated)
+\item $\Qmech = 10^{8}$ (partial metallisation with moderate
+  Q penalty)
+\item Vibration controlled via separate cryostats
+\end{itemize}
+
+Using $\Qpsi^{-1}$ scaling:
+\begin{equation}
+\lbone_{\rm moderate} = \frac{8\ee{11}}{10^{8}\times 10^{12}}
+= 8\ee{-9}.
+\end{equation}
+
+Using $\Qpsi^{-1/2}$ scaling:
+\begin{equation}
+\lbone_{\rm moderate} = \frac{2.53\ee{4}}{10^{8}\times\sqrt{10^{12}}}
+= \frac{2.53\ee{4}}{10^{8}\times 10^{6}} = 2.5\ee{-10}.
+\end{equation}
+
+\textbf{Moderate reach}: $\lbone \sim 10^{-10}$--$10^{-9}$.
+\textbf{Marginally improves the SQMS bound with $\Qpsi^{-1/2}$ scaling;
+improves by $\sim 5\times$ with $\Qpsi^{-1}$ scaling.}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=green!3!white, colframe=green!60!black,
+  title=\textbf{OPTIMISTIC Scenario}]
+\begin{itemize}[nosep]
+\item $\Qpsi = 10^{15}$ (as assumed in W3i8)
+\item $\Qmech = 10^{9}$ (bare Si$_3$N$_4$, no metallisation
+  penalty --- requires optical readout or innovative metallisation)
+\item All systematics controlled
+\item Full $10^6$~s integration achieved
+\end{itemize}
+
+\begin{equation}
+\lbone_{\rm optimistic} = 8\ee{-13}~\text{(the W3i8 figure)}.
+\end{equation}
+
+\textbf{Optimistic reach}: $\lbone \sim 8\ee{-13}$.
+\textbf{Improves the SQMS bound by $\sim 2000\times$.}
+\end{tcolorbox}
+
+
+%=============================================================================
+%=============================================================================
+\part{$\Qpsi$-Independent Channel~B Design?}
+\label{part:Qpsi_independent}
+%=============================================================================
+%=============================================================================
+
+%=============================================================================
+\section{Why Full $\Qpsi$-Independence Is Impossible}
+\label{sec:impossible}
+%=============================================================================
+
+\begin{theorem}[$\Qpsi$-Independence Is Impossible for Active Detection]
+\label{thm:Qpsi_independent}
+Any active detection scheme (source + detector) that measures the
+psi-field amplitude $\dpsi$ necessarily depends on $\Qpsi$, because:
+
+\begin{enumerate}
+\item The psi-field amplitude in the source near-field depends on
+  the intracavity psi-energy, which depends on $\Qpsi$ through the
+  resonant buildup (Eq.~\eqref{eq:E_psi_cav}).
+\item The only $\Qpsi$-independent quantity is the \emph{radiated}
+  psi-power $P_{\rm rad} = P_{\rm inject}$. But $P_{\rm inject}
+  \propto (\lam-1)^2$, and detecting this power at a distant detector
+  is the far-field regime where $\Qpsi$ cancels --- but the signal
+  is $\sim 10^{12}$--$10^{17}$ times weaker than the near-field
+  (W3i6 Finding~4.3).
+\item Passive detection (Q-factor measurement) is effectively
+  $\Qpsi$-independent: it measures
+  $1/Q_\psi \propto (\lam-1)^2\,\Heff^2\cdot A_{\rm geo}$, where
+  $A_{\rm geo}$ depends on known geometric and material parameters.
+  But passive detection is already the SQMS programme --- Channel~B
+  was supposed to go \emph{beyond} passive.
+\end{enumerate}
+
+\textbf{Conclusion}: There is no Channel~B design that measures
+$\lbone$ independent of $\Qpsi$ while achieving better sensitivity
+than passive detection.
+\end{theorem}
+
+
+%=============================================================================
+\section{The Ratio-Based Alternative: Measuring $(\lam-1)^2/\Qpsi$}
+\label{sec:ratio_based}
+%=============================================================================
+
+Although $\Qpsi$-independent measurement of $\lbone$ is impossible
+in the active channel, a \textbf{ratio-based protocol} can extract
+useful information:
+
+\begin{proposition}[Ratio-Based Channel~B Protocol]
+\label{prop:ratio_based}
+Operate Channel~B with two different SRF source configurations
+(different $E_{\rm acc}$ or different cavity mode), keeping the MEMS
+detector identical. The ratio of MEMS displacement amplitudes:
+\begin{equation}
+\frac{x_1}{x_2} = \frac{U_{\rm src,1}\,G_{00,1}}
+{U_{\rm src,2}\,G_{00,2}}
+\end{equation}
+is $\Qpsi$-independent (the $\Qpsi$ factor cancels in the ratio).
+
+This provides a consistency check: if the displacement ratio matches
+the DFD prediction for the ratio of EM-to-psi coupling strengths,
+it constitutes evidence for the DFD mechanism independent of $\Qpsi$.
+
+\textbf{However}: this requires a \emph{nonzero} signal in both
+configurations. If $\Qpsi$ is too low and neither configuration
+produces a detectable signal, the ratio test is inapplicable.
+
+\textbf{What the ratio measures}: $(\lam-1)^2/\Qpsi$ is the
+fundamental observable. If passive detection has already constrained
+$(\lam-1)^2$ (via the SQMS programme), then $\Qpsi$ is inferred
+from the ratio.
+\end{proposition}
+
+\begin{finding}[Direct $\lambda$ Measurement Without $\Qpsi$ Ambiguity]
+\label{find:direct_lambda}
+There exists one measurement that constrains $\lambda$ without
+$\Qpsi$ dependence: the \textbf{multi-frequency Q$_0$ ratio}
+in the passive SQMS programme (W3i7 Finding~6.5):
+\begin{equation}
+\frac{Q_0^{-1}(\omega_1) - Q_{\rm res,mat}^{-1}}
+{Q_0^{-1}(\omega_2) - Q_{\rm res,mat}^{-1}}
+= \frac{\Heff^2(\omega_1)}{\Heff^2(\omega_2)}.
+\end{equation}
+
+This ratio depends on $\Heff$ (a calculable geometric quantity)
+and NOT on $\Qpsi$ or $\lbone$. A measured ratio consistent with the
+DFD prediction ($0.49$ for TESLA 1.3/2.4~GHz) would confirm the
+existence of the psi-channel and identify its spectral shape,
+\emph{without knowing $\Qpsi$ or $\lbone$}.
+
+\textbf{This is the strongest argument for SQMS Phase~I preceding
+Channel~B}: the multi-frequency ratio provides model-independent
+evidence for the psi-channel, after which $\Qpsi$ can be estimated
+from the correlation timescale, enabling a well-motivated Channel~B
+design.
+\end{finding}
+
+
+%=============================================================================
+%=============================================================================
+\part{Cost and Timeline Breakdown by Subsystem}
+\label{part:cost}
+%=============================================================================
+%=============================================================================
+
+%=============================================================================
+\section{Subsystem Breakdown}
+\label{sec:subsystems}
+%=============================================================================
+
+\begin{table}[H]
+\centering
+\caption{Channel~B cost and timeline breakdown by subsystem.}
+\label{tab:cost_breakdown}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}p{4cm}p{2cm}p{2cm}p{4cm}@{}}
+\toprule
+\textbf{Subsystem} & \textbf{Cost (\$K)} & \textbf{Timeline} &
+  \textbf{Notes} \\
+\midrule
+\multicolumn{4}{l}{\textbf{Phase 0: Prerequisite R\&D (BEFORE commitment)}} \\
+\midrule
+Metallisation Q test &
+  100--200 & 6--12 mo &
+  PnC Si$_3$N$_4$ fab + Al deposition + cryo Q measurement. \\
+SQUID coupling demo &
+  100--150 & 6--12 mo &
+  Flux-to-displacement transducer for Al-coated membrane at 620~kHz. \\
+\midrule
+\multicolumn{4}{l}{\textit{Phase 0 total: \$200--350K, 6--12 months.
+Decision gate: proceed only if $\Qmech > 10^8$ with metallisation
+AND SQUID coupling demonstrated at $< 10^{-16}$~m/$\sqrt{\text{Hz}}$.}} \\
+\midrule
+\multicolumn{4}{l}{\textbf{Phase 1: Channel~B Construction (conditional on Phase 0)}} \\
+\midrule
+SRF source cavity &
+  500--1000 & 6 mo &
+  \$500K if existing SQMS cavity; \$1M if new procurement + N-doping. \\
+SRF cryostat + RF &
+  200--400 & 6 mo &
+  Existing Fermilab SQMS infrastructure (low end); new cryostat (high end). \\
+Si$_3$N$_4$ MEMS fab &
+  200--300 & 6 mo &
+  PnC membrane to Design~C spec, Al metallisation, 10 devices. \\
+MEMS DR + cryo &
+  500--1000 & 6--12 mo &
+  Separate dilution refrigerator for MEMS. \$500K used; \$1M new. \\
+SQUID readout system &
+  150--250 & 3--6 mo &
+  dc-SQUID + flux transformer + low-noise amplifier chain. \\
+Magnetic shielding &
+  50--100 & 3 mo &
+  Nb shield can + $\mu$-metal outer shield for MEMS. \\
+Vibration isolation &
+  100--300 & 3--6 mo &
+  Active + passive isolation between SRF and MEMS cryostats.
+  Low end: shared platform with dampers.
+  High end: separate optical tables + active feedback. \\
+Integration \& comm. &
+  100--200 & 6 mo &
+  Signal routing, data acquisition, control systems. \\
+\midrule
+\multicolumn{4}{l}{\textit{Phase 1 hardware total: \$1.8--3.6M, 12--18 months.}} \\
+\midrule
+\multicolumn{4}{l}{\textbf{Personnel}} \\
+\midrule
+PI + 2 postdocs &
+  600--1000 & 2.5--3.5 yr &
+  PI: 50\% FTE. 2 postdocs: 100\% FTE each. \\
+Technician (cryo) &
+  150--250 & 2 yr &
+  Cryogenic operations support. \\
+Graduate student &
+  100--200 & 3 yr &
+  MEMS fabrication and characterisation. \\
+\midrule
+\multicolumn{4}{l}{\textit{Personnel total: \$850--1.5M over 2.5--3.5 years.}} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{tcolorbox}[colback=blue!3!white, colframe=blue!50!black,
+  title=\textbf{TOTAL CHANNEL~B COST AND TIMELINE}]
+
+\textbf{Phase 0} (prerequisite R\&D): \$200--350K, 6--12 months.
+
+\textbf{Phase 1} (construction + commissioning): \$1.8--3.6M hardware
++ \$850K--1.5M personnel = \$2.6--5.1M, 18--30 months.
+
+\textbf{Science run}: 12 months (Year 3).
+
+\textbf{Grand total}: \$2.8--5.4M over 2.5--3.5 years from Phase~0
+start to first science results.
+
+\textbf{Key decision gates}:
+\begin{enumerate}[nosep]
+\item Phase~0 $\to$ Phase~1: Requires $\Qmech > 10^8$ with
+  metallisation AND SQUID coupling demonstrated.
+\item SQMS Phase~I results: If multi-frequency ratio is null,
+  Channel~B loses its primary motivation.
+\item If SQMS detects a non-null correlation, the correlation
+  timescale gives a first estimate of $\Qpsi$. Only if
+  $\Qpsi > 10^{11}$ (with $\Qpsi^{-1}$ scaling) should Channel~B
+  be fully funded.
+\end{enumerate}
+\end{tcolorbox}
+
+
+%=============================================================================
+\section{Timeline Gantt Summary}
+\label{sec:gantt}
+%=============================================================================
+
+\begin{table}[H]
+\centering
+\caption{Channel~B timeline. ``$|$'' = decision gate.}
+\label{tab:timeline}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+\textbf{Activity} & \textbf{Mo 1--6} & \textbf{Mo 7--12} &
+  \textbf{Mo 13--18} & \textbf{Mo 19--24} & \textbf{Mo 25--30} &
+  \textbf{Mo 31--42} \\
+\midrule
+Phase 0: Met.\ Q test & $\bullet\bullet$ & & & & & \\
+Phase 0: SQUID demo & $\bullet\bullet$ & & & & & \\
+Decision gate & & $|$ & & & & \\
+SRF source prep & & $\bullet\bullet$ & & & & \\
+MEMS fab (10 devices) & & $\bullet\bullet$ & $\bullet$ & & & \\
+MEMS DR procurement & & $\bullet$ & $\bullet\bullet$ & & & \\
+SQUID + shielding & & & $\bullet\bullet$ & & & \\
+Integration & & & & $\bullet\bullet$ & & \\
+Commissioning & & & & & $\bullet\bullet$ & \\
+Science run & & & & & & $\bullet\bullet\bullet$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+%=============================================================================
+%=============================================================================
+\part{Conclusions and Recommendations}
+\label{part:conclusions}
+%=============================================================================
+%=============================================================================
+
+\begin{tcolorbox}[colback=blue!5!white, colframe=blue!60!black,
+  title=\textbf{W3i9 CHANNEL~B AUDIT: FINAL VERDICT}, breakable]
+
+\textbf{1. The $\Qpsi$ problem is worse than stated.}
+The $\lbone = 8\ee{-13}$ reach requires either $\Qpsi = 10^{15}$
+(with $\Qpsi^{-1}$ scaling, matching W3i7 data) or an even higher
+$\Qpsi$ (with $\Qpsi^{-1/2}$ or $\Qpsi^{-1/4}$ scaling). The exact
+$\Qpsi$ scaling has NOT been derived from first principles in any
+existing document. [\textbf{CRITICAL GAP}]
+
+To improve on SQMS ($1.56\ee{-9}$), Channel~B requires:
+\begin{itemize}[nosep]
+\item $\Qpsi > 5\ee{11}$ (with $\Qpsi^{-1}$ scaling, $\Qmech = 10^9$)
+\item $\Qpsi > 2.6\ee{8}$ (with $\Qpsi^{-1/2}$ scaling, $\Qmech = 10^9$)
+\end{itemize}
+Both are entirely unconstrained by existing data.
+
+\textbf{2. Systematics are manageable but not trivial.}
+The dominant systematics are mechanical vibration (requires separate
+cryostats + \$0.5--1M) and metallisation Q penalty (requires Phase~0
+R\&D, \$100--200K). Magnetic shielding and SQUID noise are under control.
+
+\textbf{3. Realistic reach depends critically on $\Qpsi$.}
+\begin{itemize}[nosep]
+\item \textbf{Pessimistic} ($\Qpsi = 10^9$, met.\ $\Qmech = 10^7$):
+  $\lbone \sim 10^{-5}$--$10^{-8}$. \textbf{Cannot beat SQMS.}
+\item \textbf{Moderate} ($\Qpsi = 10^{12}$, met.\ $\Qmech = 10^8$):
+  $\lbone \sim 10^{-9}$--$10^{-10}$. \textbf{Marginal improvement.}
+\item \textbf{Optimistic} ($\Qpsi = 10^{15}$, bare $\Qmech = 10^9$):
+  $\lbone \sim 8\ee{-13}$. \textbf{Significant improvement.}
+\end{itemize}
+
+\textbf{4. No $\Qpsi$-independent Channel~B design exists.}
+All active schemes couple through $\dpsiEM$, which depends on $\Qpsi$.
+The ratio-based protocol can measure $(\lam-1)^2/\Qpsi$
+model-independently, which is valuable but does not independently
+constrain $\lbone$.
+
+\textbf{5. Cost: \$2.8--5.4M total}, with a \$200--350K Phase~0
+that must be completed first. The Phase~0 provides two critical
+go/no-go decisions: metallisation Q and SQUID coupling.
+
+\textbf{6. RECOMMENDATION.}
+\begin{enumerate}[nosep]
+\item \textbf{Fund Phase~0 immediately} (\$200--350K, 6--12 months).
+  This is low-cost and resolves two of the three major unknowns
+  (metallisation Q, SQUID coupling).
+\item \textbf{Do NOT fund full Channel~B until SQMS Phase~I completes.}
+  The multi-frequency ratio diagnostic provides model-independent
+  evidence for the psi-channel. If null, Channel~B loses its
+  primary motivation. If positive, the correlation timescale gives
+  a first $\Qpsi$ estimate, enabling a well-motivated Channel~B
+  design.
+\item \textbf{The exact $\Qpsi$ scaling MUST be derived from first
+  principles} before Channel~B sensitivity projections can be
+  trusted. This is a theoretical task that should be completed
+  during the SQMS Phase~I timeline (6--12 months of theorist effort).
+\item \textbf{If SQMS Phase~I is positive AND $\Qpsi > 10^{11}$}
+  (estimated from correlation timescale), fund full Channel~B
+  (\$2.6--5.1M, 2--3 years).
+\end{enumerate}
+\end{tcolorbox}
+
+
+%=============================================================================
+\section{Cross-References}
+\label{sec:crossrefs}
+%=============================================================================
+
+\begin{itemize}[nosep]
+\item W3i5 P10/P11: Hybrid formula derivation (Eqs.~(44)--(46)),
+  MEMS mass scan (Table~7.1).
+\item W3i6 P8/P11: 11-configuration ranking, Phase~I--III roadmap,
+  Eq.~(42) for Channel~B reach.
+\item W3i6 P1/P2: Passive Superiority Theorem, $\Qpsi$ amplification
+  discussion (Finding~4.3), detection gap analysis.
+\item W3i7 P1/P2/P11: LIGO correction, SQMS protocol, $\Qpsi$
+  constraints (Finding~7.1: trivially weak), multi-frequency ratio
+  diagnostic.
+\item W3i7 MatSci: Si$_3$N$_4$ Design~C specification, Nb optimisation,
+  metallisation Q penalty (Finding~3.8), cryogenic budget.
+\item W3i7 P6/P8/P9: $\Qpsi$ does NOT help for far-field radiation
+  (Theorem~4.1).
+\item W3i8 Detection: Definitive ranking (Channel~B at Rank~\#3),
+  critical flag on $\Qpsi$ dependence.
+\end{itemize}
+
+
+\end{document}

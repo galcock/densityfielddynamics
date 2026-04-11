@@ -1,0 +1,382 @@
+%=============================================================================
+% CP2_Multiplicities_Definitive.tex
+% Definitive resolution of eigenvalue multiplicities for the Laplacian on CP^2
+% Date: 2026-03-22
+%=============================================================================
+
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{geometry}
+\geometry{margin=1in}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+
+\title{Definitive Eigenvalue Multiplicities for the Scalar Laplacian on
+$\mathbb{C}P^2$: Resolution of the $(k{+}1)^2$ vs.\ $(k{+}1)^3$ Discrepancy}
+\author{DFD Cross-Reference Audit}
+\date{22 March 2026}
+
+\begin{document}
+\maketitle
+
+%=============================================================================
+\section{Executive Summary}
+%=============================================================================
+
+\begin{center}
+\fbox{\parbox{0.9\textwidth}{%
+\textbf{VERDICT:} The correct multiplicity for the scalar Laplacian on
+$\mathbb{C}P^2$ is
+\[
+\boxed{m_k = (k+1)^3}\,.
+\]
+The numerical code in \texttt{numerical\_a4.py} and
+\texttt{a4\_Gilkey\_Computation.tex} that uses $(k+1)^2$ is computing the
+spectrum of the \textbf{3-sphere $S^3$}, not $\mathbb{C}P^2$.  Both manifolds
+share the same eigenvalues $\lambda_k = k(k+2)$, but their multiplicities
+differ.  Agent~3's claim of $(k+1)^3$ is correct for $\mathbb{C}P^2$.
+}}
+\end{center}
+
+%=============================================================================
+\section{The Problem}
+%=============================================================================
+
+Two different multiplicity formulas appear in the DFD codebase for the scalar
+Laplacian $\Delta$ on $\mathbb{C}P^2$:
+\begin{enumerate}
+\item \textbf{Agent~3 / Toeplitz\_Heat\_Kernel.tex:} $m_k = (k+1)^3$
+\item \textbf{numerical\_a4.py / a4\_Gilkey\_Computation.tex:} $m_k = (k+1)^2$
+\end{enumerate}
+Both use the same eigenvalues $\lambda_k = k(k+2)$ for $k = 0, 1, 2, \ldots$
+
+The question is: which is the correct multiplicity for $\mathbb{C}P^2$
+(real dimension~4)?
+
+%=============================================================================
+\section{Resolution: Three Independent Derivations}
+%=============================================================================
+
+\subsection{Derivation 1: Representation Theory of $\mathrm{SU}(3)$}
+
+$\mathbb{C}P^2$ is the symmetric space $\mathrm{SU}(3)/\mathrm{U}(2)$.
+By the Peter--Weyl theorem, the $L^2$ functions on $G/K$ decompose into
+spherical (class-1) representations of $G$ with respect to $K$.
+
+\paragraph{Step 1: Identify the spherical representations.}
+For the symmetric space $\mathrm{SU}(n{+}1)/\mathrm{U}(n)$, the spherical
+representations of $\mathrm{SU}(n{+}1)$ are precisely those with Dynkin labels
+$(k, 0, \ldots, 0, k)$ for $k = 0, 1, 2, \ldots$ (the ``symmetric square''
+representations).
+
+For $\mathrm{SU}(3)$, which has rank~2, the Dynkin labels are $(a,b)$, so the
+spherical representations are $(k,k)$ for $k \geq 0$.
+
+\paragraph{Step 2: Compute the Casimir eigenvalue.}
+The quadratic Casimir operator $C_2$ of $\mathrm{SU}(3)$ acts on the
+irreducible representation $(a,b)$ with eigenvalue
+\begin{equation}
+C_2(a,b) = \frac{a^2 + ab + b^2}{3} + a + b\,.
+\end{equation}
+For the spherical representation $(k,k)$:
+\begin{equation}
+C_2(k,k) = \frac{k^2 + k^2 + k^2}{3} + 2k = k^2 + 2k = k(k+2)\,.
+\end{equation}
+This matches the eigenvalue $\lambda_k = k(k+2)$.
+
+(Note: with the standard Fubini--Study normalization giving
+$\lambda_k = 4k(k+n)$, one has $n=2$, so $4k(k+2)$.  The factor of~4
+depends on the curvature normalization.  We use $\lambda_k = k(k+2)$
+throughout, corresponding to Ricci curvature $\mathrm{Ric} = 2g$.)
+
+\paragraph{Step 3: Compute the dimension (multiplicity).}
+The Weyl dimension formula for $\mathrm{SU}(3)$ gives:
+\begin{equation}
+\dim(a,b) = \frac{(a+1)(b+1)(a+b+2)}{2}\,.
+\end{equation}
+For $(k,k)$:
+\begin{equation}
+\dim(k,k) = \frac{(k+1)(k+1)(2k+2)}{2}
+           = \frac{(k+1)^2 \cdot 2(k+1)}{2}
+           = (k+1)^3\,.
+\end{equation}
+
+\begin{proposition}
+The multiplicity of the eigenvalue $\lambda_k = k(k+2)$ of the scalar
+Laplacian on $\mathbb{C}P^2$ is $m_k = (k+1)^3$.
+\end{proposition}
+
+\subsection{Derivation 2: Bi-Homogeneous Harmonic Polynomials}
+
+The eigenfunctions of the Laplacian on $\mathbb{C}P^n$ can be realized as the
+restrictions to $\mathbb{C}P^n$ of bi-homogeneous harmonic polynomials
+$P(z, \bar{z})$ on $\mathbb{C}^{n+1}$ of bi-degree $(k,k)$---i.e.,
+homogeneous of degree~$k$ in the holomorphic variables $z_0, \ldots, z_n$
+and degree~$k$ in the anti-holomorphic variables
+$\bar{z}_0, \ldots, \bar{z}_n$.
+
+The condition of equal bi-degree $(k,k)$ is required so that $P$ descends
+to a well-defined function on $\mathbb{C}P^n = \mathbb{C}^{n+1}\!/\mathbb{C}^*$
+(the phase cancels: $P(\lambda z, \bar{\lambda}\bar{z})
+= |\lambda|^{2k} P(z,\bar{z})$).
+
+\paragraph{Counting.}
+The space of all bi-homogeneous polynomials of bi-degree $(k,k)$ on
+$\mathbb{C}^{n+1}$ has dimension
+\begin{equation}
+\binom{k+n}{n}^{\!2}\,,
+\end{equation}
+since we independently choose a monomial of degree~$k$ in $(n{+}1)$
+holomorphic variables and one in $(n{+}1)$ anti-holomorphic variables.
+
+The harmonic subspace (annihilated by $\Delta_{\mathbb{C}^{n+1}}$)
+has dimension
+\begin{equation}
+m_k = \binom{k+n}{n}^{\!2} - \binom{k+n-1}{n}^{\!2}\,.
+\end{equation}
+
+For $\mathbb{C}P^2$ ($n = 2$):
+\begin{align}
+m_k &= \binom{k+2}{2}^{\!2} - \binom{k+1}{2}^{\!2} \\
+    &= \left[\frac{(k+1)(k+2)}{2}\right]^{\!2}
+     - \left[\frac{k(k+1)}{2}\right]^{\!2} \\
+    &= \frac{(k+1)^2}{4}\bigl[(k+2)^2 - k^2\bigr] \\
+    &= \frac{(k+1)^2}{4}\cdot 4(k+1) \\
+    &= (k+1)^3\,.
+\end{align}
+
+This confirms the result independently.
+
+\subsection{Derivation 3: General Formula and the $\mathbb{C}P^n$ Family}
+
+The general multiplicity formula for $\mathbb{C}P^n$ admits the compact form:
+\begin{equation}
+\boxed{m_k(\mathbb{C}P^n) = \frac{2k+n}{n}\,\binom{k+n-1}{n-1}^{\!2}}
+\end{equation}
+
+\noindent
+This is equivalent to $\binom{k+n}{n}^2 - \binom{k+n-1}{n}^2$ by the
+identity:
+\begin{equation}
+\binom{k+n}{n}^{\!2} - \binom{k+n-1}{n}^{\!2}
+= \frac{2k+n}{n}\,\binom{k+n-1}{n-1}^{\!2}\,.
+\end{equation}
+
+\paragraph{Consistency checks.}
+\begin{center}
+\begin{tabular}{clll}
+\toprule
+$n$ & Manifold & $m_k$ formula & Simplification \\
+\midrule
+$1$ & $\mathbb{C}P^1 = S^2$ & $(2k+1)\cdot 1^2 = 2k+1$
+    & Standard spherical harmonics \\
+$2$ & $\mathbb{C}P^2$ & $\frac{2k+2}{2}(k+1)^2 = (k+1)^3$
+    & Confirmed above \\
+$3$ & $\mathbb{C}P^3$ & $\frac{2k+3}{3}\binom{k+2}{2}^2$
+    & Not a perfect power \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The $n=1$ case is an essential sanity check: $\mathbb{C}P^1 \cong S^2$, and
+the formula gives $m_k = 2k+1$, which is the well-known multiplicity for
+eigenvalue $\lambda_k = k(k+1)$ of the Laplacian on $S^2$.
+
+%=============================================================================
+\section{Weyl's Law Verification}
+%=============================================================================
+
+Weyl's law for the eigenvalue counting function on a compact Riemannian
+$d$-manifold states:
+\begin{equation}
+N(\Lambda) = \#\{\lambda_k \leq \Lambda\}
+\sim \frac{\operatorname{Vol}(M)}{(4\pi)^{d/2}\,\Gamma(d/2+1)}\,
+\Lambda^{d/2}
+\quad\text{as }\Lambda\to\infty\,.
+\end{equation}
+
+For $\mathbb{C}P^2$, $d = 4$, so $N(\Lambda) \sim c\,\Lambda^2$.
+
+\paragraph{With $(k+1)^3$ multiplicities (correct, $\mathbb{C}P^2$):}
+Using $\lambda_k = k(k+2) \sim k^2$ for large $k$, we have
+$k_{\max} \sim \Lambda^{1/2}$ and
+\begin{equation}
+N(\Lambda) = \sum_{k=0}^{k_{\max}} (k+1)^3
+\sim \frac{k_{\max}^4}{4}
+\sim \frac{\Lambda^2}{4}\,,
+\end{equation}
+which scales as $\Lambda^2$---\textbf{correct for dimension~4}.
+
+\paragraph{With $(k+1)^2$ multiplicities (incorrect for $\mathbb{C}P^2$,
+correct for $S^3$):}
+\begin{equation}
+N(\Lambda) = \sum_{k=0}^{k_{\max}} (k+1)^2
+\sim \frac{k_{\max}^3}{3}
+\sim \frac{\Lambda^{3/2}}{3}\,,
+\end{equation}
+which scales as $\Lambda^{3/2}$---correct for \textbf{dimension~3} ($S^3$),
+not dimension~4.
+
+\paragraph{Numerical verification.}
+\begin{center}
+\begin{tabular}{rrrcrc}
+\toprule
+$\Lambda$ & $N$ with $(k+1)^2$ & $N/\Lambda^{3/2}$
+          & $N$ with $(k+1)^3$ & $N/\Lambda^2$ & Weyl dim \\
+\midrule
+   100 &       385 & 0.385 &      3,025 & 0.3025 & \\
+ 1,000 &    10,416 & 0.329 &    246,016 & 0.2460 & \\
+10,000 &   338,350 & 0.338 & 25,502,500 & 0.2550 & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The ratios $N/\Lambda^{3/2}$ stabilize for $(k+1)^2$, confirming 3D behavior.
+The ratios $N/\Lambda^2$ stabilize for $(k+1)^3$, confirming 4D behavior.
+Only $(k+1)^3$ is consistent with the real dimension of $\mathbb{C}P^2$.
+
+%=============================================================================
+\section{Why $S^3$ and $\mathbb{C}P^2$ Share Eigenvalues but Not
+Multiplicities}
+%=============================================================================
+
+Both $S^3$ and $\mathbb{C}P^2$ have eigenvalues $\lambda_k = k(k+2)$ because:
+
+\begin{itemize}
+\item $S^3 = \mathrm{SU}(2)$ is a group manifold; its Laplacian eigenvalues
+  come from the Casimir operator, giving $\lambda_k = k(k+2)$ with
+  multiplicity $(k+1)^2 = (\dim V_k)^2$ where $V_k$ is the spin-$k/2$
+  representation (by the Peter--Weyl theorem for $L^2(G)$).
+
+\item $\mathbb{C}P^2 = \mathrm{SU}(3)/\mathrm{U}(2)$; its eigenvalues come
+  from the Casimir of $\mathrm{SU}(3)$ restricted to spherical representations
+  $(k,k)$, giving the same $\lambda_k = k(k+2)$ but with multiplicity
+  $(k+1)^3 = \dim(k,k)$.
+\end{itemize}
+
+This coincidence arises because both manifolds are rank-1 symmetric spaces
+whose Casimir operators yield eigenvalues of the same algebraic form $k(k+n)$
+with $n=2$.  But they are geometrically distinct: $S^3$ has real dimension~3
+while $\mathbb{C}P^2$ has real dimension~4.
+
+%=============================================================================
+\section{Impact on DFD Computations}
+%=============================================================================
+
+\subsection{Files Requiring Correction}
+
+The following files use the incorrect $(k+1)^2$ multiplicity for computations
+labeled as $\mathbb{C}P^2$:
+
+\begin{enumerate}
+\item \texttt{numerical\_a4.py} (lines 36, 47, 275, 300): Uses
+  $(k+1)^2$ throughout.  If the intent is the $\mathbb{C}P^2$ factor of
+  $X = \mathbb{C}P^2 \times S^3$, this must be changed to $(k+1)^3$.
+  If the intent is the $S^3$ factor, the labeling should be corrected.
+
+\item \texttt{a4\_Gilkey\_Computation.tex} (line 363 ff.): States
+  ``multiplicity $m_l = (l+1)^2$'' and labels it as $\mathbb{C}P^2$.
+  This is the $S^3$ spectrum, not $\mathbb{C}P^2$.
+\end{enumerate}
+
+\subsection{Files That Are Correct}
+
+\begin{enumerate}
+\item \texttt{Toeplitz\_Heat\_Kernel.tex}: Correctly identifies $(k+1)^3$
+  for $\mathbb{C}P^2$ and $(k+1)^2$ for $S^3$, provides the
+  representation-theoretic derivation, and verifies Weyl asymptotics.
+\end{enumerate}
+
+\subsection{Consequences for the Heat Kernel}
+
+The heat kernel trace on $\mathbb{C}P^2$:
+\begin{equation}
+K(t) = \sum_{k=0}^{\infty} (k+1)^3\,e^{-k(k+2)t}
+     = e^t \sum_{m=1}^{\infty} m^3\,e^{-m^2 t}
+     \sim \frac{1}{2t^2} \quad\text{as } t\to 0^+\,,
+\end{equation}
+giving the correct leading Seeley--DeWitt coefficient
+$a_0 = \operatorname{Vol}(\mathbb{C}P^2)/(4\pi)^2$ for a 4-dimensional
+manifold.
+
+With the incorrect $(k+1)^2$:
+\begin{equation}
+K_{S^3}(t) = \sum_{k=0}^{\infty} (k+1)^2\,e^{-k(k+2)t}
+\sim \frac{1}{2t^{3/2}}\cdot\frac{\sqrt{\pi}}{2}
+\quad\text{as }t\to 0^+\,,
+\end{equation}
+which gives $t^{-3/2}$ scaling, consistent with a 3-dimensional manifold.
+
+Any $a_4$ coefficient computed with $(k+1)^2$ multiplicities but labeled
+as $\mathbb{C}P^2$ will be incorrect; it will actually be the $a_4$ for $S^3$.
+
+%=============================================================================
+\section{The General Formula for $\mathbb{C}P^n$}
+%=============================================================================
+
+For completeness, the full spectrum of the scalar Laplacian on
+$\mathbb{C}P^n$ with the Fubini--Study metric (normalized so that
+$\mathrm{Ric} = (n{+}1)\,g$, giving $\lambda_k = 4k(k+n)$; or
+$\mathrm{Ric} = 2g$ in the convention with $\lambda_k = k(k+n)$):
+
+\begin{theorem}[Spectrum of $\Delta$ on $\mathbb{C}P^n$]
+\label{thm:CPn-spectrum}
+The eigenvalues are $\lambda_k = k(k+n)$ for $k = 0, 1, 2, \ldots$
+with multiplicities
+\begin{equation}
+m_k = \binom{k+n}{n}^{\!2} - \binom{k+n-1}{n}^{\!2}
+    = \frac{2k+n}{n}\,\binom{k+n-1}{n-1}^{\!2}\,.
+\end{equation}
+\end{theorem}
+
+\noindent
+This follows from the decomposition of $L^2(\mathbb{C}P^n)$ into spherical
+representations of $\mathrm{SU}(n{+}1)$ with respect to $\mathrm{U}(n)$,
+combined with the Weyl dimension formula for $\mathrm{SU}(n{+}1)$.
+
+\paragraph{References.}
+\begin{itemize}
+\item Berger, Gauduchon, Mazet, \textit{Le Spectre d'une Vari\'et\'e
+  Riemannienne}, Lecture Notes in Mathematics 194, Springer, 1971.
+\item Ikeda, Taniguchi, ``Spectra and eigenforms of the Laplacian on
+  $S^n$ and $P^n(\mathbb{C})$,'' \textit{Osaka J.\ Math.}\ \textbf{15}
+  (1978), 515--546.
+\item Lu Qikeng, ``The eigenfunctions of the complex projective space,''
+  \textit{Acta Mathematica Sinica, English Series}, 1998.
+\end{itemize}
+
+%=============================================================================
+\section{Table of First Few Eigenvalues and Multiplicities}
+%=============================================================================
+
+\begin{center}
+\begin{tabular}{crrrrl}
+\toprule
+$k$ & $\lambda_k = k(k+2)$ & $m_k^{S^3} = (k+1)^2$ & $m_k^{\mathbb{C}P^2}
+= (k+1)^3$ & Cumulative $N$ & Comment \\
+\midrule
+0 &   0 &   1 &    1 &      1 & Zero mode \\
+1 &   3 &   4 &    8 &      9 & \\
+2 &   8 &   9 &   27 &     36 & \\
+3 &  15 &  16 &   64 &    100 & \\
+4 &  24 &  25 &  125 &    225 & \\
+5 &  35 &  36 &  216 &    441 & \\
+6 &  48 &  49 &  343 &    784 & \\
+7 &  63 &  64 &  512 &  1,296 & \\
+8 &  80 &  81 &  729 &  2,025 & \\
+9 &  99 & 100 & 1000 &  3,025 & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Note that the cumulative count with $(k+1)^3$ is
+$N = \sum_{j=0}^{k}(j+1)^3 = \bigl[\frac{(k+1)(k+2)}{2}\bigr]^2
+= \binom{k+2}{2}^2$, a perfect square---this is the total dimension of
+bi-degree $\leq k$ polynomial space, as expected.
+
+\end{document}

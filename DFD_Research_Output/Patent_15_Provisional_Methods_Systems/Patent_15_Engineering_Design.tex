@@ -1,0 +1,1104 @@
+%=============================================================================
+% PATENT 15 — COMPLETE ENGINEERING DESIGN DOCUMENT
+% "Laboratory Scalar Density Field Generator: Deployment-Ready
+%  Engineering Design Specification"
+%
+% Supporting: US Provisional Patent 63/868,073 (Aug 21, 2025)
+%=============================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{siunitx}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{tcolorbox}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+
+\pagestyle{fancy}
+\fancyhead[L]{\small Patent 15 --- Engineering Design}
+\fancyhead[R]{\small CONFIDENTIAL}
+\fancyfoot[C]{\thepage}
+
+\title{\textbf{Laboratory Scalar Density Field Generator}\\[6pt]
+\large Deployment-Ready Engineering Design Specification\\[6pt]
+\normalsize Supporting US Provisional Patent 63/868,073\\
+Document Revision 1.0}
+
+\author{DFD Research Programme --- Patent 15 Technical Team}
+\date{March 2026}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+%=============================================================================
+\section{Executive Summary}
+%=============================================================================
+
+This document provides the complete, deployment-ready engineering
+design for a Laboratory Scalar Density Field Generator (LSDFG),
+the enabling apparatus for all Density Field Dynamics (DFD)
+technology patents.  The LSDFG generates controlled perturbations
+of the scalar field $\psi$ through electromagnetic--$\psi$
+back-reaction coupling, measures the generated field through a
+multi-modal sensor suite, and stabilizes the field via real-time
+feedback control.
+
+\paragraph{Key specifications:}
+\begin{itemize}[nosep]
+\item \textbf{Detection sensitivity}: $\Delta\psi \sim 10^{-19}$
+(Phase 3, $10^4\;\si{s}$ integration)
+\item \textbf{$\lambda$ parameter reach}:
+$|\lambda - 1| \sim 10^{-14}$ (Phase 3)
+\item \textbf{Footprint}: $5\;\si{m} \times 5\;\si{m} \times 6\;\si{m}$
+(including cryogenics)
+\item \textbf{Power}: $\sim 200\;\si{kW}$ (dominated by cryogenics)
+\item \textbf{Cooldown time}: $\sim 48\;\si{h}$ to operational
+temperature
+\item \textbf{Campaign duration}: $\sim 2$ weeks for Phase 1
+broadband scan
+\end{itemize}
+
+%=============================================================================
+\section{System Requirements}
+%=============================================================================
+
+\subsection{Functional Requirements}
+
+\begin{longtable}{p{0.08\textwidth}p{0.60\textwidth}p{0.22\textwidth}}
+\toprule
+\textbf{ID} & \textbf{Requirement} & \textbf{Verification} \\
+\midrule
+\endhead
+FR-01 & Generate EM-driven $\psi$ perturbations via TE+TM
+superposition in SRF cavities & Analysis + Test \\
+FR-02 & Detect $\psi$ perturbations at $\Delta\psi < 10^{-15}$
+in $10^3\;\si{s}$ & Test \\
+FR-03 & Measure $\psi$ independently in optical, atomic, and
+inertial domains & Test \\
+FR-04 & Stabilize generated $\psi$ field to $\pm 10\%$ of
+setpoint & Test \\
+FR-05 & Scan EM drive frequency over $0.1$--$10\;\si{GHz}$
+range & Test \\
+FR-06 & Enforce hardware safety limits on $|\psi|$,
+$|\nabla\psi|$, and $d|\psi|/dt$ & Inspection + Test \\
+FR-07 & Maintain vacuum $< 10^{-6}\;\si{Pa}$ during
+operation & Test \\
+FR-08 & Maintain thermal stability $\pm 1\;\si{mK}$ at
+sensor locations & Test \\
+FR-09 & Provide phase-coherent timing across all subsystems
+at $< 100\;\si{ps}$ & Test \\
+FR-10 & Record all sensor data with $< 100\;\si{ps}$
+timestamps continuously & Inspection \\
+\bottomrule
+\end{longtable}
+
+\subsection{Performance Requirements}
+
+\begin{longtable}{p{0.08\textwidth}p{0.45\textwidth}p{0.18\textwidth}p{0.19\textwidth}}
+\toprule
+\textbf{ID} & \textbf{Parameter} & \textbf{Phase 1} & \textbf{Phase 3} \\
+\midrule
+\endhead
+PR-01 & Stored EM energy & $9\;\si{kJ}$ & $1\;\si{MJ}$ \\
+PR-02 & Cavity $Q_0$ & $> 10^{10}$ & $> 3 \times 10^{10}$ \\
+PR-03 & Modulation depth $m$ & $0.01$ & $0.10$ \\
+PR-04 & $\psi$ detection floor & $10^{-17}$ & $10^{-19}$ \\
+PR-05 & Accelerometer noise & $10^{-11}\;\si{m/s^2/\sqrt{Hz}}$ &
+$10^{-13}\;\si{m/s^2/\sqrt{Hz}}$ \\
+PR-06 & Clock instability & $5 \times 10^{-17}/\sqrt{\tau}$ &
+$2 \times 10^{-18}/\sqrt{\tau}$ \\
+PR-07 & MZI phase noise & $10^{-9}\;\si{rad/\sqrt{Hz}}$ &
+$10^{-11}\;\si{rad/\sqrt{Hz}}$ \\
+\bottomrule
+\end{longtable}
+
+\subsection{Environmental Requirements}
+
+\begin{longtable}{p{0.08\textwidth}p{0.52\textwidth}p{0.30\textwidth}}
+\toprule
+\textbf{ID} & \textbf{Requirement} & \textbf{Specification} \\
+\midrule
+\endhead
+ER-01 & Ambient temperature & $20 \pm 2\;^\circ$C \\
+ER-02 & Relative humidity & $30$--$60\%$ \\
+ER-03 & Ambient vibration (floor) & $< 10^{-7}\;\si{m/s^2/\sqrt{Hz}}$
+at $1\;\si{Hz}$ \\
+ER-04 & Ambient magnetic field & $< 50\;\si{\mu T}$ (Earth's field) \\
+ER-05 & Power supply & $3$-phase $400\;\si{V}$, $500\;\si{A}$ \\
+ER-06 & Cooling water & $20\;\si{L/min}$ at $15\;^\circ$C \\
+ER-07 & Liquid He supply & $500\;\si{L/day}$ (or closed-cycle) \\
+ER-08 & Floor loading & $> 5000\;\si{kg/m^2}$ \\
+ER-09 & Ceiling height & $> 6\;\si{m}$ \\
+\bottomrule
+\end{longtable}
+
+%=============================================================================
+\section{System Architecture}
+%=============================================================================
+
+\subsection{Block Diagram}
+
+The LSDFG consists of five primary subsystems connected as follows:
+
+\begin{tcolorbox}[colback=blue!3, colframe=blue!50!black,
+title=System Architecture Block Diagram]
+\begin{verbatim}
++-----------------------------------------------------------+
+|                    CONTROL & DAQ (Sec 7)                  |
+|  +----------+  +----------+  +----------+  +----------+  |
+|  | Kalman   |  | Feedback |  | Safety   |  | Data     |  |
+|  | Filter   |  | Control  |  | Interlock|  | Recorder |  |
+|  +----+-----+  +----+-----+  +----+-----+  +----+-----+  |
+|       |             |             |             |          |
++-------+-------------+-------------+-------------+---------+
+        |             |             |             |
+   +----v----+   +----v----+   +----v----+   +---v----+
+   | SENSOR  |   | SOURCE  |   | VACUUM  |   | TIMING |
+   | SUITE   |   | ARRAY   |   | & ENV.  |   | DIST.  |
+   | (Sec 5) |   | (Sec 4) |   | (Sec 3) |   | (Sec 6)|
+   +---------+   +---------+   +---------+   +--------+
+\end{verbatim}
+\end{tcolorbox}
+
+\subsection{Phased Implementation}
+
+\begin{longtable}{p{0.12\textwidth}p{0.25\textwidth}p{0.25\textwidth}p{0.28\textwidth}}
+\toprule
+\textbf{Phase} & \textbf{Sources} & \textbf{Sensors} & \textbf{Reach} \\
+\midrule
+\endhead
+\textbf{Phase 1} (Yr 1) & 4$\times$ SRF cavities, CW, $U_0 = 9\;\si{kJ}$
+& MZI + 2$\times$ FP cavities + 3$\times$ gravimeters
+& $|\lambda{-}1| \sim 10^{-9}$ \\[6pt]
+\textbf{Phase 2} (Yr 2) & Phase 1 + optimized array, rotating mass
+& Phase 1 + Sr lattice clock + Rb atom interferometer
+& $|\lambda{-}1| \sim 10^{-11}$ \\[6pt]
+\textbf{Phase 3} (Yr 3+) & Pulsed SRF to $1\;\si{MJ}$, shrunk tube area
+& Phase 2 + Yb clock + Th-229 nuclear clock
+& $|\lambda{-}1| \sim 10^{-14}$ \\
+\bottomrule
+\end{longtable}
+
+%=============================================================================
+\section{Vacuum Chamber and Environmental Control}
+%=============================================================================
+
+\subsection{Primary Vacuum Vessel}
+
+\subsubsection{Geometry and Materials}
+
+\begin{longtable}{p{0.35\textwidth}p{0.55\textwidth}}
+\toprule
+\textbf{Parameter} & \textbf{Specification} \\
+\midrule
+\endhead
+Overall geometry & Vertical cylinder, domed ends \\
+Inner diameter & $1200\;\si{mm}$ \\
+Cylindrical height & $3000\;\si{mm}$ \\
+Total internal volume & $3.39\;\si{m^3}$ \\
+Wall material & 316L stainless steel (low magnetic permeability) \\
+Wall thickness & $12\;\si{mm}$ (ASME VIII Div.~1 rated) \\
+End caps & Torispherical, $12\;\si{mm}$ \\
+Surface finish (internal) & Electropolished, $R_a < 0.4\;\si{\mu m}$ \\
+Surface finish (external) & 2B mill finish \\
+Leak rate & $< 10^{-9}\;\si{Pa\cdot m^3/s}$ (He) \\
+Design pressure & Vacuum to $0.2\;\si{MPa}$ (gauge) \\
+Bakeout temperature & $150\;^\circ$C (full vessel) \\
+Mass (empty) & $\sim 2500\;\si{kg}$ \\
+\bottomrule
+\end{longtable}
+
+\subsubsection{Port Configuration}
+
+\begin{longtable}{p{0.15\textwidth}p{0.15\textwidth}p{0.15\textwidth}p{0.45\textwidth}}
+\toprule
+\textbf{Port} & \textbf{Size} & \textbf{Qty} & \textbf{Purpose} \\
+\midrule
+\endhead
+Optical & CF-100 & 12 & Laser access at $30^\circ$ azimuthal spacing \\
+RF waveguide & WR-90 & 4 & SRF cavity feeds \\
+RF coaxial & SMA & 8 & Monitoring, calibration, auxiliary feeds \\
+Fiber & FC/APC & 6 & PM fiber for clock/interferometer links \\
+Electrical & D-sub 50 & 4 & Sensor signals, thermocouples, heaters \\
+Electrical & BNC & 24 & Fast analog signals \\
+Pumping & DN-160 CF & 2 & Turbo pump, ion pump \\
+Cryogenic & Custom & 4 & LHe transfer lines \\
+Top access & DN-400 CF & 1 & Equipment installation \\
+Bottom access & DN-250 CF & 1 & Feedthrough plate \\
+\bottomrule
+\end{longtable}
+
+\subsection{Vacuum System}
+
+\subsubsection{Pumping Chain}
+
+\begin{enumerate}[nosep]
+\item \textbf{Roughing}: Dry scroll pump, $10\;\si{m^3/h}$,
+base $1\;\si{Pa}$.
+\item \textbf{High vacuum}: Turbomolecular pump, $300\;\si{L/s}$
+(N$_2$), magnetically levitated bearings, vibration
+$< 10^{-3}\;\si{m/s^2}$.
+\item \textbf{Ultra-high vacuum}: Sputter-ion pump, $60\;\si{L/s}$,
+no moving parts, for operational phase.
+\item \textbf{Pressure monitoring}: Bayard-Alpert ionization gauge
+($10^{-8}$--$10^{-2}\;\si{Pa}$), Pirani gauge
+($10^{-1}$--$10^5\;\si{Pa}$), residual gas analyzer
+(1--200 AMU).
+\end{enumerate}
+
+\paragraph{Pumpdown schedule:}
+Roughing to $1\;\si{Pa}$: $\sim 2\;\si{h}$.
+Turbo to $10^{-5}\;\si{Pa}$: $\sim 12\;\si{h}$.
+Bakeout + ion pump to $< 10^{-7}\;\si{Pa}$: $\sim 48\;\si{h}$.
+
+\subsection{Thermal Control}
+
+\subsubsection{Three-Stage Temperature Stabilization}
+
+\begin{longtable}{p{0.12\textwidth}p{0.20\textwidth}p{0.20\textwidth}p{0.38\textwidth}}
+\toprule
+\textbf{Stage} & \textbf{Stability} & \textbf{Method} & \textbf{Details} \\
+\midrule
+\endhead
+Outer & $\pm 0.1\;\si{K}$ & Water jacket & Cu tubing brazed to vessel exterior,
+$5\;\si{L/min}$ chilled water loop \\
+Middle & $\pm 1\;\si{mK}$ & Active Peltier & 16$\times$ TEC modules on Al shield,
+PID-controlled to $10\;\si{\mu K}$ readout \\
+Inner & $\pm 0.1\;\si{mK}$ & Passive radiation & 3 polished Al shields,
+emissivity $< 0.05$, passive equilibration \\
+\bottomrule
+\end{longtable}
+
+\paragraph{Temperature sensors:} 24$\times$ calibrated Pt-100 RTDs
+(4-wire, $0.1\;\si{mK}$ resolution) distributed across all thermal
+stages and critical sensor locations.  2$\times$ sapphire-diode
+sensors for cryogenic stages.
+
+\subsection{Magnetic Shielding}
+
+Three concentric cylindrical mu-metal shields:
+\begin{itemize}[nosep]
+\item Layer 1 (outer): $1.5\;\si{mm}$ mu-metal, $\varnothing 1500\;\si{mm}$
+\item Layer 2 (middle): $1.0\;\si{mm}$ mu-metal, $\varnothing 1400\;\si{mm}$
+\item Layer 3 (inner): $0.8\;\si{mm}$ mu-metal, $\varnothing 1300\;\si{mm}$
+\item Combined shielding factor: $> 10^5$ at DC, $> 10^6$ at $50\;\si{Hz}$
+\item Residual field at center: $< 1\;\si{nT}$
+\item Degaussing coils on each layer for periodic demagnetization
+\end{itemize}
+
+\subsection{Vibration Isolation}
+
+\subsubsection{Stage 1: Inertial Block}
+
+\begin{itemize}[nosep]
+\item Reinforced concrete block: $2.5\;\si{m} \times 2.5\;\si{m}
+\times 1.0\;\si{m}$, mass $\sim 15{,}000\;\si{kg}$
+\item Supported on 4$\times$ pneumatic isolators (air springs)
+\item Natural frequency: $f_0 = 0.5\;\si{Hz}$ (vertical),
+$0.3\;\si{Hz}$ (horizontal)
+\item Passive isolation: $-40\;\si{dB/decade}$ above $f_0$
+\end{itemize}
+
+\subsubsection{Stage 2: Active Platform}
+
+\begin{itemize}[nosep]
+\item Active piezo-servo platform beneath vacuum vessel
+\item 6-DOF feedback using integrated geophones
+\item Bandwidth: $0.5$--$200\;\si{Hz}$
+\item Residual vibration: $< 10^{-9}\;\si{m/s^2/\sqrt{Hz}}$
+above $1\;\si{Hz}$
+\end{itemize}
+
+\subsubsection{Stage 3: Internal Suspensions}
+
+\begin{itemize}[nosep]
+\item Critical sensor assemblies (FP cavities, clocks) on
+monolithic fused-silica suspensions
+\item Pendulum frequency: $f_0 = 0.1\;\si{Hz}$
+\item Quality factor: $Q > 10^6$ (fused silica)
+\item Effective isolation at $1\;\si{Hz}$: $> 10^4$
+\end{itemize}
+
+%=============================================================================
+\section{Source Array Design}
+%=============================================================================
+
+\subsection{SRF Cavity Subsystem}
+
+\subsubsection{Individual Cavity Design}
+
+\begin{longtable}{p{0.40\textwidth}p{0.50\textwidth}}
+\toprule
+\textbf{Parameter} & \textbf{Value} \\
+\midrule
+\endhead
+Cavity type & 9-cell TESLA-type elliptical \\
+Material & Bulk niobium, RRR $> 300$ \\
+Fundamental frequency (TM$_{010}$) & $1.3\;\si{GHz}$ \\
+Second mode (TE$_{011}$) & $1.82\;\si{GHz}$ \\
+Active length & $1038\;\si{mm}$ \\
+Iris diameter & $70\;\si{mm}$ \\
+Equator diameter & $206\;\si{mm}$ \\
+Wall thickness & $2.8\;\si{mm}$ \\
+$Q_0$ (TM$_{010}$, $2\;\si{K}$) & $> 2 \times 10^{10}$ \\
+$Q_0$ (TE$_{011}$, $2\;\si{K}$) & $> 1 \times 10^{10}$ \\
+Accelerating gradient (TM) & $25\;\si{MV/m}$ \\
+Peak surface magnetic field & $105\;\si{mT}$ \\
+Peak surface electric field & $50\;\si{MV/m}$ \\
+Stored energy per cell (TM) & $255\;\si{J}$ at $25\;\si{MV/m}$ \\
+Total stored energy (9-cell TM) & $2295\;\si{J}$ \\
+$R/Q$ (TM$_{010}$) & $1036\;\si{\Omega}$ \\
+Geometry factor $G$ & $271\;\si{\Omega}$ \\
+Operating temperature & $2.0\;\si{K}$ (superfluid He) \\
+Surface treatment & Nitrogen-infusion + $120\;^\circ$C bake \\
+\bottomrule
+\end{longtable}
+
+\subsubsection{Dual-Mode Operation}
+
+Each cavity is simultaneously driven in TM$_{010}$ and TE$_{011}$
+modes to break geometry transparency:
+
+\paragraph{RF feed configuration:}
+\begin{itemize}[nosep]
+\item TM$_{010}$ input coupler: $Q_{\rm ext} = 10^7$ (matched
+for $10\;\si{W}$ forward power)
+\item TE$_{011}$ input coupler: $Q_{\rm ext} = 5 \times 10^7$
+(separate antenna, orthogonal polarization)
+\item Field probe (TM): $Q_{\rm probe} = 10^{12}$, for phase
+and amplitude monitoring
+\item Field probe (TE): $Q_{\rm probe} = 10^{12}$
+\item HOM coupler: Standard TESLA design for parasitic mode
+damping
+\end{itemize}
+
+\paragraph{Phase control:}
+\begin{itemize}[nosep]
+\item Relative phase $\phi_{\rm TE-TM}$ controlled by digital
+IQ modulator
+\item Phase resolution: $< 0.001\;\si{rad}$
+\item Phase stability: $< 0.01\;\si{rad}$ RMS over $10^4\;\si{s}$
+\item Phase modulation at $2\omega$ with programmable depth
+$m = 0$--$0.2$
+\end{itemize}
+
+\subsubsection{Array Layout}
+
+Four cavities arranged vertically along the chamber axis:
+
+\begin{longtable}{p{0.12\textwidth}p{0.20\textwidth}p{0.25\textwidth}p{0.33\textwidth}}
+\toprule
+\textbf{Cavity} & \textbf{$z$ position} & \textbf{$\psi$-mode role} & \textbf{Notes} \\
+\midrule
+\endhead
+Cav-1 & $z = 0.0\;\si{m}$ & Antinode 1 & Reference cavity \\
+Cav-2 & $z = 0.75\;\si{m}$ & Antinode 2 & Phase-locked to Cav-1 \\
+Cav-3 & $z = 1.50\;\si{m}$ & Antinode 3 & Phase-locked to Cav-1 \\
+Cav-4 & $z = 2.25\;\si{m}$ & Antinode 4 & Phase-locked to Cav-1 \\
+\bottomrule
+\end{longtable}
+
+\paragraph{$\psi$-mode tube dimensions:}
+\begin{itemize}[nosep]
+\item Tube cross-section: $A_\psi = \pi(0.5)^2 = 0.785\;\si{m^2}$
+\item Tube height: $L = 3.0\;\si{m}$
+\item Total cavity aperture: $A_{\rm cav,tot} = 4 \times \pi(0.035)^2
+= 1.54 \times 10^{-2}\;\si{m^2}$
+\item Area ratio: $A_{\rm cav,tot}/A_\psi = 0.0196$
+\end{itemize}
+
+\subsection{Cryogenic System}
+
+\subsubsection{Helium Plant}
+
+\begin{longtable}{p{0.40\textwidth}p{0.50\textwidth}}
+\toprule
+\textbf{Parameter} & \textbf{Specification} \\
+\midrule
+\endhead
+Refrigeration capacity at $2\;\si{K}$ & $100\;\si{W}$ \\
+Refrigeration capacity at $4.5\;\si{K}$ & $500\;\si{W}$ \\
+LHe storage & $2000\;\si{L}$ dewar \\
+Compressor power & $150\;\si{kW}$ \\
+Cooldown time (300 K to 2 K) & $48\;\si{h}$ \\
+Steady-state He consumption & $< 5\;\si{L/h}$ (with recovery) \\
+Cryostat vacuum & $< 10^{-4}\;\si{Pa}$ \\
+Thermal shield temperature & $80\;\si{K}$ (LN$_2$ or cryo-cooler) \\
+\bottomrule
+\end{longtable}
+
+\subsubsection{Cryostat Design}
+
+Each SRF cavity sits in an individual cryostat module:
+\begin{itemize}[nosep]
+\item Inner vessel (He bath): $\varnothing 280\;\si{mm}$ Ti alloy
+\item Thermal shield: $80\;\si{K}$ Al with MLI blanket
+\item Vacuum jacket: $\varnothing 600\;\si{mm}$ SS
+\item Magnetic shield (within cryostat): $\varnothing 260\;\si{mm}$
+Nb-Ti or Cryoperm
+\item Support: Low-thermal-conductivity G-10 struts
+\item Total heat load per module: $\sim 20\;\si{W}$ at $2\;\si{K}$
+\end{itemize}
+
+\subsection{RF Power System}
+
+\begin{longtable}{p{0.40\textwidth}p{0.50\textwidth}}
+\toprule
+\textbf{Parameter} & \textbf{Specification} \\
+\midrule
+\endhead
+TM$_{010}$ RF source & Solid-state amplifier, $1.3\;\si{GHz}$ \\
+TM$_{010}$ CW power & $50\;\si{W}$ per cavity (CW) \\
+TE$_{011}$ RF source & Solid-state amplifier, $1.82\;\si{GHz}$ \\
+TE$_{011}$ CW power & $20\;\si{W}$ per cavity (CW) \\
+Phase noise (at $10\;\si{kHz}$ offset) & $< -140\;\si{dBc/Hz}$ \\
+Amplitude stability & $< 10^{-6}$ RMS \\
+AM modulation bandwidth & DC to $100\;\si{MHz}$ \\
+Frequency tuning range & $\pm 500\;\si{kHz}$ (piezo tuner) \\
+Pulsed power (Phase 3) & $500\;\si{kW}$ klystron, $10\;\si{ms}$ pulse \\
+\bottomrule
+\end{longtable}
+
+\subsection{Rotating Mass Source (Calibration)}
+
+\begin{longtable}{p{0.40\textwidth}p{0.50\textwidth}}
+\toprule
+\textbf{Parameter} & \textbf{Specification} \\
+\midrule
+\endhead
+Material & Tungsten alloy (W-Ni-Cu, $\rho = 18{,}500\;\si{kg/m^3}$) \\
+Geometry & Two semi-cylindrical masses on rotor \\
+Total rotating mass & $2 \times 204 = 408\;\si{kg}$ \\
+Rotor diameter & $300\;\si{mm}$ \\
+Rotor length & $300\;\si{mm}$ \\
+Rotation frequency & $0$--$60\;\si{Hz}$ (variable speed drive) \\
+Balance grade & ISO G0.4 \\
+Bearing type & Air bearings (low vibration) \\
+Position (relative to sensors) & External to main vessel, $r = 0.8\;\si{m}$
+from axis \\
+$\psi$ signal at sensor & $\delta\psi \approx 2GM/(c^2 r)
+\times \sin(2\pi f_{\rm rot}\,t) \sim 6 \times 10^{-25}\;\si{} \times f_2$
+component \\
+Gravitational signal & $\delta g \approx 2GM r_0/(r^3)
+\sim 8.5 \times 10^{-8}\;\si{m/s^2}$ (static, at $r=0.8\;\si{m}$) \\
+\bottomrule
+\end{longtable}
+
+%=============================================================================
+\section{Sensor Suite Design}
+%=============================================================================
+
+\subsection{Sensor Layout}
+
+Sensors are arranged at three stations within the vacuum chamber:
+
+\begin{longtable}{p{0.12\textwidth}p{0.15\textwidth}p{0.63\textwidth}}
+\toprule
+\textbf{Station} & \textbf{$z$ position} & \textbf{Instruments} \\
+\midrule
+\endhead
+Lower & $z = 0.3\;\si{m}$ & FP cavity \#1, Sr clock MOT,
+superconducting gravimeter (vertical),
+MZI lower beam \\
+Center & $z = 1.5\;\si{m}$ & Superconducting gravimeters
+($x,y$ horizontal), atom interferometer zone,
+diagnostic optics \\
+Upper & $z = 2.7\;\si{m}$ & FP cavity \#2, diagnostic clock
+(Yb, Phase 2+), MZI upper beam \\
+\bottomrule
+\end{longtable}
+
+\subsection{Optical Interferometer (MZI)}
+
+\subsubsection{Detailed Design}
+
+\begin{longtable}{p{0.40\textwidth}p{0.50\textwidth}}
+\toprule
+\textbf{Parameter} & \textbf{Specification} \\
+\midrule
+\endhead
+Topology & Mach-Zehnder, vertical arm separation \\
+Arm length & $1.0\;\si{m}$ (folded if needed) \\
+Vertical separation $\Delta h$ & $2.4\;\si{m}$ (between stations) \\
+Light source & Nd:YAG $1064\;\si{nm}$, $1\;\si{W}$,
+linewidth $< 1\;\si{kHz}$ \\
+Beam splitters & Low-loss dielectric, 50:50 \\
+Mirrors & Superpolished, $R > 99.99\%$ \\
+Readout & Balanced heterodyne at $80\;\si{MHz}$ \\
+Phase resolution & $10^{-10}\;\si{rad/\sqrt{Hz}}$ (shot-noise limited) \\
+Path length stability & Active fiber stabilization,
+$\delta L < 10^{-13}\;\si{m/\sqrt{Hz}}$ \\
+Common-mode rejection & $> 10^4$ for laser frequency noise \\
+Beam diameter & $3\;\si{mm}$ (to minimize diffraction) \\
+Alignment & Automatic beam steering with quad PDs \\
+\bottomrule
+\end{longtable}
+
+\paragraph{$\psi$ response:}
+Differential phase for a uniform $\Delta\psi$ across the
+vertical separation:
+\begin{equation}
+\Delta\phi_{\rm MZI} = \frac{2\pi L}{\lambda}\,\Delta\psi
+= \frac{2\pi \times 1.0}{1.064 \times 10^{-6}}\,\Delta\psi
+= 5.91 \times 10^6\,\Delta\psi \;\si{rad}.
+\end{equation}
+Minimum detectable: $\Delta\psi_{\rm min} = 10^{-10}/(5.91 \times 10^6)
+\times (1/\sqrt{\tau}) = 1.7 \times 10^{-17}/\sqrt{\tau/\si{s}}$.
+
+\subsection{Fabry-P\'erot Cavity Sensors}
+
+\subsubsection{Cavity Design}
+
+Two identical FP cavities at upper and lower stations:
+
+\begin{longtable}{p{0.40\textwidth}p{0.50\textwidth}}
+\toprule
+\textbf{Parameter} & \textbf{Specification} \\
+\midrule
+\endhead
+Spacer material & ULE glass (CTE zero-crossing at $\sim 20\;^\circ$C) \\
+Length & $100\;\si{mm}$ \\
+Mirror substrate & Fused silica, superpolished \\
+Mirror coating & Ion-beam-sputtered Ta$_2$O$_5$/SiO$_2$, 40 layers \\
+Reflectivity & $R > 99.9985\%$ \\
+Finesse & $\mathcal{F} \approx 400{,}000$ \\
+Free spectral range & $1.5\;\si{GHz}$ \\
+Linewidth & $3.75\;\si{kHz}$ \\
+Thermal noise (Brownian) & $\sim 3 \times 10^{-16}$ at $1\;\si{s}$ \\
+Fractional frequency stability & $< 10^{-16}$ at $0.1$--$100\;\si{s}$ \\
+Laser locking & Pound-Drever-Hall, bandwidth $100\;\si{kHz}$ \\
+Laser & ECDL at $698\;\si{nm}$ (shared with Sr clock) \\
+Operating temperature & $20.00 \pm 0.001\;^\circ$C \\
+Orientation & Vertical (sensitive to $\partial\psi/\partial z$
+through differential expansion) \\
+\bottomrule
+\end{longtable}
+
+\paragraph{$\psi$ response:}
+$\delta f/f = -2\,\delta\psi$.
+Minimum detectable (at $1\;\si{s}$): $\delta\psi_{\rm min}
+= (1/2) \times 10^{-16} = 5 \times 10^{-17}$.
+
+\subsection{Optical Lattice Clock (Sr)}
+
+\begin{longtable}{p{0.40\textwidth}p{0.50\textwidth}}
+\toprule
+\textbf{Parameter} & \textbf{Specification} \\
+\midrule
+\endhead
+Species & $^{87}$Sr \\
+Transition & $^1$S$_0 \to$ $^3$P$_0$ at $698.4\;\si{nm}$
+($429.228\;\si{THz}$) \\
+Lattice wavelength & $813.4274\;\si{nm}$ (magic wavelength) \\
+Lattice depth & $80\,E_r$ ($E_r$ = recoil energy) \\
+Atom number & $\sim 10^4$ per cycle \\
+Interrogation time & $1$--$10\;\si{s}$ \\
+Dick effect limit & $3 \times 10^{-17}/\sqrt{\tau}$ \\
+Systematic uncertainty & $< 2 \times 10^{-18}$ (target) \\
+BBR shift uncertainty & $< 5 \times 10^{-19}$ (in-vacuum) \\
+Clock laser & PDH-locked to FP cavity \#1 \\
+Cycle time & $\sim 1.5\;\si{s}$ \\
+Location & Lower sensor station \\
+\bottomrule
+\end{longtable}
+
+\subsection{Superconducting Gravimeters}
+
+Three superconducting gravimeters provide acceleration readout:
+
+\begin{longtable}{p{0.40\textwidth}p{0.50\textwidth}}
+\toprule
+\textbf{Parameter} & \textbf{Specification} \\
+\midrule
+\endhead
+Type & Nb levitated sphere in persistent-current trap \\
+Sensitivity & $< 10^{-12}\;\si{m/s^2/\sqrt{Hz}}$ \\
+Bandwidth & $10^{-4}$--$1\;\si{Hz}$ \\
+Dynamic range & $\pm 10^{-4}\;\si{m/s^2}$ \\
+Long-term drift & $< 10^{-10}\;\si{m/s^2/yr}$ \\
+Operating temperature & $4.2\;\si{K}$ \\
+Orientations & 1 vertical (center station), 2 horizontal
+($x$, $y$, center station) \\
+Readout & SQUID, lock-in at pump frequency \\
+\bottomrule
+\end{longtable}
+
+\subsection{Atom Interferometer (Phase 2+)}
+
+\begin{longtable}{p{0.40\textwidth}p{0.50\textwidth}}
+\toprule
+\textbf{Parameter} & \textbf{Specification} \\
+\midrule
+\endhead
+Species & $^{87}$Rb \\
+Configuration & Mach-Zehnder, vertical \\
+Beam-splitting & Raman transitions at $780\;\si{nm}$ \\
+Interrogation time $T$ & $0.3\;\si{s}$ \\
+Interferometer length & $2T^2 g/2 \approx 0.44\;\si{m}$ \\
+Phase sensitivity & $\sim k_{\rm eff}\,a\,T^2
+= 1.6 \times 10^7 \times a \times 0.09\;\si{rad}$ \\
+Acceleration sensitivity & $\sim 10^{-9}\;\si{m/s^2/\sqrt{Hz}}$ \\
+Repetition rate & $\sim 1\;\si{Hz}$ \\
+Atom source & 3D MOT + molasses, $10^6$ atoms per shot \\
+Location & Center station, vertical path \\
+\bottomrule
+\end{longtable}
+
+\subsection{Timing Distribution System}
+
+\begin{longtable}{p{0.40\textwidth}p{0.50\textwidth}}
+\toprule
+\textbf{Parameter} & \textbf{Specification} \\
+\midrule
+\endhead
+Primary reference & Active hydrogen maser,
+$\sigma_y \sim 10^{-13}$ at $1\;\si{s}$ \\
+Optical distribution & Frequency comb (Er:fiber, $250\;\si{MHz}$
+rep rate) \\
+Comb stability & Phase-locked to Sr clock laser \\
+Fiber distribution & PM fiber, actively stabilized \\
+Transfer stability & $< 10^{-19}$ ($10^4\;\si{s}$ integration) \\
+RF distribution & $10\;\si{MHz}$, $100\;\si{MHz}$, $1\;\si{GHz}$
+synthesized from comb \\
+GPS receiver & Multi-constellation, for external comparison \\
+PPS output & $< 1\;\si{ns}$ accuracy to UTC \\
+\bottomrule
+\end{longtable}
+
+%=============================================================================
+\section{Control System Architecture}
+%=============================================================================
+
+\subsection{Hardware Overview}
+
+\begin{longtable}{p{0.25\textwidth}p{0.65\textwidth}}
+\toprule
+\textbf{Component} & \textbf{Specification} \\
+\midrule
+\endhead
+FPGA platform & Xilinx Ultrascale+ (or equivalent), $500\;\si{MHz}$
+clock \\
+ADC (fast) & 16-channel, 16-bit, $250\;\si{MSPS}$ \\
+ADC (precision) & 32-channel, 24-bit, $1\;\si{kSPS}$ \\
+DAC (fast) & 8-channel, 16-bit, $1\;\si{GSPS}$ \\
+DAC (slow) & 16-channel, 20-bit, $100\;\si{kSPS}$ \\
+Digital I/O & 64 channels \\
+Timing & White Rabbit switches ($< 1\;\si{ns}$ sync) \\
+Computing & Dual-CPU server with GPU (for offline Kalman filter) \\
+Network & $10\;\si{Gbit}$ Ethernet backbone \\
+Storage & RAID-6 array, $100\;\si{TB}$ \\
+\bottomrule
+\end{longtable}
+
+\subsection{Real-Time State Estimator}
+
+\subsubsection{Kalman Filter Design}
+
+\paragraph{State vector:}
+The $\psi$ field is discretized on a cylindrical grid
+($N_r = 10$, $N_z = 30$, $N_\theta = 1$ for azimuthal symmetry),
+giving $N = 300$ spatial nodes.  The state vector is:
+\begin{equation}
+\mathbf{x} = [\psi_1, \ldots, \psi_N,
+\dot{\psi}_1, \ldots, \dot{\psi}_N]^T
+\in \mathbb{R}^{600}.
+\end{equation}
+
+\paragraph{Process model:}
+The linearized $\psi$ field equation in matrix form:
+\begin{equation}
+\dot{\mathbf{x}} = \mathbf{A}\,\mathbf{x} + \mathbf{B}\,\mathbf{u}
++ \mathbf{w},
+\end{equation}
+where $\mathbf{A}$ encodes the discretized field equation
+(including screening), $\mathbf{B}\,\mathbf{u}$ is the EM
+source driving, and $\mathbf{w}$ is process noise.
+
+\paragraph{Measurement model:}
+\begin{equation}
+\mathbf{z} = \mathbf{H}\,\mathbf{x} + \mathbf{v},
+\end{equation}
+where $\mathbf{H}$ maps the field state to:
+\begin{itemize}[nosep]
+\item MZI phase: $z_{\rm MZI} = (2\pi L/\lambda)\sum_i w_i\,\psi_i$
+\item FP frequency: $z_{\rm FP,k} = -2\,\psi(z_k)$
+\item Clock ratio: $z_{\rm clock} = (K_A^{\rm obs} - K_B^{\rm obs})
+\,\psi(z_{\rm clock})$
+\item Gravimeters: $z_{{\rm grav},k} = (c^2/2)\,(\partial\psi/\partial z)
+\big|_{z_k}$
+\end{itemize}
+
+\paragraph{Update rate:} $10\;\si{kHz}$ (FPGA-implemented
+for fast channels), $1\;\si{Hz}$ (CPU for clock channels).
+
+\subsection{Feedback Controller}
+
+\subsubsection{Control Architecture}
+
+Two nested feedback loops:
+
+\paragraph{Inner loop (fast, FPGA):}
+\begin{itemize}[nosep]
+\item Controls: TE/TM relative phase $\phi$, RF amplitude,
+cavity frequency (via piezo tuner)
+\item Bandwidth: $1\;\si{kHz}$
+\item Objective: Maintain EM drive at $2\omega = \Omega_\psi$
+resonance
+\end{itemize}
+
+\paragraph{Outer loop (slow, CPU):}
+\begin{itemize}[nosep]
+\item Controls: Modulation depth $m$, frequency scan rate,
+integration time
+\item Bandwidth: $0.01\;\si{Hz}$
+\item Objective: Optimize $\psi$ generation or scan frequency
+parameter space
+\end{itemize}
+
+\subsubsection{Operating Modes}
+
+\begin{longtable}{p{0.18\textwidth}p{0.72\textwidth}}
+\toprule
+\textbf{Mode} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{SCAN} & Swept-frequency search for $\psi$ modes.  Drive
+frequency steps through programmed range.  Lock-in detection at
+each step. \\
+\texttt{LOCK} & Frequency locked to identified $\psi$ mode.  PLL
+maintains $2\omega = \Omega_\psi$.  Long integration for
+sensitivity. \\
+\texttt{SHAPE} & Active $\psi$-field shaping.  Multiple cavities
+driven with phase offsets to produce desired spatial profile. \\
+\texttt{CALIBRATE} & Rotating mass or known gravitational source.
+Validates sensor chain end-to-end. \\
+\texttt{NULL} & All sources off.  Measures ambient background
+for subtraction. \\
+\texttt{SAFE} & All RF off.  Monitoring only.  Default power-on
+state. \\
+\bottomrule
+\end{longtable}
+
+%=============================================================================
+\section{Safety System Design}
+%=============================================================================
+
+\subsection{Safety Philosophy}
+
+The safety system is designed to the IEC 61508 SIL-2 standard
+(Safety Integrity Level 2), providing:
+\begin{itemize}[nosep]
+\item Independent safety-rated sensors (separate from measurement
+sensors)
+\item Hardwired interlock logic (not software-dependent)
+\item Fail-safe design (loss of power $\to$ safe state)
+\item Dual-redundant trip channels
+\end{itemize}
+
+\subsection{Safety Instrumented System (SIS)}
+
+\subsubsection{Safety Sensors}
+
+\begin{longtable}{p{0.20\textwidth}p{0.25\textwidth}p{0.22\textwidth}p{0.23\textwidth}}
+\toprule
+\textbf{Sensor} & \textbf{Measurand} & \textbf{Range} & \textbf{Response} \\
+\midrule
+\endhead
+Safety accel.~1 & $|a_z|$ & $0$--$1\;\si{m/s^2}$ & $< 1\;\si{ms}$ \\
+Safety accel.~2 & $|a_z|$ & $0$--$1\;\si{m/s^2}$ & $< 1\;\si{ms}$ \\
+Safety MZI & $|\Delta\phi|$ & $0$--$2\pi$ & $< 10\;\si{\mu s}$ \\
+Personnel sensor & Exclusion zone & Presence/absence & $< 100\;\si{ms}$ \\
+RF power mon. & Forward power & $0$--$1\;\si{MW}$ & $< 1\;\si{\mu s}$ \\
+Cryo sensors & He level, pressure & Multiple & $< 1\;\si{s}$ \\
+Vacuum gauge & Chamber pressure & $10^{-8}$--$10^5\;\si{Pa}$ & $< 1\;\si{s}$ \\
+O$_2$ monitor & Ambient O$_2$ & $0$--$25\%$ & $< 5\;\si{s}$ \\
+\bottomrule
+\end{longtable}
+
+\subsubsection{Interlock Logic}
+
+\begin{tcolorbox}[colback=red!3, colframe=red!60!black,
+title=Safety Interlock Trip Matrix]
+\begin{verbatim}
+CONDITION                    ACTION
+---------                    ------
+|a_anom| > 10^-4 m/s^2  --> RF KILL + CAVITY DETUNE
+|a_anom| > 10^-6 m/s^2  --> WARNING + LOG
+|dpsi/dt| > 10^-6 /s    --> RF KILL + CAVITY DETUNE
+Vacuum > 10^-3 Pa       --> RF OFF (protect cavities)
+He level < 50%           --> RF POWER REDUCE
+He level < 20%           --> RF OFF
+Personnel in zone        --> RF INTERLOCK
+O2 < 19.5%              --> ALARM + VENTILATION
+Any 2 safety sensors     --> FULL SHUTDOWN (Phase 4)
+  disagreeing
+\end{verbatim}
+\end{tcolorbox}
+
+\subsubsection{Shutdown Sequence}
+
+\begin{longtable}{p{0.10\textwidth}p{0.18\textwidth}p{0.62\textwidth}}
+\toprule
+\textbf{Phase} & \textbf{Time} & \textbf{Action} \\
+\midrule
+\endhead
+1 & $< 1\;\si{\mu s}$ & PIN diode switches kill RF drive to all cavities \\
+2 & $< 100\;\si{\mu s}$ & Fast piezo tuners detune cavities by $> 100$
+bandwidths \\
+3 & $< 10\;\si{ms}$ & Stored energy rings down ($\tau = Q/(\pi f)
+\sim 2.4\;\si{s}$; detuning accelerates) \\
+4 & $< 1\;\si{s}$ & Mains power disconnect via safety-rated
+contactors \\
+5 & $< 60\;\si{s}$ & All systems to monitored safe state \\
+\bottomrule
+\end{longtable}
+
+\subsection{Personnel Safety}
+
+\begin{itemize}[nosep]
+\item $5\;\si{m}$ exclusion zone during high-power operation,
+enforced by light curtains and interlocked doors
+\item Personal dosimeters: wearable MEMS accelerometers logging
+at $100\;\si{Hz}$, alarm at $10^{-4}\;\si{m/s^2}$
+\item RF exposure: maintained below ICNIRP occupational limits
+at all accessible locations
+\item Cryogenic: ODH (Oxygen Deficiency Hazard) monitoring,
+forced ventilation, emergency breathing apparatus
+\item Magnetic: Access restricted during degaussing operations
+\item Radiation: No significant ionizing radiation sources;
+standard lab monitoring
+\end{itemize}
+
+%=============================================================================
+\section{Expected Performance and Sensitivity}
+%=============================================================================
+
+\subsection{Design Law Evaluation}
+
+Using the design law (Eq.~\ref{eq:design-law-ref}):
+\begin{equation}
+|\lambda - 1|_{\rm min} = \frac{\pi\gamma_\psi}{c_s\,U_0\,m}
+\frac{A_\psi^2}{\kappa_{\rm eff}\,A_{\rm cav,tot}}
+\label{eq:design-law-ref}
+\end{equation}
+
+\begin{longtable}{p{0.25\textwidth}p{0.18\textwidth}p{0.18\textwidth}p{0.18\textwidth}}
+\toprule
+\textbf{Parameter} & \textbf{Phase 1} & \textbf{Phase 2} & \textbf{Phase 3} \\
+\midrule
+\endhead
+$U_0$ (J) & $9 \times 10^3$ & $9 \times 10^3$ & $10^6$ \\
+$m$ & $0.01$ & $0.05$ & $0.10$ \\
+$A_\psi$ (m$^2$) & $0.785$ & $0.785$ & $0.27$ \\
+$A_{\rm cav,tot}$ (m$^2$) & $0.0154$ & $0.0154$ & $0.030$ \\
+$\gamma_\psi/\Omega_\psi$ & $10^{-3}$ & $10^{-3}$ & $10^{-3}$ \\
+$\kappa_{\rm eff}$ & $1$ & $1$ & $1$ \\
+$c_s$ & $c$ & $c$ & $c$ \\
+\midrule
+$|\lambda{-}1|_{\rm min}$ & $2.7 \times 10^{-7}$ & $5.3 \times 10^{-8}$
+& $5.1 \times 10^{-12}$ \\
+\bottomrule
+\end{longtable}
+
+\paragraph{Note:} These are the parametric instability thresholds.
+The driven-resonance channel with TE+TM superposition provides
+an independent sensitivity estimate (see main paper
+Eq.~\ref{eq:psi-amplitude}).  With lock-in detection and long
+integration, the effective reach extends further as shown in
+the main paper Table~\ref{tab:lambda-reach}.
+
+\subsection{Noise Budget Summary}
+
+\begin{longtable}{p{0.30\textwidth}p{0.20\textwidth}p{0.20\textwidth}p{0.20\textwidth}}
+\toprule
+\textbf{Noise Source} & \textbf{Level} & \textbf{$\psi$ equiv.} & \textbf{Regime} \\
+\midrule
+\endhead
+Shot noise (MZI) & $3 \times 10^{-10}\;\si{rad/\sqrt{Hz}}$
+& $5 \times 10^{-17}/\sqrt{\si{Hz}}$ & White \\
+Seismic (after isolation) & $10^{-9}\;\si{m/s^2/\sqrt{Hz}}$
+& $2 \times 10^{-26}/\sqrt{\si{Hz}}$ & $1/f$ \\
+Thermal (FP cavity) & $3 \times 10^{-16}$
+& $1.5 \times 10^{-16}$ & $1/\sqrt{f}$ \\
+Laser frequency & $10^{-14}/\sqrt{\si{Hz}}$
+& CMR $> 10^4$ & White \\
+Residual gas & $10^{-12}\;\si{rad/\sqrt{Hz}}$
+& $2 \times 10^{-19}/\sqrt{\si{Hz}}$ & White \\
+Clock QPN & $5 \times 10^{-17}/\sqrt{\tau}$
+& species-dependent & White \\
+Gravimeter thermal & $10^{-12}\;\si{m/s^2/\sqrt{Hz}}$
+& $2 \times 10^{-29}/\sqrt{\si{Hz}}$ & White \\
+ADC quantization & $< 10^{-7}$ (24-bit)
+& negligible & White \\
+\midrule
+\textbf{Combined floor} & --- & $\sim 5 \times 10^{-17}/\sqrt{\si{Hz}}$
+& Shot-noise limited \\
+\bottomrule
+\end{longtable}
+
+\subsection{Sensitivity Timeline}
+
+\begin{longtable}{p{0.20\textwidth}p{0.18\textwidth}p{0.22\textwidth}p{0.30\textwidth}}
+\toprule
+\textbf{Phase} & \textbf{Duration} & \textbf{$\Delta\psi_{\rm min}$}
+& \textbf{$|\lambda{-}1|_{\rm min}$} \\
+\midrule
+\endhead
+Phase 1, scan & 12 days & $10^{-15}$ per step & $10^{-8}$ (broadband) \\
+Phase 1, lock & 1 month & $5 \times 10^{-17}$ & $10^{-9}$ \\
+Phase 2, lock & 3 months & $10^{-17}$ & $10^{-11}$ \\
+Phase 3, lock & 6 months & $10^{-19}$ & $10^{-14}$ \\
+\bottomrule
+\end{longtable}
+
+%=============================================================================
+\section{Commissioning and Operations}
+%=============================================================================
+
+\subsection{Commissioning Sequence}
+
+\begin{enumerate}[nosep]
+\item \textbf{Mechanical installation} (4 weeks): Vacuum vessel,
+isolation platform, shielding, cryostats.
+\item \textbf{Vacuum qualification} (2 weeks): Leak test,
+pumpdown, bakeout, RGA survey.
+\item \textbf{Cryogenic commissioning} (2 weeks): Cooldown,
+thermal stability verification, He plant tuning.
+\item \textbf{RF commissioning} (2 weeks): Individual cavity
+conditioning, $Q_0$ measurement, dual-mode excitation test.
+\item \textbf{Sensor commissioning} (4 weeks): MZI alignment,
+FP cavity locking, gravimeter cooldown, clock first light.
+\item \textbf{Integration test} (2 weeks): Full system operation,
+data pipeline validation, rotating mass calibration.
+\item \textbf{Safety validation} (1 week): Trip test matrix,
+shutdown timing verification, personnel safety audit.
+\end{enumerate}
+
+Total commissioning: $\sim 17$ weeks.
+
+\subsection{Operational Procedures}
+
+\subsubsection{Daily Operations}
+
+\begin{enumerate}[nosep]
+\item Verify vacuum, cryogenic, and environmental parameters
+within specification.
+\item Check all sensor calibrations against internal references.
+\item Execute scheduled measurement program (\texttt{SCAN},
+\texttt{LOCK}, or \texttt{CALIBRATE}).
+\item Monitor safety system status continuously.
+\item Perform end-of-day data quality review.
+\end{enumerate}
+
+\subsubsection{Weekly Maintenance}
+
+\begin{enumerate}[nosep]
+\item LHe dewar refill or recovery system check.
+\item Mu-metal degaussing cycle.
+\item Sensor recalibration against rotating mass source.
+\item Vibration isolation performance verification.
+\item Data backup and transfer to analysis cluster.
+\end{enumerate}
+
+%=============================================================================
+\section{Cost and Schedule Estimates}
+%=============================================================================
+
+\subsection{Phase 1 Capital Cost}
+
+\begin{longtable}{p{0.45\textwidth}p{0.20\textwidth}p{0.25\textwidth}}
+\toprule
+\textbf{Item} & \textbf{Cost (USD)} & \textbf{Notes} \\
+\midrule
+\endhead
+Vacuum vessel + shielding & \$350K & Custom fabrication \\
+Vacuum pumps + gauges & \$120K & Commercial \\
+Vibration isolation & \$200K & Commercial + custom \\
+SRF cavities (4$\times$) & \$800K & Niobium + fabrication \\
+Cryostats (4$\times$) & \$400K & Custom \\
+He refrigerator & \$600K & Commercial \\
+RF power systems & \$300K & Solid-state amplifiers \\
+Optical interferometer & \$150K & Custom optics \\
+FP cavities (2$\times$) & \$200K & Custom \\
+Sr clock system & \$500K & Laser + vacuum + optics \\
+Superconducting gravimeters (3$\times$) & \$600K & Commercial \\
+Control electronics + DAQ & \$250K & FPGA + ADC + DAC \\
+Timing (maser + comb) & \$350K & Commercial \\
+Rotating mass source & \$80K & Custom machining \\
+Installation + commissioning & \$400K & Labor + consumables \\
+\midrule
+\textbf{Phase 1 Total} & \textbf{\$5.3M} & \\
+\bottomrule
+\end{longtable}
+
+\subsection{Operating Cost (Annual)}
+
+\begin{longtable}{p{0.45\textwidth}p{0.20\textwidth}}
+\toprule
+\textbf{Item} & \textbf{Cost (USD/yr)} \\
+\midrule
+\endhead
+Liquid helium & \$150K \\
+Electricity ($200\;\si{kW}$ avg) & \$175K \\
+Personnel (3 FTE) & \$450K \\
+Consumables + maintenance & \$100K \\
+\midrule
+\textbf{Annual Total} & \textbf{\$875K} \\
+\bottomrule
+\end{longtable}
+
+\subsection{Schedule}
+
+\begin{longtable}{p{0.12\textwidth}p{0.20\textwidth}p{0.58\textwidth}}
+\toprule
+\textbf{Month} & \textbf{Milestone} & \textbf{Deliverable} \\
+\midrule
+\endhead
+M0--M3 & Detailed design & Final drawings, procurement specifications \\
+M3--M9 & Procurement & Long-lead items (SRF cavities, He plant) \\
+M6--M12 & Installation & Vacuum vessel, isolation, cryogenics \\
+M12--M16 & Commissioning & Per Sec.~10.1 sequence \\
+M16--M18 & Phase 1 science & Broadband $\psi$-mode scan \\
+M18--M24 & Phase 1 results & First $|\lambda - 1|$ constraint \\
+M24--M36 & Phase 2 upgrade & Clock + atom interferometer integration \\
+M36+ & Phase 3 planning & Pulsed high-power design \\
+\bottomrule
+\end{longtable}
+
+%=============================================================================
+\section{Conclusion}
+%=============================================================================
+
+This engineering design document provides a complete,
+deployment-ready specification for the Laboratory Scalar Density
+Field Generator.  Key features:
+
+\begin{enumerate}[nosep]
+\item \textbf{Proven technology base}: SRF cavities, optical
+clocks, and superconducting gravimeters are mature technologies.
+\item \textbf{Multi-modal detection}: Independent optical, atomic,
+and inertial measurement channels provide cross-validation.
+\item \textbf{Systematic uncertainty control}: Triple-layer
+magnetic shielding, three-stage thermal stabilization,
+multi-stage vibration isolation.
+\item \textbf{Safety by design}: Hardware-enforced limits with
+microsecond response times.
+\item \textbf{Phased approach}: Phase 1 achieves 4 orders of
+magnitude improvement over current bounds with existing technology.
+\item \textbf{Cost-effective}: Phase 1 capital cost of \$5.3M is
+comparable to a single precision metrology experiment.
+\end{enumerate}
+
+The apparatus is the enabling technology for all DFD patent
+applications and represents the critical first step toward
+laboratory validation of scalar density field dynamics.
+
+\end{document}

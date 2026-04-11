@@ -1,0 +1,914 @@
+%=============================================================================
+% Engineering Design Document:
+% 4-Node ψ-Linked Quantum Sensor Array Demonstrator
+%
+% Patent #6 — Density Field Dynamics
+% Author: Gary Thomas Alcock
+%=============================================================================
+
+\documentclass[12pt,a4paper]{article}
+
+\usepackage{amsmath,amssymb}
+\usepackage{physics}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{tcolorbox}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{array}
+
+\geometry{margin=2.5cm}
+
+\title{\textbf{Engineering Design Document:\\
+4-Node $\psi$-Linked Quantum Sensor Array Demonstrator}\\[6pt]
+\large Patent \#6 Supporting Engineering Specification\\
+\large Density Field Dynamics Research Programme}
+
+\author{Gary Thomas Alcock\\
+\texttt{gary@densityfielddynamics.com}}
+
+\date{March 2026 \quad Rev.\ 1.0}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This document provides the complete engineering design for a 4-node
+$\psi$-linked quantum sensor array demonstrator. The system uses
+$^{87}$Rb atom interferometers as the primary $\psi$-field sensors,
+arranged in a tetrahedral configuration with baselines from 10 m to
+10 km, to verify the DFD prediction that distributed sensors sharing
+a common gravitational $\psi$ envelope exhibit phase correlations
+beyond classical environmental coupling. The design is specified to
+sufficient detail for fabrication and deployment, including sensor
+node architecture, environmental monitoring subsystems, data
+acquisition pipeline, systematic error budget, calibration procedures,
+and a phased deployment plan.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+%=============================================================================
+\section{System Requirements}\label{sec:requirements}
+%=============================================================================
+
+\subsection{Primary Requirements}
+
+\begin{enumerate}[label=\textbf{PR-\arabic*}]
+\item Measure inter-node phase correlations with precision
+$\delta C_{ij} < 10^{-7}$ after $10^6$ measurement cycles.
+\item Reject all known classical correlation channels (seismic,
+electromagnetic, thermal, tidal) to the level of $10^{-8}$ in the
+correlation coefficient.
+\item Operate with baselines $d = 10$ m to 10 km without physical
+coherent links between nodes.
+\item Achieve single-shot phase sensitivity $< 10^{-2}$ rad per node.
+\item Provide full 3D measurement capability through non-planar
+(tetrahedral) node placement.
+\end{enumerate}
+
+\subsection{Derived Requirements}
+
+\begin{enumerate}[label=\textbf{DR-\arabic*}]
+\item Each node shall contain an independent $^{87}$Rb cold-atom
+interferometer with interrogation time $T = 1$--$10$ s.
+\item Inter-node timing synchronization $< 10$ ns via GPS common-view.
+\item Environmental monitoring at each node with $\geq 6$ independent
+channels.
+\item Data recording at each node with absolute timestamp, stored
+locally and transmitted via standard network.
+\item The system shall be operable in three deployment phases
+(compact, extended, continental) without node redesign.
+\end{enumerate}
+
+\subsection{Performance Targets}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lcc}
+\toprule
+\textbf{Metric} & \textbf{Phase 1} & \textbf{Phase 2/3} \\
+\midrule
+Baseline & 10--100 m & 1--10$^4$ km \\
+Phase sensitivity/shot & $10^{-2}$ rad & $10^{-3}$ rad \\
+Correlation precision ($10^6$ shots) & $10^{-5}$ & $10^{-7}$ \\
+Environmental rejection & $10^{-6}$ & $10^{-8}$ \\
+Measurement cadence & 0.1 Hz & 0.1 Hz \\
+Continuous operation & $>$ 30 days & $>$ 90 days \\
+\bottomrule
+\end{tabular}
+\caption{Performance targets by deployment phase.}
+\label{tab:performance}
+\end{table}
+
+
+%=============================================================================
+\section{System Architecture}\label{sec:architecture}
+%=============================================================================
+
+\subsection{Top-Level Block Diagram}
+
+The system consists of four identical, autonomous sensor nodes plus a
+central data processing facility:
+
+\begin{tcolorbox}[colback=gray!5, colframe=gray!60, title=System Architecture]
+\begin{verbatim}
++------------------+     +------------------+
+|   NODE A         |     |   NODE B         |
+|  Atom IF + Env   |     |  Atom IF + Env   |
+|  Local Clock     |     |  Local Clock     |
+|  Local DAQ       |     |  Local DAQ       |
++--------+---------+     +--------+---------+
+         |                         |
+         |    Standard Network     |
+         +------------+------------+
+                      |
+              +-------+--------+
+              | CENTRAL        |
+              | PROCESSING     |
+              | Correlation    |
+              | Analysis       |
+              +-------+--------+
+                      |
+         +------------+------------+
+         |                         |
++--------+---------+     +--------+---------+
+|   NODE C         |     |   NODE D         |
+|  Atom IF + Env   |     |  Atom IF + Env   |
+|  Local Clock     |     |  Local Clock     |
+|  Local DAQ       |     |  Local DAQ       |
++------------------+     +------------------+
+\end{verbatim}
+\end{tcolorbox}
+
+\textbf{Key design principle}: Each node is \emph{fully autonomous}.
+There is no real-time coherent link between nodes. The $\psi$ field
+itself provides the correlation; the engineering challenge is to
+measure it without introducing spurious correlations through the
+hardware.
+
+\subsection{Node Functional Decomposition}
+
+Each node contains six subsystems:
+
+\begin{enumerate}
+\item \textbf{Atom Interferometer Core} (AIC): Cold-atom preparation,
+Raman interrogation, state detection
+\item \textbf{Laser Subsystem} (LAS): Cooling, repumping, Raman, and
+reference lasers
+\item \textbf{Environmental Monitoring Suite} (EMS): Seismic, magnetic,
+thermal, barometric, tilt sensors
+\item \textbf{Timing and Synchronization} (TAS): Atomic clock, GPS
+receiver, timestamp generator
+\item \textbf{Data Acquisition and Control} (DAC): Digitization,
+local storage, sequence control
+\item \textbf{Infrastructure} (INF): Vacuum, magnetic shielding, thermal
+enclosure, power, network
+\end{enumerate}
+
+
+%=============================================================================
+\section{Atom Interferometer Core}\label{sec:aic}
+%=============================================================================
+
+\subsection{Atom Source}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Parameter} & \textbf{Specification} \\
+\midrule
+Species & $^{87}$Rb \\
+Cooling transition & $5S_{1/2}(F=2) \to 5P_{3/2}(F'=3)$, 780.241 nm \\
+MOT loading rate & $\geq 10^9$ atoms/s \\
+MOT atom number & $\geq 10^9$ atoms \\
+Optical molasses temperature & $\leq 3\,\mu$K \\
+Evaporative cooling (optional) & $\leq 50$ nK (BEC regime) \\
+Launch velocity (fountain) & 0--5 m/s (vertical) \\
+Atom number at interrogation & $\geq 10^6$ atoms \\
+State preparation & $|F=1, m_F=0\rangle$ via microwave selection \\
+\bottomrule
+\end{tabular}
+\caption{Atom source specifications.}
+\end{table}
+
+\subsection{Interferometer Geometry}
+
+\textbf{Configuration}: Vertical Mach-Zehnder with three-pulse sequence
+$\pi/2$--$\pi$--$\pi/2$ at times $t = 0, T, 2T$.
+
+\textbf{Raman transitions}:
+\begin{itemize}
+\item Two-photon Raman via $5P_{3/2}$
+\item Counter-propagating beams: $k_{\text{eff}} = 2k = 1.61 \times 10^7$ m$^{-1}$
+\item Recoil velocity: $v_r = \hbar k_{\text{eff}}/m = 1.18 \times 10^{-2}$ m/s
+\item Rabi frequency: $\Omega_R \geq 2\pi \times 25$ kHz ($\pi$-pulse
+duration $\leq 20\,\mu$s)
+\end{itemize}
+
+\textbf{Interrogation time}: Adjustable $T = 0.1$--$10$ s.
+
+\textbf{Phase shift (gravitational)}:
+\begin{equation}
+\phi_{\text{grav}} = k_{\text{eff}}\,g\,T^2.
+\end{equation}
+For $T = 1$ s: $\phi_{\text{grav}} = 1.58 \times 10^8$ rad.
+
+\textbf{DFD-specific phase}:
+\begin{equation}
+\phi_{\text{DFD}} = \frac{\hbar k_{\text{eff}}^2}{m}\frac{g}{c^2}T^3.
+\end{equation}
+For $T = 1$ s: $\phi_{\text{DFD}} \approx 2 \times 10^{-11}$ rad.
+
+\subsection{Detection System}
+
+\begin{itemize}
+\item \textbf{Method}: Normalized fluorescence detection
+\item \textbf{Probe beam}: Resonant with $F=2 \to F'=3$ cycling
+transition, 3 ms pulse
+\item \textbf{Detection}: CCD or CMOS camera imaging the atom cloud;
+separate images for $|F=1\rangle$ and $|F=2\rangle$ populations
+\item \textbf{Population ratio}:
+$P = N_2/(N_1 + N_2) = \frac{1}{2}(1 + \cos\phi)$
+\item \textbf{Detection noise}: Quantum projection noise limited:
+$\delta\phi = 1/\sqrt{N_{\text{atom}}} \approx 10^{-3}$ rad for
+$10^6$ detected atoms
+\end{itemize}
+
+\subsection{Vacuum System}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Parameter} & \textbf{Specification} \\
+\midrule
+Chamber material & Titanium (low magnetic permeability) \\
+Base pressure & $\leq 5 \times 10^{-11}$ mbar \\
+Pumping & 40 L/s ion pump + Ti sublimation pump \\
+Rb source & Alkali metal dispenser (AMD) \\
+Viewport material & UV-grade fused silica, AR coated at 780 nm \\
+Bakeout temperature & 200$^\circ$C for 48 h \\
+Interferometry volume & $\geq 30$ cm vertical $\times$ 5 cm diameter \\
+Total chamber length & 1.5 m (vertical, for $T = 1$ s fountain) \\
+\bottomrule
+\end{tabular}
+\caption{Vacuum system specifications.}
+\end{table}
+
+For extended interrogation times ($T > 1$ s), the chamber extends
+to accommodate the atomic fountain trajectory:
+\begin{equation}
+h_{\max} = \frac{1}{2}g T^2 + v_0 T,
+\end{equation}
+where $v_0$ is the launch velocity. For $T = 3$ s with zero apex
+velocity: $h_{\max} = \frac{1}{2}(9.8)(3)^2 = 44$ m. This requires
+a tall vacuum tower, achieved in Phase 2/3 using existing infrastructure
+(e.g., elevator shafts, mine shafts, or purpose-built towers similar
+to those at Stanford or Wuhan).
+
+
+%=============================================================================
+\section{Laser Subsystem}\label{sec:laser}
+%=============================================================================
+
+\subsection{Laser Architecture}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{llll}
+\toprule
+\textbf{Function} & \textbf{Wavelength} & \textbf{Power} & \textbf{Linewidth} \\
+\midrule
+Cooling/detection & 780.241 nm & 200 mW & $< 1$ MHz \\
+Repumper & 780.232 nm & 50 mW & $< 1$ MHz \\
+Raman 1 & 780.241 nm & 100 mW & See below \\
+Raman 2 & 780.241 nm + 6.835 GHz & 100 mW & See below \\
+Dipole trap (opt.) & 1064 nm & 10 W & N/A \\
+\bottomrule
+\end{tabular}
+\caption{Laser specifications by function.}
+\end{table}
+
+\subsection{Raman Laser Phase Noise}
+
+The Raman laser pair must have low relative phase noise, as this
+directly maps onto interferometer phase noise. Requirements:
+
+\begin{itemize}
+\item \textbf{Phase noise spectral density}:
+$S_\phi(f) < 10^{-4}$ rad$^2$/Hz at $f = 1$ Hz
+\item \textbf{Implementation}: Phase-locked loop (PLL) locking two
+ECDLs to a common ultra-stable cavity, with the 6.835 GHz offset
+derived from a low-noise microwave synthesizer referenced to the local
+atomic clock
+\item \textbf{Fiber noise cancellation}: Active fiber noise cancellation
+on all paths from laser table to vacuum chamber
+\end{itemize}
+
+\subsection{Reference Cavity}
+
+Each node includes an ultra-stable optical cavity for the local
+laser frequency reference:
+\begin{itemize}
+\item \textbf{Spacer}: ULE glass, 10 cm length
+\item \textbf{Finesse}: $\geq 100{,}000$
+\item \textbf{Thermal noise floor}: $\sim 10^{-16}$ at 1 s
+\item \textbf{Temperature control}: $\pm 1$ mK at zero-CTE temperature
+\item \textbf{Vibration isolation}: Notch-and-spring mount on active
+platform
+\end{itemize}
+
+\textbf{Critical note}: The reference cavity provides a local frequency
+standard for each node. It does \emph{not} need to be coherent with
+cavities at other nodes. The $\psi$-correlation analysis uses only the
+\emph{phase of the atom interferometer output}, not the laser frequency.
+
+
+%=============================================================================
+\section{Environmental Monitoring Suite}\label{sec:ems}
+%=============================================================================
+
+\subsection{Sensor Complement}
+
+Each node deploys the following environmental sensors:
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{llll}
+\toprule
+\textbf{Channel} & \textbf{Sensor type} & \textbf{Sensitivity} & \textbf{Bandwidth} \\
+\midrule
+Seismic (3-axis) & Broadband seismometer & $10^{-10}$ m/s$^2$/$\sqrt{\text{Hz}}$ & 0.01--100 Hz \\
+Tilt (2-axis) & Precision tiltmeter & 1 nrad/$\sqrt{\text{Hz}}$ & DC--1 Hz \\
+Magnetic (3-axis) & Fluxgate magnetometer & 10 pT/$\sqrt{\text{Hz}}$ & DC--100 Hz \\
+Temperature (4 pts) & Pt100 RTD & 0.1 mK & DC--0.1 Hz \\
+Barometric & Microbarograph & 0.01 Pa/$\sqrt{\text{Hz}}$ & 0.001--10 Hz \\
+Humidity & Capacitive sensor & 0.5\% RH & DC--0.01 Hz \\
+Gravity gradient & Tidal gravimeter & $10^{-11}$ m/s$^2$/$\sqrt{\text{Hz}}$ & DC--0.01 Hz \\
+EM field (RF) & Spectrum analyzer & $-120$ dBm & 1 MHz--6 GHz \\
+\bottomrule
+\end{tabular}
+\caption{Environmental monitoring sensor complement per node.}
+\label{tab:env-sensors}
+\end{table}
+
+\subsection{Environmental Rejection Strategy}
+
+The environmental data serves two functions:
+\begin{enumerate}
+\item \textbf{Real-time veto}: Shots taken during large transients
+(earthquakes, nearby vehicle traffic, magnetic storms) are flagged
+and optionally excluded.
+\item \textbf{Post-processing regression}: Environmental channels are
+regressed against the interferometer phase to identify and remove
+classical correlations:
+\begin{equation}
+\phi_i^{\text{clean}} = \phi_i^{\text{raw}} - \sum_k \beta_{ik}\,e_k(t_i),
+\end{equation}
+where $e_k$ is the $k$-th environmental channel and $\beta_{ik}$ are
+regression coefficients determined from calibration data.
+\end{enumerate}
+
+\subsection{Witness Sensors for Spurious Correlations}
+
+To ensure that any detected inter-node correlation is not due to
+common environmental driving, the following witness channels are
+specifically monitored at all nodes simultaneously:
+
+\begin{itemize}
+\item \textbf{Schumann resonances} (7.83, 14.3, 20.8, 27.3 Hz):
+Earth-ionosphere cavity modes that are globally correlated; measured
+via magnetic field sensor
+\item \textbf{Tidal gravity} (12.42-hour and 24-hour periods): Measured
+by tidal gravimeter and compared with theoretical tidal model
+\item \textbf{Atmospheric pressure loading}: Measured by microbarograph;
+correlated across nodes at synoptic scales
+\item \textbf{Seismic surface waves}: Measured by seismometers; known
+propagation velocity allows time-delay prediction between nodes
+\end{itemize}
+
+
+%=============================================================================
+\section{Timing and Synchronization}\label{sec:timing}
+%=============================================================================
+
+\subsection{Clock Architecture}
+
+Each node contains:
+\begin{itemize}
+\item \textbf{Local atomic clock}: Rubidium frequency standard
+(e.g., Microsemi SA.45s CSAC or equivalent)
+\begin{itemize}
+\item Short-term stability: $\sigma_y(1\,\text{s}) < 3 \times 10^{-10}$
+\item Medium-term: $\sigma_y(100\,\text{s}) < 3 \times 10^{-12}$
+\end{itemize}
+\item \textbf{GPS receiver}: Dual-frequency (L1/L2), timing mode
+\begin{itemize}
+\item Absolute timing: $< 20$ ns (1$\sigma$) to UTC
+\item Common-view differential: $< 5$ ns between nodes
+\end{itemize}
+\item \textbf{Timestamp counter}: FPGA-based, 1 ns resolution, triggered
+by each interferometer measurement cycle
+\end{itemize}
+
+\subsection{Synchronization Protocol}
+
+\begin{enumerate}
+\item All nodes reference GPS 1-PPS (pulse per second) for coarse
+synchronization ($< 100$ ns).
+\item Common-view GPS processing provides differential timing to $< 5$ ns.
+\item Each interferometer shot is timestamped with the local FPGA counter
+referenced to the GPS-disciplined Rb clock.
+\item Post-processing applies common-view corrections to align all
+timestamps to a common timescale.
+\end{enumerate}
+
+\textbf{Synchronization requirement for $\psi$-correlation}: The atom
+interferometer interrogation time $T = 1$--$10$ s means that the
+synchronization error must satisfy $\delta t \ll T$. Even at $\delta t
+= 100$ ns, the fractional timing error is $10^{-7}$ relative to $T = 1$ s,
+which is negligible for the correlation measurement.
+
+
+%=============================================================================
+\section{Data Acquisition and Processing}\label{sec:daq}
+%=============================================================================
+
+\subsection{Local Data Acquisition}
+
+Each node records per shot:
+\begin{itemize}
+\item Interferometer phase: $\phi_i$ (derived from population ratio)
+\item Atom number: $N_1, N_2$ (for normalization and noise estimation)
+\item Timestamp: $t_i$ (FPGA counter, GPS-referenced)
+\item Environmental data: all channels at matching cadence
+\item Diagnostics: laser power, MOT fluorescence, vacuum pressure,
+shield temperature
+\end{itemize}
+
+\textbf{Data rate per node}: $\sim 1$ kB/shot $\times$ 0.1 Hz $= 100$ B/s
+continuous $\approx 8.6$ MB/day. Negligible bandwidth for any network link.
+
+\subsection{Data Transfer}
+
+\begin{itemize}
+\item \textbf{Phase 1} (compact): Local Ethernet, real-time transfer
+\item \textbf{Phase 2} (extended): VPN over university/commercial internet
+\item \textbf{Phase 3} (continental): Same as Phase 2; latency of hours
+is acceptable since no real-time coherent processing is needed
+\end{itemize}
+
+\subsection{Central Processing Pipeline}
+
+The central processing facility performs the following analysis chain:
+
+\begin{enumerate}
+\item \textbf{Data ingestion}: Collect shot records from all four nodes,
+align timestamps.
+
+\item \textbf{Quality cuts}: Remove shots where:
+\begin{itemize}
+\item Atom number $< N_{\min} = 5 \times 10^5$
+\item Environmental transient exceeds threshold
+\item Laser diagnostics indicate unlock
+\end{itemize}
+
+\item \textbf{Environmental regression}: For each node, compute cleaned
+phase:
+\begin{equation}
+\phi_i^{(\text{clean})} = \phi_i - \sum_{k=1}^{N_{\text{env}}} \hat{\beta}_{ik}\,e_{ik}
+\end{equation}
+
+\item \textbf{Correlation computation}: For each pair $(i,j)$:
+\begin{equation}
+\hat{C}_{ij} = \frac{1}{M}\sum_{m=1}^{M}\cos\!\left(\phi_i^{(\text{clean})}(m) - \phi_j^{(\text{clean})}(m)\right)
+\end{equation}
+
+\item \textbf{Null tests}:
+\begin{itemize}
+\item Time-reversed correlation (should give same result for $\psi$, not for causal environmental coupling)
+\item Frequency-domain correlation vs.\ known environmental spectra
+\item Jackknife/bootstrap error estimation
+\end{itemize}
+
+\item \textbf{Signal extraction}: Excess correlation
+$\Delta C_{ij} = \hat{C}_{ij} - C_{ij}^{(\text{null})}$ tested against
+the DFD prediction:
+\begin{equation}
+C_{ij}^{(\psi)} = \exp\!\left[-\sigma_\psi^2\!\left(1 - \frac{\Xi(d_{ij})}{\sigma_\psi^2}\right)\right]
+\end{equation}
+\end{enumerate}
+
+\subsection{Statistical Framework}
+
+\textbf{Detection threshold}: A $5\sigma$ excess correlation above the
+null model, where $\sigma$ is estimated from bootstrap resampling of the
+data with randomized time offsets between nodes (destroying any true
+temporal correlation while preserving single-node statistics).
+
+\textbf{Required measurement cycles}: For a target correlation precision
+$\delta C \sim 10^{-7}$:
+\begin{equation}
+M \geq \frac{1}{\delta C^2} = 10^{14}\,\text{shots},
+\end{equation}
+at 0.1 Hz cadence, this requires $10^{15}$ s $\approx 3 \times 10^7$ years
+if limited to single-shot precision. However, with single-shot noise
+$\sigma_\phi \sim 10^{-3}$ rad and the correlation signal being a function
+of the \emph{common-mode} $\psi$ variation (not the per-shot noise):
+\begin{equation}
+\delta\hat{C}_{ij} = \frac{\sigma_\phi^2}{\sqrt{M}} \approx \frac{10^{-6}}{\sqrt{M}}.
+\end{equation}
+For $\delta\hat{C} = 10^{-7}$: $M = 10^{2}$ shots $\approx 1000$ s.
+
+The bottleneck is not statistical precision but \emph{systematic rejection}:
+demonstrating that the measured correlation is not environmental requires
+the extensive witness sensor and null test program described above.
+
+
+%=============================================================================
+\section{Magnetic Shielding}\label{sec:shielding}
+%=============================================================================
+
+\subsection{Requirements}
+
+Magnetic fields couple to atom interferometers through the quadratic
+Zeeman effect. For the $m_F = 0 \to m_F = 0$ clock transition:
+\begin{equation}
+\delta\phi_B = 2\pi \times 575.15\,\text{Hz/G}^2 \times B^2 \times T.
+\end{equation}
+For $\delta\phi_B < 10^{-4}$ rad at $T = 1$ s:
+$B < \sqrt{10^{-4}/(2\pi \times 575.15)} \approx 5\,\mu$G $= 0.5$ nT.
+
+\subsection{Shield Design}
+
+Four-layer mu-metal shield surrounding the vacuum chamber:
+\begin{itemize}
+\item Layer 1 (outermost): 1.5 mm Mu-metal, shielding factor $\sim 100$
+\item Layer 2: 1.0 mm Mu-metal, shielding factor $\sim 80$
+\item Layer 3: 1.0 mm Mu-metal, shielding factor $\sim 80$
+\item Layer 4 (innermost): 0.5 mm Mu-metal, shielding factor $\sim 50$
+\item \textbf{Total shielding factor}: $\geq 10^7$ (DC)
+\item \textbf{Residual field}: $< 50$ pT (Earth's field $\sim 50\,\mu$T
+$/10^7$)
+\end{itemize}
+
+Internal bias coils provide a uniform 100 mG ($10\,\mu$T) quantization
+field along the vertical axis.
+
+
+%=============================================================================
+\section{Vibration Isolation}\label{sec:vibration}
+%=============================================================================
+
+\subsection{Requirements}
+
+The atom interferometer phase is sensitive to vibrations of the Raman
+retroreflection mirror:
+\begin{equation}
+\delta\phi_{\text{vib}} = k_{\text{eff}}\,\delta x_{\text{mirror}}.
+\end{equation}
+For $\delta\phi_{\text{vib}} < 10^{-2}$ rad:
+$\delta x < 6 \times 10^{-10}$ m $= 0.6$ nm.
+
+\subsection{Isolation Strategy}
+
+\begin{enumerate}
+\item \textbf{Passive platform}: Minus-K or similar negative-stiffness
+isolator
+\begin{itemize}
+\item Vertical resonance: 0.5 Hz
+\item Isolation above 1 Hz: $> 40$ dB/decade
+\end{itemize}
+
+\item \textbf{Active feedback}: Seismometer-driven piezo actuator on
+retroreflection mirror mount
+\begin{itemize}
+\item Bandwidth: 0.01--50 Hz
+\item Residual acceleration: $< 10^{-9}$ m/s$^2$/$\sqrt{\text{Hz}}$
+at 1 Hz
+\end{itemize}
+
+\item \textbf{Post-correction}: Correlate seismometer signal with
+interferometer phase; subtract in post-processing
+\begin{itemize}
+\item Additional factor $\sim 100$ rejection at frequencies where
+seismometer SNR is high
+\end{itemize}
+\end{enumerate}
+
+\subsection{Differential Vibration Rejection}
+
+For the $\psi$-correlation measurement, the critical quantity is the
+\emph{differential} vibration between nodes. At separations $> 100$ m,
+ground vibrations are largely uncorrelated above $\sim 0.1$ Hz (except
+for coherent seismic waves). The environmental regression removes
+correlated seismic signals; the uncorrelated component averages down
+as $1/\sqrt{M}$.
+
+
+%=============================================================================
+\section{Thermal Control}\label{sec:thermal}
+%=============================================================================
+
+\subsection{Requirements}
+
+Temperature fluctuations affect the interferometer through:
+\begin{itemize}
+\item Blackbody radiation shift of the clock transition:
+$\partial\nu_{\text{BBR}}/\partial T \approx 0.02$ Hz/K at 300 K
+\item Vacuum chamber outgassing rate (affects collisional phase shift)
+\item Reference cavity frequency drift
+\end{itemize}
+
+\subsection{Thermal Enclosure}
+
+\begin{itemize}
+\item \textbf{Outer insulation}: 10 cm expanded polystyrene, covering
+the full apparatus
+\item \textbf{Active temperature control}: PID-controlled heater tape
+on the vacuum chamber, stability $\pm 1$ mK over 24 hours
+\item \textbf{Reference cavity}: Independent thermal enclosure with
+$\pm 0.1$ mK stability near the ULE zero-CTE temperature ($\sim 30$--$35^\circ$C)
+\item \textbf{Air conditioning}: Laboratory HVAC maintaining $\pm 0.5$ K
+ambient temperature
+\end{itemize}
+
+
+%=============================================================================
+\section{Node Physical Layout}\label{sec:physical}
+%=============================================================================
+
+\subsection{Compact Node (Phase 1)}
+
+Dimensions: 2.0 m (H) $\times$ 1.0 m (W) $\times$ 0.8 m (D)
+\begin{itemize}
+\item Lower section (0--0.5 m): Electronics, DAQ, power supplies
+\item Middle section (0.5--1.5 m): Vacuum chamber (vertical), magnetic
+shield, vibration isolation platform
+\item Upper section (1.5--2.0 m): Optical breadboard with laser system
+\item Side panel: Environmental sensor cluster
+\end{itemize}
+
+Total mass per node: $\sim 500$ kg (including shielding).
+
+\subsection{Extended Node (Phase 2/3)}
+
+For $T > 1$ s, the vacuum tower extends above the compact node:
+\begin{itemize}
+\item Tower height: 5 m ($T = 1$ s) to 50 m ($T = 3$ s)
+\item Tower diameter: 30 cm (vacuum tube) within 1 m (thermal/magnetic
+shield)
+\item Foundation: Vibration-isolated pier, separate from building structure
+\end{itemize}
+
+
+%=============================================================================
+\section{Calibration Procedures}\label{sec:calibration}
+%=============================================================================
+
+\subsection{Phase Calibration}
+
+\begin{enumerate}
+\item \textbf{Gravity measurement}: Each node independently measures
+$g$ from the standard $k_{\text{eff}}gT^2$ phase:
+\begin{equation}
+g_i = \frac{\phi_i}{k_{\text{eff}}T^2}
+\end{equation}
+This calibrates the absolute phase-to-acceleration conversion.
+
+\item \textbf{Raman laser calibration}: Modulate the Raman phase at
+known amplitude and frequency; verify the phase response matches.
+
+\item \textbf{Tidal calibration}: Compare the measured tidal phase
+modulation at each node with the theoretical solid-Earth tide:
+\begin{equation}
+\delta g_{\text{tide}}(t) = \sum_{n} A_n \cos(\omega_n t + \phi_n),
+\end{equation}
+where the principal constituents ($M_2, S_2, K_1, O_1$, etc.) have
+known amplitudes and phases. This provides an absolute calibration of
+the $\psi$-dependent phase at the $\sim 10^{-7}$ level.
+\end{enumerate}
+
+\subsection{Correlation Calibration}
+
+\begin{enumerate}
+\item \textbf{Self-correlation}: Each node's autocorrelation $C_{ii}$
+should be $\leq 1$, decreasing with the Allan variance of the
+measurement noise.
+
+\item \textbf{Known-signal injection}: Introduce a known gravitational
+signal (e.g., a moving test mass near one node) and verify:
+\begin{itemize}
+\item The signal appears in the near-node data
+\item It does \emph{not} appear in the far-node data (classical test)
+\item It does appear in the $\psi$-correlation at the predicted level
+(DFD test)
+\end{itemize}
+
+\item \textbf{Hardware exchange}: Swap physical sensor nodes between
+positions to verify that any detected correlation follows the
+\emph{position}, not the \emph{hardware}.
+\end{enumerate}
+
+
+%=============================================================================
+\section{Deployment Plan}\label{sec:deployment}
+%=============================================================================
+
+\subsection{Phase 1: Compact Demonstrator (Year 1--2)}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lp{10cm}}
+\toprule
+\textbf{Month} & \textbf{Activity} \\
+\midrule
+1--6 & Design and procure four identical atom interferometer nodes.
+Assemble laser systems, vacuum chambers, magnetic shields. \\
+7--9 & Commission each node individually: achieve cold-atom loading,
+Raman interferometry, gravity measurement to $10^{-8}$ m/s$^2$. \\
+10--12 & Deploy four nodes in tetrahedral configuration within
+laboratory campus (baselines 10--100 m). Commission environmental
+monitoring. \\
+13--18 & Collect correlation data ($\geq 10^6$ shots). Perform null
+tests and environmental regression. \\
+19--24 & Analysis, systematic studies, hardware exchange tests.
+Publish Phase 1 results. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Phase 2: Metropolitan Scale (Year 2--4)}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lp{10cm}}
+\toprule
+\textbf{Month} & \textbf{Activity} \\
+\midrule
+25--30 & Relocate nodes to university/laboratory sites across a
+metropolitan area (baselines 1--10 km). Upgrade vacuum towers for
+$T \leq 3$ s. \\
+31--36 & Commission at new sites. Establish GPS common-view timing.
+Verify independent operation. \\
+37--48 & Extended data collection ($\geq 10^7$ shots over 1 year).
+Sensitivity to gravitational wave signals in the 0.01--1 Hz band.
+$\psi$-field tomography of local geology. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Phase 3: Continental Scale (Year 4--7)}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lp{10cm}}
+\toprule
+\textbf{Month} & \textbf{Activity} \\
+\midrule
+49--60 & Partner with existing atom interferometry laboratories
+(e.g., MAGIS, MIGA, ZAIGA sites). Install $\psi$-correlation
+DAQ at partner nodes. \\
+61--72 & Continental-baseline correlation analysis. Gravitational
+wave searches. Earth interior tomography. \\
+73--84 & Full 4-node continental network science operations.
+Publish definitive $\psi$-correlation results. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+%=============================================================================
+\section{Cost Estimate}\label{sec:cost}
+%=============================================================================
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lrr}
+\toprule
+\textbf{Item} & \textbf{Per node} & \textbf{4 nodes} \\
+\midrule
+Vacuum system (chamber, pumps, gauges) & \$120k & \$480k \\
+Laser system (cooling, Raman, reference) & \$200k & \$800k \\
+Optics (AOM, EOM, fibers, mirrors) & \$80k & \$320k \\
+Magnetic shielding (4-layer) & \$40k & \$160k \\
+Vibration isolation platform & \$30k & \$120k \\
+Environmental sensors suite & \$50k & \$200k \\
+DAQ electronics and FPGA & \$30k & \$120k \\
+GPS timing receiver & \$15k & \$60k \\
+Thermal enclosure & \$10k & \$40k \\
+\midrule
+\textbf{Node subtotal} & \textbf{\$575k} & \textbf{\$2.30M} \\
+\midrule
+Central processing facility & --- & \$100k \\
+Installation and commissioning & --- & \$200k \\
+Contingency (20\%) & --- & \$520k \\
+\midrule
+\textbf{Phase 1 total} & --- & \textbf{\$3.12M} \\
+\bottomrule
+\end{tabular}
+\caption{Phase 1 cost estimate (compact demonstrator).}
+\label{tab:cost}
+\end{table}
+
+Phase 2 additional costs: $\sim\$1$M (tower construction, relocation,
+extended operation).
+
+Phase 3 additional costs: $\sim\$0.5$M (partner integration, travel,
+data infrastructure).
+
+
+%=============================================================================
+\section{Risk Assessment}\label{sec:risk}
+%=============================================================================
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{p{4cm}ccp{5cm}}
+\toprule
+\textbf{Risk} & \textbf{Likelihood} & \textbf{Impact} & \textbf{Mitigation} \\
+\midrule
+$\psi$-correlation signal below detection threshold & Medium & High &
+Increase $M$; improve single-shot sensitivity; extend to longer baselines \\
+Environmental correlations mimic $\psi$ signal & Medium & High &
+Extensive witness sensors; null tests; hardware exchange \\
+Individual node failure & Low & Medium &
+Modular design allows swap/repair; 4 nodes provides redundancy \\
+Timing synchronization drift & Low & Low &
+GPS common-view; periodic calibration against known tidal signals \\
+DFD theory incorrect (no $\psi$ field) & Unknown & Existential &
+Null result is scientifically valuable; apparatus can serve as
+conventional gravity gradiometer network \\
+\bottomrule
+\end{tabular}
+\caption{Risk assessment for the 4-node demonstrator.}
+\label{tab:risk}
+\end{table}
+
+
+%=============================================================================
+\section{Success Criteria}\label{sec:success}
+%=============================================================================
+
+\subsection{Minimum Success (Phase 1)}
+
+\begin{enumerate}
+\item Four nodes operational with single-shot phase noise $< 10^{-2}$ rad.
+\item Environmental regression reduces classical correlations to
+$< 10^{-6}$ level.
+\item Tidal calibration agrees with theory to $< 10^{-7}$ fractional.
+\item Null tests (time-reversal, hardware swap) pass at $5\sigma$.
+\end{enumerate}
+
+\subsection{Full Success (Phase 1)}
+
+\begin{enumerate}
+\item Excess inter-node correlation detected at $\geq 5\sigma$ significance.
+\item Correlation follows DFD spatial dependence model
+$C_{ij}(\mathbf{r}_{ij})$.
+\item Correlation is independent of hardware identity (survives node swap).
+\item Spectral shape consistent with $\psi$-field power spectrum prediction.
+\end{enumerate}
+
+\subsection{Extended Success (Phase 2/3)}
+
+\begin{enumerate}
+\item Sensitivity scaling verified: $N$-node sensitivity improves faster
+than $N^{-1/2}$.
+\item Gravitational wave sensitivity demonstrated in the 0.01--1 Hz band.
+\item $\psi$-field tomography produces subsurface density maps consistent
+with independent geological data.
+\end{enumerate}
+
+
+%=============================================================================
+\section{Conclusion}\label{sec:conclusion}
+%=============================================================================
+
+This engineering design provides a complete, buildable specification for
+a 4-node $\psi$-linked quantum sensor array demonstrator. The design uses
+established cold-atom interferometry technology, requires no inter-node
+coherent links, and is deployable in three phases of increasing baseline
+and scientific ambition. The primary engineering challenge is not the
+sensor technology itself---which is mature---but the systematic rejection
+of classical correlation channels to the precision required to isolate
+the $\psi$-field signal.
+
+Whether the $\psi$-linked correlations predicted by Density Field Dynamics
+are confirmed or ruled out, this apparatus represents a novel approach to
+distributed quantum sensing that will produce valuable science at every
+deployment phase: as a gravity gradiometer network for geophysics,
+as a testbed for atom interferometer technology, and as a probe of
+fundamental physics at the intersection of quantum mechanics and gravity.
+
+\end{document}

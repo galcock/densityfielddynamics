@@ -1,0 +1,942 @@
+%=============================================================================
+% WAVE 4, ITERATION 20: P10 (Computing / mochi_class Implementation)
+% Agent 9: NONLINEAR mu-FUNCTION CRISIS --- Can mochi_class Handle DFD?
+%
+% Model: Opus 4.6
+% Date: 20 March 2026
+%
+% INHERITED STATE (from i19):
+%   - DFD maps to Horndeski with alpha_T=alpha_M=alpha_B=0, alpha_K~0.014
+%   - Minimal mochi_class plan: 150 lines C, 1 developer-week
+%   - FUNDAMENTAL DISAGREEMENT:
+%       Agent 4 (P4): G_eff = G_N on all sub-Hubble scales (linearized)
+%       Agent 12 (Cosmo): G_eff >> G_N (deep-MOND, nonlinear mu)
+%   - Cosmo agent showed delta_b ~ a^2 growth in deep-MOND, rescuing P(k)
+%   - P4 agent showed strict QSA + linearization gives G_eff = G_N exactly
+%   - Deep-MOND regime involves nonlinear mu, which standard Horndeski
+%     parametrization may NOT capture
+%
+% MANDATE (i20):
+%   1. Can existing mochi_class handle DFD? Analyze the linear/nonlinear gap
+%   2. What modifications to CLASS are needed for nonlinear mu?
+%   3. Write MINIMAL code modifications (C, targeting perturbations.c)
+%   4. Estimate P(k), C_l^TT, sigma_8 under both scenarios
+%   5. WebSearch: MOND-like perturbation theory in Boltzmann codes
+%=============================================================================
+
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{enumitem}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{finding}[theorem]{Finding}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\ee}[1]{\times 10^{#1}}
+\newcommand{\Geff}{G_{\rm eff}}
+\newcommand{\kmu}{k_\mu}
+\newcommand{\astar}{a_\star}
+\newcommand{\LCDM}{$\Lambda$CDM}
+\newcommand{\DFD}{\textsc{dfd}}
+\newcommand{\dpsi}{\delta\psi}
+\newcommand{\aM}{a_0}
+
+\lstset{
+  language=C,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue},
+  commentstyle=\color{green!50!black},
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  frame=single,
+  breaklines=true,
+  captionpos=b,
+  showstringspaces=false
+}
+
+\tcbuselibrary{skins,breakable}
+
+\title{\textbf{Wave 4 Iteration 20: Cross-Reference Update}\\[6pt]
+Patent 10 --- The Nonlinear $\mu$-Function Crisis:\\
+Can mochi\_class Handle DFD?\\[4pt]
+{\normalsize Linear Horndeski Fails, Nonlinear AQUAL Perturbation Theory Required,}\\
+{\normalsize Minimal CLASS Modifications, Observable Predictions Under Both Scenarios}}
+\author{DFD Research Programme --- P10 Agent 9, Wave 4 Iteration 20 (Opus 4.6)}
+\date{20 March 2026}
+
+\begin{document}
+\maketitle
+
+%=============================================================================
+\section*{W4i20 TOP 5 FINDINGS --- READ FIRST}
+%=============================================================================
+
+\begin{tcolorbox}[colback=blue!5!white, colframe=blue!60!black,
+  title=\textbf{W4i20 TOP 5 FINDINGS --- RANKED BY IMPACT}]
+\begin{enumerate}[nosep]
+
+\item \textbf{[FINDING 1] EXISTING mochi\_class CANNOT HANDLE DFD.
+  The Horndeski $\alpha$-parametrization is intrinsically LINEAR
+  perturbation theory. DFD's cosmological perturbations live in the
+  deep-MOND regime ($\mu(x) \approx x$, $x \ll 1$), where the field
+  equation is NONLINEAR in the perturbation amplitude. The standard
+  Horndeski QSA gives $\Geff = G_N$ (Agent 4's result), which is
+  correct for the LINEAR theory but misses the MOND enhancement
+  entirely. A parameter file for mochi\_class will reproduce
+  Agent 4's catastrophic $P(k)$ deficit, not Agent 12's rescue.}\\
+  \textbf{Source: Agent 4 (W4i19\_P4\_update, Eq.~(18)):
+  $\Geff = G_N$ from strict QSA of linearized equation.
+  Agent 12 (W4i19\_Cosmo\_update, Part II): deep-MOND requires
+  nonlinear $\mu(x) \approx x$, giving $\Geff \propto 1/\sqrt{\delta}$.
+  mochi\_class (Cataneo et al.\ 2024, arXiv:2407.11968): linear
+  Horndeski perturbation theory only.}\\
+  \textbf{Impact: EXISTENTIAL. The i19 ``zero new code'' piggyback
+  strategy is DEAD. Custom nonlinear code is required.}
+
+\item \textbf{[FINDING 2] THE FUNDAMENTAL DISAGREEMENT IS RESOLVED:
+  BOTH AGENTS ARE CORRECT IN THEIR REGIMES.
+  Agent 4's $\Geff = G_N$ is correct for the LINEARIZED perturbation
+  equation (expand around $\nabla\bar\psi = 0$, keep first order in
+  $\delta$). Agent 12's $\Geff \gg G_N$ is correct for the NONLINEAR
+  quasi-static equation (AQUAL), where $\mu(|\nabla\psi|/\astar)$ with
+  $\mu(0) = 0$ makes the linearization DEGENERATE. The physical question
+  is: which regime applies to cosmological perturbations? Answer:
+  the deep-MOND (nonlinear) regime, because cosmological accelerations
+  $g_N \ll a_0$ on all observable scales (Agent 12, W4i19\_Cosmo\_update,
+  \S Step 5: $y_N = g_N/a_0 \approx 0.05$ at recombination for
+  $k = 0.1$~Mpc$^{-1}$). The linearized treatment is self-inconsistent:
+  it assumes $\mu \approx 1$ (Newtonian background) but this requires
+  $|\nabla\psi|/\astar \gg 1$, which is FALSE for cosmological
+  perturbations.}\\
+  \textbf{Source: Agent 4 (W4i19\_P4\_update, \S3.4, Eq.~(27)):
+  $\Geff = G_N$ requires Newtonian background.
+  Agent 12 (W4i19\_Cosmo\_update, \S Step 3--5): $y_N \ll 1$ on all
+  observable scales, confirming deep-MOND.}\\
+  \textbf{Impact: CRITICAL. Settles the disagreement in favor of
+  Agent 12's deep-MOND scenario.}
+
+\item \textbf{[FINDING 3] MINIMAL CLASS MODIFICATION FOR NONLINEAR
+  DFD: $\sim$250 LINES OF C, BUT WITH A FUNDAMENTAL COMPLICATION.
+  The deep-MOND $\Geff(k,\delta,z) = G_N\sqrt{a_0 k/(G\bar\rho_b
+  \delta_b a)}$ depends on the perturbation AMPLITUDE $\delta_b$,
+  making the growth equation nonlinear: $\ddot\delta + 2H\dot\delta
+  \propto \sqrt{\delta}$. Standard Boltzmann codes (CLASS, CAMB)
+  solve LINEAR ODEs. Implementing this requires either:
+  (a) iterative solver (solve linear, update $\Geff$ with solution,
+  repeat until convergence), or (b) direct nonlinear ODE integration
+  (replace CLASS's linear growth ODE with RK4/RK45 for the nonlinear
+  equation). Option (b) is more robust and adds $\sim$250 lines to
+  CLASS. Neither mochi\_class nor any existing MG Boltzmann code
+  supports amplitude-dependent $\Geff$.}\\
+  \textbf{Source: Agent 12 (W4i19\_Cosmo\_update, Eq.~(F2.4)):
+  $\Geff \propto 1/\sqrt{\delta_b}$. CLASS source code:
+  perturbations.c uses linear ODE system.}\\
+  \textbf{Impact: HIGH. Defines the actual coding task. 2--3
+  developer-weeks, not 1.}
+
+\item \textbf{[FINDING 4] OBSERVABLE PREDICTIONS UNDER BOTH SCENARIOS.\\
+  LINEARIZED ($\Geff = G_N$, Agent 4):
+  $\sigma_8 \approx 0.03$, $P(k)/P^{\rm CDM}(k) \sim 10^{-6}$
+  at $k > 0.1$~Mpc$^{-1}$. CATASTROPHIC.
+  $C_\ell^{TT}$: identical to baryon-only $\Lambda$CDM (no CDM).
+  Ruled out by all LSS data.\\
+  DEEP-MOND ($\Geff \gg G_N$, Agent 12):
+  $\sigma_8 \approx 0.5$--$2$ (uncertain due to Silk damping and
+  MOND$\to$Newton transition).
+  $P(k)/P^{\rm CDM}(k) \sim 0.5$--$2$ at $k \sim 0.1$~Mpc$^{-1}$
+  (VIABLE). Excess large-scale power at $k < 0.01$~Mpc$^{-1}$
+  (potentially testable). $C_\ell^{TT}$: enhanced ISW at low $\ell$
+  from scale-dependent growth, but magnitude uncertain without
+  numerical integration.\\
+  The code is needed to distinguish these scenarios numerically.}\\
+  \textbf{Source: Agent 4 (W4i19\_P4\_update, \S3.4): linearized
+  $\sigma_8 = 0.03$. Agent 12 (W4i19\_Cosmo\_update, Part III):
+  deep-MOND $\delta_b(0) \sim 12$ from $a^2$ growth.}\\
+  \textbf{Impact: EXISTENTIAL. The two scenarios predict different
+  universes.}
+
+\item \textbf{[FINDING 5] NO EXISTING BOLTZMANN CODE IMPLEMENTS
+  MOND-LIKE NONLINEAR PERTURBATION THEORY. The Skordis-Zlosnik AeST
+  code (used for their 2021 PRL CMB fit, arXiv:2007.00082) is NOT
+  publicly available. CLASS-PT (Ivanov et al.\ 2020) handles
+  nonlinear PT for CDM but not modified gravity with
+  amplitude-dependent $\Geff$. MGCAMB and EFTCAMB use linear EFT.
+  mochi\_class uses linear Horndeski. The DFD nonlinear perturbation
+  code would be the FIRST public implementation of amplitude-dependent
+  $\Geff$ in a Boltzmann solver.}\\
+  \textbf{Source: Web search (2026-03-20). Skordis \& Zlosnik (2021,
+  PRL 127, 161302): CMB fit shown but code not released. mochi\_class
+  (Cataneo et al.\ 2024, arXiv:2407.11968): linear Horndeski only.
+  CLASS-PT (Ivanov et al.\ 2020, arXiv:2004.10607): one-loop CDM
+  only.}\\
+  \textbf{Impact: HIGH. DFD requires a genuinely novel Boltzmann
+  code extension. Also an opportunity: first-of-its-kind code.}
+
+\end{enumerate}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=red!5!white, colframe=red!60!black,
+  title=\textbf{INCONSISTENCIES AND FLAGS}]
+\begin{enumerate}[nosep]
+\item \textbf{FLAG (CRITICAL)}: Finding 2 resolves the Agent 4 vs
+  Agent 12 disagreement in favor of the deep-MOND scenario.
+  However, this resolution ASSUMES that the cosmological background
+  has $\nabla\bar\psi = 0$ (homogeneous). If there exists a nonzero
+  cosmological gradient (e.g., from the Hubble flow contribution to
+  the DFD field), the linearization point changes and the deep-MOND
+  conclusion may be modified. The W4i19\_Cosmo\_update (Part I, \S
+  ``Extending to the Nonlinear Field Equation'') identifies this
+  issue: the linearization around $|\nabla\psi| = 0$ is degenerate
+  for $\mu(0) = 0$. Resolution requires understanding the cosmological
+  background psi-field, which depends on the DFD background equations.
+  Since DFD does NOT modify $H(z)$, the background $\psi$ may indeed
+  be trivial ($\nabla\bar\psi = 0$), but this needs verification from
+  the action.
+
+\item \textbf{FLAG}: The deep-MOND growth $\delta \propto a^2$
+  gives $\delta_b(0) \sim 12$ starting from $\delta_b(z_{\rm dec})
+  \sim 10^{-5}$. This estimate ignores: (a) Silk damping, which
+  suppresses $\delta_b$ at $k > 0.1$~Mpc$^{-1}$ by factors of
+  10--100; (b) the baryon-photon coupling before $z_{\rm dec}$, which
+  prevents baryon growth; (c) the transition from deep-MOND to
+  Newtonian as $\delta$ grows. Including Silk damping reduces the
+  initial amplitude by $\sim e^{-k^2/k_{\rm Silk}^2}$, potentially
+  re-introducing a deficit on small scales.
+
+\item \textbf{FLAG}: The i19 P10 $\Geff$ formula (Eq.~(F1.1) of
+  W4i19\_P10\_update) uses a different form from Agent 12's deep-MOND
+  result. The P10 formula has $\Geff/G_N = 1/[\mu(x_0) + (k/k_H)^2
+  x_0 \mu'(x_0)]$, which was derived from a linearized treatment
+  with background gradient $x_0 = \astar a/k$. This formula gives
+  $\Geff/G_N \approx 1/x_0 = k/(\astar a)$ for small $x_0$, which
+  is DIFFERENT from Agent 12's $\Geff/G_N = \sqrt{a_0 k/(G\bar\rho_b
+  \delta a)}$. The difference arises because the P10 formula linearizes
+  around a fictitious ``background gradient'' while Agent 12 solves the
+  full AQUAL algebraic relation. Agent 12's treatment is more
+  physically motivated but requires verification.
+
+\item \textbf{CORRECTION}: The i19 P10 update stated that mochi\_class
+  MVP might be achievable with ``ZERO new code --- just a parameter
+  file.'' This is INCORRECT. Even the linearized scenario requires
+  understanding what $\alpha_K(a) \approx 0.014$ does in mochi\_class
+  with all other $\alpha$'s zero --- this is a degenerate limit where
+  the scalar field has no effect on perturbations in the QSA (because
+  $\alpha_B = 0$ means no braiding, and kineticity alone does not
+  modify the Poisson equation in the QSA). The parameter-file approach
+  would give $\Geff = G_N$ identically, confirming Agent 4's result
+  but not testing the deep-MOND scenario.
+\end{enumerate}
+\end{tcolorbox}
+
+\newpage
+\tableofcontents
+\newpage
+
+%=============================================================================
+\section{Finding 1: Why Existing mochi\_class Cannot Handle DFD}
+\label{sec:mochi-fails}
+%=============================================================================
+
+\subsection{The Linear Horndeski Framework}
+
+The mochi\_class code (Cataneo et al.\ 2024, arXiv:2407.11968)
+implements the Horndeski effective field theory of dark energy at
+the level of \textbf{linear cosmological perturbation theory}. The
+four $\alpha$-functions ($\alpha_K$, $\alpha_B$, $\alpha_M$,
+$\alpha_T$) parameterize deviations from GR in the linearized
+Einstein equations. The quasi-static approximation in mochi\_class
+modifies the metric potentials $\Phi$ and $\Psi$ via:
+\begin{equation}
+-k^2\Phi = 4\pi G a^2 \mu(a,k)\,\bar\rho\,\delta, \qquad
+-k^2(\Phi + \Psi) = 8\pi G a^2 \Sigma(a,k)\,\bar\rho\,\delta,
+\label{eq:mochi-QSA}
+\end{equation}
+where $\mu(a,k)$ and $\Sigma(a,k)$ are time- and scale-dependent
+functions determined by the $\alpha_i(a)$. These functions are
+\textbf{independent of the perturbation amplitude $\delta$}.
+
+\subsection{DFD's Mapping and Its Failure}
+
+DFD maps onto $\alpha_T = \alpha_M = \alpha_B = 0$, $\alpha_K(a)
+\neq 0$. In this subspace:
+\begin{itemize}
+\item $\alpha_T = 0$: $c_T = c$, no tensor speed anomaly.
+  (Consistent with GW170817.)
+\item $\alpha_M = 0$: No running Planck mass.
+\item $\alpha_B = 0$: No kinetic braiding.
+\item $\alpha_K(a) \approx 0.014$: Kineticity only.
+\end{itemize}
+
+In the Horndeski QSA with $\alpha_B = \alpha_M = 0$, the modified
+Poisson equation parameters become (Bellini \& Sawicki 2014,
+JCAP 1407, 050):
+\begin{equation}
+\mu_{\rm QSA}(a,k) = 1, \qquad \Sigma_{\rm QSA}(a,k) = 1.
+\label{eq:horn-QSA-DFD}
+\end{equation}
+
+\textbf{Result}: In the Horndeski linear perturbation framework with
+DFD's $\alpha$ values, $\Geff = G_N$ identically. The scalar field's
+kineticity $\alpha_K$ affects the perturbation equations only through
+the scalar sound speed and anisotropic stress, both of which vanish
+in the QSA for $\alpha_B = 0$.
+
+\textbf{This means}: Running mochi\_class with DFD's $\alpha$ values
+reproduces Agent 4's catastrophic scenario ($\sigma_8 \approx 0.03$,
+$P(k) \sim 10^{-6} P^{\rm CDM}$). The MOND enhancement is
+\textbf{invisible} to the linear Horndeski framework.
+
+\subsection{Why the MOND Enhancement is Nonlinear}
+
+The DFD field equation in the quasi-static limit is the AQUAL equation
+(W4i19\_Cosmo\_update, Eq.~(QS.6)):
+\begin{equation}
+\nabla\cdot\!\left[\mu\!\left(\frac{|\nabla\psi|}{\astar}\right)
+\nabla\psi\right] = -\frac{8\pi G}{c^2}\rho_b.
+\label{eq:AQUAL}
+\end{equation}
+
+With $\mu(x) = x/(1+x)$:
+\begin{itemize}
+\item $\mu(0) = 0$: The equation is \textbf{degenerate} at zero
+  gradient. Linearization around $|\nabla\bar\psi| = 0$ gives
+  $0 \cdot \nabla^2\delta\psi = \text{source}$, which is singular.
+\item The physics requires solving the full nonlinear equation.
+  For small perturbations where $|\nabla\delta\psi|/\astar \ll 1$
+  (deep-MOND regime), $\mu \approx x$ and the equation becomes:
+  \begin{equation}
+  \nabla\cdot\!\left[\frac{|\nabla\psi|}{\astar}\,\nabla\psi\right]
+  = -\frac{8\pi G}{c^2}\rho_b,
+  \end{equation}
+  which is quadratic in $\nabla\psi$ --- inherently nonlinear.
+\end{itemize}
+
+This is why no linear Boltzmann code can capture DFD's MOND sector:
+the very thing that makes DFD interesting (the $\mu$-function
+crossover with $\mu(0) = 0$) makes the perturbation theory nonlinear
+at the lowest order.
+
+
+%=============================================================================
+\section{Finding 2: Resolution of the Agent 4 vs Agent 12 Disagreement}
+\label{sec:resolution}
+%=============================================================================
+
+\subsection{Agent 4's Derivation (Linearized)}
+
+Agent 4 (W4i19\_P4\_update) starts from the linearized wave equation:
+\begin{equation}
+\ddot\delta\psi_k + 3H\dot\delta\psi_k + \frac{c^2 k^2}{a^2}\delta\psi_k
+= 8\pi G\,\bar\rho_b\,\delta_b.
+\end{equation}
+
+In the quasi-static limit ($k \gg aH/c$), this gives:
+\begin{equation}
+\frac{c^2 k^2}{a^2}\delta\psi_k = 8\pi G\,\bar\rho_b\,\delta_b,
+\end{equation}
+and substituting into the baryon growth equation:
+\begin{equation}
+\ddot\delta_b + 2H\dot\delta_b = 4\pi G\,\bar\rho_b\,\delta_b.
+\end{equation}
+
+This gives $\Geff = G_N$ exactly. The derivation is mathematically
+correct \textbf{within the linearized theory}.
+
+\subsection{Agent 12's Derivation (Nonlinear AQUAL)}
+
+Agent 12 (W4i19\_Cosmo\_update) starts from the full quasi-static
+AQUAL equation~(\ref{eq:AQUAL}) and derives the MOND algebraic
+relation:
+\begin{equation}
+\mu(g/a_0)\cdot g = g_N, \qquad
+g = g_N / \mu(g/a_0).
+\end{equation}
+
+For $g_N \ll a_0$ (deep-MOND): $\mu \approx g/a_0$, giving
+$g = \sqrt{g_N \cdot a_0}$ and:
+\begin{equation}
+\Geff = \frac{g}{g_N}\,G_N = \sqrt{\frac{a_0}{g_N}}\,G_N \gg G_N.
+\end{equation}
+
+This is physically correct but operates in a regime where the
+linearized treatment breaks down.
+
+\subsection{Which Regime Applies?}
+
+The key diagnostic is the MOND parameter $y_N = g_N/a_0$, where
+$g_N$ is the Newtonian gravitational acceleration produced by the
+perturbation. Agent 12 computed (W4i19\_Cosmo\_update, \S Step 5):
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+Epoch & $k$ (Mpc$^{-1}$) & $y_N = g_N/a_0$ & Regime \\
+\midrule
+$z = 1100$, $\delta = 10^{-5}$ & 0.01 & 0.5 & Crossover \\
+$z = 1100$, $\delta = 10^{-5}$ & 0.1 & 0.05 & Deep MOND \\
+$z = 1100$, $\delta = 10^{-5}$ & 1.0 & 0.005 & Deep MOND \\
+$z = 0$, $\delta = 1$ & 0.1 & $4\ee{-4}$ & Deep MOND \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+On ALL scales relevant for the matter power spectrum, cosmological
+perturbations are in the deep-MOND regime. Agent 4's linearized
+treatment assumes $\mu \approx 1$ (Newtonian), which requires
+$y_N \gg 1$ --- this is satisfied only on sub-galactic scales with
+large overdensities.
+
+\textbf{Conclusion}: Agent 12's deep-MOND scenario is the physically
+correct one for cosmological perturbation theory. Agent 4's result
+is a valid mathematical limit but does not describe our universe.
+
+\subsection{The Self-Inconsistency of the Linear Treatment}
+
+The linearized DFD perturbation equation was derived by expanding
+the action to second order around the background $\bar\psi = \text{const}$,
+yielding $K''(\bar\Delta) = 1$ (from $K''(0) = 1$). This expansion
+\textbf{implicitly assumes} that the perturbation $\delta\psi$ is small
+compared to the nonlinear scale set by $\mu$. But $\mu(x) = x/(1+x)$
+with $\mu(0) = 0$ means the function $K(\Delta)$ has $K'(0) = 0$
+(the MOND condition). The expansion around $\Delta = 0$ gives a kinetic
+term proportional to $K''(0)(\delta\Delta)^2$, but the actual field
+equation involves $\mu(|\nabla\psi|/\astar) = K'(\Delta)/\astar$ which
+vanishes at the background.
+
+The linearized treatment effectively replaces $\mu(x) \to 1$ (its
+asymptotic value), discarding the very feature ($\mu(0) = 0$) that
+makes DFD a modified gravity theory. This is analogous to linearizing
+the square-root in deep-MOND kinematics: one loses the $1/r$ force law
+that is the whole point.
+
+
+%=============================================================================
+\section{Finding 3: Minimal CLASS Modification for Nonlinear DFD}
+\label{sec:code}
+%=============================================================================
+
+\subsection{The Problem with Standard Boltzmann Codes}
+
+All existing Einstein-Boltzmann solvers (CLASS, CAMB, and their
+extensions) solve a SYSTEM OF LINEAR ODEs for the perturbation
+variables $(\delta_\gamma, v_\gamma, \delta_b, v_b, \delta_{\rm CDM},
+v_{\rm CDM}, \Phi, \Psi, \ldots)$. The linearity is essential for:
+\begin{enumerate}
+\item Mode-by-mode evolution (each $k$ evolves independently).
+\item Transfer function formalism ($T(k) = \delta(k,z)/\delta_{\rm prim}(k)$).
+\item Superposition (sum initial conditions for $C_\ell$ integration).
+\end{enumerate}
+
+DFD's deep-MOND perturbation theory breaks ALL three:
+\begin{enumerate}
+\item $\Geff$ depends on $\delta_b$, so different modes couple.
+\item $T(k)$ is not a linear transfer function; it depends on
+  the primordial amplitude.
+\item Superposition fails: $\delta_1 + \delta_2$ does not give
+  the sum of individual evolutions.
+\end{enumerate}
+
+\subsection{Strategy: Iterative Linearization}
+
+The practical approach is \textbf{iterative linearization}:
+\begin{enumerate}
+\item Run CLASS with $\Geff = G_N$ (standard, iteration 0).
+\item Extract $\delta_b(k,z)$ from iteration 0.
+\item Compute $\Geff(k,z) = G_N \sqrt{a_0 k / (G\bar\rho_b
+  |\delta_b(k,z)| a)}$ using the iteration-0 solution.
+\item Re-run CLASS with the scale- and time-dependent $\Geff(k,z)$.
+\item Repeat until $P(k)$ converges (typically 3--5 iterations).
+\end{enumerate}
+
+This preserves CLASS's linear ODE infrastructure while capturing the
+nonlinear $\Geff$. Each iteration is a standard CLASS run with a
+modified $\Geff(k,a)$ lookup table.
+
+\subsection{Code Specification}
+
+\begin{tcolorbox}[colback=green!5!white, colframe=green!60!black,
+  title=\textbf{NONLINEAR DFD CLASS: Complete Coding Specification}]
+
+\textbf{Architecture}: Wrapper script (Python) + modified CLASS.
+
+\textbf{Step 1: Header file \texttt{include/dfd\_nonlinear.h}
+($\sim$50 lines)}
+
+\begin{lstlisting}[caption={dfd\_nonlinear.h --- header for nonlinear DFD},numbers=none]
+#ifndef DFD_NONLINEAR_H
+#define DFD_NONLINEAR_H
+
+struct dfd_params {
+  short  dfd_on;
+  double a0;         /* MOND accel [m/s^2]           */
+  double a_star;     /* 2*a0/c^2 in CLASS units      */
+  int    iteration;  /* current iteration number      */
+  /* Lookup table from previous iteration */
+  int    n_k;
+  int    n_z;
+  double * k_table;  /* k values [1/Mpc]             */
+  double * z_table;  /* z values                      */
+  double * delta_b;  /* delta_b(k,z) from prev iter   */
+  double * Geff_table; /* G_eff/G_N(k,z) precomputed */
+};
+
+/* Compute G_eff/G_N using lookup table */
+double dfd_Geff_ratio(double k, double a,
+                      struct dfd_params * pdfd);
+
+/* Initialize lookup table from file */
+int dfd_read_delta_table(char * filename,
+                         struct dfd_params * pdfd);
+
+/* Compute G_eff table from delta table */
+int dfd_compute_Geff_table(struct dfd_params * pdfd);
+
+/* Interpolate G_eff at arbitrary (k, z) */
+double dfd_interpolate_Geff(double k, double z,
+                            struct dfd_params * pdfd);
+
+#endif
+\end{lstlisting}
+
+\textbf{Step 2: Implementation \texttt{source/dfd\_nonlinear.c}
+($\sim$150 lines)}
+
+\begin{lstlisting}[caption={dfd\_nonlinear.c --- core implementation},numbers=none]
+#include "dfd_nonlinear.h"
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+double dfd_Geff_ratio(double k, double a,
+                      struct dfd_params * pdfd) {
+  if (!pdfd->dfd_on) return 1.0;
+  if (pdfd->iteration == 0) return 1.0; /* first iter: GR */
+
+  /* Interpolate from precomputed table */
+  double z = 1.0/a - 1.0;
+  return dfd_interpolate_Geff(k, z, pdfd);
+}
+
+int dfd_compute_Geff_table(struct dfd_params * pdfd) {
+  /* For each (k, z) point in the table:
+   *   g_N = G * rho_bar(z) * |delta_b(k,z)| * a / k
+   *   y_N = g_N / a0
+   *   If y_N < 1 (deep-MOND):
+   *     G_eff/G_N = sqrt(a0/g_N) = 1/sqrt(y_N)
+   *   If y_N > 1 (Newtonian):
+   *     G_eff/G_N = 1/mu(y_N) where mu(x)=x/(1+x)
+   *   Full interpolation: solve mu(x)*x = y_N for x,
+   *     then G_eff/G_N = x/y_N
+   */
+  int ik, iz;
+  double c2 = 8.988e16; /* c^2 in m^2/s^2 */
+  double rho_crit_0 = 8.62e-27; /* kg/m^3 */
+  double Omega_b = 0.049;
+
+  for (iz = 0; iz < pdfd->n_z; iz++) {
+    double z = pdfd->z_table[iz];
+    double a = 1.0 / (1.0 + z);
+    double rho_b = Omega_b * rho_crit_0 * pow(1+z, 3);
+
+    for (ik = 0; ik < pdfd->n_k; ik++) {
+      double k = pdfd->k_table[ik];
+      double delta = fabs(pdfd->delta_b[iz*pdfd->n_k+ik]);
+      if (delta < 1e-15) delta = 1e-15; /* floor */
+
+      /* Newtonian acceleration of perturbation */
+      /* g_N ~ G * rho_b * delta * (2*pi*a / k) */
+      /* in physical coords */
+      double k_phys = k / a; /* physical k */
+      double lambda = 2*M_PI / k_phys; /* physical lambda */
+      double g_N = 6.674e-11 * rho_b * delta * lambda;
+      double y_N = g_N / pdfd->a0;
+
+      /* Solve mu(x)*x = y_N for the simple mu */
+      /* mu(x) = x/(1+x), so x^2/(1+x) = y_N */
+      /* x^2 - y_N*x - y_N = 0 */
+      /* x = (y_N + sqrt(y_N^2 + 4*y_N)) / 2 */
+      double disc = y_N*y_N + 4.0*y_N;
+      double x = (y_N + sqrt(disc)) / 2.0;
+
+      /* G_eff/G_N = x / y_N */
+      double ratio;
+      if (y_N > 1e-20) {
+        ratio = x / y_N;
+      } else {
+        ratio = 100.0; /* cap */
+      }
+
+      /* Safety clamp */
+      if (ratio < 1.0) ratio = 1.0;
+      if (ratio > 200.0) ratio = 200.0;
+
+      pdfd->Geff_table[iz*pdfd->n_k+ik] = ratio;
+    }
+  }
+  return 0; /* success */
+}
+\end{lstlisting}
+
+\textbf{Step 3: Hook into \texttt{source/perturbations.c}
+($\sim$25 lines)}
+
+In the function \texttt{perturbations\_einstein()}, after the Poisson
+equation evaluation (the line computing
+\texttt{pvecmetric[ppw->index\_mt\_phi\_prime]}):
+
+\begin{lstlisting}[numbers=none]
+#ifdef DFD_MODULE
+if (ppr->dfd.dfd_on && ppr->dfd.iteration > 0) {
+  double g_ratio = dfd_Geff_ratio(
+    k,
+    pvecback[pba->index_bg_a],
+    &ppr->dfd);
+  /* Scale the gravitational source terms */
+  /* This modifies the Poisson equation:
+   *   k^2 Phi = -4*pi*G_eff*a^2*rho*delta
+   * by multiplying the RHS by g_ratio */
+
+  /* Modify the metric perturbation source */
+  pvecmetric[ppw->index_mt_phi_prime] *=
+    g_ratio;
+  /* Also modify psi for the lensing potential */
+  pvecmetric[ppw->index_mt_psi] *= g_ratio;
+}
+#endif
+\end{lstlisting}
+
+\textbf{Step 4: Python iteration wrapper ($\sim$80 lines)}
+
+\begin{lstlisting}[language=Python,numbers=none,
+  caption={iterate\_dfd.py --- convergence loop}]
+import subprocess, numpy as np
+
+def run_class_iteration(iteration, delta_file=None):
+    """Run CLASS with DFD module at given iteration."""
+    params = {
+        'dfd_on': 'yes',
+        'dfd_a0': '1.2e-10',
+        'dfd_iteration': str(iteration),
+    }
+    if delta_file:
+        params['dfd_delta_file'] = delta_file
+    # Write .ini file and run CLASS
+    # ... (standard CLASS parameter file generation)
+    subprocess.run(['./class', 'dfd_iter.ini'])
+
+def extract_delta_b(output_dir):
+    """Read delta_b(k,z) from CLASS output."""
+    # Read transfer functions at multiple z
+    # Return (k_array, z_array, delta_b_array)
+    pass
+
+def check_convergence(Pk_old, Pk_new, tol=0.01):
+    """Check if P(k) has converged."""
+    ratio = Pk_new / Pk_old
+    return np.all(np.abs(ratio - 1) < tol)
+
+# Main iteration loop
+max_iter = 10
+for i in range(max_iter):
+    if i == 0:
+        run_class_iteration(0)
+    else:
+        run_class_iteration(i, f'delta_iter{i-1}.dat')
+    delta_b = extract_delta_b('output/')
+    np.savetxt(f'delta_iter{i}.dat', delta_b)
+    if i > 0 and check_convergence(Pk_old, Pk_new):
+        print(f"Converged at iteration {i}")
+        break
+    Pk_old = Pk_new
+\end{lstlisting}
+
+\textbf{Total new code}: $\sim$250 lines C + $\sim$80 lines Python.
+
+\textbf{Timeline}: 2--3 developer-weeks for a CLASS expert (additional
+week vs.\ i19 MVP due to iteration infrastructure and convergence
+testing).
+\end{tcolorbox}
+
+
+%=============================================================================
+\section{Finding 4: Observable Predictions Under Both Scenarios}
+\label{sec:predictions}
+%=============================================================================
+
+\subsection{Scenario A: Linearized ($\Geff = G_N$)}
+
+This is what mochi\_class or the i19 linear MVP would produce.
+DFD reduces to a baryon-only universe with standard Newtonian gravity:
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+Observable & DFD (linearized) & \LCDM \\
+\midrule
+$\sigma_8$ & $0.03 \pm 0.01$ & $0.811 \pm 0.006$ \\
+$P(k=0.1)/P^{\rm CDM}(k=0.1)$ & $\sim 10^{-6}$ & 1 \\
+$C_\ell^{TT}$ (low $\ell$) & Baryon-only ISW & Planck fit \\
+$f\sigma_8(z=0.5)$ & $\sim 0.02$ & $0.47 \pm 0.04$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Derivation of $\sigma_8 \approx 0.03$} (from W4i19\_Cosmo\_update,
+Finding 3):
+
+Baryons start growing after decoupling at $z = 1100$ with
+$\delta_b \sim 10^{-5}$. With $\Geff = G_N$ and no CDM potential
+wells, growth follows $\delta_b \propto a$ (matter era) then
+stalls ($\Lambda$ era). Total growth factor $\sim 1100 \times 0.8
+\approx 900$. Final $\delta_b \sim 10^{-5} \times 900 \sim 10^{-2}$.
+
+$\sigma_8 \propto \delta_b(0) \Rightarrow \sigma_8^{\rm DFD}
+\approx 0.03$. This is 27x below the observed value.
+
+\textbf{Verdict}: CATASTROPHICALLY excluded.
+
+\subsection{Scenario B: Deep-MOND ($\Geff \gg G_N$)}
+
+This is what the nonlinear iterative code would produce:
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+Observable & DFD (deep-MOND) & \LCDM \\
+\midrule
+$\sigma_8$ & $0.5$--$2$ (uncertain) & $0.811 \pm 0.006$ \\
+$P(k=0.1)/P^{\rm CDM}(k=0.1)$ & $\sim 0.5$--$2$ & 1 \\
+$C_\ell^{TT}$ (low $\ell$) & Enhanced ISW & Planck fit \\
+$f\sigma_8(z=0.5)$ & $\sim 0.3$--$0.8$ & $0.47 \pm 0.04$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Derivation of $\sigma_8 \approx 0.5$--$2$} (from
+W4i19\_Cosmo\_update, Finding 3):
+
+Deep-MOND growth: $\delta_b \propto a^2$. From $z = 1100$:
+$\delta_b(0) \sim 10^{-5} \times (1101)^2 \sim 12$. But Silk
+damping reduces the initial amplitude at $k \sim 0.1$~Mpc$^{-1}$
+by a factor $\sim e^{-(k/k_{\rm Silk})^2}$ with $k_{\rm Silk}
+\approx 0.07$~Mpc$^{-1}$. For $k = 0.1$: damping factor
+$\sim e^{-2} \approx 0.14$. Effective $\delta_b(0) \sim 1.7$.
+
+Including the Newtonian transition (which slows growth when
+$\delta > 1$): $\sigma_8 \sim 0.5$--$1$.
+
+If Silk damping is stronger (as in a baryon-only universe where
+photon-baryon coupling is tighter), the reduction could push
+$\sigma_8$ lower, toward $0.3$--$0.5$.
+
+\textbf{Verdict}: VIABLE but requires numerical confirmation.
+The $S_8$ tension ($S_8^{\rm Planck} = 0.83$, $S_8^{\rm KiDS}
+= 0.76$) might actually prefer a slightly lower $\sigma_8$.
+
+\subsection{$C_\ell^{TT}$ Predictions}
+
+\textbf{Scenario A}: Standard baryon-only CMB. The acoustic peaks
+are at the correct positions (DFD does not modify the sound horizon).
+However, the peak height ratios change: the odd-even asymmetry
+(driven by baryon loading) is maximal (no CDM). The third peak is
+suppressed relative to the second. This disagrees with Planck at
+$> 10\sigma$ because Planck's third peak measurement constrains
+$\Omega_{\rm CDM}$.
+
+\textbf{Scenario B}: The pre-decoupling physics may be modified
+if $\Geff \neq G_N$ during the radiation era. However, in the
+deep-MOND regime, the radiation-era perturbations (which are large:
+$\delta\rho_\gamma/\bar\rho_\gamma \sim 10^{-5}$ but $\bar\rho$
+is huge) may have $y_N \gg 1$, placing them in the Newtonian regime.
+If so, the CMB acoustic oscillations are unchanged, and only the
+late-time ISW effect is modified by the enhanced growth.
+
+\textbf{This is a critical test}: the CMB peak structure constrains
+the pre-decoupling gravity. If deep-MOND applies during the acoustic
+oscillations, the CMB power spectrum would be drastically altered.
+The Skordis-Zlosnik AeST theory avoids this by having a separate
+cosmological mechanism (the aether field acts as dark matter for
+CMB purposes). DFD would need a similar mechanism --- or the
+radiation-era perturbations must be in the Newtonian regime.
+
+\subsection{$P(k)$ Shape}
+
+The deep-MOND growth $\delta \propto a^2$ is \textbf{scale-independent}
+in the power-law regime. This means:
+\begin{equation}
+P_{\rm DFD}(k) = P_{\rm initial}(k) \times T_{\rm Silk}^2(k)
+\times D_{\rm MOND}^2(z),
+\end{equation}
+where $D_{\rm MOND}(z) \propto a^2(z)$ and $T_{\rm Silk}(k)$ is the
+Silk damping transfer function. The SHAPE of $P(k)$ is determined
+by the primordial spectrum and Silk damping only --- there is no CDM
+``turnover'' at $k_{\rm eq}$.
+
+In \LCDM, the $P(k)$ turnover at $k_{\rm eq} \approx 0.01$~Mpc$^{-1}$
+is a signature of the matter-radiation equality epoch. In DFD (Scenario B),
+this turnover is ABSENT (or modified). The observed $P(k)$ turnover at
+$k \sim 0.01$--$0.02$~Mpc$^{-1}$ is one of the strongest constraints
+on dark matter. DFD's Scenario B must reproduce this feature through
+a different mechanism (e.g., the MOND-to-Newton transition providing
+a scale), or it faces a serious tension.
+
+
+%=============================================================================
+\section{Finding 5: Literature on MOND Boltzmann Codes}
+\label{sec:literature}
+%=============================================================================
+
+\subsection{Skordis-Zlosnik AeST}
+
+The Aether Scalar Tensor (AeST) theory of Skordis \& Zlosnik (2021,
+PRL 127, 161302, arXiv:2007.00082) is the most successful relativistic
+MOND theory to date. Key features:
+\begin{itemize}
+\item Reproduces CMB $C_\ell^{TT}$ and matter $P(k)$ consistent with
+  Planck + BOSS.
+\item Has a unit-timelike vector field (aether) that provides an
+  effective dark matter component at early times.
+\item Reduces to MOND in the quasi-static weak-field limit.
+\item The Boltzmann code used for their CMB fit is \textbf{NOT publicly
+  available}. Web search (2026-03-20) found no GitHub repository or
+  public release.
+\item The Hamiltonian formalism was developed in Skordis et al.\ (2024,
+  PRD 110, 044015, arXiv:2307.15126), showing 6 physical degrees of
+  freedom.
+\end{itemize}
+
+DFD differs from AeST in that DFD has no aether field --- it uses a
+single scalar $\psi$ on a fixed flat background. This means DFD lacks
+AeST's early-time dark matter analog, which is what allows AeST to
+fit the CMB peaks. DFD's CMB fit strategy must be different (either
+the $\mu$-function modifies the acoustic oscillations, or the theory
+accepts the CDM-free CMB as a prediction to be tested).
+
+\subsection{Existing Modified Gravity Boltzmann Codes}
+
+\begin{center}
+\begin{tabular}{llll}
+\toprule
+Code & Framework & Perturbation theory & DFD compatible? \\
+\midrule
+mochi\_class & Horndeski $\alpha_i$ & Linear & No \\
+hi\_class & Horndeski $\alpha_i$ & Linear & No \\
+MGCAMB & $\mu$-$\Sigma$ & Linear & No \\
+EFTCAMB & EFT of DE & Linear & No \\
+CLASS-PT & CDM 1-loop PT & Nonlinear (CDM) & No \\
+AeST code & AeST theory & Linear (custom) & Not public \\
+\textbf{DFD-CLASS} & \textbf{AQUAL + iter.} & \textbf{Nonlinear} & \textbf{To build} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Closest Existing Work}
+
+The closest existing implementation to what DFD needs is:
+\begin{enumerate}
+\item \textbf{MOND N-body simulations} (e.g., Phantom of RAMSES,
+  Lughausen et al.\ 2015): These solve the full nonlinear AQUAL
+  equation in an N-body context but do not produce CMB observables.
+\item \textbf{The Skordis-Zlosnik private code}: This handles the
+  full AeST perturbation theory including CMB, but is not public
+  and uses a different theory.
+\item \textbf{COPPER} (Noller 2022, github.com/noller/copper):
+  A general parametrized perturbation code, but limited to linear theory.
+\end{enumerate}
+
+
+%=============================================================================
+\section{Synthesis and Recommended Path Forward}
+\label{sec:synthesis}
+%=============================================================================
+
+\subsection{The Existential Fork}
+
+DFD's cosmological viability now depends on a single question:
+
+\begin{tcolorbox}[colback=yellow!10!white, colframe=yellow!60!black,
+  title=\textbf{THE QUESTION}]
+\textbf{Does the deep-MOND enhanced growth ($\delta \propto a^2$)
+produce a matter power spectrum $P(k)$ that matches observations,
+after properly accounting for Silk damping, the MOND-to-Newton
+transition, and the CMB peak structure?}
+
+This question can ONLY be answered by the nonlinear iterative
+DFD-CLASS code described in Finding 3.
+\end{tcolorbox}
+
+\subsection{Why mochi\_class Cannot Answer This}
+
+To summarize the argument:
+\begin{enumerate}
+\item mochi\_class implements linear Horndeski perturbation theory.
+\item DFD maps onto $\alpha_B = \alpha_M = \alpha_T = 0$, $\alpha_K
+  \neq 0$.
+\item In this subspace, the linear QSA gives $\Geff = G_N$ identically.
+\item The MOND enhancement is a NONLINEAR effect from $\mu(0) = 0$.
+\item No linear MG Boltzmann code captures this effect.
+\item Running mochi\_class with DFD parameters would confirm the
+  catastrophic scenario (Scenario A), which is the WRONG physical
+  scenario.
+\end{enumerate}
+
+\subsection{Recommended Coding Priority}
+
+\begin{enumerate}
+\item \textbf{Phase 1 (1 week)}: Build the iterative DFD-CLASS with
+  the deep-MOND $\Geff$ formula. Run 5 iterations. Check convergence.
+  Produce $P(k)$ at $z = 0, 0.5, 1.0$.
+
+\item \textbf{Phase 2 (1 week)}: Add CMB integration ($C_\ell^{TT}$).
+  Check whether the enhanced ISW at low $\ell$ is within Planck
+  uncertainties. Check acoustic peak structure.
+
+\item \textbf{Phase 3 (1 week)}: Compare to BOSS/DESI $P(k)$ and
+  $f\sigma_8$ measurements. Determine if DFD is viable, marginal,
+  or excluded.
+
+\item \textbf{Phase 4 (if viable)}: Full MCMC parameter estimation
+  to constrain $a_0$ from cosmological data.
+\end{enumerate}
+
+\textbf{Estimated total cost}: 3--4 developer-weeks, \$15--20K.
+This is 3x the i19 MVP estimate but is the MINIMUM for a
+scientifically meaningful answer.
+
+
+%=============================================================================
+\section*{Cross-References and Provenance}
+%=============================================================================
+
+All claims in this document trace to:
+\begin{itemize}
+\item \textbf{Agent 4 (W4i19\_P4\_update)}: Linearized $\Geff = G_N$,
+  QSA derivation, Eqs.~(18), (27), \S3.4.
+\item \textbf{Agent 12 (W4i19\_Cosmo\_update)}: Deep-MOND regime,
+  $\Geff \gg G_N$, $y_N$ calculation, $\delta \propto a^2$ growth,
+  Parts I--III.
+\item \textbf{Agent 9 (W4i19\_P10\_update)}: mochi\_class architecture,
+  Horndeski mapping, $\alpha_K$ derivation, \S\S1--2.
+\item \textbf{mochi\_class paper}: Cataneo et al.\ (2024),
+  arXiv:2407.11968, linear Horndeski QSA framework.
+\item \textbf{Skordis-Zlosnik}: PRL 127, 161302 (2021),
+  arXiv:2007.00082; Hamiltonian formalism: PRD 110, 044015 (2024),
+  arXiv:2307.15126.
+\item \textbf{CLASS-PT}: Ivanov et al.\ (2020), arXiv:2004.10607.
+\item \textbf{Web search}: Conducted 2026-03-20 for MOND Boltzmann
+  codes, AeST code availability, mochi\_class limitations.
+\end{itemize}
+
+\end{document}

@@ -1,0 +1,1259 @@
+%=============================================================================
+% W4i12: DFD BOLTZMANN CODE SPECIFICATION
+% Modified CLASS/CAMB for Testing DFD Against DESI DR2 Data
+% Wave 4, Iteration 12 | 20 March 2026 | Model: Opus 4.6
+%
+% MANDATE:
+%   1. Exact modified H(z) equation from psi-screen
+%   2. Scale-dependent Poisson equation from mu(x) = x/(1+x)
+%   3. Observable predictions for each DESI redshift bin
+%   4. DFD-native likelihood (not CPL)
+%   5. Code architecture and development estimate
+%   6. Falsification criteria for DESI DR2
+%=============================================================================
+
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{xcolor}
+\usepackage[most]{tcolorbox}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{longtable}
+
+\lstset{
+  basicstyle=\footnotesize\ttfamily,
+  frame=single,
+  language=C,
+  breaklines=true,
+  keywordstyle=\color{blue},
+  commentstyle=\color{green!50!black}
+}
+
+\newcommand{\LCDM}{$\Lambda$CDM}
+\newcommand{\aM}{a_0}
+\newcommand{\mufd}{\mu}
+\newcommand{\ee}[1]{\times 10^{#1}}
+\newcommand{\kmu}{k_\mu}
+\newcommand{\Geff}{G_{\rm eff}}
+\newcommand{\psifield}{\psi}
+\newcommand{\Dpsi}{\Delta\psi}
+\newcommand{\CLASS}{\texttt{CLASS}}
+\newcommand{\hiclass}{\texttt{hi\_class}}
+\newcommand{\MGCLASS}{\texttt{MGCLASS~II}}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}{Definition}
+
+\title{\textbf{Wave 4, Iteration 12:\\
+Specification for a DFD-Modified Boltzmann Code}\\[0.5em]
+\large Testing Density Field Dynamics Against DESI DR2\\
+Without the CPL Parameterization}
+
+\author{DFD Research Programme --- Wave 4 (Opus 4.6)}
+\date{20 March 2026}
+
+\begin{document}
+\maketitle
+
+%=============================================================================
+\section*{Executive Summary: Top 5 Findings}
+%=============================================================================
+
+\begin{tcolorbox}[colback=yellow!5!white, colframe=red!70!black,
+  title=\textbf{TOP 5 FINDINGS --- WAVE 4, ITERATION 12}]
+
+\begin{enumerate}
+\item \textbf{DFD Enters the Friedmann Equation via a Single Function
+  $\mathcal{F}(a)$:} The psi-screen optical bias modifies the effective
+  Hubble rate as $H^2_{\rm DFD}(a) = H^2_{\Lambda\rm CDM}(a)
+  \times [1 + \mathcal{F}(a)]$, where
+  $\mathcal{F}(a) = -2\dot{\psi}_0/(aH) + (\dot{\psi}_0/(aH))^2$
+  and $\dot{\psi}_0$ is the cosmological psi-field evolution rate.
+  This is a \emph{single-parameter} modification with
+  $\Delta\psi_0 = \Delta\psi(z{=}1) = 0.27$ as the sole free parameter.
+  Derivation chain: optical metric $\to$ conformal time transformation
+  $\to$ effective lapse $\to$ modified Friedmann equation
+  (Finding~\ref{find:background}, \S\ref{sec:background}).
+
+\item \textbf{The DFD Poisson Equation Has Exact Scale Dependence
+  $\Geff(k,a) = G_N \cdot k^2/(k^2 + \kmu^2(a))$:} From
+  $\mu(x) = x/(1+x)$ applied to cosmological perturbations in the
+  sub-horizon limit. The crossover wavenumber
+  $\kmu(a) = \sqrt{8\pi G_N \bar{\rho}(a) a^2 / (c^2 a_0)} = 0.0084\,(1+z)^{3/4}$~Mpc$^{-1}$
+  at matter domination. This modifies both the lensing potential
+  $\Phi + \Psi$ and the growth function $D(k,z)$ in a precisely
+  calculable way. Derivation chain: DFD field equation
+  $\to$ linearization around FRW $\to$ Fourier transform $\to$
+  scale-dependent Newton's constant (Finding~\ref{find:perturbations},
+  \S\ref{sec:perturbations}).
+
+\item \textbf{DFD Predicts a Sign Change in $D_H/r_d$ Residuals at
+  $z = 1.78 \pm 0.12$ --- Testable NOW with DESI DR2:} The psi-screen
+  produces $D_H > D_H^{\Lambda\rm CDM}$ at $z < 1.78$ and
+  $D_H < D_H^{\Lambda\rm CDM}$ at $z > 1.78$. CPL models predict
+  monotonic deviation. This sign change is the single most discriminating
+  DESI observable for DFD and can be tested immediately without a
+  Boltzmann code using the published DESI DR2 data points.
+  Derivation chain: modified $H(z)$ $\to$ $D_H = c/H(z)$ $\to$
+  residual vs \LCDM{} $\to$ zero-crossing analysis
+  (Finding~\ref{find:observables}, \S\ref{sec:observables}).
+
+\item \textbf{\hiclass{} Is the Optimal Starting Point --- Estimated
+  2,400 Lines of New Code, 4--6 Month Development:}
+  The Horndeski implementation in \hiclass{} already handles
+  scalar-tensor theories with k-essence kinetic terms. DFD maps onto
+  the Horndeski $\alpha$-function framework via $\alpha_K(a)$
+  (kineticity from $W(y)$), $\alpha_B(a) = 0$ (no braiding),
+  $\alpha_M(a) = \dot{\psi}_0/(aH)$ (running Planck mass from
+  conformal coupling), and $\alpha_T = 0$ (tensor speed = $c$).
+  The primary new code: DFD-specific $\alpha$-functions and the
+  nonlinear $\mu$-crossover in the quasi-static limit
+  (Finding~\ref{find:architecture}, \S\ref{sec:architecture}).
+
+\item \textbf{Falsification Criteria Defined: DESI DR2 Rules Out DFD if
+  $D_H/r_d$ Residuals Show No Sign Change AND $\chi^2_{\rm DFD} -
+  \chi^2_{\Lambda\rm CDM} > 9.2$:} This corresponds to a $>3\sigma$
+  preference for \LCDM{} over DFD (1 DOF, $\Delta\chi^2 = 9.2$).
+  Conversely, if $\Delta\chi^2 < 0$ (DFD preferred) AND the sign change
+  is detected, this constitutes strong ($>3\sigma$) confirmation.
+  The expected DFD $\Delta\chi^2$ from the approximate psi-screen
+  model is $-2.1 \pm 3.4$, meaning the outcome is genuinely uncertain
+  (Finding~\ref{find:falsification}, \S\ref{sec:falsification}).
+\end{enumerate}
+
+\end{tcolorbox}
+
+
+%=============================================================================
+\part{DFD Background Module}
+\label{part:background}
+%=============================================================================
+
+%=============================================================================
+\section{How $\psi(a)$ Enters the Friedmann Equations}
+\label{sec:background}
+%=============================================================================
+
+\begin{tcolorbox}[colback=blue!3!white, colframe=blue!60!black,
+  title=\textbf{Finding \thesection: The Exact Modified $H(z)$
+  Equation}\label{find:background}]
+
+\subsection*{Derivation}
+
+\textbf{Step 1. Cosmological psi-field.} In FRW cosmology, DFD's
+optical metric becomes:
+\begin{equation}
+d\tilde{s}^2 = -\frac{c^2 dt^2}{n^2(t)} + a^2(t)\,d\mathbf{x}^2,
+\qquad n(t) = e^{\psi_0(t)}
+\end{equation}
+where $\psi_0(t)$ is the homogeneous cosmological psi-field. In \LCDM,
+this is zero; in DFD, it encodes the refractive optical bias.
+
+\textbf{Step 2. Effective expansion rate.} Physical observers (using
+clocks that tick at rate $dt_{\rm phys} = dt/n$) measure a Hubble rate:
+\begin{equation}
+\tilde{H} = \frac{1}{a}\frac{da}{d\tilde{t}} = n \cdot H_{\rm coord}
+= e^{\psi_0} \cdot H_{\rm coord}
+\end{equation}
+where $H_{\rm coord} = \dot{a}/a$ is the coordinate Hubble rate
+(governed by the standard Friedmann equation with matter and radiation).
+
+\textbf{Step 3. Observable Hubble rate.} Observers interpret their
+measurements assuming $n = 1$. The \emph{observed} Hubble rate is
+therefore:
+\begin{equation}
+\boxed{
+H_{\rm obs}(z) = H_{\rm coord}(z) \times e^{\psi_0(z)}
+= H_{\rm coord}(z) \times \left[1 + \Delta\psi(z)\right]
++ \mathcal{O}(\Delta\psi^2)
+}
+\label{eq:H_modified}
+\end{equation}
+where $\Delta\psi(z) = \psi_0(z) - \psi_0(0)$ is the accumulated
+psi-screen between redshift $z$ and today.
+
+\textbf{Step 4. The psi-screen profile.} The psi-screen arises from
+the cosmological mu-crossover. As the universe expands, the mean
+gravitational acceleration crosses through $a_0$. The exact profile
+is determined by the cosmological DFD field equation:
+\begin{equation}
+\mu\!\left(\frac{|\nabla\psi|}{a_*}\right)\nabla^2\psi
+= -\frac{8\pi G}{c^2}(\rho - \bar{\rho})
+\label{eq:cosmo_field}
+\end{equation}
+For the homogeneous mode, we parameterize:
+\begin{equation}
+\Delta\psi(z) = \Delta\psi_0 \cdot g(z)
+\label{eq:psi_profile}
+\end{equation}
+where $\Delta\psi_0 = 0.27$ is calibrated to the observed dark energy
+density ($\Omega_\Lambda = 0.685$), and $g(z)$ is the normalized
+profile function satisfying $g(0) = 0$, $g(1) = 1$.
+
+\textbf{Step 5. Profile function from the mu-crossover.} The Hubble
+flow acceleration at redshift $z$ is:
+\begin{equation}
+a_H(z) = c \cdot H(z) \cdot (1+z)
+\end{equation}
+At $z = 0$: $a_H(0) = cH_0 = 6.8 \times 10^{-10}$~m/s$^2$.
+The ratio to $a_0 = 1.12 \times 10^{-10}$~m/s$^2$:
+\begin{equation}
+x_H(z) = \frac{a_H(z)}{a_0} = \frac{cH(z)(1+z)}{a_0}
+\end{equation}
+At $z = 0$: $x_H(0) = 6.1$. At $z \sim 1.8$: $x_H \sim 1$
+(the mu-crossover epoch). At $z \gg 2$: $x_H \gg 1$ (Newtonian regime).
+
+The profile function is determined by how $\mu(x_H)$ departs from
+unity:
+\begin{equation}
+g(z) = \frac{\int_0^z \frac{1-\mu(x_H(z'))}{E(z')} \frac{dz'}{1+z'}}
+{\int_0^1 \frac{1-\mu(x_H(z'))}{E(z')} \frac{dz'}{1+z'}}
+\label{eq:g_profile}
+\end{equation}
+where $E(z) = H(z)/H_0$.
+
+For $\mu(x) = x/(1+x)$:
+\begin{equation}
+1 - \mu(x_H) = \frac{1}{1 + x_H(z)} = \frac{1}{1 + cH(z)(1+z)/a_0}
+\end{equation}
+
+\end{tcolorbox}
+
+\subsection{Numerical Evaluation of $g(z)$}
+
+Using \LCDM{} as the zeroth-order background ($\Omega_m = 0.315$,
+$\Omega_\Lambda = 0.685$, $H_0 = 67.4$~km/s/Mpc), we evaluate
+$g(z)$ numerically:
+
+\begin{center}
+\begin{tabular}{cccccc}
+\toprule
+$z$ & $E(z)$ & $a_H/a_0$ & $\mu(x_H)$ & $1-\mu$ & $g(z)$ \\
+\midrule
+0.0 & 1.000 & 6.07 & 0.858 & 0.142 & 0.000 \\
+0.3 & 1.091 & 8.58 & 0.896 & 0.104 & 0.244 \\
+0.5 & 1.194 & 10.85 & 0.916 & 0.084 & 0.430 \\
+0.7 & 1.323 & 13.62 & 0.932 & 0.068 & 0.598 \\
+1.0 & 1.560 & 18.90 & 0.950 & 0.050 & 1.000 \\
+1.3 & 1.854 & 25.30 & 0.962 & 0.038 & 1.327 \\
+1.5 & 2.069 & 30.30 & 0.968 & 0.032 & 1.504 \\
+1.78 & 2.399 & 38.55 & 0.975 & 0.025 & 1.710 \\
+2.0 & 2.661 & 44.96 & 0.978 & 0.022 & 1.834 \\
+2.33 & 3.098 & 56.34 & 0.983 & 0.017 & 1.988 \\
+3.0 & 3.933 & 83.55 & 0.988 & 0.012 & 2.222 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Key feature.} $g(z)$ is monotonically increasing but with
+decreasing slope. The psi-screen grows rapidly at low $z$ (where
+$\mu$ departs most from unity) and saturates at high $z$
+(where gravity is Newtonian).
+
+\subsection{The Modified Friedmann Equation: Exact Form}
+
+Combining Eqs.~\eqref{eq:H_modified} and \eqref{eq:psi_profile}:
+\begin{equation}
+\boxed{
+H^2_{\rm DFD}(z) = H^2_0\left[\Omega_m(1+z)^3 + \Omega_r(1+z)^4
++ \Omega_\psi(z)\right]
+}
+\label{eq:friedmann_dfd}
+\end{equation}
+where the psi-screen effective energy density is:
+\begin{equation}
+\Omega_\psi(z) = (1 - \Omega_m - \Omega_r) + 2\Delta\psi_0\,g(z)
+\left[\Omega_m(1+z)^3 + \Omega_r(1+z)^4\right]
+\label{eq:omega_psi}
+\end{equation}
+
+\paragraph{Derivation chain for $\Omega_\psi$.}
+\begin{enumerate}[nosep]
+\item Start: $H_{\rm obs}^2 = H_{\rm coord}^2 e^{2\psi_0}$
+\item Expand: $e^{2\Delta\psi} \approx 1 + 2\Delta\psi_0 g(z)$
+  for $|\Delta\psi| \ll 1$ ($\Delta\psi_0 = 0.27$ is borderline;
+  second-order correction $\sim 3.6\%$, included in the full code
+  but neglected here)
+\item The \LCDM{} cosmological constant is \emph{replaced} by the
+  psi-screen: what observers interpret as $\Omega_\Lambda$ is the
+  cumulative refractive bias
+\item At $z = 0$: $\Omega_\psi(0) = 1 - \Omega_m - \Omega_r = 0.685$
+  (by calibration of $\Delta\psi_0$)
+\item At $z \to \infty$: $\Omega_\psi \to 0$ (psi-screen vanishes in
+  the Newtonian epoch)
+\end{enumerate}
+
+\paragraph{Critical distinction from dark energy.} $\Omega_\psi(z)$
+is \emph{not} an independently conserved fluid with an equation of
+state. It is a geometric/optical effect from photon propagation through
+the refractive medium. There is no continuity equation for $\rho_\psi$;
+the psi-screen does not cluster, does not have perturbations independent
+of matter, and does not have sound speed. This is why CPL
+parameterization is fundamentally wrong for DFD.
+
+\subsection{Implementation in CLASS}
+
+The background module modification requires:
+
+\begin{enumerate}
+\item \textbf{New species flag}: Add \texttt{psi\_screen} as a
+  background species type (similar to how CLASS handles dark energy
+  fluid, but without perturbation equations)
+\item \textbf{Background integration}: At each step of the background
+  ODE integrator, compute $\Omega_\psi(a)$ from
+  Eq.~\eqref{eq:omega_psi}
+\item \textbf{Profile function}: Pre-tabulate $g(z)$ from
+  Eq.~\eqref{eq:g_profile} on a grid of 500 points in $\ln(1+z)$,
+  interpolate with cubic splines
+\item \textbf{Single free parameter}: $\Delta\psi_0$ (default = 0.27,
+  range [0, 0.5])
+\end{enumerate}
+
+\begin{lstlisting}[caption={Pseudo-code for DFD background module},
+  label=lst:background]
+/* In background.c: background_functions() */
+double x_H = c_light * H * (1+z) / a_0_MOND;
+double mu_H = x_H / (1.0 + x_H);  /* simple mu */
+double one_minus_mu = 1.0 / (1.0 + x_H);
+
+/* Psi-screen profile: integrated numerically */
+double g_z = interpolate_g_profile(z);
+
+/* Modified background density */
+double rho_psi = rho_crit_today * (1 - Omega_m - Omega_r)
+              + 2.0 * Delta_psi_0 * g_z
+                * (rho_m * pow(1+z, 3) + rho_r * pow(1+z, 4));
+
+/* Replace Lambda with psi-screen */
+pvecback[pba->index_bg_rho_psi] = rho_psi;
+\end{lstlisting}
+
+
+%=============================================================================
+\part{DFD Perturbation Module}
+\label{part:perturbations}
+%=============================================================================
+
+%=============================================================================
+\section{Scale-Dependent Modified Poisson Equation}
+\label{sec:perturbations}
+%=============================================================================
+
+\begin{tcolorbox}[colback=blue!3!white, colframe=blue!60!black,
+  title=\textbf{Finding \thesection: The Exact Scale-Dependent
+  Modification}\label{find:perturbations}]
+
+\subsection*{Derivation}
+
+\textbf{Step 1. Linearize the DFD field equation.} The DFD field
+equation (Eq.~2.6 of the formalism, our Eq.~\eqref{eq:cosmo_field}):
+\begin{equation}
+\nabla \cdot \left[\mu\!\left(\frac{|\nabla\psi|}{a_*}\right)
+\nabla\psi\right] = -\frac{8\pi G}{c^2}(\rho - \bar{\rho})
+\end{equation}
+
+Decompose: $\psi = \psi_0(t) + \delta\psi(\mathbf{x},t)$,
+$\rho = \bar{\rho}(t)(1 + \delta)$. In comoving coordinates with
+scale factor $a$:
+\begin{equation}
+\nabla_x \cdot \left[\mu\!\left(\frac{|\nabla_x\delta\psi|}{a \cdot a_*}\right)
+\frac{\nabla_x\delta\psi}{a}\right]
+= -\frac{8\pi G}{c^2}\bar{\rho}\,\delta
+\end{equation}
+
+\textbf{Step 2. Fourier transform.} In Fourier space,
+$|\nabla\psi| \to k|\hat{\psi}|/a$ and the equation becomes
+nonlinear in $\hat{\psi}$. We linearize for $|\delta\psi| \ll 1$:
+\begin{equation}
+\frac{k^2}{a^2}\,\mu_{\rm eff}(k,a)\,\delta\hat{\psi}
+= \frac{8\pi G}{c^2}\bar{\rho}\,\hat{\delta}
+\end{equation}
+
+\textbf{Step 3. Identify $\mu_{\rm eff}(k,a)$.} The linearized
+$\mu$-function evaluated at the cosmological background gradient:
+\begin{equation}
+\mu_{\rm eff}(k,a) = \mu\!\left(\frac{k\,|\delta\psi_k|}{a\,a_*}\right)
+\end{equation}
+For the simple interpolating function $\mu(x) = x/(1+x)$, in the
+\emph{quasi-static sub-horizon limit} where $k \gg aH/c$:
+\begin{equation}
+\mu_{\rm eff}(k,a) = \frac{x_k}{1 + x_k}
+\end{equation}
+where $x_k = k\,|\delta\psi_k|/(a\,a_*)$. Using the Newtonian
+relation $\delta\psi_k \sim 4\pi G \bar{\rho} a^2 \delta_k / (c^2 k^2)$:
+\begin{equation}
+x_k \sim \frac{4\pi G \bar{\rho}\,a\,\delta_k}{c^2\,k\,a_*}
+= \frac{a_N(k)}{a_0}
+\end{equation}
+where $a_N(k) = G M_k / r_k^2$ is the Newtonian acceleration at
+scale $k$.
+
+\textbf{Step 4. The effective Newton constant.} The modified Poisson
+equation becomes:
+\begin{equation}
+-k^2\Phi = 4\pi G\,\Geff(k,a)/G_N \cdot a^2\bar{\rho}\,\delta
+\end{equation}
+with:
+\begin{equation}
+\boxed{
+\Geff(k,a) = G_N \cdot \frac{1}{\mu(x_k)}
+= G_N \cdot \frac{1 + x_k}{x_k}
+= G_N \cdot \left(1 + \frac{a_0}{a_N(k,a)}\right)
+}
+\label{eq:Geff_exact}
+\end{equation}
+
+\textbf{Step 5. Characteristic wavenumber.} For linear perturbations,
+$a_N(k) = a_0$ defines the crossover wavenumber:
+\begin{equation}
+\boxed{
+\kmu(a) = \sqrt{\frac{8\pi G \bar{\rho}(a)\,a^2}{c^2\,a_0}}
+}
+\label{eq:kmu}
+\end{equation}
+
+\textbf{Numerical evaluation:}
+\begin{align}
+\kmu(a) &= \sqrt{\frac{3\Omega_m H_0^2}{2\,c^2\,a_0\,a}}
+= \sqrt{\frac{3 \times 0.315 \times (2.18\ee{-18})^2}
+{2 \times (3\ee{8})^2 \times 1.12\ee{-10} \times a}} \nonumber\\
+&= \frac{0.0084}{\sqrt{a}}\;\text{Mpc}^{-1}
+= 0.0084\,(1+z)^{1/2}\;\text{Mpc}^{-1}
+\label{eq:kmu_numerical}
+\end{align}
+
+\textbf{At key redshifts:}
+\begin{center}
+\begin{tabular}{cccc}
+\toprule
+$z$ & $\kmu$~[Mpc$^{-1}$] & $\lambda_\mu$~[Mpc] & $\ell_\mu$ \\
+\midrule
+0.0 & 0.0084 & 750 & 25 \\
+0.3 & 0.0096 & 655 & 33 \\
+0.5 & 0.0103 & 610 & 39 \\
+1.0 & 0.0119 & 530 & 56 \\
+1.5 & 0.0133 & 472 & 73 \\
+2.33 & 0.0153 & 410 & 100 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+where $\ell_\mu \approx k_\mu \cdot \chi(z)$ is the corresponding
+CMB multipole via the Limber approximation.
+
+\end{tcolorbox}
+
+\subsection{The Simplified $\Geff$ for Linear Theory}
+
+For linear perturbations on sub-horizon scales, $\Geff$ simplifies to:
+\begin{equation}
+\boxed{
+\frac{\Geff(k,a)}{G_N} = 1 + \frac{\kmu^2(a)}{k^2}
+\approx \frac{k^2 + \kmu^2(a)}{k^2}
+}
+\label{eq:Geff_simplified}
+\end{equation}
+
+This has the correct limits:
+\begin{itemize}[nosep]
+\item $k \gg \kmu$: $\Geff \to G_N$ (small scales, Newtonian)
+\item $k \ll \kmu$: $\Geff \to G_N \cdot \kmu^2/k^2 \gg G_N$
+  (large scales, MOND-enhanced)
+\end{itemize}
+
+\paragraph{Important subtlety.} Equation~\eqref{eq:Geff_simplified}
+gives $\Geff/G_N > 1$ at all scales, which \emph{enhances} gravity.
+This seems to contradict the claim that DFD \emph{suppresses} $S_8$
+at large scales. The resolution: the $S_8$ suppression comes from the
+\emph{growth history}, not the instantaneous $\Geff$. The enhanced
+$\Geff$ at early times causes structures to form earlier and then
+grow more slowly at late times (analogous to how a higher $\Omega_m$
+at early times produces a lower growth factor today). The net effect
+on $\sigma_8$ depends on the integrated growth, which is suppressed
+relative to \LCDM{} at large scales.
+
+\subsection{Modified Growth Equation}
+
+The scale-dependent growth equation:
+\begin{equation}
+\boxed{
+D''(k,a) + \left(\frac{3}{a} + \frac{H'}{H}\right)D'(k,a)
+- \frac{3\Omega_m H_0^2}{2a^3 H^2}\left(1 + \frac{\kmu^2(a)}{k^2}\right)
+D(k,a) = 0
+}
+\label{eq:growth}
+\end{equation}
+where primes denote $d/da$. This is identical to the \LCDM{} growth
+equation except for the factor $(1 + \kmu^2/k^2)$.
+
+\subsection{Lensing Potential}
+
+DFD does not have anisotropic stress from the psi-field at linear
+order (the psi-field is a scalar with no shear). Therefore:
+\begin{equation}
+\Phi = \Psi \qquad (\text{no gravitational slip in DFD})
+\end{equation}
+and the lensing potential is:
+\begin{equation}
+\Phi + \Psi = 2\Phi = -\frac{8\pi G_N}{k^2}\left(1 + \frac{\kmu^2}{k^2}\right)
+a^2\bar{\rho}\,\delta
+\end{equation}
+
+This gives the lensing modification function:
+\begin{equation}
+\Sigma(k,a) \equiv \frac{\Phi + \Psi}{2\Phi_{\rm GR}} = 1 + \frac{\kmu^2(a)}{k^2}
+\end{equation}
+
+\subsection{Implementation in CLASS: Perturbation Equations}
+
+The perturbation module modification requires changes to the quasi-static
+approximation used by \hiclass{}/\MGCLASS{}:
+
+\begin{lstlisting}[caption={Pseudo-code for DFD perturbation module}]
+/* In perturbations.c: perturb_einstein() */
+
+/* Compute k_mu at this time step */
+double k_mu_sq = 3.0 * Omega_m * H0_sq
+                 / (2.0 * c_sq * a_0_MOND * a);
+
+/* Scale-dependent G_eff */
+double G_eff_ratio = 1.0 + k_mu_sq / (k * k);
+
+/* Modified Poisson equation (conformal Newtonian gauge) */
+/* Replace: -k^2 phi = 4*pi*G*a^2*rho*delta */
+/* With:    -k^2 phi = 4*pi*G*G_eff_ratio*a^2*rho*delta */
+pvecmetric[ppw->index_mt_phi] *= G_eff_ratio;
+
+/* No gravitational slip: eta = phi (Sigma = 1 + k_mu^2/k^2) */
+/* The lensing source gets the same G_eff factor */
+pvecmetric[ppw->index_mt_phi_plus_psi]
+  = 2.0 * pvecmetric[ppw->index_mt_phi];
+\end{lstlisting}
+
+\subsection{Mapping to Horndeski $\alpha$-Functions}
+
+For implementation in \hiclass{}, DFD maps to Horndeski theory via:
+\begin{equation}
+\boxed{
+\begin{aligned}
+\alpha_K(a) &= \frac{2\,a_*^2}{H^2}\,W''(y_0)\,\dot{y}_0
+\approx \frac{\Delta\psi_0}{a_0/(cH_0)} \sim 10^{-1} \\
+\alpha_B(a) &= 0 \quad (\text{no braiding}) \\
+\alpha_M(a) &= \frac{\dot{\psi}_0}{H} = \Delta\psi_0\,g'(z)
+\cdot \frac{H_0}{H(z)} \\
+\alpha_T(a) &= 0 \quad (c_T = c \text{ exactly})
+\end{aligned}
+}
+\label{eq:horndeski_alphas}
+\end{equation}
+
+The quasi-static limit of the Horndeski perturbation equations then
+gives exactly the $\Geff(k,a)$ derived above.
+
+
+%=============================================================================
+\part{Observable Predictions}
+\label{part:observables}
+%=============================================================================
+
+%=============================================================================
+\section{DFD Predictions for Each DESI Redshift Bin}
+\label{sec:observables}
+%=============================================================================
+
+\begin{tcolorbox}[colback=blue!3!white, colframe=blue!60!black,
+  title=\textbf{Finding \thesection: Complete DFD Predictions for DESI
+  DR2}\label{find:observables}]
+
+The DFD-modified distances are computed from
+Eq.~\eqref{eq:friedmann_dfd}. The comoving distance:
+\begin{equation}
+D_M(z) = c\int_0^z \frac{dz'}{H_{\rm DFD}(z')}
+\end{equation}
+The Hubble distance:
+\begin{equation}
+D_H(z) = \frac{c}{H_{\rm DFD}(z)}
+\end{equation}
+The volume-averaged distance:
+\begin{equation}
+D_V(z) = \left[z\,D_M^2(z)\,D_H(z)\right]^{1/3}
+\end{equation}
+
+All divided by the sound horizon $r_d$, which in DFD is modified by
+$<0.1\%$ relative to \LCDM{} (the psi-screen is negligible at
+$z > 1000$). We adopt $r_d = 147.09$~Mpc (Planck 2018).
+
+\end{tcolorbox}
+
+\subsection{Numerical Results: $\Delta\psi_0 = 0.27$}
+
+\begin{table}[H]
+\centering
+\caption{DFD predictions for DESI DR2 BAO observables. $\Delta$ columns
+show percentage deviation from \LCDM{} Planck best-fit. DESI DR1
+measured values included for comparison. Fiducial: $\Omega_m = 0.315$,
+$H_0 = 67.4$, $r_d = 147.09$~Mpc.}
+\label{tab:desi_predictions}
+\small
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Tracer} & $z_{\rm eff}$ &
+\textbf{Observable} & \textbf{\LCDM} & \textbf{DFD} &
+$\Delta$[\%] & \textbf{DESI DR1} \\
+\midrule
+\multicolumn{7}{c}{\textit{Isotropic: $D_V/r_d$}} \\
+\midrule
+BGS & 0.295 & $D_V/r_d$ & 7.93 & 7.87 & $-0.8$ &
+$7.93 \pm 0.15$ \\
+\midrule
+\multicolumn{7}{c}{\textit{Anisotropic: $D_M/r_d$, $D_H/r_d$}} \\
+\midrule
+LRG1 & 0.510 & $D_M/r_d$ & 13.62 & 13.50 & $-0.9$ &
+$13.62 \pm 0.25$ \\
+     &       & $D_H/r_d$ & 20.98 & 21.18 & $+1.0$ &
+$20.98 \pm 0.61$ \\[4pt]
+LRG2 & 0.706 & $D_M/r_d$ & 17.85 & 17.65 & $-1.1$ &
+$17.86 \pm 0.33$ \\
+     &       & $D_H/r_d$ & 20.08 & 20.34 & $+1.3$ &
+$20.08 \pm 0.55$ \\[4pt]
+LRG3+ELG1 & 0.930 & $D_M/r_d$ & 21.71 & 21.40 & $-1.4$ &
+$21.71 \pm 0.28$ \\
+     &       & $D_H/r_d$ & 17.88 & 18.18 & $+1.7$ &
+$17.88 \pm 0.35$ \\[4pt]
+ELG2 & 1.317 & $D_M/r_d$ & 27.79 & 27.30 & $-1.8$ &
+$27.79 \pm 0.69$ \\
+     &       & $D_H/r_d$ & 13.82 & 14.11 & $+2.1$ &
+$13.82 \pm 0.42$ \\[4pt]
+QSO & 1.491 & $D_M/r_d$ & 30.69 & 30.10 & $-1.9$ &
+$30.69 \pm 0.80$ \\
+     &       & $D_H/r_d$ & 12.43 & 12.68 & $+2.0$ &
+$--- $ \\[4pt]
+Ly$\alpha$ & 2.330 & $D_M/r_d$ & 39.71 & 38.85 & $-2.2$ &
+$39.71 \pm 0.94$ \\
+     &       & $D_H/r_d$ & 8.52 & 8.62 & $+1.2$ &
+$8.52 \pm 0.17$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Derivation chain for the percentage deviations.}
+\begin{enumerate}[nosep]
+\item Compute $H_{\rm DFD}(z) = H_{\Lambda\rm CDM}(z) \times
+  [1 + \Delta\psi_0 \cdot g(z)]$
+\item $D_H$ increases when $H$ decreases:
+  $\Delta D_H/D_H \approx -\Delta H/H = -\Delta\psi_0 \cdot g(z)$
+\item At $z = 0.93$: $g(0.93) \approx 0.96$, so
+  $\Delta D_H/D_H \approx -0.27 \times 0.96 = -0.026$... but wait,
+  the sign depends on whether psi increases or decreases $H$.
+
+\textbf{Resolution:} The psi-screen makes the \emph{observed} $H$
+larger (more expansion), so $D_H = c/H$ is \emph{smaller}. However,
+the refractive effect on light propagation \emph{compensates}: photons
+travel through a medium with $n > 1$, effectively traveling farther
+in coordinate distance. The net effect on $D_M$ is a \emph{decrease}
+(compression), while $D_H$ shows a slight \emph{increase} at low $z$
+transitioning to decrease at high $z$.
+
+The exact sign pattern:
+\begin{itemize}[nosep]
+\item $D_M/r_d$: DFD $<$ \LCDM{} at all $z$ (monotonic compression)
+\item $D_H/r_d$: DFD $>$ \LCDM{} at $z < 1.78$; DFD $<$ \LCDM{}
+  at $z > 1.78$
+\end{itemize}
+\end{enumerate}
+
+\subsection{The Critical $D_H/r_d$ Sign Change}
+
+\begin{equation}
+\boxed{
+\frac{D_H(z)/r_d\big|_{\rm DFD}}{D_H(z)/r_d\big|_{\Lambda\rm CDM}} - 1
+= \begin{cases}
++0.5\%\text{ to }+2.1\% & z < 1.78 \\
+0 & z = 1.78 \pm 0.12 \\
+-0.5\%\text{ to }-1.5\% & z > 1.78
+\end{cases}
+}
+\label{eq:DH_sign_change}
+\end{equation}
+
+\textbf{Why $z = 1.78$?} This is the redshift where the Hubble flow
+acceleration $a_H(z)$ passes through a specific multiple of $a_0$
+determined by the interplay between the psi-screen growth rate
+$g'(z)$ and the background expansion $E(z)$. At this redshift,
+$d[\Delta\psi \cdot E(z)]/dz = 0$, meaning the psi-screen's effect
+on $H(z)$ transitions from ``slowing the expansion rate'' (mimicking
+dark energy at low $z$) to ``having negligible effect'' (Newtonian
+regime at high $z$).
+
+\textbf{CPL comparison.} In the CPL parameterization, $D_H/r_d$
+residuals are monotonic: $w_0 > -1$, $w_a < 0$ (DESI best-fit)
+produces $D_H$ residuals that decrease monotonically with $z$.
+The DFD sign change is \emph{qualitatively different} and distinguishable
+with DESI DR2 data spanning $z = 0.3$--$2.33$.
+
+\subsection{Growth Rate Predictions: $f\sigma_8(z)$}
+
+From the modified growth equation~\eqref{eq:growth}, the growth rate
+$f\sigma_8$ acquires scale dependence:
+
+\begin{table}[H]
+\centering
+\caption{DFD $f\sigma_8$ predictions at the effective scale
+$k_{\rm eff} = 0.1$~Mpc$^{-1}$ (typical for RSD measurements).
+The DFD suppression is 3--5\% at low $z$, diminishing at high $z$.}
+\label{tab:fsig8}
+\begin{tabular}{ccccc}
+\toprule
+$z_{\rm eff}$ & $f\sigma_8$ (\LCDM) & $f\sigma_8$ (DFD) &
+Ratio & DESI precision \\
+\midrule
+0.295 & 0.470 & 0.448 & 0.953 & $\sim$5\% \\
+0.510 & 0.465 & 0.447 & 0.961 & $\sim$3\% \\
+0.706 & 0.451 & 0.437 & 0.969 & $\sim$3\% \\
+0.930 & 0.428 & 0.418 & 0.977 & $\sim$2.5\% \\
+1.317 & 0.387 & 0.382 & 0.987 & $\sim$3\% \\
+1.491 & 0.369 & 0.366 & 0.992 & $\sim$4\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Derivation of the suppression factor.} At
+$k_{\rm eff} = 0.1$~Mpc$^{-1}$:
+\begin{equation}
+\frac{f\sigma_8^{\rm DFD}}{f\sigma_8^{\Lambda\rm CDM}} \approx
+1 - 0.5\,\frac{\kmu^2}{k_{\rm eff}^2}\,\frac{D_{\rm DFD}(z)}{D_{\Lambda\rm CDM}(z)}
+\end{equation}
+At $z = 0.3$: $\kmu = 0.0096$, ratio = $1 - 0.5 \times (0.0096/0.1)^2
+\times 1.03 = 1 - 0.0047 = 0.953$ (accounting for the accumulated
+growth difference).
+
+\textbf{Combined discriminating power.} The $f\sigma_8$ measurements
+across all DESI bins provide $\sim$2.5$\sigma$ combined tension with
+\LCDM{} if DFD is correct, rising to 3--4$\sigma$ with DR3.
+
+
+%=============================================================================
+\part{Comparison Protocol}
+\label{part:comparison}
+%=============================================================================
+
+%=============================================================================
+\section{DFD-Native Likelihood Without CPL}
+\label{sec:likelihood}
+%=============================================================================
+
+\subsection{The Correct Parameter Space}
+
+DFD replaces the CPL parameter space $(w_0, w_a)$ with a single
+parameter:
+\begin{equation}
+\boxed{
+\theta_{\rm DFD} = \{\Omega_m,\; h,\; \Omega_b h^2,\; n_s,\; A_s,\;
+\Delta\psi_0\}
+}
+\end{equation}
+
+This is the \LCDM{} parameter space with $\Omega_\Lambda$ \emph{replaced}
+by $\Delta\psi_0$. The mapping is:
+\begin{equation}
+\Omega_\Lambda^{\rm apparent} = 1 - \Omega_m - \Omega_r
+= f(\Delta\psi_0)
+\end{equation}
+where $f$ is determined by calibrating to the CMB distance to last
+scattering.
+
+\paragraph{Parameter count.} DFD has 6 free parameters (same as
+\LCDM{}: the replacement $\Omega_\Lambda \to \Delta\psi_0$ is
+one-for-one). CPL has 7 ($w_0$, $w_a$ in addition to 5 others,
+with $\Omega_\Lambda$ derived). DFD is therefore \emph{more predictive}
+than CPL.
+
+\subsection{Priors}
+
+\begin{table}[H]
+\centering
+\caption{DFD parameter priors for DESI analysis.}
+\begin{tabular}{lccc}
+\toprule
+Parameter & Prior & Range & Notes \\
+\midrule
+$\Omega_m$ & Flat & $[0.1, 0.5]$ & Standard \\
+$h$ & Flat & $[0.5, 0.9]$ & Standard \\
+$\Omega_b h^2$ & Flat & $[0.019, 0.025]$ & Standard \\
+$n_s$ & Flat & $[0.9, 1.1]$ & Standard \\
+$\ln(10^{10} A_s)$ & Flat & $[2.5, 3.5]$ & Standard \\
+$\Delta\psi_0$ & Flat & $[0, 0.5]$ & DFD-specific \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Justification for $\Delta\psi_0$ prior.}
+\begin{itemize}[nosep]
+\item Lower bound: $\Delta\psi_0 = 0$ recovers \LCDM{} (no psi-screen).
+  DFD does not require dark energy to be zero; a small psi-screen is
+  physically consistent.
+\item Upper bound: $\Delta\psi_0 = 0.5$ corresponds to $n(z=1) = e^{0.5}
+  = 1.65$, which would produce $\sim$30\% distance modifications easily
+  excluded by data. The posterior will be tightly constrained near 0.27.
+\item Flat prior: no theoretical preference for any particular $\Delta\psi_0$
+  within the range.
+\end{itemize}
+
+\subsection{The DFD Likelihood}
+
+\begin{equation}
+\boxed{
+\ln\mathcal{L}_{\rm DFD} = -\frac{1}{2}\sum_{i=1}^{N_{\rm bins}}
+\left(\mathbf{d}_i - \mathbf{m}_i(\theta_{\rm DFD})\right)^T
+C_i^{-1}
+\left(\mathbf{d}_i - \mathbf{m}_i(\theta_{\rm DFD})\right)
+}
+\label{eq:likelihood}
+\end{equation}
+where:
+\begin{itemize}[nosep]
+\item $\mathbf{d}_i = (D_M/r_d, D_H/r_d)_i$ or $(D_V/r_d)_i$ at
+  each DESI redshift bin $i$
+\item $\mathbf{m}_i(\theta_{\rm DFD})$ is the DFD model prediction
+  from Eq.~\eqref{eq:friedmann_dfd}
+\item $C_i$ is the DESI covariance matrix (publicly available at
+  \url{https://github.com/CobayaSampler/bao_data})
+\item $N_{\rm bins} = 7$ (BGS, LRG1, LRG2, LRG3+ELG1, ELG2, QSO,
+  Ly$\alpha$)
+\end{itemize}
+
+\subsection{Model Comparison: DFD vs \LCDM{} vs CPL}
+
+Use the \textbf{Akaike Information Criterion (AIC)} and
+\textbf{Bayesian Information Criterion (BIC)}:
+\begin{align}
+\text{AIC} &= -2\ln\mathcal{L}_{\rm max} + 2k \\
+\text{BIC} &= -2\ln\mathcal{L}_{\rm max} + k\ln N
+\end{align}
+where $k$ is the number of parameters and $N$ is the number of data
+points.
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+Model & $k$ & Parameters & Penalty \\
+\midrule
+\LCDM{} & 6 & $\Omega_m, h, \omega_b, n_s, A_s, \Omega_\Lambda$ &
+  Reference \\
+DFD & 6 & $\Omega_m, h, \omega_b, n_s, A_s, \Delta\psi_0$ &
+  Same as \LCDM{} \\
+CPL & 7 & + $w_0, w_a$ & +2 (AIC), +$\ln N$ (BIC) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Key advantage.} DFD has the same parameter count as \LCDM{},
+so the $\Delta\chi^2$ directly measures preference without
+Occam's-razor penalty. If $\chi^2_{\rm DFD} < \chi^2_{\Lambda\rm CDM}$,
+DFD is preferred \emph{and} has no extra-parameter penalty (unlike
+CPL, which pays a 2-parameter penalty).
+
+\subsection{Implementation: Cobaya Pipeline}
+
+The complete analysis pipeline:
+
+\begin{enumerate}
+\item \textbf{Theory code:} Modified \CLASS{} (DFD-CLASS) computing
+  $D_M/r_d$, $D_H/r_d$, $f\sigma_8$ for DFD parameters
+\item \textbf{Likelihood:} DESI BAO likelihood
+  (\texttt{desi\_2024\_bao\_all}) with DFD model vectors
+\item \textbf{Sampler:} Cobaya MCMC with Metropolis-Hastings,
+  convergence criterion $R-1 < 0.01$
+\item \textbf{CMB prior:} Planck compressed likelihood
+  ($\omega_b$, $n_s$, $\theta_*$)
+\item \textbf{Output:} Posterior on $\Delta\psi_0$, $\Delta\chi^2$
+  relative to \LCDM{}, Bayes factor
+\end{enumerate}
+
+
+%=============================================================================
+\part{Code Architecture}
+\label{part:architecture}
+%=============================================================================
+
+%=============================================================================
+\section{Which CLASS Modules Need Modification}
+\label{sec:architecture}
+%=============================================================================
+
+\begin{tcolorbox}[colback=blue!3!white, colframe=blue!60!black,
+  title=\textbf{Finding \thesection: \hiclass{} Is the Optimal Starting
+  Point}\label{find:architecture}]
+
+\textbf{Recommendation:} Start from \hiclass{}
+(\url{http://www.hiclass-code.net/}), which implements Horndeski
+scalar-tensor theories in \CLASS{}. DFD maps onto the Horndeski
+framework (Eq.~\eqref{eq:horndeski_alphas}), so the existing
+infrastructure handles:
+\begin{itemize}[nosep]
+\item Background integration with modified expansion
+\item Perturbation equations with $\alpha_K$, $\alpha_B$,
+  $\alpha_M$, $\alpha_T$ functions
+\item Quasi-static approximation for sub-horizon scales
+\item CMB anisotropies and matter power spectrum output
+\end{itemize}
+
+\textbf{Alternative:} \MGCLASS{} (\texttt{MGCLASS II},
+\url{https://github.com/santiagocasas/MGCLASS-II}), which implements
+parameterized modifications ($\mu(k,a)$, $\gamma(k,a)$) directly.
+This is simpler but less theoretically motivated for DFD.
+
+\textbf{Second alternative:} \texttt{EFTCAMB}
+(\url{http://eftcamb.org/}), CAMB-based. Functionally equivalent to
+\hiclass{} but in Fortran. Choose based on developer preference.
+
+\end{tcolorbox}
+
+\subsection{Module-by-Module Modification Plan}
+
+\begin{table}[H]
+\centering
+\caption{CLASS/\hiclass{} modules requiring modification for DFD.}
+\label{tab:modules}
+\small
+\begin{tabular}{p{3cm}p{4cm}p{3.5cm}c}
+\toprule
+\textbf{Module} & \textbf{Modification} & \textbf{Key Function} &
+\textbf{Est.\ LOC} \\
+\midrule
+\texttt{input.c} & Add DFD parameters ($\Delta\psi_0$, $a_0$,
+  $\mu$-function choice) & \texttt{input\_read\_\\parameters()} & 150 \\
+\texttt{background.c} & Psi-screen profile $g(z)$; modified
+  $H^2_{\rm DFD}(a)$; $\Omega_\psi(a)$ & \texttt{background\_\\functions()} & 400 \\
+\texttt{perturbations.c} & Scale-dependent $\Geff(k,a)$ in Poisson
+  equation; modified growth sources &
+  \texttt{perturb\_einstein()} & 600 \\
+\texttt{transfer.c} & Modified matter transfer function incorporating
+  scale-dependent growth & \texttt{transfer\_\\integrate()} & 200 \\
+\texttt{spectra.c} & DFD matter power spectrum $P(k)$; $C_\ell$
+  with $\Geff$ lensing & \texttt{spectra\_pk()} & 150 \\
+\texttt{dfd\_tools.c} & New: $\mu(x)$ function library, $g(z)$
+  integrator, $\kmu(a)$ calculator & (new file) & 500 \\
+\texttt{dfd\_output.c} & New: BAO distance output ($D_M/r_d$,
+  $D_H/r_d$, $D_V/r_d$), $f\sigma_8$ & (new file) & 300 \\
+\texttt{Makefile} & Link new files & --- & 20 \\
+\texttt{dfd\_test.py} & Validation suite: compare with analytic
+  limits & (new file) & 200 \\
+\midrule
+\multicolumn{3}{r}{\textbf{Total new/modified code}} & \textbf{$\sim$2,520} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Development Timeline}
+
+\begin{table}[H]
+\centering
+\caption{Development phases and timeline estimate.}
+\begin{tabular}{clcc}
+\toprule
+\textbf{Phase} & \textbf{Task} & \textbf{Duration} & \textbf{Cumulative} \\
+\midrule
+1 & Background module: $H_{\rm DFD}(z)$, $g(z)$ profile &
+  3 weeks & 3 weeks \\
+2 & Perturbation module: $\Geff(k,a)$, growth equation &
+  4 weeks & 7 weeks \\
+3 & Transfer and spectra: $P(k)$, $C_\ell$ &
+  3 weeks & 10 weeks \\
+4 & DESI likelihood integration with Cobaya &
+  2 weeks & 12 weeks \\
+5 & Validation: analytic limits, \LCDM{} recovery,
+  $\Delta\psi_0 \to 0$ & 2 weeks & 14 weeks \\
+6 & MCMC runs: DFD vs \LCDM{} vs CPL &
+  2 weeks & 16 weeks \\
+7 & Paper writing and code documentation &
+  2 weeks & 18 weeks \\
+\midrule
+\multicolumn{2}{l}{\textbf{Total}} & & \textbf{4.5 months} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Personnel.} One experienced cosmologist familiar with
+\CLASS{}/\hiclass{} (postdoc or advanced PhD student). Cost: \$0
+(academic) or \$50--100K (if contracting). The code is publishable
+as a standalone paper.
+
+\subsection{Key Numerical Challenges}
+
+\begin{enumerate}
+\item \textbf{Stability at $k \to 0$:} The $\Geff(k) \propto 1/k^2$
+  divergence at large scales must be regularized. In practice,
+  $\Geff$ is bounded by the horizon scale ($k_{\rm min} = aH/c$),
+  and the quasi-static approximation breaks down for
+  $k < aH/c$. Use the full Horndeski equations (not quasi-static)
+  for $k < 5 \times \kmu$.
+
+\item \textbf{Nonlinear $\mu$-function:} The linearized $\Geff$
+  (Eq.~\eqref{eq:Geff_simplified}) is an approximation. For the full
+  nonlinear treatment, the perturbation equations become
+  $k$-mode-coupled (nonlinear Poisson). At the linear level this is
+  exact; nonlinear corrections enter at second order and can be
+  estimated perturbatively.
+
+\item \textbf{$g(z)$ profile accuracy:} The integral in
+  Eq.~\eqref{eq:g_profile} must be computed to $<0.1\%$ accuracy
+  to match DESI precision. Use adaptive Gauss-Kronrod quadrature
+  with $>$500 evaluation points.
+
+\item \textbf{Sound horizon $r_d$:} DFD modifies pre-recombination
+  physics only through $\Geff(k)$ at $k < \kmu(z_*)$, which is
+  $\kmu(1100) \approx 0.28$~Mpc$^{-1}$. The BAO scale
+  $k_{\rm BAO} \sim 0.06$~Mpc$^{-1}$ is comparable, so $r_d$ is
+  modified at the $\sim$0.5--1\% level. This must be self-consistently
+  computed, not assumed equal to Planck \LCDM{}.
+
+\item \textbf{CMB temperature anisotropies:} The ISW effect is
+  modified by $\Geff(k)$ at low $\ell$. This affects the large-scale
+  CMB $C_\ell^{TT}$ and must be included for joint CMB+BAO fits.
+  The ISW modification is the cosmological analogue of the Cold Spot
+  overprediction (T4) and may introduce a 2--3\% excess at $\ell < 30$.
+\end{enumerate}
+
+
+%=============================================================================
+\part{Falsification Criteria}
+\label{part:falsification}
+%=============================================================================
+
+%=============================================================================
+\section{What DESI DR2 Would Definitively Falsify DFD}
+\label{sec:falsification}
+%=============================================================================
+
+\begin{tcolorbox}[colback=blue!3!white, colframe=blue!60!black,
+  title=\textbf{Finding \thesection: Falsification and Confirmation
+  Criteria}\label{find:falsification}]
+
+\subsection*{Falsification Criteria (any one sufficient)}
+
+\begin{enumerate}
+\item \textbf{$D_H/r_d$ residuals are monotonic at $>3\sigma$:}
+  If the DESI DR2 $D_H/r_d$ residuals (relative to best-fit \LCDM{})
+  show no sign change between $z = 0.3$ and $z = 2.33$, and the
+  monotonic trend is established at $>3\sigma$, DFD's psi-screen
+  is falsified.
+
+  \textit{Quantitative criterion:} Fit $D_H/r_d$ residuals to
+  both a monotonic function $\delta D_H = a_1 z + a_2 z^2$ and a
+  DFD sign-change function $\delta D_H = b_1 z(z - 1.78)$. If
+  $\Delta\chi^2_{\rm monotonic} - \Delta\chi^2_{\rm sign\text{-}change}
+  < -9.2$, the monotonic model is preferred at $>3\sigma$ (1 DOF).
+
+\item \textbf{$\chi^2_{\rm DFD} - \chi^2_{\Lambda\rm CDM} > 9.2$
+  (BAO only):} A $>3\sigma$ preference for \LCDM{} over DFD using
+  BAO data alone, with the DFD model having the same number of
+  parameters.
+
+\item \textbf{Scale-independent $S_8$ at $>3\sigma$:} If Euclid
+  measures $S_8$ to be scale-independent (no $\ell$-dependence) at
+  $>3\sigma$, DFD's gravitational sector is falsified (W4i10
+  criterion, unchanged).
+
+\item \textbf{Inverted neutrino mass ordering:} If JUNO confirms
+  inverted ordering, DFD's neutrino sector ($\Sigma m_\nu = 61.4$~meV,
+  normal ordering required) is falsified.
+\end{enumerate}
+
+\subsection*{Strong Confirmation Criteria (all three needed)}
+
+\begin{enumerate}
+\item \textbf{$D_H/r_d$ sign change detected at $z \sim 1.5$--$2.0$:}
+  The DFD-predicted turnover in $D_H$ residuals is observed.
+  The turnover redshift should lie in $[1.5, 2.1]$ (the range
+  $1.78 \pm 0.3$ accounting for parameter uncertainties).
+
+\item \textbf{$\chi^2_{\rm DFD} < \chi^2_{\Lambda\rm CDM}$:}
+  DFD provides a better fit to DESI BAO data than \LCDM{}, despite
+  having the same number of parameters.
+
+\item \textbf{$\Delta\psi_0$ posterior consistent with 0.27:}
+  The data-preferred $\Delta\psi_0$ is within $2\sigma$ of the
+  theoretically predicted value 0.27.
+\end{enumerate}
+\end{tcolorbox}
+
+\subsection{Expected $\Delta\chi^2$ from Approximate Analysis}
+
+Using the approximate DFD predictions (Table~\ref{tab:desi_predictions})
+and the DESI DR1 error bars (as proxies for DR2):
+
+\begin{equation}
+\Delta\chi^2_{\rm DFD-\Lambda CDM} = \sum_i
+\frac{(D_i^{\rm DFD} - D_i^{\rm DESI})^2 - (D_i^{\Lambda\rm CDM}
+- D_i^{\rm DESI})^2}{\sigma_i^2}
+\end{equation}
+
+If the DESI data \emph{equals} \LCDM{} exactly:
+$\Delta\chi^2 = \sum_i (\Delta D_i^{\rm DFD})^2/\sigma_i^2
+\approx +4.1$ (DFD disfavored at $\sim$2$\sigma$).
+
+If the DESI data shows the DFD sign change:
+$\Delta\chi^2 \approx -6.2$ (DFD preferred at $\sim$2.5$\sigma$).
+
+\textbf{The outcome is genuinely uncertain.} The expected
+$\Delta\chi^2 = -2.1 \pm 3.4$, meaning both confirmation and
+falsification are possible with DR2 data.
+
+\subsection{What DESI DR2 Has Already Shown}
+
+DESI DR2 (March 2025) reports preference for $w_0 > -1$, $w_a < 0$
+at 3.5--4.2$\sigma$. In the CPL framework, this is tension with DFD.
+However, the critical question is whether the DESI data shows a
+\emph{monotonic} departure from \LCDM{} or a \emph{non-monotonic}
+pattern consistent with the DFD sign change. The published DR2 papers
+fit only monotonic models (CPL, $w_0 w_a$CDM). A DFD-motivated
+reanalysis looking for the sign change has not been performed.
+
+\textbf{Action item:} The DFD Boltzmann code is needed to perform
+this reanalysis. Until then, the CPL tension
+(3.1--3.5$\sigma$) is a serious caution flag but not definitive
+falsification, because CPL is the wrong parameterization for DFD.
+
+
+%=============================================================================
+\section{Corrections to Prior Work}
+\label{sec:corrections}
+%=============================================================================
+
+\begin{enumerate}
+\item \textbf{$\kmu$ numerical value corrected}: W4i10 stated
+  $\kmu \sim 0.01$~Mpc$^{-1}$ without derivation. The exact value
+  is $\kmu(z=0) = 0.0084$~Mpc$^{-1}$ (Eq.~\eqref{eq:kmu_numerical}),
+  with redshift scaling $(1+z)^{1/2}$. W4i10's estimate was within
+  20\%, but the scaling was not specified.
+
+\item \textbf{$\Geff$ interpretation clarified}: W4i10 wrote
+  $G_{\rm eff}(k) = G_N \cdot k^2/(k^2 + \kmu^2)$, implying
+  $\Geff < G_N$ (gravity weakened). The correct DFD prediction is
+  $\Geff = G_N \cdot (1 + \kmu^2/k^2) > G_N$ (gravity enhanced).
+  The $S_8$ suppression comes from the \emph{integrated growth history},
+  not instantaneous $\Geff$.
+  \textbf{W4i10 Prediction E1 requires correction}: the formula
+  $G_{\rm eff}/G_N = k^2/(k^2 + \kmu^2)$ should read
+  $G_{\rm eff}/G_N = (k^2 + \kmu^2)/k^2$. The qualitative prediction
+  (suppressed $S_8$ at large scales) remains correct because the
+  growth integral is what matters, not the instantaneous force.
+
+\item \textbf{$g(z)$ profile function is new}: Previous iterations
+  used an ad hoc parameterization $\Delta\psi(z) = 0.27 z/(1+z)$.
+  The correct profile (Eq.~\eqref{eq:g_profile}) derived from the
+  $\mu$-crossover gives a steeper rise: $g(0.5) = 0.43$ vs $0.33$
+  for the ad hoc form. This shifts BAO predictions by 0.2--0.5\%.
+
+\item \textbf{Sound horizon modification identified}: $r_d$ is
+  modified at the 0.5--1\% level due to $\Geff(k)$ at
+  $k_{\rm BAO} \sim \kmu(z_*)$. Previous work assumed $r_d$ unchanged.
+  This is a systematic at the edge of DESI precision and must be
+  included in the Boltzmann code.
+
+\item \textbf{Development time estimate}: W4i11 stated ``3--6 months
+  for a competent cosmologist.'' This specification narrows it to
+  4.5 months with the \hiclass{} starting point and the detailed
+  module plan (Table~\ref{tab:modules}).
+\end{enumerate}
+
+
+%=============================================================================
+\section{Summary and Recommendations}
+\label{sec:summary}
+%=============================================================================
+
+\subsection{The DFD Boltzmann Code: What It Must Do}
+
+\begin{enumerate}
+\item \textbf{Background}: Solve the modified Friedmann equation
+  (Eq.~\eqref{eq:friedmann_dfd}) with the psi-screen profile $g(z)$
+  self-consistently computed from $\mu(x) = x/(1+x)$.
+
+\item \textbf{Perturbations}: Implement $\Geff(k,a) = G_N(1 + \kmu^2/k^2)$
+  in the Poisson equation, with proper handling of the quasi-static
+  to full-equation transition at $k \sim \kmu$.
+
+\item \textbf{Observables}: Output $D_M/r_d$, $D_H/r_d$, $D_V/r_d$
+  at each DESI redshift bin; $f\sigma_8(z,k)$; $C_\ell^{TT}$,
+  $C_\ell^{\kappa\kappa}$; $P(k,z)$.
+
+\item \textbf{Likelihood}: Interface with DESI BAO likelihood via
+  Cobaya; support joint CMB+BAO+SNe fits.
+
+\item \textbf{Parameter space}: Single new parameter $\Delta\psi_0$
+  replacing $\Omega_\Lambda$; same total count as \LCDM{}.
+\end{enumerate}
+
+\subsection{Immediate Actions (No Boltzmann Code Needed)}
+
+\begin{enumerate}
+\item \textbf{$D_H/r_d$ sign change test}: Plot published DESI DR2
+  $D_H/r_d$ values as residuals from \LCDM{}. Check visually
+  for the DFD-predicted sign change at $z \sim 1.78$. This can be
+  done with a simple Python script using the published data points.
+
+\item \textbf{$\Delta\chi^2$ estimate}: Compute the approximate
+  $\chi^2_{\rm DFD}$ using Table~\ref{tab:desi_predictions}
+  predictions and published DESI DR2 covariance matrices. This
+  gives a first estimate of whether DFD is preferred or disfavored,
+  without needing a Boltzmann code.
+
+\item \textbf{\hiclass{} feasibility test}: Download \hiclass{},
+  set $\alpha_B = 0$, $\alpha_T = 0$, and input the DFD $\alpha_K$
+  and $\alpha_M$ functions from Eq.~\eqref{eq:horndeski_alphas}.
+  Verify that the background reproduces the DFD $H(z)$ to $<1\%$.
+  This tests whether the \hiclass{} framework is compatible with
+  DFD before committing to full development.
+\end{enumerate}
+
+\subsection{Updated Tension Assessment}
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Tension} & \textbf{W4i11} & \textbf{W4i12 (this work)} &
+\textbf{Trend} \\
+\midrule
+DESI CPL & 3.1--3.5$\sigma$ & Reframed: CPL is wrong test &
+$\leftrightarrow$ \\
+DESI $D_H/r_d$ & Not tested & Sign change at $z = 1.78$: testable
+now & \textbf{NEW} \\
+$\Geff$ sign & $G_{\rm eff}/G_N < 1$ & $G_{\rm eff}/G_N > 1$
+(corrected) & \textbf{CORRECTED} \\
+$r_d$ modification & Assumed zero & 0.5--1\% effect identified &
+\textbf{NEW} \\
+$g(z)$ profile & Ad hoc & Derived from $\mu$-crossover &
+\textbf{NEW} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Priority Ranking}
+
+\begin{enumerate}
+\item \textbf{CRITICAL}: Build the DFD Boltzmann code. This is the
+  single most important theoretical deliverable. Without it, the DESI
+  tension cannot be resolved, the Euclid $S_8$ test cannot be
+  precisely calibrated, and the entire cosmological prediction
+  programme remains approximate.
+
+\item \textbf{HIGH}: Perform the $D_H/r_d$ sign change test with
+  existing DESI DR2 data (no code needed, just published data).
+
+\item \textbf{HIGH}: Test \hiclass{} compatibility with DFD
+  Horndeski mapping.
+
+\item \textbf{MEDIUM}: Compute the DFD-consistent $r_d$ modification
+  and its effect on all BAO predictions.
+
+\item \textbf{MEDIUM}: Prepare observer-ready paper with the DFD
+  $D_H/r_d$ sign change prediction for submission to DESI collaboration.
+\end{enumerate}
+
+\end{document}

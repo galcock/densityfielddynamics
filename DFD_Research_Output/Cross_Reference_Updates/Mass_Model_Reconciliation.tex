@@ -1,0 +1,247 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
+
+\newcommand{\CP}{\mathbb{CP}}
+
+\begin{document}
+
+\title{Reconciliation of Two DFD Fermion Mass Scripts:\\
+\texttt{compute\_all\_masses.py} vs.\ \texttt{compute\_mass\_exponents.py}}
+
+\author{Research Note for DFD v108}
+
+\date{March 2026}
+
+\maketitle
+
+%==========================================================================
+\section{Summary}
+%==========================================================================
+
+Two Python scripts exist in the DFD repository that compute fermion masses
+from the formula $m_f = A_f\,\alpha^{n_f}\,(v/\sqrt{2})$.  They use
+\textbf{different prefactors and different exponents} for several fermions.
+This note identifies which is canonical and explains the origin of the
+discrepancy.
+
+\textbf{Conclusion:} They are \textbf{genuinely different models}, not
+different conventions for the same model.  Script~A matches the verified
+v67 Mass Dictionary and is canonical.  Script~B is an exploratory variant
+that should not be used for publication.
+
+%==========================================================================
+\section{Side-by-Side Comparison}
+%==========================================================================
+
+\begin{table}[h]
+\centering
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{@{}l cc cc@{}}
+\toprule
+& \multicolumn{2}{c}{\textbf{Script A} (\texttt{compute\_all\_masses.py})}
+& \multicolumn{2}{c}{\textbf{Script B} (\texttt{compute\_mass\_exponents.py})} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5}
+Fermion & $A_f$ & $n_f$ & $A_f$ & $n_f$ \\
+\midrule
+$e$   & $2/3$   & 2.5 & $2/\pi$      & 2.5 \\
+$\mu$ & $1$     & 1.5 & $1$          & 1.5 \\
+$\tau$& $\sqrt{2}$ & 1.0 & $\sqrt{2}$ & 1.0 \\
+$u$   & $8/3$   & 2.5 & $2\sqrt{2}$  & 2.5 \\
+$c$   & $1$     & 1.0 & $1$          & 1.0 \\
+$t$   & $1$     & 0   & $1$          & 0   \\
+$d$   & $6$     & \textbf{2.5} & $1/2$  & \textbf{2.0} \\
+$s$   & $6/7$   & 1.5 & $\sqrt{3}/2$ & 1.5 \\
+$b$   & $1/42$  & \textbf{0}   & $\pi$  & \textbf{1.0} \\
+\midrule
+Mean $|$error$|$ & \multicolumn{2}{c}{1.42\%} & \multicolumn{2}{c}{1.73\%} \\
+\bottomrule
+\end{tabular}
+\caption{Comparison of the two scripts.  Bold entries highlight where
+exponents differ.  Five of nine prefactors also differ.}
+\label{tab:comparison}
+\end{table}
+
+%==========================================================================
+\section{Are These the Same Model?}
+\label{sec:same}
+%==========================================================================
+
+\textbf{No.}  They differ in two structurally significant ways:
+
+\subsection{Different Exponents for $b$ and $d$}
+
+\begin{itemize}
+\item \textbf{Bottom quark:}
+  Script~A has $n_b = 0$ (the $b$ quark sits at the Higgs vertex, same as $t$,
+  with $k_f = 1$, $k_H = +1$, and QCD dressing shifting $n = 1 \to 0$).
+  Script~B has $n_b = 1$ (using a ``linear rule'' $k_f = 4 - g$ with $g = 3$
+  giving $k_f = 1$, $k_H = +1$, $n = 1$, and \emph{no} QCD dressing shift).
+
+\item \textbf{Down quark:}
+  Script~A has $n_d = 5/2$ (same as the electron and up quark---all
+  first-generation fermions at maximum CP$^2$ distance).
+  Script~B has $n_d = 2$ (using $k_f = 3$, $k_H = +1$, giving $(3+1)/2 = 2$).
+\end{itemize}
+
+These differences mean the two scripts assign different bundle degrees $k_f$
+to the $b$ and $d$ quarks.  This is a physical disagreement about which
+spin$^c$ zero mode each fermion occupies on $\CP^2$.
+
+\subsection{Different Prefactors for 5 Fermions}
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Fermion & Script A & Script B \\
+\midrule
+$e$   & $2/3$ (rational)      & $2/\pi$ (transcendental) \\
+$u$   & $8/3$ (rational)      & $2\sqrt{2}$ (algebraic) \\
+$d$   & $6$ (integer)         & $1/2$ (rational) \\
+$s$   & $6/7$ (rational)      & $\sqrt{3}/2$ (algebraic) \\
+$b$   & $1/42$ (rational)     & $\pi$ (transcendental) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Script~A's prefactors are all rational numbers (or $\sqrt{2}$ for $\tau$),
+and each can be traced to an explicit operator product: $A_f = G[g] \times$
+(sector factor).
+
+Script~B's prefactors include $\pi$ and $2/\pi$, which cannot arise from
+the operator algebra of finite groups and matrices.  These are fitting
+coefficients, not derived quantities.
+
+%==========================================================================
+\section{Which Is Correct?}
+\label{sec:correct}
+%==========================================================================
+
+\textbf{Script~A} is correct.  The evidence:
+
+\begin{enumerate}
+\item \textbf{Matches the v67 dictionary.}
+  The v67 Mass Dictionary was produced in January 2026, verified by running
+  \texttt{dfd\_v67\_mass\_dictionary\_verify.py}, and explicitly approved.
+  Script~A reproduces it exactly.
+
+\item \textbf{Lower mean error.}
+  Script~A achieves 1.42\% vs.\ Script~B's 1.73\%.
+
+\item \textbf{Prefactors are derivable.}
+  Script~A's prefactors all come from the explicit Yukawa operator:
+  \[
+  A_f = G[g_f] \times D_\ell[g_f] \quad\text{(leptons)}, \qquad
+  A_f = G[g_f] \times Q_d[g_f] \times R_d[g_f] \quad\text{(down quarks)},
+  \]
+  etc.  Every factor is a matrix element of an algebraically defined operator.
+  Script~B's $\pi$ and $2/\pi$ have no such derivation.
+
+\item \textbf{Consistent exponent pattern.}
+  In Script~A, all first-generation fermions ($e$, $u$, $d$) share $n_f = 5/2$
+  (maximum CP$^2$ distance).  All third-generation fermions ($\tau$, $t$, $b$)
+  have $n_f \in \{0, 1\}$ (at or near the Higgs vertex).  This is a
+  cleaner, more symmetric pattern.
+\end{enumerate}
+
+%==========================================================================
+\section{Origin of Script~B}
+\label{sec:origin}
+%==========================================================================
+
+Script~B (\texttt{compute\_mass\_exponents.py}) was written as an
+\emph{exploratory} exercise to derive the exponents $n_f$ from three
+``generation rules'' (doubling, linear, triangular) applied to the
+bundle degrees.  The exponent derivation in Script~B is valuable---it
+provides a candidate mechanism for \emph{why} specific $k_f$ values
+arise---but it produced a \textbf{different} set of $(k_f, A_f)$ for
+the $b$ and $d$ quarks.
+
+The key discrepancy is that Script~B's ``linear rule'' for down quarks
+gives $k_d = 3$ (first generation) and $k_b = 1$ (third generation)
+\emph{without} the QCD dressing shift that, in Script~A/v67, moves
+$n_b$ from 1 to 0.  Script~B then compensates by using entirely different
+prefactors ($A_d = 1/2$ instead of $6$; $A_b = \pi$ instead of $1/42$)
+to fit the observed masses.
+
+\subsection{What Script~B Got Right}
+
+\begin{itemize}
+\item The lepton and up-quark exponents match Script~A exactly.
+\item The exponent derivation rules (doubling for leptons, triangular for
+  up quarks) are a valid proposal for the underlying mechanism.
+\item The $\mu$, $\tau$, $c$, $t$ entries are identical in both scripts.
+\end{itemize}
+
+\subsection{What Script~B Got Wrong}
+
+\begin{itemize}
+\item The down-quark sector exponents ($n_d$, $n_b$) disagree with the
+  verified v67 dictionary.
+\item The prefactors $A_b = \pi$ and $A_e = 2/\pi$ are transcendental
+  numbers that cannot come from the finite Yukawa operator algebra.
+\item The higher mean error (1.73\% vs.\ 1.42\%) confirms the mismatch.
+\end{itemize}
+
+%==========================================================================
+\section{Recommendation}
+\label{sec:recommendation}
+%==========================================================================
+
+\begin{enumerate}
+\item \textbf{Use Script~A values (= v67 dictionary) for all publications.}
+  The canonical script is now \texttt{mass\_canonical.py}.
+
+\item \textbf{Retire Script~B as an exploratory tool.}
+  The exponent derivation mechanism in Script~B (generation rules) is
+  interesting but needs revision in the down-quark sector to match the
+  canonical values.
+
+\item \textbf{Do not mix prefactors/exponents between the two scripts.}
+  They are coupled: changing an exponent requires changing the corresponding
+  prefactor to maintain agreement with experiment.
+
+\item \textbf{The free parameter count is ONE, not zero}, when using
+  $v/\sqrt{2} = 174.1$~GeV from $G_F$.  The zero-parameter claim requires
+  the derived formula $v = M_P\alpha^8\sqrt{2\pi}$, which is at Tier~1.5
+  rigor (not yet published-theorem grade).
+\end{enumerate}
+
+%==========================================================================
+\section{Canonical Values (for Reference)}
+\label{sec:canonical}
+%==========================================================================
+
+The following table is the single authoritative mass dictionary.
+
+\begin{table}[h]
+\centering
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{}lccrrc@{}}
+\toprule
+Fermion & $A_f$ & $n_f$ & $m_{\text{pred}}$ (MeV) & $m_{\text{PDG}}$ (MeV) & Error \\
+\midrule
+$e$      & $2/3$       & 2.5 &    0.528 &    0.511 & $+3.32\%$ \\
+$\mu$    & $1$         & 1.5 &  108.53  &  105.66  & $+2.72\%$ \\
+$\tau$   & $\sqrt{2}$  & 1.0 & 1796.7   & 1776.86  & $+1.12\%$ \\
+$u$      & $8/3$       & 2.5 &    2.112 &    2.16  & $-2.23\%$ \\
+$c$      & $1$         & 1.0 & 1270.5   & 1270     & $+0.04\%$ \\
+$t$      & $1$         & 0   & 174100   & 172760   & $+0.78\%$ \\
+$d$      & $6$         & 2.5 &    4.752 &    4.67  & $+1.75\%$ \\
+$s$      & $6/7$       & 1.5 &   93.03  &   93.0   & $+0.03\%$ \\
+$b$      & $1/42$      & 0   & 4145.2   & 4180     & $-0.83\%$ \\
+\midrule
+\multicolumn{5}{@{}l}{Mean $|$error$|$} & $1.42\%$ \\
+\bottomrule
+\end{tabular}
+\caption{Canonical v67 mass dictionary.  $\alpha = 1/137.036$,
+$v/\sqrt{2} = 174.1$~GeV.  One free parameter (the global scale).}
+\end{table}
+
+\end{document}

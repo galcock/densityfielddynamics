@@ -1,0 +1,441 @@
+% Af_Derivation_Trace.tex
+% Rigorous trace of each v67 dictionary prefactor A_f back to A5 group theory
+% Generated 2026-03-23
+
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,amsthm,booktabs,geometry,enumitem}
+\geometry{margin=1in}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+\newtheorem*{status}{Derivation Status}
+
+\title{Derivation Trace: v67 Prefactors $A_f$ from $A_5$ Group Theory}
+\author{DFD Research Audit}
+\date{23 March 2026}
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+\newpage
+
+%======================================================================
+\section{Preamble: The Operator Framework}
+%======================================================================
+
+The finite Yukawa operator acts on the Hilbert space
+$\mathcal{H}_F = \mathcal{H}_{\mathrm{species}} \otimes \mathcal{H}_{\mathrm{chirality}} \otimes \mathcal{H}_{\mathrm{gen}} \otimes \mathcal{H}_{\mathrm{aux}}$
+as
+\begin{equation}\label{eq:Yukawa}
+Y \;=\; \lambda \sum_f \Pi_{f,R}\;\bigl(G \otimes S_f\bigr)\;\Pi_{f,L} + \mathrm{h.c.},
+\end{equation}
+where $\lambda = g_Y \varepsilon_H \kappa$ is a single global scale and the prefactors are
+\begin{equation}\label{eq:Af}
+A_f \;=\; \langle g_f | \, G \cdot (\text{sector operators}) \, | g_f \rangle.
+\end{equation}
+
+The operators appearing are:
+\begin{itemize}[nosep]
+  \item $G = \mathrm{diag}(2/3,\,1,\,1)$ on $\mathcal{H}_{\mathrm{gen}}$ \quad (generation suppression),
+  \item $Q_d = \mathrm{diag}(1,\,6/7,\,1/42)$ on $\mathcal{H}_{\mathrm{gen}}$ \quad (QCD running, down-type quarks only),
+  \item $D_\ell = \mathrm{diag}(1,\,1,\,\sqrt{2})$ on $\mathcal{H}_{\mathrm{gen}}$ \quad (Dirac normalisation, leptons only),
+  \item $K_d = J_3 := \sum_{i,j}|p_i\rangle\langle p_j|$ on $V_d \cong \mathbb{C}^3$ \quad (CP$^2$ fixed-point kernel),
+  \item $K_u = I_4$ on $V_u \cong \mathbb{R}^4$ \quad (CP$^2$ tangent kernel).
+\end{itemize}
+
+The generation index convention is: generation~3 $\leftrightarrow$ index~$g=3$ (closest to Higgs), generation~1 $\leftrightarrow$ index~$g=1$ (farthest).  Only generation~1 receives the full CP$^2$ coupling factor ($R_u = 4$ or $R_d = 9$); generations 2 and 3 are normalised to $R = 1$.
+
+\medskip
+\noindent\textbf{Notation.}
+Throughout, $A_5$ denotes the alternating group on 5 letters with $|A_5| = 60$.
+The unique order-3 conjugacy class is $C_3$ with $|C_3| = 20$.
+The Cayley operator is $T = \sum_{s \in S} R_s$ with $S = \{a, a^{-1}, b, b^{-1}\}$, $a = (123)$, $b = (12345)$.
+The $\mathbb{Z}_3$ projectors are $P_r^{(L)} = \frac{1}{3}\sum_{m=0}^{2} \omega^{-rm} L(a)^m$, $P_s^{(R)} = \frac{1}{3}\sum_{n=0}^{2} \omega^{-sn} R(a)^n$, with $\omega = e^{2\pi i/3}$.
+
+%======================================================================
+\section{Proven Building Blocks}
+%======================================================================
+
+The following results are \textbf{theorem-grade}, verified both analytically and by explicit computation on the 60-element group (see \texttt{a5\_class\_state\_matrix.py}, \texttt{Af\_RIGOROUS\_COMPUTATION.py}).
+
+\begin{theorem}[Class-state matrix element]\label{thm:class-state}
+$\langle C_3 | T | \{e\} \rangle = \dfrac{2}{\sqrt{|C_3|}} = \dfrac{2}{\sqrt{20}} = \dfrac{1}{\sqrt{5}}.$
+
+\noindent\textit{Proof.}
+Only the two order-3 generators $\{a, a^{-1}\} \subset S$ send $e$ into $C_3$.
+Hence $N(C_3 \leftarrow \{e\}) = 2$, and the normalised amplitude is $2/\sqrt{|C_3|\cdot 1} = 2/\sqrt{20}$.
+\end{theorem}
+
+\begin{lemma}[Bin-overlap weights]\label{lem:bin-overlap}
+Define $r(C_3; r, s) := \mathrm{Tr}(P_{C_3}\, P_r^{(L)}\, P_s^{(R)})$.  Then
+\[
+r(C_3; r, s) \;=\;
+\begin{cases}
+  8/3, & r = s, \\
+  2,   & r \neq s.
+\end{cases}
+\]
+
+\noindent\textit{Proof.}
+By fixed-point counting: $N_{m,n} = \#\{g \in C_3 : a^m g a^n = g\}$ equals 20 for $(m,n) = (0,0)$, equals 2 for $(m,n) \in \{(1,2),(2,1)\}$, and 0 otherwise.
+Substituting into $r(C_3;r,s) = \frac{1}{9}\sum_{m,n} \omega^{-rm-sn} N_{m,n}$ yields the closed form
+$r(C_3;r,s) = \frac{1}{9}(20 + 2\omega^{-(r+2s)} + 2\omega^{-(2r+s)})$.
+For $r = s$ the phases sum to $+4$, giving $24/9 = 8/3$.
+For $r \neq s$ the phases sum to $-2$, giving $18/9 = 2$.
+\end{lemma}
+
+\begin{lemma}[Down-type kernel uniqueness (Lemma~L)]\label{lem:kernel-down}
+$S_3$ invariance on three CP$^2$ localization sites plus democratic coupling forces $K_d = \lambda_d J_3$.
+
+\noindent\textit{Proof.}
+$\mathrm{Comm}_{S_3}(\mathbb{C}^3) = \mathrm{span}\{I_3, J_3\}$.
+Democratic coupling (no diagonal preference) selects $J_3$.
+\end{lemma}
+
+\begin{corollary}[Up-type kernel uniqueness]\label{cor:kernel-up}
+$O(4)$ isotropy on the real tangent space $T_{p_0}\mathrm{CP}^2 \cong \mathbb{R}^4$ forces $K_u = \lambda_u I_4$ by Schur's lemma.
+\end{corollary}
+
+\begin{remark}[QCD running coefficients]
+With $N_c = 3$, $N_f = 6$: $b_0 = (11 N_c - 2 N_f)/3 = 7$.
+This is standard perturbative QCD, not $A_5$-specific.
+\end{remark}
+
+%======================================================================
+\section{The Nine Prefactors: Individual Traces}
+%======================================================================
+
+For each fermion $f$ with generation index $g_f \in \{1,2,3\}$, the prefactor is
+\[
+A_f = G[g_f, g_f] \times (\text{sector factor}).
+\]
+
+%----------------------------------------------------------------------
+\subsection{$A_e = 2/3$ \quad (electron)}
+
+\paragraph{Computation.}
+\begin{align}
+A_e &= G[1,1] \times D_\ell[1,1] = \frac{2}{3} \times 1 = \frac{2}{3}.
+\end{align}
+
+\paragraph{What $A_5$ element / representation?}
+The factor $2/3$ is the $(1,1)$ matrix element of $G = \mathrm{diag}(2/3, 1, 1)$.
+
+\paragraph{Explicit computation.}
+$G[1,1]$ is asserted to equal $2/3$.
+The ``derivation'' offered is: two of the four generators $S = \{a, a^{-1}, b, b^{-1}\}$ have order~3 (namely $a$ and $a^{-1}$), giving $2/|S| = 2/4$.
+But the scripts show this is repackaged as $2/N_{\mathrm{gen}} = 2/3$, not $2/4$.
+Neither ratio follows from a matrix element or trace formula on $A_5$.
+
+\paragraph{Uses class-state matrix $T$?} No.
+\paragraph{Uses bin-overlap weights?} No.
+
+\begin{status}
+\textbf{Not theorem-grade.}
+$G[1,1] = 2/3$ is an \emph{assertion} (operator input), not a computed $A_5$ matrix element.
+The rigorous computation script (\texttt{Af\_RIGOROUS\_COMPUTATION.py}, Part~10) explicitly states:
+``G\_1 = 2/N\_gen arises from gauge partition --- Hypothesis.''
+The walk-sum on the Cayley graph gives \emph{equal} amplitudes for all diagonal bins, so generation suppression does not emerge from the walk.
+\end{status}
+
+%----------------------------------------------------------------------
+\subsection{$A_\mu = 1$ \quad (muon)}
+
+\paragraph{Computation.}
+\begin{align}
+A_\mu &= G[2,2] \times D_\ell[2,2] = 1 \times 1 = 1.
+\end{align}
+
+\paragraph{What $A_5$ element / representation?}
+$G[2,2] = 1$ is the reference generation (generation~2 is normalised to unity by convention).
+
+\paragraph{Explicit computation.}
+Trivial: the $(2,2)$ element of $G = \mathrm{diag}(2/3, 1, 1)$ is 1 by definition.
+
+\paragraph{Uses $T$?} No.
+\paragraph{Uses bin-overlap?} No.
+
+\begin{status}
+\textbf{Theorem-grade by convention.}
+This is the normalisation reference for leptons.  No $A_5$ content.
+\end{status}
+
+%----------------------------------------------------------------------
+\subsection{$A_\tau = \sqrt{2}$ \quad (tau)}
+
+\paragraph{Computation.}
+\begin{align}
+A_\tau &= G[3,3] \times D_\ell[3,3] = 1 \times \sqrt{2} = \sqrt{2}.
+\end{align}
+
+\paragraph{What $A_5$ element / representation?}
+$D_\ell[3,3] = \sqrt{2}$ is the Dirac normalisation factor for third-generation leptons.
+
+\paragraph{Explicit computation.}
+This is a QFT normalisation (chiral Dirac spinor norm), not an $A_5$ computation.
+Specifically, $\sqrt{2}$ arises from the Dirac bilinear $\bar\psi_L \psi_R$ normalisation when both chiralities are independently localised at the same CP$^2$ site (generation~3).
+
+\paragraph{Uses $T$?} No.
+\paragraph{Uses bin-overlap?} No.
+
+\begin{status}
+\textbf{Not from $A_5$.}
+This is standard Dirac field theory ($\sqrt{2}$ from chiral normalisation).
+Theorem-grade \emph{as QFT}, but not group-theoretic.
+\end{status}
+
+%----------------------------------------------------------------------
+\subsection{$A_u = 8/3$ \quad (up quark)}
+
+\paragraph{Computation.}
+\begin{align}
+A_u &= G[1,1] \times R_u^{(1)} = \frac{2}{3} \times 4 = \frac{8}{3}.
+\end{align}
+
+\paragraph{What $A_5$ element / representation?}
+\begin{itemize}[nosep]
+  \item $G[1,1] = 2/3$: generation suppression (see electron entry).
+  \item $R_u^{(1)} = 4$: CP$^2$ tangent-space coupling for generation~1.
+\end{itemize}
+
+\paragraph{Explicit computation.}
+$R_u = \langle \Omega_u | K_u | \Omega_u \rangle = \langle \Omega_u | I_4 | \Omega_u \rangle$.
+With $|\Omega_u\rangle = (1,1,1,1)/2$, this gives $R_u = 1$.
+The value $R_u^{(1)} = 4 = \mathrm{Tr}(I_4) = \dim_{\mathbb{R}}(T_{p_0}\mathrm{CP}^2)$ is obtained by taking the \emph{trace} rather than the normalised expectation value, interpreted as: generation~1 couples to all four tangent directions.
+
+\paragraph{Uses $T$?} No.
+\paragraph{Uses bin-overlap?} No.
+
+\begin{status}
+\textbf{Partially theorem-grade.}
+$K_u = I_4$ is rigorously forced by $O(4)$ isotropy (Corollary~\ref{cor:kernel-up}).
+That $\mathrm{Tr}(I_4) = 4$ is arithmetic.
+But the claim that generation~1 gets the full trace while generations 2 and 3 get $R = 1$ is \textbf{not derived} --- it is an assumption about generation--kernel coupling that is not proven from $A_5$ or CP$^2$ geometry.
+Also, $G[1,1] = 2/3$ carries the same caveat as for $A_e$.
+\end{status}
+
+%----------------------------------------------------------------------
+\subsection{$A_c = 1$ \quad (charm quark)}
+
+\paragraph{Computation.}
+\begin{align}
+A_c &= G[2,2] \times R_u^{(2)} = 1 \times 1 = 1.
+\end{align}
+
+\paragraph{What $A_5$ element / representation?}
+$G[2,2] = 1$ (reference), $R_u^{(2)} = 1$ (generation~2 normalised coupling).
+
+\paragraph{Explicit computation.}
+Trivial: both factors are unity by the generation-normalisation convention.
+
+\paragraph{Uses $T$?} No.
+\paragraph{Uses bin-overlap?} No.
+
+\begin{status}
+\textbf{Theorem-grade by convention.}
+This is the normalisation reference for up-type quarks.
+\end{status}
+
+%----------------------------------------------------------------------
+\subsection{$A_t = 1$ \quad (top quark)}
+
+\paragraph{Computation.}
+\begin{align}
+A_t &= G[3,3] \times R_u^{(3)} = 1 \times 1 = 1.
+\end{align}
+
+\paragraph{What $A_5$ element / representation?}
+Same as charm: both factors unity.
+
+\paragraph{Explicit computation.}
+In the alternative ``COMPLETE DERIVATION'' script, $A_t = \sqrt{2}$ (Dirac factor) is used, which would require $n_t = 0$ to give $m_t = \sqrt{2} \times v/\sqrt{2} = v = 246\;\mathrm{GeV}$ (too high by $\sim 40\%$).
+In the Explicit Yukawa Operator script, $A_t = 1$ with $n_t = 0$, giving $m_t = v/\sqrt{2} = 174.1\;\mathrm{GeV}$ (0.8\% error).
+\textbf{The two scripts disagree on whether $A_t$ includes the $\sqrt{2}$ Dirac factor.}
+
+\paragraph{Uses $T$?} No.
+\paragraph{Uses bin-overlap?} No.
+
+\begin{status}
+\textbf{Convention-dependent.}
+The value $A_t = 1$ is a normalisation choice.
+The Dirac-factor ambiguity ($A_t = 1$ vs $A_t = \sqrt{2}$) reflects an unresolved convention issue between the two derivation scripts.
+\end{status}
+
+%----------------------------------------------------------------------
+\subsection{$A_d = 6$ \quad (down quark)}
+
+\paragraph{Computation.}
+\begin{align}
+A_d &= G[1,1] \times Q_d[1,1] \times R_d^{(1)} = \frac{2}{3} \times 1 \times 9 = 6.
+\end{align}
+
+\paragraph{What $A_5$ element / representation?}
+\begin{itemize}[nosep]
+  \item $G[1,1] = 2/3$: generation suppression.
+  \item $Q_d[1,1] = 1$: no QCD running modification for generation~1.
+  \item $R_d^{(1)} = 9$: CP$^2$ fixed-point coupling for generation~1.
+\end{itemize}
+
+\paragraph{Explicit computation.}
+$R_d = \sum_{i,j} \langle p_i | K_d^{\mathrm{shape}} | p_j \rangle = \sum_{i,j} 1 = 9 = N_{\mathrm{gen}}^2$.
+This uses $K_d = J_3$ (Lemma~\ref{lem:kernel-down}), so $R_d = 9$ is the sum of all entries of $J_3$.
+
+\paragraph{Uses $T$?} Indirectly (the kernel $K_d = J_3$ is determined by symmetry, not by $T$ directly).
+\paragraph{Uses bin-overlap?} No (the factor 9 is the total trace of $J_3$, not a bin weight).
+
+\begin{status}
+\textbf{Partially theorem-grade.}
+$K_d = J_3$ is rigorously derived (Lemma~\ref{lem:kernel-down}).
+$\sum_{ij} [J_3]_{ij} = 9$ is arithmetic.
+But the assumption that generation~1 gets the full $R_d = 9$ while higher generations get $R = 1$ is \textbf{not proven}.
+The $G[1,1] = 2/3$ factor carries the same caveat as before.
+\end{status}
+
+%----------------------------------------------------------------------
+\subsection{$A_s = 6/7$ \quad (strange quark)}
+
+\paragraph{Computation.}
+\begin{align}
+A_s &= G[2,2] \times Q_d[2,2] \times R_d^{(2)} = 1 \times \frac{6}{7} \times 1 = \frac{6}{7}.
+\end{align}
+
+\paragraph{What $A_5$ element / representation?}
+$Q_d[2,2] = N_f / b_0 = 6/7$ is the QCD Yukawa running factor for the 2nd-generation down-type quark.
+
+\paragraph{Explicit computation.}
+$b_0 = (11 N_c - 2 N_f)/3 = (33 - 12)/3 = 7$.
+The QCD running operator assigns $Q_d[2,2] = N_f/b_0 = 6/7$.
+This is a \emph{pattern identification}: the 1-loop running factor for the strange Yukawa from the Planck scale to the weak scale is \emph{asserted} to equal $N_f/b_0$, but a complete RG derivation showing precisely this ratio is not provided in the source files.
+
+\paragraph{Uses $T$?} No.
+\paragraph{Uses bin-overlap?} No.
+
+\begin{status}
+\textbf{Pattern-level, not theorem-grade.}
+$b_0 = 7$ is standard QCD.
+But the claim $Q_d[2,2] = N_f/b_0 = 6/7$ is a pattern identification, not a derived result from running the RG equations.
+A full RG computation would need to specify the matching scales, threshold corrections, and show that the ratio of Yukawa couplings at low vs.\ high scale equals exactly $6/7$.
+\end{status}
+
+%----------------------------------------------------------------------
+\subsection{$A_b = 1/42$ \quad (bottom quark)}
+
+\paragraph{Computation.}
+\begin{align}
+A_b &= G[3,3] \times Q_d[3,3] \times R_d^{(3)} = 1 \times \frac{1}{42} \times 1 = \frac{1}{42}.
+\end{align}
+
+\paragraph{What $A_5$ element / representation?}
+$Q_d[3,3] = 1/(N_f \times b_0) = 1/(6 \times 7) = 1/42$ is the QCD Yukawa running factor for the 3rd-generation down-type quark.
+
+\paragraph{Explicit computation.}
+$1/(N_f \cdot b_0) = 1/42$.
+As with $A_s$, this is a pattern: the running is asserted to introduce an \emph{additional} factor of $1/N_f$ beyond the 2nd-generation suppression.
+
+\paragraph{Uses $T$?} No.
+\paragraph{Uses bin-overlap?} No.
+
+\begin{status}
+\textbf{Pattern-level, not theorem-grade.}
+Same caveat as $A_s$.
+Additionally, the ``extra $1/N_f$'' suppression for 3rd generation relative to 2nd generation is stated but not derived from the RG equations.
+\end{status}
+
+%======================================================================
+\section{Summary Table}
+%======================================================================
+
+\begin{table}[h]
+\centering
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+$f$ & $A_f$ & $G[g,g]$ & Sector factor & Uses $T$? & Uses bin-overlap? & Status \\
+\midrule
+$e$   & $2/3$     & $2/3$ & $D_\ell = 1$    & No & No & Assumed \\
+$\mu$ & $1$       & $1$   & $D_\ell = 1$    & No & No & Convention \\
+$\tau$& $\sqrt{2}$& $1$   & $D_\ell = \sqrt{2}$ & No & No & QFT (not $A_5$) \\
+$u$   & $8/3$     & $2/3$ & $R_u = 4$       & No & No & Partial \\
+$c$   & $1$       & $1$   & $R_u = 1$       & No & No & Convention \\
+$t$   & $1$       & $1$   & $R_u = 1$       & No & No & Convention \\
+$d$   & $6$       & $2/3$ & $Q_d = 1,\; R_d = 9$ & No & No & Partial \\
+$s$   & $6/7$     & $1$   & $Q_d = 6/7$     & No & No & Pattern \\
+$b$   & $1/42$    & $1$   & $Q_d = 1/42$    & No & No & Pattern \\
+\bottomrule
+\end{tabular}
+\caption{Derivation status of v67 prefactors.  ``Assumed'' means the value is an operator input without proof.  ``Convention'' means it is the normalisation reference.  ``QFT'' means it follows from quantum field theory but not from $A_5$.  ``Partial'' means some ingredients are proven.  ``Pattern'' means a numerological pattern is identified but not derived.}
+\end{table}
+
+%======================================================================
+\section{What Is and Is Not Derived from $A_5$}
+%======================================================================
+
+\subsection{Genuinely derived from $A_5$ (theorem-grade)}
+
+\begin{enumerate}[nosep]
+  \item $|C_3| = 20$ --- the order-3 conjugacy class has 20 elements.
+  \item $\langle C_3 | T | \{e\}\rangle = 2/\sqrt{20}$ --- Cayley operator matrix element (Theorem~\ref{thm:class-state}).
+  \item $r(C_3; r,r) = 8/3$, $r(C_3; r,s \neq r) = 2$ --- bin-overlap weights (Lemma~\ref{lem:bin-overlap}).
+  \item $K_d \propto J_3$ --- forced by $S_3$ symmetry on CP$^2$ sites (Lemma~\ref{lem:kernel-down}).
+  \item $K_u \propto I_4$ --- forced by $O(4)$ isotropy (Corollary~\ref{cor:kernel-up}).
+\end{enumerate}
+
+\subsection{Not derived from $A_5$ (required assumptions)}
+
+\begin{enumerate}[nosep]
+  \item $G = \mathrm{diag}(2/3, 1, 1)$ --- the generation suppression operator.
+    The entry $2/3$ does not emerge from any computed matrix element or trace on $A_5$.
+    The \texttt{RIGOROUS\_COMPUTATION} script shows the walk-sum gives \emph{equal} amplitudes for all diagonal bins.
+  \item $R_u^{(1)} = 4$, $R_d^{(1)} = 9$ for generation~1 only --- the assumption that first-generation quarks couple to the full kernel trace while others get $R = 1$.
+  \item $Q_d = \mathrm{diag}(1, 6/7, 1/42)$ --- the QCD running operator.
+    $b_0 = 7$ is standard QCD, but the exact ratios $N_f/b_0$ and $1/(N_f b_0)$ as generation-specific Yukawa running factors are pattern identifications.
+  \item $D_\ell = \mathrm{diag}(1, 1, \sqrt{2})$ --- Dirac normalisation.
+    This is QFT, not $A_5$.
+  \item Generation $\leftrightarrow$ bin assignment --- which $\mathbb{Z}_3 \times \mathbb{Z}_3$ bin maps to which Standard Model generation is not uniquely determined by the group theory.
+\end{enumerate}
+
+\subsection{The role of the class-state matrix and bin-overlap weights}
+
+A critical finding: \textbf{none of the nine $A_f$ values, as computed in the Explicit Yukawa Operator script, directly use} the class-state matrix element $\langle C_3 | T | \{e\}\rangle = 2/\sqrt{20}$ or the bin-overlap weights $r(C_3; r,s) \in \{8/3, 2\}$.
+
+These proven $A_5$ results provide structural \emph{motivation}:
+\begin{itemize}[nosep]
+  \item $\sqrt{|C_3|} = \sqrt{20}$ motivates the quark-lepton scale separation.
+  \item The bin weights $\{8/3, 2\}$ show that diagonal vs.\ off-diagonal bins are inequivalent, motivating generation structure.
+  \item The matrix element $2/\sqrt{20}$ shows that the Cayley graph connects the identity to $C_3$ with a specific amplitude.
+\end{itemize}
+
+However, the operator $G = \mathrm{diag}(2/3, 1, 1)$ is inserted as an \emph{input} rather than computed as an output of these structures.  The ``COMPLETE DERIVATION'' script uses $\sqrt{|C_3|}$ as a multiplicative base for quark prefactors, but this represents a different (and less rigorous) decomposition than the Explicit Yukawa Operator.
+
+%======================================================================
+\section{Honest Bottom Line}
+%======================================================================
+
+The v67 dictionary prefactors $\{2/3, 1, \sqrt{2}, 8/3, 1, 1, 6, 6/7, 1/42\}$ can be \emph{reproduced} by the operator formula $A_f = G[g,g] \times (\text{sector})$ with three diagonal operators $G$, $Q_d$, $D_\ell$ and two CP$^2$ kernels $K_d$, $K_u$.
+
+Of these ingredients:
+\begin{itemize}
+  \item The \textbf{kernels} $K_d = J_3$ and $K_u = I_4$ are \textbf{theorem-grade} (Lemma~L, Schur).
+  \item The \textbf{QCD coefficient} $b_0 = 7$ is \textbf{standard physics}.
+  \item The \textbf{Dirac factor} $\sqrt{2}$ is \textbf{standard QFT}.
+  \item The \textbf{generation operator} $G = \mathrm{diag}(2/3, 1, 1)$ is an \textbf{unproven input}.
+  \item The \textbf{generation--kernel coupling} ($R^{(1)} = \mathrm{Tr}(K)$ for gen~1, $R^{(g)} = 1$ otherwise) is an \textbf{unproven assumption}.
+  \item The \textbf{QCD running ratios} $6/7$ and $1/42$ are \textbf{pattern-level} (numerology involving $N_f$ and $b_0$, not derived from RG flow).
+\end{itemize}
+
+\medskip
+\noindent
+To upgrade from ``pattern'' to ``theorem,'' the following would be needed:
+\begin{enumerate}
+  \item Derive $G[1,1] = 2/3$ as a matrix element or trace from the microsector propagator.
+  \item Prove that generation~1 couples to $\mathrm{Tr}(K)$ while other generations couple to 1.
+  \item Carry out the explicit RG running of the down-type Yukawa and show the threshold-matched ratio equals $N_f/b_0$ for gen~2 and $1/(N_f b_0)$ for gen~3.
+  \item Prove the generation--bin assignment is unique.
+\end{enumerate}
+
+\end{document}

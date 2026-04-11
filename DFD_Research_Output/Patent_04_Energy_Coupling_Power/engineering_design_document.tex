@@ -1,0 +1,907 @@
+%=============================================================================
+% ENGINEERING DESIGN DOCUMENT
+% ψ-Field Wireless Power Transfer System
+% Patent #4 — DFD Energy Coupling and Power Transfer Networks
+% Author: Gary Thomas Alcock
+%=============================================================================
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{amsmath,amssymb}
+\usepackage{siunitx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+\geometry{margin=2.5cm}
+\pagestyle{fancy}
+\fancyhead[L]{\textbf{DFD Patent \#4 --- Engineering Design}}
+\fancyhead[R]{CONFIDENTIAL}
+\fancyfoot[C]{\thepage}
+
+\title{\textbf{Engineering Design Document}\\[0.5em]
+\Large $\psi$-Field Wireless Power Transfer System\\[0.3em]
+\large Patent \#4: Energy Coupling and Power Transfer Networks}
+\author{Gary Thomas Alcock\\
+Density Field Dynamics Programme}
+\date{Document Revision 1.0 --- \today}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+%=============================================================================
+\section{Executive Summary}
+%=============================================================================
+
+This document presents the deployment-ready engineering design for a
+wireless power transfer system based on $\psi$-field corridor technology
+within Density Field Dynamics (DFD). The system exploits the DFD scalar
+refractive field $\psi$ ($n = e^\psi$) to create graded-index waveguide
+channels in free space, enabling guided electromagnetic power transfer
+that bypasses the inverse-square law.
+
+\begin{tcolorbox}[colback=blue!5!white, colframe=blue!60!black, title=Key Performance Targets]
+\begin{itemize}[nosep]
+\item \textbf{Range:} 100\,m to 1000\,km (application-dependent)
+\item \textbf{Power:} 10\,kW to 1\,GW (scalable architecture)
+\item \textbf{Efficiency:} $>$70\% end-to-end at 1\,km; $>$50\% at 10\,km
+\item \textbf{Safety:} Full compliance with IEEE C95.1, ICNIRP, FCC limits
+\item \textbf{Carrier frequency:} 94\,GHz primary; 5.8\,GHz and optical bands secondary
+\end{itemize}
+\end{tcolorbox}
+
+%=============================================================================
+\section{System Architecture}
+%=============================================================================
+
+\subsection{Functional Block Diagram}
+
+The $\psi$-corridor wireless power system consists of five primary subsystems:
+
+\begin{enumerate}
+\item \textbf{Transmitter Station (TX)}
+    \begin{itemize}
+    \item Power source (utility grid or generator)
+    \item DC-to-RF converter (gyrotron/klystron/solid-state)
+    \item Beamforming antenna array
+    \item $\psi$-corridor former (cavity array)
+    \item TX control and monitoring system
+    \end{itemize}
+
+\item \textbf{$\psi$-Corridor (Transmission Medium)}
+    \begin{itemize}
+    \item Graded-index $\psi$-field channel
+    \item Optional relay/amplification stations (for $>$100\,km)
+    \item Corridor monitoring sensors
+    \end{itemize}
+
+\item \textbf{Receiver Station (RX)}
+    \begin{itemize}
+    \item Receive antenna / rectenna array
+    \item RF-to-DC rectification
+    \item Power conditioning (DC-DC, DC-AC)
+    \item $\psi$-coupler (mode-field matching element)
+    \item RX control and monitoring system
+    \end{itemize}
+
+\item \textbf{Safety and Monitoring System}
+    \begin{itemize}
+    \item Corridor volume surveillance (radar/LIDAR)
+    \item Beam interlock system
+    \item Emergency shutdown controller
+    \item EMF monitoring network
+    \end{itemize}
+
+\item \textbf{Command, Control, and Communications (C3)}
+    \begin{itemize}
+    \item TX-RX data link (out-of-band or in-band on higher-order modes)
+    \item Adaptive power control
+    \item Corridor health monitoring
+    \item Grid integration controller
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Signal Flow}
+
+\begin{verbatim}
+Grid Power --> DC-RF Converter --> Beamforming Array
+                                        |
+                              Psi-Corridor Former
+                                        |
+                                  Psi-Corridor
+                              (Guided Propagation)
+                                        |
+                              Receive Antenna Array
+                                        |
+                              RF-DC Rectification
+                                        |
+                              Power Conditioning
+                                        |
+                              Load / Grid Tie-in
+\end{verbatim}
+
+%=============================================================================
+\section{Detailed Subsystem Design}
+%=============================================================================
+
+\subsection{Transmitter Subsystem}
+
+\subsubsection{RF Power Source}
+
+\begin{table}[h]
+\centering
+\caption{RF source options by application class.}
+\begin{tabular}{lcccc}
+\toprule
+Source Type & Frequency & Power & Efficiency & Application \\
+\midrule
+Magnetron & 2.45/5.8\,GHz & 1--100\,kW & 70--85\% & Short range, EV \\
+Klystron & 2.45--94\,GHz & 10\,kW--10\,MW & 50--65\% & General \\
+Gyrotron & 94--170\,GHz & 100\,kW--2\,MW & 35--50\% & Long range \\
+GaN SSPA array & 5.8--94\,GHz & 1--500\,kW & 40--55\% & Phased array \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Primary design choice: 94\,GHz Gyrotron.}
+\begin{itemize}
+\item Model: Based on CPI VGB-8094 or equivalent
+\item Output power: 200\,kW CW (derated for reliability)
+\item RF efficiency: 45\%
+\item Cooling: Liquid-cooled collector
+\item Beam voltage: 80\,kV, beam current: 5.5\,A
+\item Mass: $\sim$200\,kg (tube + magnet)
+\item MTBF: $>$10{,}000 hours
+\end{itemize}
+
+\subsubsection{$\psi$-Corridor Former Array}
+
+The corridor former establishes the $\psi$-field gradient profile
+required for guided-mode propagation. It consists of an array of
+high-Q superconducting microwave cavities operated in TE+TM
+superposition mode.
+
+\paragraph{Design parameters:}
+\begin{itemize}
+\item Number of cavities: $N_{\rm cav} = 100$
+\item Cavity type: Niobium SRF, $Q_0 > 10^{10}$
+\item Operating frequency: 1.3\,GHz (TESLA-type, well-characterized)
+\item Stored energy per cavity: $U_{\rm cav} = 10$\,kJ ($Q = 10^{10}$, $P_{\rm diss} = 8\,\text{W}$)
+\item Total stored energy: $U_0 = N_{\rm cav} \times U_{\rm cav} = 1$\,MJ
+\item Modulation depth: $m = 0.1$ (PLL-controlled)
+\item Mode configuration: TE$_{011}$ + TM$_{010}$ co-phased ($\eta_\times = 0.3$)
+\item Cavity array length: 50\,m (spacing 0.5\,m)
+\item Cryogenic system: 4.2\,K liquid helium, total heat load $\sim$800\,W
+\item Cryoplant: 2\,kW at 4.2\,K (standard commercial unit)
+\end{itemize}
+
+\paragraph{$\psi$-field generation capability.}
+Using the driven $\psi$ amplitude equation:
+\begin{equation}
+\Delta\psi = \frac{|\lambda - 1|\eta_\times U_0 c_s}{\pi A_\psi \gamma_\psi}
+\end{equation}
+
+\begin{table}[h]
+\centering
+\caption{$\Delta\psi$ achieved vs.\ $|\lambda - 1|$ value
+($A_\psi = 3.14\,\text{m}^2$, $\gamma_\psi = 0.03\,\text{s}^{-1}$,
+$c_s = c$).}
+\begin{tabular}{lcc}
+\toprule
+$|\lambda - 1|$ & $\Delta\psi$ & Modes at 94\,GHz ($w_c = 1\,\text{m}$) \\
+\midrule
+$10^{-5}$ & $3.2 \times 10^{8}$ (saturated) & $\gg 10^6$ \\
+$10^{-8}$ & $3.2 \times 10^{5}$ (saturated) & $\gg 10^6$ \\
+$10^{-12}$ & 32 (saturated) & $\gg 10^6$ \\
+$10^{-15}$ & 0.032 & $\gg 10^6$ \\
+$10^{-18}$ & $3.2 \times 10^{-5}$ & $\sim$6{,}500 \\
+$10^{-21}$ & $3.2 \times 10^{-8}$ & $\sim$7$ \\
+$10^{-24}$ & $3.2 \times 10^{-11}$ & $<$1 (below cutoff) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Note:} The linear driven-mode equation breaks down at large
+$\Delta\psi$ due to nonlinear saturation. Realistic achievable values
+require knowledge of the saturation mechanism. The table shows that
+even $|\lambda - 1| \sim 10^{-21}$ suffices for multi-mode corridor
+operation at 94\,GHz.
+
+\subsubsection{Beamforming Antenna Array}
+
+\paragraph{Design:} Corrugated horn antenna optimized for fundamental
+Gaussian mode excitation.
+
+\begin{itemize}
+\item Type: Corrugated conical horn
+\item Aperture diameter: $D = 4w_0 = 0.52$\,m (for $w_0 = 0.13$\,m)
+\item Flare angle: 6.5$^\circ$
+\item Horn length: 2.3\,m
+\item Gaussian mode coupling efficiency: $>$98\%
+\item Cross-polarization: $<$-35\,dB
+\item Material: Aluminum with corrugated inner surface
+\item Mass: $\sim$80\,kg
+\end{itemize}
+
+\paragraph{Alternative: Phased array.}
+For applications requiring beam steering or multi-corridor support:
+\begin{itemize}
+\item Array size: 64 $\times$ 64 = 4{,}096 elements
+\item Element spacing: $\lambda/2 = 1.6$\,mm
+\item Array aperture: 102\,mm $\times$ 102\,mm
+\item Per-element power: 37\,mW (total 150\,W for 100\,kW system)
+\item Phase shifters: MEMS or ferroelectric, 6-bit resolution
+\item Scanning range: $\pm$45$^\circ$
+\item Cost: \$50k--\$200k at volume
+\end{itemize}
+
+\subsection{$\psi$-Corridor Transmission Medium}
+
+\subsubsection{Corridor Specifications}
+
+\begin{table}[h]
+\centering
+\caption{Corridor specifications for the reference 1\,km design.}
+\begin{tabular}{lcc}
+\toprule
+Parameter & Value & Unit \\
+\midrule
+Length & 1000 & m \\
+Core radius ($w_c$) & 1.0 & m \\
+$\psi$ contrast ($\Delta\psi$) & $10^{-6}$ & --- \\
+Refractive index contrast ($\Delta n/n$) & $10^{-6}$ & --- \\
+Gradient parameter ($g$) & $1.41 \times 10^{-3}$ & m$^{-1}$ \\
+Fundamental mode radius ($w_0$) & 0.13 & m \\
+Number of guided modes & $\sim$850 & --- \\
+Propagation constant (fund.) & $\beta_0 \approx k_0 n_0$ & m$^{-1}$ \\
+Intermodal dispersion & $<$0.01\,ps/m & --- \\
+\midrule
+\multicolumn{3}{l}{\textit{Loss budget per km:}} \\
+Atmospheric absorption (94\,GHz, clear) & 0.4 & dB \\
+$\psi$-profile scattering & $<$0.01 & dB \\
+Bend loss (straight corridor) & 0 & dB \\
+Total corridor loss & 0.41 & dB \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Corridor Maintenance}
+
+The $\psi$-corridor requires continuous maintenance power to
+counteract damping. The maintenance power is:
+\begin{equation}
+P_{\rm maint} = 2\gamma_\psi \times E_{\rm corridor}^{\rm pump},
+\end{equation}
+where $E_{\rm corridor}^{\rm pump}$ is the EM pump energy stored
+in the corridor former cavities. For $\gamma_\psi = 0.03\,\text{s}^{-1}$
+and $U_0 = 1\,\text{MJ}$:
+\begin{equation}
+P_{\rm maint} = 2 \times 0.03 \times 10^6 = 60\,\text{kW}.
+\end{equation}
+
+This is a significant overhead for a 100\,kW delivered-power system.
+Strategies to reduce maintenance power:
+\begin{itemize}
+\item Higher-Q cavities (lower $\gamma_\psi$)
+\item Self-sustaining corridors (EM-$\psi$ feedback loop)
+\item Pulsed operation (corridor established during transmission only)
+\end{itemize}
+
+\subsubsection{Relay Stations for Extended Range}
+
+For corridors exceeding $\sim$10\,km, relay stations along the path
+regenerate the corridor profile. Each relay station consists of:
+\begin{itemize}
+\item Local $\psi$-corridor former (reduced cavity count, $\sim$20 cavities)
+\item RF amplifier to compensate accumulated loss
+\item Local safety monitoring system
+\item Autonomous power supply (solar + battery or grid connection)
+\end{itemize}
+
+Relay spacing: every 10\,km (5\,dB total loss budget per section,
+with 1\,dB margin for degradation).
+
+\subsection{Receiver Subsystem}
+
+\subsubsection{Rectenna Array Design}
+
+\begin{itemize}
+\item Array topology: Planar, circular aperture
+\item Array diameter: $4w_0 = 0.52$\,m (captures $>$99.97\% of fundamental mode)
+\item Element count: $\sim$8{,}300 (at $\lambda/2$ spacing, 94\,GHz)
+\item Element type: Patch antenna + GaN Schottky diode rectifier
+\item Per-element rectification efficiency: 85--90\% at $S = 10^4\,\text{W/m}^2$
+\item DC combining: Series-parallel matrix for voltage/current matching
+\item Output voltage: 400--800\,V DC (configurable via combining topology)
+\item Thermal management: Passive heatsink + forced air (power density
+$\sim$$5\,\text{kW/m}^2$ waste heat)
+\end{itemize}
+
+\subsubsection{Power Conditioning Unit}
+
+\begin{itemize}
+\item DC-DC converter: Interleaved buck-boost, $\eta > 96\%$
+\item Voltage regulation: $\pm$1\% over full load range
+\item DC-AC inverter (for grid-tied applications): 3-phase, $\eta > 97\%$
+\item Grid synchronization: PLL-based, IEEE 1547 compliant
+\item Power factor: $>$0.99
+\item Total harmonics distortion: $<$3\%
+\item Transient response: $<$10\,ms to 90\% of step load
+\end{itemize}
+
+\subsubsection{$\psi$-Coupler Design}
+
+The $\psi$-coupler is a passive structure at the receiver aperture
+that optimizes mode-field matching between the corridor mode and the
+rectenna array. It consists of:
+
+\begin{itemize}
+\item \textbf{Dielectric lens:} GRIN lens with profile matched to
+corridor fundamental mode. Material: low-loss ceramic
+($\epsilon_r = 9.8$, $\tan\delta < 10^{-4}$ at 94\,GHz). Diameter:
+0.6\,m, thickness: 50\,mm.
+
+\item \textbf{Impedance taper:} Quarter-wave matching section between
+corridor impedance ($Z_0/n_{\rm ax}$) and rectenna element impedance.
+Implemented as multilayer dielectric stack.
+
+\item \textbf{Mode filter:} Optional spatial filter to reject
+higher-order modes and suppress interference. Implemented as
+aperture stop at the confocal plane of the GRIN lens.
+\end{itemize}
+
+%=============================================================================
+\section{System Performance Analysis}
+%=============================================================================
+
+\subsection{End-to-End Power Budget}
+
+\begin{table}[h]
+\centering
+\caption{Detailed power budget for 1\,km, 100\,kW delivered system at 94\,GHz.}
+\begin{tabular}{lccc}
+\toprule
+Stage & Efficiency & Power In (kW) & Power Out (kW) \\
+\midrule
+Grid input & --- & 499 & --- \\
+AC-DC conversion & 96\% & 499 & 479 \\
+DC-RF conversion (gyrotron) & 45\% & 479 & 216 \\
+RF feed network loss & 95\% & 216 & 205 \\
+TX antenna coupling & 98\% & 205 & 201 \\
+$\psi$-corridor (1\,km, 0.4\,dB) & 91.2\% & 201 & 183 \\
+RX antenna coupling & 98\% & 183 & 179 \\
+Rectification & 88\% & 179 & 158 \\
+DC-DC conversion & 96\% & 158 & 152 \\
+DC-AC inversion & 97\% & 152 & 147 \\
+\midrule
+\textbf{Subtotal (power path)} & \textbf{29.5\%} & \textbf{499} & \textbf{147} \\
+\midrule
+Corridor maintenance power & --- & 60 & --- \\
+Cryoplant power (4.2\,K) & --- & 15 & --- \\
+Control/monitoring & --- & 5 & --- \\
+Safety systems & --- & 2 & --- \\
+\midrule
+\textbf{Total grid input} & --- & \textbf{581} & --- \\
+\textbf{Total delivered to load} & --- & --- & \textbf{147} \\
+\textbf{Overall system efficiency} & \textbf{25.3\%} & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{tcolorbox}[colback=yellow!10!white, colframe=orange!70!black, title=Design Note]
+The primary efficiency bottleneck is the DC-to-RF conversion (gyrotron at 45\%).
+Using solid-state GaN power amplifiers at lower frequencies (e.g., 5.8\,GHz) with
+60--70\% efficiency, or advanced gyrotron designs achieving 55--60\%, would
+significantly improve the system-level efficiency. With 60\% DC-RF efficiency:
+overall system efficiency rises to $\sim$33\%.
+\end{tcolorbox}
+
+\subsection{Comparison: $\psi$-Corridor vs.\ Conventional at 1\,km}
+
+\begin{table}[h]
+\centering
+\caption{Head-to-head comparison for 100\,kW delivered at 1\,km.}
+\begin{tabular}{lccc}
+\toprule
+Metric & $\psi$-Corridor & Microwave Beam & Cable \\
+\midrule
+Carrier frequency & 94\,GHz & 5.8\,GHz & 50/60\,Hz \\
+TX aperture & 0.52\,m dia & 10\,m dia & N/A \\
+RX aperture & 0.52\,m dia & 100\,m dia & N/A \\
+Corridor/beam efficiency & 91.2\% & 0.06\% & 99.5\% \\
+End-to-end (RF-to-load) & 72\% & $<$0.05\% & 97\% \\
+Infrastructure & TX + RX stations & TX + huge rectenna farm & 1\,km cable trench \\
+Installation time & Days & Months & Months \\
+Right-of-way & None & Large RX footprint & Full corridor \\
+Weather vulnerability & Low (94\,GHz) & Low & Low \\
+Scalability & Simple (add power) & Add rectenna area & New cable \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Range--Efficiency Curves}
+
+The corridor efficiency vs.\ range follows:
+\begin{equation}
+\eta_{\rm corridor}(R) = \eta_{\rm c}^2 \times 10^{-\alpha R/10}
+\end{equation}
+where $\eta_c = 0.98$ (coupling each end) and $\alpha$ is in dB/km.
+
+\begin{table}[h]
+\centering
+\caption{Corridor efficiency vs.\ range at 94\,GHz.}
+\begin{tabular}{lccc}
+\toprule
+Range & Corridor Loss & $\eta_{\rm corridor}$ & $\eta_{\rm e2e}$ (RF-to-load) \\
+\midrule
+100\,m & 0.04\,dB & 95.1\% & 74.7\% \\
+500\,m & 0.20\,dB & 94.3\% & 74.1\% \\
+1\,km & 0.40\,dB & 91.2\% & 71.7\% \\
+5\,km & 2.0\,dB & 79.4\% & 62.4\% \\
+10\,km & 4.0\,dB & 63.1\% & 49.6\% \\
+50\,km & 20\,dB & 6.3\% & 5.0\% \\
+50\,km (with 4 relays) & 4.0\,dB (per section) & 45\% & 35\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Observation:} Without relays, 94\,GHz atmospheric absorption
+limits useful range to $\sim$15\,km. With relay stations every 10\,km,
+the range extends to hundreds of km. In vacuum (space applications),
+the range is limited only by $\psi$-field profile maintenance.
+
+%=============================================================================
+\section{Detailed Component Specifications}
+%=============================================================================
+
+\subsection{SRF Cavity Array (Corridor Former)}
+
+\begin{longtable}{lcc}
+\caption{SRF cavity array specifications.} \\
+\toprule
+Parameter & Value & Unit \\
+\midrule
+\endfirsthead
+\toprule
+Parameter & Value & Unit \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+Cavity type & TESLA 9-cell & --- \\
+Operating frequency & 1.3 & GHz \\
+Intrinsic quality factor $Q_0$ & $>$10$^{10}$ & --- \\
+Operating temperature & 2.0 (superfluid He) & K \\
+Accelerating gradient & N/A (storage mode) & --- \\
+Stored energy per cavity & 10 & kJ \\
+RF surface resistance & $<$10 & n$\Omega$ \\
+Dissipated power per cavity & 8 & W \\
+TE+TM mode configuration & TE$_{011}$ + TM$_{010}$ & --- \\
+Mode overlap $\eta_\times$ & 0.3 & --- \\
+Modulation frequency & $2\omega_{\rm drive}$ & --- \\
+Modulation depth $m$ & 0.1 & --- \\
+Cavity spacing & 0.5 & m \\
+Total array length & 50 & m \\
+Number of cavities & 100 & --- \\
+Total stored energy & 1.0 & MJ \\
+Total dissipated power & 800 & W \\
+Cryoplant capacity (at 2\,K) & 1.5 & kW \\
+Cryoplant electrical power & 15 & kW \\
+Cryostat mass (loaded) & 5{,}000 & kg \\
+Helium inventory & 500 & L \\
+\end{longtable}
+
+\subsection{94\,GHz Gyrotron Transmitter}
+
+\begin{longtable}{lcc}
+\caption{Gyrotron transmitter specifications.} \\
+\toprule
+Parameter & Value & Unit \\
+\midrule
+\endfirsthead
+\toprule
+Parameter & Value & Unit \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+Operating frequency & 94 & GHz \\
+Output power (CW) & 200 & kW \\
+Beam voltage & 80 & kV \\
+Beam current & 5.5 & A \\
+Efficiency (RF/beam) & 45 & \% \\
+Depressed collector stages & 2 & --- \\
+Collector efficiency & 75 & \% \\
+Overall efficiency (wall-plug) & 40 & \% \\
+Output mode & TE$_{22,6}$ $\to$ TEM$_{00}$ (converter) & --- \\
+Mode purity & $>$95 & \% \\
+Bandwidth & 200 & MHz \\
+Cooling & Liquid (collector), forced air (body) & --- \\
+Coolant flow rate & 20 & L/min \\
+Magnet type & Superconducting (persistent mode) & --- \\
+Magnetic field & 3.6 & T \\
+Tube lifetime & $>$10{,}000 & hours \\
+Mass (tube + magnet) & 250 & kg \\
+Power supply mass & 500 & kg \\
+\end{longtable}
+
+\subsection{Rectenna Array Receiver}
+
+\begin{longtable}{lcc}
+\caption{Rectenna array specifications.} \\
+\toprule
+Parameter & Value & Unit \\
+\midrule
+\endfirsthead
+\toprule
+Parameter & Value & Unit \\
+\midrule
+\endhead
+\bottomrule
+\endlastfoot
+Array topology & Circular planar & --- \\
+Diameter & 0.52 & m \\
+Active area & 0.21 & m$^2$ \\
+Element type & Patch + Schottky diode & --- \\
+Element spacing & 1.6 ($\lambda/2$) & mm \\
+Number of elements & 8{,}300 & --- \\
+Per-element power (100\,kW mode) & 12 & W \\
+Rectification efficiency & 88 & \% \\
+DC output voltage (nominal) & 600 & V DC \\
+DC output current (100\,kW) & 167 & A \\
+Combining network & Series-parallel matrix & --- \\
+Substrate material & Rogers RT/Duroid 5880 & --- \\
+Diode type & GaN Schottky & --- \\
+Diode junction temperature (max) & 175 & $^\circ$C \\
+Thermal management & Heatsink + fan array & --- \\
+Waste heat (at 100\,kW output) & 13.5 & kW \\
+Array mass & 15 & kg \\
+Environmental rating & IP65 & --- \\
+\end{longtable}
+
+%=============================================================================
+\section{Safety System Design}
+%=============================================================================
+
+\subsection{Hazard Analysis}
+
+\begin{table}[h]
+\centering
+\caption{Hazard identification and mitigation.}
+\begin{tabular}{p{3cm}p{3cm}p{2cm}p{4cm}}
+\toprule
+Hazard & Scenario & Severity & Mitigation \\
+\midrule
+RF exposure (personnel) & Person enters corridor & High & Keep-out volume, radar detection, auto-shutdown \\
+RF exposure (wildlife) & Bird enters corridor & Medium & Acoustic deterrents, corridor height control \\
+Equipment failure (TX) & Gyrotron arc & Medium & Crowbar circuit, fault detection, auto-shutdown \\
+Equipment failure (RX) & Rectenna element failure & Low & Graceful degradation, monitoring \\
+Corridor collapse & $\psi$-field loss & Low & Natural dispersion (safe), power ramp-down \\
+EMI to nearby systems & Sidelobe radiation & Low & Corridor confinement, $<$-40\,dB sidelobes \\
+Cyber attack & Unauthorized power diversion & Medium & Encrypted C3, physical interlocks \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Keep-Out Volume Specification}
+
+For 100\,kW at 94\,GHz through a corridor with $w_0 = 0.13\,\text{m}$:
+
+\paragraph{On-axis power density:}
+\begin{equation}
+S_0 = \frac{P}{\pi w_0^2} = \frac{10^5}{\pi \times 0.0169}
+= 1.88 \times 10^6\,\text{W/m}^2
+\end{equation}
+
+\paragraph{MPE limits (IEEE C95.1, general public, 94\,GHz):}
+$S_{\rm MPE} = 10\,\text{W/m}^2$.
+
+\paragraph{Keep-out radius:}
+\begin{equation}
+\rho_{\rm KO} = w_0\sqrt{\frac{1}{2}\ln\frac{S_0}{S_{\rm MPE}}}
+= 0.13\sqrt{\frac{1}{2}\ln(1.88 \times 10^5)}
+= 0.13 \times 2.44 = 0.32\,\text{m}
+\end{equation}
+
+\paragraph{Safety margin:} Apply 3$\times$ margin:
+$\rho_{\rm KO,design} = 1.0\,\text{m}$ from corridor center.
+
+\paragraph{Keep-out volume:} Cylinder of radius 1.0\,m, length 1\,km,
+centered on corridor axis. Total volume: $\pi \times 1^2 \times 1000
+= 3{,}142\,\text{m}^3$.
+
+\subsection{Intrusion Detection System}
+
+\begin{itemize}
+\item \textbf{Primary sensor:} 94\,GHz FMCW radar (shared frequency band
+with power beam), range resolution 0.15\,m, update rate 100\,Hz.
+Detection range: corridor length + 100\,m buffer.
+
+\item \textbf{Secondary sensor:} 1550\,nm LIDAR array (eye-safe), 360$^\circ$
+coverage every 50\,m along corridor. Object classification capability
+(distinguish birds from aircraft from personnel).
+
+\item \textbf{Response time:} Intrusion detection to beam shutoff: $<$1\,ms.
+
+\item \textbf{Beam shutoff mechanism:} Solid-state RF switch (PIN diode) in
+waveguide feed, insertion loss 0.3\,dB, switching time 50\,ns.
+Backup: crowbar circuit on gyrotron power supply, switching time 10\,$\mu$s.
+\end{itemize}
+
+\subsection{Fail-Safe Modes}
+
+\begin{enumerate}
+\item \textbf{Corridor obstruction detected:} Immediate power shutoff
+($<$1\,ms). Power held at zero until obstruction clears and 5\,s
+clear period confirmed.
+
+\item \textbf{RX communication loss:} Power reduced to 10\% within 100\,ms.
+Full shutoff if communication not restored within 10\,s.
+
+\item \textbf{$\psi$-corridor degradation:} Corridor mode quality continuously
+monitored via pilot tone. If mode quality drops below 80\% threshold,
+power reduced proportionally. Below 50\%, full shutoff.
+
+\item \textbf{Grid fault (TX side):} UPS maintains corridor former power
+for 30\,s (allowing graceful load transfer). RF power ramps down
+immediately.
+
+\item \textbf{Grid fault (RX side):} RX signals TX to reduce power.
+Excess power absorbed by RX dummy load (rated for 100\% power,
+30\,s thermal capacity).
+\end{enumerate}
+
+%=============================================================================
+\section{Installation and Commissioning}
+%=============================================================================
+
+\subsection{Site Requirements}
+
+\paragraph{TX station:}
+\begin{itemize}
+\item Floor area: 10\,m $\times$ 20\,m (equipment room + corridor former)
+\item Ceiling height: 5\,m (for gyrotron and waveguide routing)
+\item Grid connection: 750\,kVA, 3-phase, 480\,V
+\item Cooling: 500\,kW cooling capacity (water or air)
+\item Foundation: Standard industrial, 500\,kg/m$^2$ floor loading
+\end{itemize}
+
+\paragraph{RX station:}
+\begin{itemize}
+\item Floor area: 5\,m $\times$ 5\,m (rectenna + power conditioning)
+\item Grid connection: 200\,kVA (output)
+\item Cooling: 50\,kW (waste heat from rectification)
+\end{itemize}
+
+\paragraph{Corridor path:}
+\begin{itemize}
+\item Clear line of sight between TX and RX
+\item Keep-out volume maintained (1\,m radius cylinder)
+\item No permanent structures within 3\,m of corridor center
+\item Corridor height: minimum 5\,m above ground (adjustable via steering)
+\end{itemize}
+
+\subsection{Commissioning Procedure}
+
+\begin{enumerate}
+\item \textbf{Phase 1: Equipment installation and checkout} (2 weeks)
+    \begin{itemize}
+    \item Install TX and RX stations
+    \item Connect power, cooling, communications
+    \item Individual subsystem verification
+    \end{itemize}
+
+\item \textbf{Phase 2: Corridor formation} (1 week)
+    \begin{itemize}
+    \item Cool SRF cavities to operating temperature
+    \item Establish TE+TM modes in all cavities
+    \item Phase-lock cavity array
+    \item Begin $2\omega$ modulation; monitor for $\psi$-mode buildup
+    \item Verify corridor profile with probe beam
+    \end{itemize}
+
+\item \textbf{Phase 3: Low-power commissioning} (1 week)
+    \begin{itemize}
+    \item Inject 1\,kW probe signal through corridor
+    \item Measure received power and mode profile
+    \item Verify coupling efficiency and corridor loss
+    \item Test safety interlocks with simulated intrusions
+    \end{itemize}
+
+\item \textbf{Phase 4: Power ramp-up} (1 week)
+    \begin{itemize}
+    \item Increase power in 10\,kW steps
+    \item Monitor all thermal, electrical, and safety parameters
+    \item Verify corridor stability under load
+    \item Final acceptance testing at rated power
+    \end{itemize}
+\end{enumerate}
+
+Total commissioning time: 5 weeks from equipment delivery.
+
+%=============================================================================
+\section{Estimated Costs and Schedule}
+%=============================================================================
+
+\subsection{Capital Cost Estimate}
+
+\begin{table}[h]
+\centering
+\caption{Capital cost estimate for 1\,km, 100\,kW reference system.}
+\begin{tabular}{lrr}
+\toprule
+Item & Quantity & Cost (USD) \\
+\midrule
+94\,GHz Gyrotron + power supply & 1 & \$500{,}000 \\
+SRF cavity array (100 cavities) & 1 & \$2{,}000{,}000 \\
+Cryoplant (2\,kW at 2\,K) & 1 & \$500{,}000 \\
+Cryostat + distribution & 1 & \$300{,}000 \\
+TX horn antenna & 1 & \$50{,}000 \\
+Rectenna array + housing & 1 & \$200{,}000 \\
+Power conditioning unit & 1 & \$100{,}000 \\
+Safety system (radar + LIDAR + interlocks) & 1 & \$300{,}000 \\
+C3 system & 1 & \$100{,}000 \\
+Installation + commissioning & 1 & \$500{,}000 \\
+\midrule
+\textbf{Total capital cost} & & \textbf{\$4{,}550{,}000} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Operating Cost Estimate}
+
+\begin{table}[h]
+\centering
+\caption{Annual operating cost estimate.}
+\begin{tabular}{lr}
+\toprule
+Item & Annual Cost (USD) \\
+\midrule
+Electricity (581\,kW $\times$ 8760\,h $\times$ \$0.10/kWh) & \$508{,}000 \\
+Helium replenishment (5\% annual loss) & \$25{,}000 \\
+Gyrotron tube replacement (every 2 years) & \$100{,}000 \\
+Maintenance labor (2 FTE) & \$200{,}000 \\
+Insurance and permits & \$50{,}000 \\
+\midrule
+\textbf{Total annual operating cost} & \textbf{\$883{,}000} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Levelized Cost of Energy Transfer}
+
+For 100\,kW delivered, 95\% availability (8322 hours/year):
+\begin{equation}
+\text{LCOE}_{\rm transfer} = \frac{\text{Annualized capital} + \text{O\&M}}
+{\text{Energy delivered}} = \frac{455{,}000 + 883{,}000}{832{,}200\,\text{kWh}}
+= \$1.61/\text{kWh}
+\end{equation}
+(assuming 10-year capital recovery).
+
+This is significantly higher than conventional power lines (\$0.01--0.05/kWh
+for overhead lines). The $\psi$-corridor system is economically viable
+primarily for:
+\begin{itemize}
+\item Locations where physical cables are impossible (across water,
+environmentally protected areas)
+\item Emergency/rapid deployment (disaster relief)
+\item Mobile power delivery (military forward bases)
+\item Space applications (no alternative exists)
+\end{itemize}
+
+At scale (10\,MW+ systems), the LCOE drops to $\sim$\$0.20/kWh due to
+the better utilization of the fixed-cost corridor former.
+
+%=============================================================================
+\section{Technology Roadmap}
+%=============================================================================
+
+\begin{table}[h]
+\centering
+\caption{Technology development roadmap.}
+\begin{tabular}{llll}
+\toprule
+Phase & Timeline & Milestone & TRL \\
+\midrule
+0 & Year 0--1 & Measure $|\lambda - 1|$ in laboratory & 1$\to$2 \\
+1 & Year 1--2 & Demonstrate $\psi$-mode excitation & 2$\to$3 \\
+2 & Year 2--4 & Lab-scale corridor (1\,m) with guided mode & 3$\to$4 \\
+3 & Year 4--6 & 100\,m outdoor corridor, 10\,kW & 4$\to$5 \\
+4 & Year 6--8 & 1\,km reference system, 100\,kW & 5$\to$6 \\
+5 & Year 8--10 & Multi-km system, MW-class & 6$\to$7 \\
+6 & Year 10--12 & Commercial deployment & 7$\to$9 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{tcolorbox}[colback=red!5!white, colframe=red!60!black, title=Critical Path Item]
+\textbf{The entire roadmap is gated by Phase 0: measurement of $|\lambda - 1|$.}
+If $|\lambda - 1| = 0$ exactly (no EM-$\psi$ back-reaction), then direct
+$\psi$-corridor generation via EM pumping is impossible. Alternative
+approaches (mass-sourced corridors, metamaterial-only systems) would then
+be pursued, with significantly different timelines and capabilities.
+\end{tcolorbox}
+
+%=============================================================================
+\section{Intellectual Property Coverage}
+%=============================================================================
+
+Patent \#4 covers the following claims:
+
+\begin{enumerate}
+\item A method for wireless power transfer comprising: generating a shaped
+$\psi$-field envelope defining a corridor of modified refractive index between
+a transmitter and a receiver; coupling electromagnetic energy into guided modes
+of said corridor; propagating said guided modes along said corridor; and
+extracting electromagnetic energy from said guided modes at the receiver.
+
+\item The method of claim 1 wherein the $\psi$-field envelope is generated by
+an array of electromagnetic resonant cavities operating in a superposition of
+transverse electric and transverse magnetic modes with amplitude modulation at
+twice the drive frequency.
+
+\item A system for $\psi$-field wireless power transfer comprising: a transmitter
+station with an RF source and $\psi$-corridor former; a $\psi$-corridor
+transmission medium; a receiver station with a $\psi$-responsive coupler and
+rectification system; and a safety system with keep-out volume enforcement.
+
+\item The system of claim 3 further comprising metamaterial beamforming elements
+for enhanced mode coupling.
+
+\item The system of claim 3 further comprising multi-lane delivery using
+mode-division multiplexing within a single $\psi$-corridor.
+
+\item A method for dynamic electric vehicle charging comprising a
+ground-embedded $\psi$-corridor former and vehicle-mounted receiver coupler.
+
+\item A method for deep-space energy beaming using $\psi$-corridors established
+and maintained in vacuum between orbital or planetary stations.
+
+\item A safety system for $\psi$-corridor power transfer comprising corridor
+volume surveillance, beam interlock, and automatic shutdown upon intrusion
+detection.
+\end{enumerate}
+
+%=============================================================================
+\section{Conclusions and Recommendations}
+%=============================================================================
+
+This engineering design document establishes that a $\psi$-corridor wireless
+power transfer system is technically feasible using existing component
+technologies (gyrotrons, SRF cavities, rectennas, radar safety systems),
+contingent upon the existence of a nonzero EM-$\psi$ coupling parameter
+$|\lambda - 1|$.
+
+\paragraph{Key recommendations:}
+\begin{enumerate}
+\item \textbf{Priority 1:} Execute the $|\lambda - 1|$ measurement protocol
+described in Appendix R of the main DFD text. This is the single most
+important experiment for the entire $\psi$-corridor technology programme.
+
+\item \textbf{Priority 2:} Develop the metamaterial-only $\psi$-corridor
+analogue as a parallel track. This provides immediate practical value
+(GRIN waveguide in air) while the $\psi$-field physics is being established.
+
+\item \textbf{Priority 3:} Design and build a proof-of-concept corridor
+former using existing SRF infrastructure (e.g., at DESY, FNAL, or
+Jefferson Lab). The cavity technology is mature; only the TE+TM
+configuration and $2\omega$ modulation scheme are novel.
+
+\item \textbf{Priority 4:} Engage with the space power community
+(NASA, JAXA, ESA) to evaluate $\psi$-corridor potential for space-based
+solar power and lunar/Mars power delivery. The space application has
+the largest potential impact and the least competition from conventional
+alternatives.
+\end{enumerate}
+
+\end{document}

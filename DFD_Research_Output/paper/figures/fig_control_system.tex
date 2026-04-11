@@ -1,0 +1,193 @@
+% fig_control_system.tex - GNC block diagram
+% Standalone compilation: pdflatex fig_control_system.tex
+\documentclass[tikz,border=5pt]{standalone}
+\usepackage{tikz}
+\usepackage{amsmath}
+\usetikzlibrary{arrows.meta,calc,positioning,fit}
+
+\begin{document}
+\begin{tikzpicture}[
+    >=Stealth,
+    every node/.style={font=\footnotesize\sffamily},
+    sensor/.style={
+        draw=blue!60!black, thick, rounded corners=2pt,
+        fill=blue!12, minimum width=2.4cm, minimum height=0.85cm,
+        font=\scriptsize\sffamily, align=center
+    },
+    processor/.style={
+        draw=black!70, very thick, rounded corners=4pt,
+        fill=black!8, minimum width=3cm, minimum height=1.2cm,
+        font=\scriptsize\sffamily\bfseries, align=center
+    },
+    actuator/.style={
+        draw=red!60!black, thick, rounded corners=2pt,
+        fill=red!10, minimum width=2.4cm, minimum height=0.85cm,
+        font=\scriptsize\sffamily, align=center
+    },
+    plant/.style={
+        draw=teal!60!black, thick, rounded corners=3pt,
+        fill=teal!10, minimum width=2.4cm, minimum height=1cm,
+        font=\scriptsize\sffamily, align=center
+    },
+    signarrow/.style={-{Stealth[length=2.5mm]}, thick, #1},
+    signarrow/.default={black!70},
+    fbarrow/.style={-{Stealth[length=2mm]}, thick, dashed, #1!50!black},
+]
+
+\definecolor{navBlue}{RGB}{40,80,160}
+\definecolor{tvcRed}{RGB}{170,50,50}
+\definecolor{rfPurple}{RGB}{120,50,150}
+\definecolor{shellTeal}{RGB}{40,130,120}
+\definecolor{psiViolet}{RGB}{100,50,150}
+\definecolor{motionGreen}{RGB}{50,130,60}
+
+% ============================================================
+% SENSORS (left column)
+% ============================================================
+
+\node[sensor] (star) at (0,3) {Star Tracker\\[1pt]\tiny attitude, 0.1 arcsec};
+\node[sensor] (radar) at (0,1.5) {Radar Altimeter\\[1pt]\tiny range, velocity};
+\node[sensor] (imu) at (0,0) {IMU (Ring Laser)\\[1pt]\tiny $\omega$, $a$ 6-DOF};
+\node[sensor] (psis) at (0,-1.5) {$\psi$ Field Sensor\\[1pt]\tiny gradient magnitude};
+\node[sensor] (gps) at (0,-3) {Deep Space Nav\\[1pt]\tiny X-band ranging};
+
+% Sensor group label
+\node[font=\scriptsize\sffamily\bfseries, navBlue!80!black, rotate=90, anchor=south]
+    at (-2,0) {SENSORS};
+
+% ============================================================
+% NAVIGATION COMPUTER (center-left)
+% ============================================================
+
+\node[processor, minimum width=3.2cm, minimum height=1.5cm]
+    (nav) at (5,0.75)
+    {Navigation\\Computer\\[2pt]\tiny Kalman filter\\state estimation};
+
+% ============================================================
+% GUIDANCE (center)
+% ============================================================
+
+\node[processor, minimum width=3.2cm, minimum height=1.2cm, fill=yellow!8]
+    (guid) at (5,-2)
+    {Guidance\\[2pt]\tiny Trajectory planning\\waypoints, constraints};
+
+% ============================================================
+% THRUST VECTOR CONTROLLER (center-right)
+% ============================================================
+
+\node[processor, minimum width=3.2cm, minimum height=1.3cm, fill=red!6]
+    (tvc) at (10,0)
+    {Thrust Vector\\Controller\\[2pt]\tiny PID + feedforward\\$\mathbf{a}_\text{cmd} \to (\phi_i, A_i)$};
+
+% ============================================================
+% ACTUATORS (right column)
+% ============================================================
+
+\node[actuator] (rfamp) at (15,1.5) {RF Amplifiers\\[1pt]\tiny amplitude $A_i$, $i=1..4$};
+\node[actuator] (phase) at (15,0) {Phase Shifters\\[1pt]\tiny $\phi_i$, $i=1..4$};
+\node[actuator] (freq) at (15,-1.5) {Frequency Tuner\\[1pt]\tiny cavity resonance lock};
+
+% Actuator group label
+\node[font=\scriptsize\sffamily\bfseries, tvcRed!80!black, rotate=-90, anchor=south]
+    at (17,0) {ACTUATORS};
+
+% ============================================================
+% PLANT (bottom-right, physical system)
+% ============================================================
+
+\node[plant, minimum width=2.8cm, minimum height=1.2cm]
+    (shell) at (15,-4)
+    {Ferrite Shell\\[1pt]\tiny EM energy dist.\\$u(\theta,\varphi,t)$};
+
+\node[plant, minimum width=2.8cm, minimum height=1.2cm, fill=psiViolet!10]
+    (psifield) at (10,-4)
+    {$\psi$ Field\\[1pt]\tiny $\nabla\psi$ asymmetry};
+
+\node[plant, minimum width=2.8cm, minimum height=1.2cm, fill=motionGreen!10]
+    (vehicle) at (5,-4)
+    {Vehicle Motion\\[1pt]\tiny $\mathbf{r}(t), \mathbf{v}(t), \boldsymbol{\omega}(t)$};
+
+% ============================================================
+% SIGNAL FLOW ARROWS
+% ============================================================
+
+% Sensors to nav computer
+\foreach \s in {star, radar, imu, psis, gps} {
+    \draw[signarrow] (\s.east) -- (nav.west |- \s.east);
+}
+% Simplified: connect to nav
+\draw[signarrow, navBlue] (star.east) -| ($(nav.west)-(0.3,0)$) -- (nav.west);
+\draw[signarrow, navBlue] (radar.east) -- ++(1,0) |- (nav.west);
+\draw[signarrow, navBlue] (imu.east) -- ++(1.2,0) |- (nav.west);
+\draw[signarrow, navBlue] (psis.east) -- ++(1,0) |- (nav.south west);
+\draw[signarrow, navBlue] (gps.east) -- ++(0.8,0) |- (nav.south west);
+
+% Nav to guidance
+\draw[signarrow] (nav.south) -- (guid.north)
+    node[midway, right, font=\tiny\sffamily] {state $\hat{\mathbf{x}}$};
+
+% Guidance to TVC
+\draw[signarrow] (guid.east) -| (tvc.south)
+    node[near end, right, font=\tiny\sffamily] {$\mathbf{a}_\text{cmd}$};
+
+% Nav to TVC
+\draw[signarrow] (nav.east) -- (tvc.west)
+    node[midway, above, font=\tiny\sffamily] {nav state};
+
+% TVC to actuators
+\draw[signarrow, tvcRed] (tvc.east) -- ++(1,0) |- (rfamp.west)
+    node[near start, above, font=\tiny\sffamily] {};
+\draw[signarrow, tvcRed] (tvc.east) -- ++(1,0) |- (phase.west);
+\draw[signarrow, tvcRed] (tvc.east) -- ++(1,0) |- (freq.west);
+
+% Actuators to shell
+\draw[signarrow, rfPurple] (rfamp.south) -- ++(0,-0.5) -| (shell.north);
+\draw[signarrow, rfPurple] (phase.south) -- ++(0,-0.3) -| ($(shell.north)-(0.3,0)$);
+\draw[signarrow, rfPurple] (freq.south) -- ($(shell.north)+(0.3,0)$);
+
+% Shell to psi field
+\draw[signarrow, shellTeal] (shell.west) -- (psifield.east)
+    node[midway, above, font=\tiny\sffamily] {$\nabla\psi$};
+
+% Psi field to vehicle motion
+\draw[signarrow, psiViolet] (psifield.west) -- (vehicle.east)
+    node[midway, above, font=\tiny\sffamily] {$\mathbf{F} = -m\nabla\psi$};
+
+% ============================================================
+% FEEDBACK LOOPS
+% ============================================================
+
+% Vehicle motion back to sensors
+\draw[fbarrow=motionGreen, very thick]
+    (vehicle.south) -- ++(0,-1) -| (-2,-4.5) -- (-2,0) -- (imu.west)
+    node[near start, below, font=\tiny\sffamily] {physical feedback};
+
+% Psi field sensor feedback
+\draw[fbarrow=psiViolet]
+    (psifield.south) -- ++(0,-0.5) -| (-1.5,-3.5) -- (-1.5,-1.5) -- (psis.west);
+
+% Label feedback loops
+\node[font=\tiny\sffamily\itshape, motionGreen!60!black, anchor=east]
+    at (-2.2,-2) {outer loop};
+\node[font=\tiny\sffamily\itshape, psiViolet!60!black, anchor=east]
+    at (-1.3,-2.5) {inner loop};
+
+% ============================================================
+% DASHED BOXES FOR SUBSYSTEMS
+% ============================================================
+
+\begin{scope}[on background layer]
+    \node[draw=navBlue!40, dashed, thick, rounded corners=5pt,
+          fit=(star)(gps), inner sep=8pt, fill=navBlue!3] {};
+    \node[draw=tvcRed!40, dashed, thick, rounded corners=5pt,
+          fit=(rfamp)(freq), inner sep=8pt, fill=tvcRed!3] {};
+\end{scope}
+
+% ============================================================
+% TITLE
+% ============================================================
+\node[font=\normalsize\sffamily\bfseries, anchor=south] at (7.5,5)
+    {Guidance, Navigation \& Control (GNC) Architecture};
+
+\end{tikzpicture}
+\end{document}

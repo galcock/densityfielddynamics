@@ -1,0 +1,441 @@
+%=============================================================================
+% ACTUAL MECHANISM: How the DFD Paper Produces alpha^{-1} = 137.03599985
+%
+% This document answers the question: what is the ACTUAL computation?
+% Not what we wish it were. Not what a_4 should give. What it ACTUALLY does.
+%
+% Created: 2026-03-22
+%=============================================================================
+\documentclass[12pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs,array,longtable}
+\usepackage{hyperref}
+\usepackage{tcolorbox}
+\usepackage{xcolor}
+
+\title{The Actual Mechanism Behind $\alpha^{-1} = 137.03599985$\\[6pt]
+\large A Definitive Forensic Analysis of What the DFD Papers\\
+Actually Compute, Step by Step}
+
+\author{Forensic Audit --- All Source Documents Examined}
+\date{March 22, 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+After exhaustive examination of three source documents ---
+\texttt{section\_alpha\_locked.tex} (274 lines),
+\texttt{appendix\_K.tex} (560+ lines), and the standalone PDF
+``Ab Initio Derivation'' (27 pages, including Python code listings)
+--- this document identifies the \textbf{actual mechanism} by which
+DFD produces $\alpha^{-1} = 137.03599985$.
+
+The answer is: \textbf{there are two distinct computations at two
+different precision levels, connected by a formula that is never
+explicitly written down}. The lattice route (Route~2) provides
+$\sim 1\%$ verification. The sub-ppm value (Route~1) comes from
+the spectral action framework, but the critical step --- the
+computation of $\kappa_{U(1)}$ from the $a_4$ heat-kernel
+coefficient --- is \textbf{never performed explicitly} in any
+of the three source documents. This is the central gap.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+%=============================================================================
+\section{Executive Summary: The Two-Route Architecture}
+\label{sec:executive}
+%=============================================================================
+
+\begin{tcolorbox}[colback=red!5!white, colframe=red!60!black,
+  title=Critical Finding]
+The DFD corpus contains \textbf{two distinct derivation routes}
+for $\alpha$:
+
+\begin{enumerate}
+\item \textbf{Route 1} (Section~8C / \texttt{section\_alpha\_locked.tex}):
+  Claims sub-ppm precision ($\alpha^{-1} = 137.03599985$, residual
+  $-0.006$~ppm). Lists eight algebraic/SM ingredients in a derivation
+  chain table. \textbf{Never writes the master formula combining them.}
+
+\item \textbf{Route 2} (Standalone PDF / \texttt{appendix\_K.tex}):
+  Uses lattice Monte Carlo at $(\beta_{U(1)}, \beta_{SU(2)}) = (3.80, 22.80)$.
+  Achieves $\sim 1\%$ precision. The formula is explicit and
+  verifiable: Eq.~13 of the PDF.
+\end{enumerate}
+
+The sub-ppm claim comes \emph{exclusively} from Route~1.
+Route~2 cannot deliver sub-ppm precision from lattice statistics.
+\end{tcolorbox}
+
+%=============================================================================
+\section{What Route 2 Actually Computes (Verifiable)}
+\label{sec:route2}
+%=============================================================================
+
+Route~2 is fully explicit. The standalone PDF provides two Python
+code listings (pages 23--24) that implement the entire computation.
+
+\subsection{Step 1: Compute $\beta_{U(1)}$ from CS Weights}
+
+The weight function (Eq.~5 of PDF):
+\begin{equation}
+w(k) = \frac{2}{k+2}\sin^2\!\frac{\pi}{k+2}
+\end{equation}
+is the squared modulus of the SU(2) Chern--Simons partition function
+$Z_{SU(2)_k}(S^3)$ on $S^3$ (Witten 1989).
+
+The effective coupling (Eq.~15):
+\begin{equation}
+\beta_{U(1)} = \langle k_{\rm eff}\rangle
+= \frac{\sum_{k=0}^{59}(k+2)\,w(k)}{\sum_{k=0}^{59}w(k)}
+= 3.7969\ldots \approx 3.80
+\end{equation}
+
+This is a finite sum of trigonometric terms, computable to arbitrary
+precision. The UV cutoff $k_{\max} = 60$ comes from the Bridge Lemma
+(Eq.~14).
+
+\subsection{Step 2: Derive Lattice Parameters}
+
+\begin{align}
+\beta_{SU(2)} &= \frac{n_2}{n_1} \times N_{\rm gen} \times \beta_{U(1)}
+= 2 \times 3 \times 3.80 = 22.80 \tag{Eq.~17--18}
+\end{align}
+
+\subsection{Step 3: Run Lattice Monte Carlo}
+
+At $(\beta_{U(1)}, \beta_{SU(2)}) = (3.80, 22.80)$, simulate compact
+U(1) and SU(2) on an $L^4$ hypercubic lattice. Measure stiffnesses
+$\kappa_{U(1)}$ and $\kappa_{SU(2)}$ via the background-field method
+(Eq.~20):
+\begin{equation}
+\kappa = \frac{F''(0)}{V}, \qquad
+F''(0) = \langle S''\rangle - \langle (S')^2\rangle + \langle S'\rangle^2
+\end{equation}
+
+\subsection{Step 4: Extract $\alpha$}
+
+From measured stiffnesses (Eqs.~12--13):
+\begin{align}
+g_1^2 &= \frac{1}{\kappa_{U(1)}}, \qquad
+g_2^2 = \frac{4}{\kappa_{SU(2)}} \\[6pt]
+\alpha_W &= \frac{g_1^2 \cdot g_2^2}{g_1^2 + g_2^2} \cdot \frac{1}{4\pi}
+\end{align}
+
+\textbf{Python Listing 2} implements exactly this as
+\texttt{alpha\_wilson(ku, ks)}.
+
+\subsection{Step 4a: Simplification Using Stiffness Ratio}
+
+With $\kappa_{SU(2)} = 2\kappa_{U(1)}$ (Frame Stiffness Theorem):
+\begin{equation}
+\boxed{\alpha^{-1} = 6\pi\,\kappa_{U(1)}}
+\end{equation}
+
+This is exact and proven. No approximation is involved.
+
+\subsection{Route 2 Results}
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+$L$ & $\alpha_W$ (mean) & $\Delta\alpha/\alpha$ & Precision \\
+\midrule
+6 & 0.007297 & $-0.00\%$ & $\sim 1\%$ \\
+8 & 0.007322 & $+0.34\%$ & $\sim 1\%$ \\
+12 & 0.007291 & $-0.08\%$ & $\sim 0.3\%$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Route 2 precision: $\sim 1\%$.} This is limited by lattice
+statistics (finite $L$, finite sweeps, autocorrelations).
+
+%=============================================================================
+\section{What Route 1 Claims (Sub-ppm)}
+\label{sec:route1}
+%=============================================================================
+
+Route~1 (\texttt{section\_alpha\_locked.tex}) claims
+$\alpha^{-1} = 137.03599985$ with residual $-0.006$~ppm.
+
+\subsection{The Derivation Chain Table}
+
+Section~8C presents a table (Table~XXVIII) listing eight locked
+ingredients. The table says ``All above combined'' gives
+$\alpha^{-1} = 137.03599985$. But \textbf{no equation number,
+no formula, and no computation is shown} for how these ingredients
+combine to produce this number.
+
+The ingredients are:
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{lll}
+\toprule
+Component & Value & Role \\
+\midrule
+$K_{\mathbb{C}P^2} = \mathcal{O}(-3)$ & $-3$ & Sets Spin$^c$ shift \\
+$L_{\det} = K^{-1}$ & $\mathcal{O}(3)$ & Determinant line \\
+$d = k+4$ & $64$ & Toeplitz dimension \\
+$(d-1)/d$ & $63/64$ & Traceless projection \\
+$N_{\rm species}$ & $7$ & SM content \\
+$\text{Tr}(Y^2)$ & $10$ & Hypercharge sum \\
+$g_F$ & $8$ & Spectral triple factor \\
+$w = N_{\rm sp}/(g_F\text{Tr}(Y^2))$ & $7/80$ & Hypercharge weight \\
+$\varepsilon_{\rm adj} = d^2/(d^2-1)$ & $4096/4095$ & BOOST (Branch A) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Notice:} $\beta_{U(1)} = 3.7969$ is listed in an updated version
+of the table but was not in the original Section~8C table. The table
+in Section~8C does \emph{not} list $\beta$ or $\kappa$ as ingredients.
+
+\subsection{What Section 8C Actually Says}
+
+The section makes the following claims:
+\begin{enumerate}
+\item The operator is the connection Laplacian on $\mathbb{C}P^2 \times S^3$
+\item The regulator is a plateau cutoff (kills $a_6, a_8, \ldots$)
+\item The truncation is Toeplitz at $d = 64$
+\item The ``gauge-kinetic extraction from $a_4$ is unambiguous''
+\item There is a forced binary fork between Branch A (BOOST) and Branch B (DROP)
+\item Branch A gives 137.03599985; Branch B gives 137.03014445
+\item Branch A matches experiment; Branch B is falsified at 43 ppm
+\end{enumerate}
+
+\textbf{What it does NOT do:}
+\begin{itemize}
+\item Write out the Gilkey formula for $a_4$
+\item Compute any curvature invariant of $\mathbb{C}P^2$ or $S^3$
+\item Show a product formula for $a_4$ on $M_1 \times M_2$
+\item Cite Gilkey, Vassilevich, or Chamseddine--Connes
+\item Display any intermediate value for $a_4$ or $\kappa$
+\item Write a master formula combining the table ingredients
+\end{itemize}
+
+%=============================================================================
+\section{The Central Gap: How Does $\beta = 3.80$ Become $\kappa = 7.27$?}
+\label{sec:gap}
+%=============================================================================
+
+\begin{tcolorbox}[colback=orange!5!white, colframe=orange!60!black,
+  title=The Missing Step]
+The exact formula $\alpha^{-1} = 6\pi\kappa_{U(1)}$ requires
+$\kappa_{U(1)} = 7.2700$ for the sub-ppm result.
+
+The Chern--Simons computation gives $\beta_{U(1)} = 3.7969$.
+
+The ratio $\kappa/\beta = 1.914$ must come from somewhere.
+
+\textbf{The paper explicitly states (Eq.~11, page 7 of the PDF):}
+``The relationship between [$\beta$ and $\kappa$] is non-perturbative
+and lattice-size dependent, which is precisely why the simulation
+is needed.''
+
+Yet the sub-ppm value comes from Route~1, which does NOT use the
+lattice simulation. The spectral action route must compute
+$\kappa$ analytically --- but this computation is never shown.
+\end{tcolorbox}
+
+\subsection{What the Spectral Action Framework Should Provide}
+
+In the Chamseddine--Connes spectral action approach:
+\begin{equation}
+S = \text{Tr}\,f(P/\Lambda^2) \sim \sum_{n \geq 0} f_n \cdot a_n(P)
+\end{equation}
+
+The $a_4$ coefficient contains the gauge-kinetic term:
+\begin{equation}
+a_4 \supset \frac{1}{(4\pi)^{n/2}} \int_M
+\text{tr}\!\left(\frac{1}{12}\,\Omega_{ij}\Omega^{ij}\right)
+\end{equation}
+where $\Omega$ is the bundle curvature. This directly gives $\kappa$.
+
+For the connection Laplacian on a line bundle $\mathcal{O}(1)$ over
+$\mathbb{C}P^2 \times S^3$, evaluating $a_4$ requires:
+\begin{itemize}
+\item Curvature invariants of $\mathbb{C}P^2$ (never stated)
+\item Curvature invariants of $S^3$ (never stated)
+\item Metric normalization / volume of both spaces (never stated)
+\item Product formula for $a_4$ on $M_1 \times M_2$ (never stated)
+\item Toeplitz truncation effect on $a_4$ (never analyzed)
+\end{itemize}
+
+\textbf{None of these are provided in any of the three source documents.}
+
+\subsection{Hypothesis Testing}
+
+\paragraph{Hypothesis 1: The sub-ppm value comes from a specific lattice run.}
+\textbf{Rejected.} The best lattice result (L12, $\alpha_W = 0.007291$,
+deviation $-0.08\%$) has $\kappa_{U(1)} \approx 7.276$, not 7.270.
+No lattice simulation at $L \leq 16$ can achieve sub-ppm precision.
+
+\paragraph{Hypothesis 2: $\kappa/\beta \approx 1.91$ is computed from
+compact U(1) perturbative expansion.}
+\textbf{Not used.} The paper explicitly calls this relationship
+``non-perturbative.'' Furthermore, the perturbative expansion of
+$\langle P \rangle$ at $\beta = 3.80$ gives $\kappa/\beta \approx 0.93$
+(from the plaquette mean field), not $1.91$.
+
+\paragraph{Hypothesis 3: The sub-ppm value comes from a Chern--Simons
+gauge coupling computation, not through $a_4$ at all.}
+\textbf{Possible but unverifiable.} The paper mentions $a_4$
+qualitatively but never computes it. The actual numerical path from
+the CS weights to $\kappa = 7.270$ is not documented.
+
+\paragraph{Hypothesis 4: CS/lattice duality maps $\beta$ directly to
+$\kappa$.}
+\textbf{No such duality is stated or used in the papers.}
+
+%=============================================================================
+\section{The Actual Answer: What Really Happens}
+\label{sec:actual}
+%=============================================================================
+
+\begin{tcolorbox}[colback=blue!5!white, colframe=blue!60!black,
+  title=Definitive Finding]
+The DFD paper obtains $\alpha^{-1} = 137.03599985$ through the
+following actual mechanism:
+
+\begin{enumerate}
+\item \textbf{The electroweak formula} $\alpha^{-1} = 6\pi\kappa_{U(1)}$
+  is exact and proven (Frame Stiffness Theorem + Wilson normalization).
+
+\item \textbf{The Chern--Simons weighted average}
+  $\beta_{U(1)} = 3.7969$ is computable to arbitrary precision
+  from the finite trigonometric sum with $k_{\max} = 60$.
+
+\item \textbf{The lattice Monte Carlo} at $\beta = 3.80$ measures
+  $\kappa_{U(1)} \approx 7.25 \pm 0.10$ (the PDF's Eq.~11 states
+  this explicitly), confirming $\alpha \approx 1/137$ at $\sim 1\%$.
+
+\item \textbf{The sub-ppm refinement} comes from Route~1
+  (Section~8C), which claims that the spectral action on the
+  Toeplitz-truncated $\mathbb{C}P^2 \times S^3$ computes
+  $\kappa_{U(1)}$ analytically with all eight table ingredients.
+  The BOOST factor $4096/4095$ is the final discrete correction
+  that selects between Branch~A and Branch~B.
+
+\item \textbf{The critical gap:} The formula that combines the eight
+  ingredients to produce $\kappa_{U(1)} = 7.26999$ is never written
+  down. Section~8C asserts the result but does not show the
+  computation. The $a_4$ coefficient is invoked qualitatively
+  (``the gauge-kinetic extraction from $a_4$ is unambiguous'')
+  but never evaluated.
+\end{enumerate}
+\end{tcolorbox}
+
+\subsection{Structural Diagnosis}
+
+The derivation has three layers of decreasing explicitness:
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{lp{5cm}l}
+\toprule
+Layer & Content & Shown? \\
+\midrule
+$\alpha^{-1} = 6\pi\kappa_{U(1)}$ & Electroweak mixing formula &
+  \textbf{Yes} (Eq.~13 of PDF) \\
+$\kappa_{U(1)} \approx 7.25$ (lattice) & MC measurement at
+  $\beta = 3.80$ & \textbf{Yes} (86 runs, Tables V--VIII) \\
+$\kappa_{U(1)} = 7.26999\ldots$ (analytic) & Spectral action on
+  Toeplitz $\mathbb{C}P^2 \times S^3$ &
+  \textcolor{red}{\textbf{No}} (result stated, computation absent) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The first two layers are fully explicit and verifiable.
+The third layer --- which is the \emph{only} layer capable of
+sub-ppm precision --- is asserted but not demonstrated.
+
+\subsection{An Approximate Closed Form (85~ppm Residual)}
+
+Reverse engineering suggests an approximate formula:
+\begin{equation}
+\alpha^{-1} \approx \frac{35\pi}{3}\;\beta_{U(1)}
+\;\frac{d-1}{d}\;\frac{d^2}{d^2-1}
+\end{equation}
+which gives $\alpha^{-1} \approx 137.024$ (85~ppm from experiment).
+The prefactor $35\pi/3 = 4\pi \times (5/2) \times (7/6)$ can be
+decomposed into electroweak mixing and spectral triple factors.
+But this is a \emph{reverse-engineered approximation}, not a
+derived result.
+
+%=============================================================================
+\section{What Would Be Needed for a Complete Derivation}
+\label{sec:needed}
+%=============================================================================
+
+To close the gap in Section~\ref{sec:gap}, one would need to:
+
+\begin{enumerate}
+\item \textbf{Compute $a_4$ explicitly} for the connection Laplacian
+  on a line bundle over $\mathbb{C}P^2 \times S^3$, using the
+  standard Gilkey formula with specified metric normalizations.
+
+\item \textbf{Apply the Toeplitz truncation} and show how it
+  modifies the $a_4$ coefficient (if at all --- previous analysis
+  showed Toeplitz truncation does not modify polynomial SDW
+  coefficients at leading order).
+
+\item \textbf{Incorporate the SM content} ($N_{\rm species} = 7$,
+  $\text{Tr}(Y^2) = 10$, $g_F = 8$) into the $a_4$ trace and
+  show that the result gives
+  $\kappa_{U(1)} = 137.03599985/(6\pi) = 7.26999$.
+
+\item \textbf{Or:} Provide an alternative analytic formula
+  (not going through $a_4$) that produces $\kappa = 7.27$ from
+  $\beta = 3.80$ and the discrete factors.
+\end{enumerate}
+
+Previous attempts to compute $a_4$ directly have produced:
+\begin{itemize}
+\item Scalar Laplacian $a_4$: gives $\alpha^{-1} \approx 20$
+  (factor 6.79 too small)
+\item Dirac operator $a_4$: even smaller than scalar
+\item Various prefactors ($35/18$, etc.): reverse-engineered,
+  not derived from Gilkey
+\end{itemize}
+
+%=============================================================================
+\section{Conclusions}
+\label{sec:conclusions}
+%=============================================================================
+
+\begin{enumerate}
+\item The sub-ppm value $\alpha^{-1} = 137.03599985$ is stated but
+  not derived in the extant source documents. The derivation chain
+  table lists ingredients; the formula combining them is absent.
+
+\item The $\sim 1\%$-level result ($\alpha \approx 1/137$ from
+  lattice MC) \emph{is} fully explicit and reproducible.
+  The code is published (Listings 1--2 of the PDF; Zenodo repository).
+
+\item The relationship $\beta \to \kappa$ (bare coupling to
+  renormalized stiffness) is explicitly called ``non-perturbative''
+  by the paper itself (Eq.~11). Yet Route~1 claims analytic
+  sub-ppm precision for this very quantity without showing how.
+
+\item The BOOST factor $4096/4095$ is well-defined and enters
+  cleanly. It is the \emph{only} component of the sub-ppm claim
+  that is fully derived and explicit.
+
+\item \textbf{The actual mechanism is:} $\alpha^{-1} = 6\pi\kappa_{U(1)}$
+  (exact), with $\kappa_{U(1)}$ measured by lattice MC at $\sim 1\%$
+  precision. The sub-ppm claim requires an analytic computation of
+  $\kappa$ that has not been shown.
+
+\item None of the four hypotheses tested (lattice fine-tuning,
+  perturbative $\kappa/\beta$, direct CS gauge coupling, CS/lattice
+  duality) successfully explains the sub-ppm value from first
+  principles.
+\end{enumerate}
+
+\end{document}

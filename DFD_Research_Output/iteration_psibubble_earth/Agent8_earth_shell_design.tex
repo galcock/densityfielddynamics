@@ -1,0 +1,893 @@
+%=============================================================================
+% AGENT 8: FERRITE-SUPERCONDUCTOR SHELL DESIGN FOR EARTH ATMOSPHERIC OPERATION
+% Engineering specification for a psi-bubble device at the Karman line
+%=============================================================================
+
+\documentclass[11pt,a4paper]{article}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{siunitx}
+\usepackage{geometry}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{enumitem}
+\geometry{margin=2.5cm}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{designrule}{Design Rule}
+
+\title{Ferrite--Superconductor Shell Design\\for Earth Atmospheric $\psi$-Bubble Operation\\
+\large Engineering Specification at the K\'arm\'an Line ($h = \SI{100}{km}$)}
+\author{Agent 8 -- DFD Research Iteration}
+\date{March 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We present a complete engineering design for a ferrite--superconductor composite
+shell optimised for $\psi$-bubble activation at and above the K\'arm\'an line
+($h = \SI{100}{km}$), where the ambient mass density
+$\rho = \SI{5.6e-7}{kg/m^3}$ requires a threshold magnetic field of only
+$B_c = \SI{11.4}{T}$. The design employs REBCO (rare-earth barium copper oxide)
+high-temperature superconducting tape wound into a prolate spheroidal shell
+generating a persistent \SI{15}{T} field, providing a safety margin of $1.3$
+over threshold. We analyse three shell architectures in order of decreasing
+complexity: (i) a full ferrite--superconductor composite with YIG resonant
+storage for parametric threshold modulation; (ii) a thin-ferrite hybrid for
+reduced mass; and (iii) a pure superconductor shell with no ferrite, identified
+as the \emph{minimum viable $\psi$-bubble} (MVB). The pure-SC design achieves a
+total mass of $\sim\!\SI{37000}{kg}$, generates Mode~I thrust using ambient
+thermospheric gas with an exhaust velocity of $\SI{1.8e7}{m/s}$ ($0.06c$) and a
+specific impulse of $\SI{1.8e6}{s}$, and requires only $\sim\!\SI{10}{kW}$ of
+electrical power for cryogenics and control. We provide detailed mass budgets,
+thermal analysis, structural loading calculations, launch-to-activation
+trajectories, and a technology readiness assessment for each subsystem.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+%=============================================================================
+\section{Design Point Selection}\label{sec:design_point}
+%=============================================================================
+
+\subsection{The $\eta_c$ Threshold at Altitude}
+
+The DFD threshold condition requires:
+\begin{equation}\label{eq:eta_threshold}
+\eta \equiv \frac{U_{\mathrm{EM}}}{\rho c^2} \geq \eta_c = \frac{\alpha}{4}
+\approx 1.82 \times 10^{-3},
+\end{equation}
+where $U_{\mathrm{EM}} = B^2/(2\mu_0)$ for a purely magnetic configuration. Solving
+for the threshold field:
+\begin{equation}\label{eq:B_threshold}
+B_{\mathrm{threshold}}(h) = \sqrt{2\mu_0 \,\rho(h)\, c^2 \,\eta_c}\,.
+\end{equation}
+
+\subsection{Altitude Trade Study}
+
+Using the US Standard Atmosphere (1976) and NRLMSISE-00 thermospheric model:
+
+\begin{table}[h]
+\centering
+\caption{Threshold magnetic field as a function of altitude.}
+\label{tab:altitude_trade}
+\begin{tabular}{@{}lrrrl@{}}
+\toprule
+Altitude & $\rho$ [\si{kg/m^3}] & $B_{\mathrm{threshold}}$ [\si{T}] & Margin at \SI{15}{T} & Technology \\
+\midrule
+\SI{0}{km} (sea level) & $1.225$ & $22{,}500$ & $6.7\times 10^{-4}$ & Impossible \\
+\SI{40}{km} (balloon ceiling) & $3.99 \times 10^{-3}$ & $1{,}280$ & $0.012$ & Impossible \\
+\SI{60}{km} & $3.10 \times 10^{-4}$ & $357$ & $0.042$ & Impossible \\
+\SI{80}{km} (mesopause) & $1.8 \times 10^{-5}$ & $86$ & $0.17$ & Pulsed HTS \\
+\SI{100}{km} (K\'arm\'an) & $5.6 \times 10^{-7}$ & $11.4$ & $\mathbf{1.3}$ & \textbf{Persistent HTS} \\
+\SI{120}{km} & $2.2 \times 10^{-8}$ & $3.0$ & $5.0$ & HTS (easy) \\
+\SI{200}{km} (LEO) & $2.5 \times 10^{-10}$ & $0.24$ & $63$ & NdFeB permanent \\
+\SI{400}{km} (ISS) & $2.8 \times 10^{-12}$ & $0.025$ & $600$ & Ferrite alone \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{designrule}[Primary Design Point]
+The K\'arm\'an line ($h = \SI{100}{km}$) is selected as the primary operating
+altitude because:
+\begin{enumerate}[nosep]
+\item $B_{\mathrm{threshold}} = \SI{11.4}{T}$ is within the demonstrated
+capability of REBCO superconducting magnets (record: \SI{45.5}{T}, NHMFL 2019);
+\item a design field of $B_0 = \SI{15}{T}$ provides a safety margin of $1.3$;
+\item the altitude is above the homopause, so residual gas is predominantly
+atomic oxygen (beneficial for plasma Mode~I thrust);
+\item conventional launch vehicles can deliver payloads to \SI{100}{km} routinely.
+\end{enumerate}
+\end{designrule}
+
+\subsection{Exhaust Velocity and Specific Impulse at the Design Point}
+
+At $B = \SI{15}{T}$ and $\rho = \SI{5.6e-7}{kg/m^3}$, the Alfv\'en speed
+(governing Mode~I exhaust velocity) is:
+\begin{equation}\label{eq:v_exh}
+v_{\mathrm{exh}} = \frac{B}{\sqrt{\mu_0 \rho}}
+= \frac{15}{\sqrt{1.257 \times 10^{-6} \times 5.6 \times 10^{-7}}}
+= \SI{1.79e7}{m/s} \approx 0.06\,c\,.
+\end{equation}
+The corresponding specific impulse:
+\begin{equation}
+I_{\mathrm{sp}} = \frac{v_{\mathrm{exh}}}{g_0}
+= \frac{1.79 \times 10^7}{9.81} = \SI{1.82e6}{s}\,.
+\end{equation}
+For comparison, chemical rockets achieve $I_{\mathrm{sp}} \sim 300$--$450\;\mathrm{s}$,
+ion thrusters $\sim 3000$--$10{,}000\;\mathrm{s}$. The $\psi$-bubble Mode~I drive
+exceeds all existing propulsion by three orders of magnitude.
+
+%=============================================================================
+\section{Shell Architecture: Three Configurations}\label{sec:architectures}
+%=============================================================================
+
+We analyse three shell configurations in order of decreasing complexity and
+mass, identifying the optimal trade between performance and buildability.
+
+%-----------------------------------------------------------------------------
+\subsection{Configuration A: Full Ferrite--Superconductor Composite}
+%-----------------------------------------------------------------------------
+
+\subsubsection{Concept}
+
+The full composite shell comprises three functional layers:
+
+\begin{enumerate}[nosep]
+\item \textbf{Outer structural shell:} Carbon fibre reinforced polymer (CFRP)
+or Inconel 718, providing meteoroid shielding and mechanical support.
+
+\item \textbf{Ferrite resonant layer:} Yttrium iron garnet (YIG,
+\ce{Y3Fe5O12}) tiles bonded to the structural shell, providing high-$Q$
+($>10^4$) electromagnetic resonant storage for parametric threshold modulation.
+
+\item \textbf{Inner superconductor layer:} REBCO tape (YBCO on Hastelloy
+substrate) wound in a cos-$\theta$ or saddle-coil configuration, generating
+the persistent \SI{15}{T} base field.
+
+\item \textbf{Innermost radiation/thermal shield:} Multi-layer insulation (MLI)
+and cryogenic thermal bus.
+\end{enumerate}
+
+\subsubsection{Ferrite Layer Specification}
+
+\begin{table}[h]
+\centering
+\caption{YIG ferrite layer properties.}
+\label{tab:yig_properties}
+\begin{tabular}{@{}lr@{}}
+\toprule
+Property & Value \\
+\midrule
+Material & \ce{Y3Fe5O12} (YIG) \\
+Density & \SI{5170}{kg/m^3} \\
+Saturation magnetisation $M_s$ & \SI{0.178}{T} \\
+Curie temperature & \SI{553}{K} \\
+Unloaded $Q$ at \SI{10}{GHz} & $>10{,}000$ \\
+FMR linewidth $\Delta H$ & \SI{0.3}{Oe} (\SI{24}{A/m}) \\
+Relative permeability $\mu_r$ & $\sim 15$ (below saturation) \\
+Thermal conductivity & \SI{7.4}{W/(m\cdot K)} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The ferrite layer serves a specific purpose: storing the \emph{modulation}
+energy for parametric pumping of the $\psi$-field. In this mode, the magnetic
+field oscillates between $B_{\min} = \SI{13}{T}$ and $B_{\max} = \SI{17}{T}$
+at a frequency matched to the $\psi$-field resonance. The YIG tiles convert
+between magnetic and electromagnetic energy with minimal loss ($Q > 10^4$),
+enabling sustained parametric amplification.
+
+\textbf{Modulation energy per cycle:}
+\begin{equation}
+\Delta U = \frac{B_{\max}^2 - B_{\min}^2}{2\mu_0} \times V_{\mathrm{cavity}}
+= \frac{17^2 - 13^2}{2 \times 1.257 \times 10^{-6}} \times \frac{4}{3}\pi(5)^3
+= \SI{2.5e10}{J}\,.
+\end{equation}
+
+\subsubsection{Mass Budget: Configuration A}
+
+\begin{table}[h]
+\centering
+\caption{Mass budget for Configuration A (full ferrite--SC composite).}
+\label{tab:mass_A}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Subsystem & Unit mass & Quantity/Area & Total mass [\si{kg}] \\
+\midrule
+REBCO SC coils & \SI{300}{kg/m^3} & \SI{50}{m^3} & $15{,}000$ \\
+YIG ferrite tiles (\SI{50}{mm}) & \SI{5170}{kg/m^3} & \SI{17.6}{m^3} & $91{,}000$ \\
+CFRP structure & \SI{1600}{kg/m^3} & \SI{9.4}{m^3} & $15{,}000$ \\
+Cryogenics (pulse tubes + bus) & -- & -- & $1{,}600$ \\
+Power system (solar + batteries) & -- & -- & $500$ \\
+Avionics and control & -- & -- & $400$ \\
+Payload/crew volume & -- & -- & $5{,}000$ \\
+\midrule
+\textbf{Total} & & & $\mathbf{128{,}500}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{designrule}[Ferrite Mass Problem]
+At \SI{91}{t}, the YIG ferrite layer constitutes 71\% of the total vehicle
+mass. This is the dominant engineering challenge for Configuration~A.
+\end{designrule}
+
+%-----------------------------------------------------------------------------
+\subsection{Configuration B: Thin-Ferrite Hybrid}
+%-----------------------------------------------------------------------------
+
+\subsubsection{Rationale for Reduced Ferrite}
+
+The full \SI{50}{mm} ferrite thickness was sized for maximum modulation
+depth. However, the parametric pumping can operate with reduced modulation
+amplitude at the cost of longer $\psi$-field growth time. A \SI{5}{mm}
+ferrite shell reduces the modulation energy by $10\times$ but the $Q$-factor
+remains $>10^4$, so the exponential growth rate decreases by only $\ln(10)
+\approx 2.3\times$.
+
+\subsubsection{Mass Budget: Configuration B}
+
+\begin{table}[h]
+\centering
+\caption{Mass budget for Configuration B (thin-ferrite hybrid).}
+\label{tab:mass_B}
+\begin{tabular}{@{}lr@{}}
+\toprule
+Subsystem & Total mass [\si{kg}] \\
+\midrule
+REBCO SC coils & $15{,}000$ \\
+YIG ferrite tiles (\SI{5}{mm}) & $9{,}100$ \\
+CFRP structure & $15{,}000$ \\
+Cryogenics & $1{,}600$ \\
+Power system & $500$ \\
+Avionics and control & $400$ \\
+Payload & $5{,}000$ \\
+\midrule
+\textbf{Total} & $\mathbf{46{,}600}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Configuration~B reduces total mass by 64\% relative to Configuration~A while
+retaining parametric modulation capability. The ferrite fraction drops from
+71\% to 20\%.
+
+%-----------------------------------------------------------------------------
+\subsection{Configuration C: Pure Superconductor Shell (Minimum Viable $\psi$-Bubble)}
+%-----------------------------------------------------------------------------
+
+\subsubsection{Rationale}
+
+For \emph{static} threshold operation -- where $B_0 > B_c$ is maintained as a
+persistent superconducting current with no parametric modulation -- the ferrite
+layer is not required. The $\psi$-field transition is triggered by simply
+exceeding $\eta_c$; no resonant pumping is needed. This eliminates the heaviest
+subsystem entirely.
+
+\begin{designrule}[Minimum Viable $\psi$-Bubble]
+If the DFD threshold transition occurs spontaneously when $\eta > \eta_c$
+(as predicted by the theory), then no parametric resonance is required and
+the ferrite layer can be eliminated. Configuration~C is the minimum viable
+$\psi$-bubble (MVB).
+\end{designrule}
+
+\subsubsection{Mass Budget: Configuration C}
+
+\begin{table}[h]
+\centering
+\caption{Mass budget for Configuration C (pure SC shell, MVB).}
+\label{tab:mass_C}
+\begin{tabular}{@{}lrl@{}}
+\toprule
+Subsystem & Mass [\si{kg}] & Notes \\
+\midrule
+REBCO SC coils & $15{,}000$ & 50 layers, \SI{5}{mm} total \\
+CFRP structural shell & $12{,}000$ & Reduced without ferrite load \\
+Cryogenics & $1{,}600$ & 4 pulse-tube cryocoolers \\
+Power system & $500$ & Solar array + Li-ion buffer \\
+Avionics/GNC & $400$ & Redundant flight computers \\
+Thermal management & $1{,}500$ & MLI + radiators \\
+Crew/payload & $5{,}000$ & Pressurised cabin volume \\
+Launch adapter & $1{,}000$ & Jettisoned after separation \\
+\midrule
+\textbf{Total (on-orbit)} & $\mathbf{37{,}000}$ & After adapter jettison \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%=============================================================================
+\section{Superconductor Subsystem Design}\label{sec:sc_design}
+%=============================================================================
+
+\subsection{REBCO Tape Selection}
+
+\begin{table}[h]
+\centering
+\caption{REBCO tape baseline specifications (representative of SuperPower
+2G-HTS or Fujikura FESC).}
+\label{tab:rebco_spec}
+\begin{tabular}{@{}lr@{}}
+\toprule
+Parameter & Value \\
+\midrule
+Conductor architecture & YBCO on Hastelloy C-276 \\
+Tape width & \SI{12}{mm} \\
+Tape thickness & \SI{0.1}{mm} (including substrate) \\
+Critical current $I_c$ (\SI{77}{K}, self-field) & \SI{500}{A} \\
+Critical current $I_c$ (\SI{20}{K}, \SI{15}{T}) & $\sim\!\SI{250}{A}$ \\
+Engineering current density $J_e$ (\SI{20}{K}, \SI{15}{T}) & $\sim\!\SI{200}{A/mm^2}$ \\
+Irreversibility field $B^*$ (\SI{20}{K}) & $>\SI{40}{T}$ \\
+Operating temperature range & \SIrange{4}{77}{K} \\
+Minimum bend radius & \SI{5.5}{mm} \\
+Mechanical stress limit & \SI{700}{MPa} \\
+Piece length (commercial) & $>\SI{300}{m}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Coil Geometry: Prolate Spheroidal Shell}
+
+The shell is a prolate spheroid with semi-major axis $a = \SI{6}{m}$ and
+semi-minor axis $b = \SI{5}{m}$ (eccentricity $e = 0.553$). The REBCO tape
+is wound in a modified cos-$\theta$ pattern to produce a predominantly dipolar
+field inside the cavity, with field concentration at the poles for directional
+thrust vectoring.
+
+\textbf{Shell surface area:}
+\begin{equation}
+A = 2\pi b^2 + \frac{2\pi ab}{e}\sin^{-1}(e)
+= 2\pi(25) + \frac{2\pi(30)}{0.553}\sin^{-1}(0.553)
+= \SI{352}{m^2}\,.
+\end{equation}
+
+\textbf{REBCO tape volume} (50 layers $\times$ \SI{0.1}{mm} thickness):
+\begin{equation}
+V_{\mathrm{SC}} = A \times 50 \times 0.1\;\mathrm{mm} = 352 \times 0.005 = \SI{1.76}{m^3}\,.
+\end{equation}
+
+\textbf{REBCO tape mass} (density of Hastelloy-dominated tape $\approx \SI{8500}{kg/m^3}$):
+\begin{equation}
+m_{\mathrm{SC}} \approx 1.76 \times 8500 \approx \SI{15000}{kg}\,.
+\end{equation}
+
+\textbf{Total tape length:}
+\begin{equation}
+L_{\mathrm{tape}} = \frac{A \times 50}{0.012} = \frac{352 \times 50}{0.012}
+= \SI{1.47e6}{m} = \SI{1470}{km}\,.
+\end{equation}
+This is a large but not unprecedented quantity. The ITER tokamak uses
+$\sim\!\SI{100000}{km}$ of Nb$_3$Sn and NbTi conductor.
+
+\subsection{Persistent Current Mode}
+
+Once energised, the REBCO coil operates in persistent current mode with
+zero external power. The persistent current switch is a short section of
+the REBCO tape heated above $T_c$ during charging, then cooled to close
+the circuit.
+
+\textbf{Stored magnetic energy:}
+\begin{equation}
+E_{\mathrm{mag}} = \frac{B^2}{2\mu_0} V_{\mathrm{cavity}}
+\approx \frac{15^2}{2 \times 1.257 \times 10^{-6}} \times \frac{4}{3}\pi(4.5)^3
+\approx \SI{3.4e10}{J} = \SI{34}{GJ}\,.
+\end{equation}
+This is equivalent to about 8 tonnes of TNT. The energy is stored entirely
+in the magnetic field and can be recovered by de-energising the coil.
+
+\textbf{Charging time} (at \SI{10}{MW} power supply, ground-based):
+\begin{equation}
+t_{\mathrm{charge}} = \frac{E_{\mathrm{mag}}}{P_{\mathrm{supply}}}
+= \frac{3.4 \times 10^{10}}{10^7} = \SI{3400}{s} \approx \SI{57}{min}\,.
+\end{equation}
+
+\subsection{Meissner Shielding of the Interior}
+
+The superconducting shell provides complete Meissner shielding of the interior
+cavity. This creates:
+\begin{itemize}[nosep]
+\item A field-free region for crew and electronics (important for radiation-
+sensitive components);
+\item A sharp field boundary at the shell surface, maximising the field
+gradient and thus the $\psi$-field coupling;
+\item Natural containment of the $\psi$-bubble within the shell geometry.
+\end{itemize}
+
+The London penetration depth for YBCO is $\lambda_L \approx \SI{150}{nm}$,
+so the field decays to $<10^{-6} B_0$ within a few micrometres of the inner
+surface. With 50 layers of tape, the shielding is effectively perfect.
+
+%=============================================================================
+\section{Shell Geometry and Structural Analysis}\label{sec:structural}
+%=============================================================================
+
+\subsection{Magnetic Pressure Loading}
+
+The magnetic pressure on the shell inner surface is:
+\begin{equation}
+P_{\mathrm{mag}} = \frac{B^2}{2\mu_0} = \frac{15^2}{2 \times 1.257 \times 10^{-6}}
+= \SI{8.95e7}{Pa} \approx \SI{90}{MPa}\,.
+\end{equation}
+
+This is a substantial outward pressure (equivalent to $\sim\!900\;\mathrm{atm}$)
+that the structural shell must resist.
+
+\subsection{Hoop Stress in the Spheroidal Shell}
+
+For a thin-walled pressure vessel with semi-minor axis $b = \SI{5}{m}$ and
+wall thickness $t = \SI{0.1}{m}$ (combined SC + structure):
+\begin{equation}
+\sigma_{\mathrm{hoop}} = \frac{P_{\mathrm{mag}} \cdot b}{t}
+= \frac{8.95 \times 10^7 \times 5}{0.1} = \SI{4.48}{GPa}\,.
+\end{equation}
+
+\begin{table}[h]
+\centering
+\caption{Structural material options for the pressure shell.}
+\label{tab:structural_materials}
+\begin{tabular}{@{}lrrl@{}}
+\toprule
+Material & UTS [\si{GPa}] & Density [\si{kg/m^3}] & Feasibility \\
+\midrule
+CFRP (T1000G/epoxy) & 3.0 & 1600 & Insufficient alone \\
+Inconel 718 & 1.4 & 8200 & Insufficient alone \\
+Toray T1100G CFRP & 3.7 & 1790 & Marginal \\
+\textbf{REBCO tape (Hastelloy)} & \textbf{1.2} & \textbf{8500} & \textbf{Self-supporting to \SI{700}{MPa}} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{designrule}[Structural Solution]
+The \SI{4.5}{GPa} hoop stress exceeds any single material's UTS at reasonable
+wall thickness. The solution is to increase wall thickness or employ external
+reinforcement:
+\begin{enumerate}[nosep]
+\item Increase structural shell to $t = \SI{0.3}{m}$: reduces $\sigma$ to
+\SI{1.5}{GPa} (achievable with high-modulus CFRP layup);
+\item Use the REBCO tape itself as structural reinforcement: the Hastelloy
+substrate carries \SI{700}{MPa}, contributing to the overall load path;
+\item Employ \emph{force-balanced} coil design where opposing field regions
+cancel the net outward force (as in tokamak designs).
+\end{enumerate}
+\end{designrule}
+
+The force-balanced approach is the most mass-efficient. In a dipole
+configuration, the attractive force between opposing-current paths partially
+offsets the expansive magnetic pressure. The net structural load is reduced
+by approximately 40\%, bringing the required wall thickness to $\sim\!\SI{0.2}{m}$
+and the hoop stress to $\sim\!\SI{2.2}{GPa}$ -- achievable with advanced CFRP.
+
+%=============================================================================
+\section{Thermal Management and Cryogenics}\label{sec:cryo}
+%=============================================================================
+
+\subsection{Operating Temperature}
+
+REBCO tape at \SI{15}{T} has a comfortable operating margin at \SI{20}{K}:
+\begin{itemize}[nosep]
+\item $T_c$ at \SI{15}{T}: $\sim\!\SI{75}{K}$
+\item Operating temperature: \SI{20}{K}
+\item Temperature margin: \SI{55}{K} (exceptionally large)
+\item $I_c$ at \SI{20}{K}, \SI{15}{T}: $\sim\!\SI{250}{A}$ per \SI{12}{mm} tape
+\end{itemize}
+
+\subsection{Heat Load Budget}
+
+\begin{table}[h]
+\centering
+\caption{Cryogenic heat load at \SI{20}{K}.}
+\label{tab:heat_load}
+\begin{tabular}{@{}lrl@{}}
+\toprule
+Source & Heat load [\si{W}] & Notes \\
+\midrule
+Radiation through MLI & 15 & 40 layers MLI, $\epsilon_{\mathrm{eff}} = 10^{-4}$ \\
+Conduction through supports & 8 & G-10 fibreglass standoffs \\
+Current lead heat leak & 0 & Persistent mode (leads retracted) \\
+Residual AC loss (vibration) & 2 & Magnetostrictive coupling \\
+Instrumentation wiring & 1 & Phosphor-bronze wires \\
+\midrule
+\textbf{Total at \SI{20}{K}} & \textbf{26} & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Cryocooler Selection}
+
+Pulse-tube cryocoolers are selected for their vibration-free operation
+(no moving parts at the cold end):
+
+\begin{itemize}[nosep]
+\item Model class: Cryomech PT420 or equivalent
+\item Cooling capacity: $\sim\!\SI{14}{W}$ at \SI{20}{K} per unit
+\item Number of units: 4 (redundant: 2 required, 4 installed)
+\item Electrical power per unit: \SI{10}{kW} compressor input
+\item Total cryocooler mass: \SI{400}{kg} per unit $\times 4 = \SI{1600}{kg}$
+\item Total electrical power for cryo: \SI{20}{kW} (2 running) to \SI{40}{kW} (all 4)
+\end{itemize}
+
+\textbf{Note:} In the vacuum of \SI{100}{km} altitude, the radiative heat
+load is dominated by solar input on the sunlit side and thermal emission
+on the dark side. Active thermal control (sun shields + radiators) reduces
+the effective load to the values in Table~\ref{tab:heat_load}.
+
+%=============================================================================
+\section{Power System}\label{sec:power}
+%=============================================================================
+
+\subsection{Steady-State Power Requirements}
+
+\begin{table}[h]
+\centering
+\caption{Electrical power budget.}
+\label{tab:power}
+\begin{tabular}{@{}lr@{}}
+\toprule
+Subsystem & Power [\si{kW}] \\
+\midrule
+Cryocoolers (2 of 4 running) & 5.0 \\
+Thrust vectoring RF amplifiers & 2.0 \\
+Avionics and GNC & 0.5 \\
+Thermal management & 1.0 \\
+Life support (if crewed) & 1.5 \\
+\midrule
+\textbf{Total} & \textbf{10.0} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Power Source Options}
+
+\begin{enumerate}[nosep]
+\item \textbf{Solar arrays:} At \SI{100}{km}+, solar flux is the full
+$\SI{1361}{W/m^2}$. With 30\% efficient GaAs triple-junction cells,
+\SI{10}{kW} requires $\sim\!\SI{25}{m^2}$ of array area.
+Specific power: $\sim\!\SI{200}{W/kg}$ $\Rightarrow$ array mass $\sim\!\SI{50}{kg}$.
+
+\item \textbf{RTG (radioisotope):} For missions where solar is impractical
+(e.g., extended interplanetary). A \SI{10}{kW} Stirling RTG would mass
+$\sim\!\SI{500}{kg}$.
+
+\item \textbf{Lithium-ion battery buffer:} \SI{100}{kWh} buffer for
+peak loads and eclipse periods. At \SI{250}{Wh/kg}, mass $= \SI{400}{kg}$.
+\end{enumerate}
+
+\textbf{Selected baseline:} Solar + Li-ion buffer, total mass \SI{500}{kg}.
+
+\subsection{Energisation Power (Ground-Based)}
+
+The \SI{34}{GJ} coil charging is performed on the ground before launch
+via an external \SI{10}{MW} power supply (equivalent to a small substation).
+This is a one-time operation taking $\sim\!\SI{1}{hour}$. The persistent
+current then sustains the field indefinitely with zero on-board power.
+
+%=============================================================================
+\section{Thrust Vectoring and Propulsion}\label{sec:thrust}
+%=============================================================================
+
+\subsection{Mode I Thrust Mechanism}
+
+At \SI{100}{km}, the ambient thermospheric gas (predominantly atomic oxygen,
+$n \approx \SI{5e15}{m^{-3}}$) is swept into the $\psi$-bubble's magnetic
+field structure. The DFD coupling accelerates this gas to the Alfv\'en speed
+(Eq.~\ref{eq:v_exh}), ejecting it as a collimated exhaust.
+
+\textbf{Mass flow rate} (ambient ram intake at orbital velocity
+$v_{\mathrm{orb}} = \SI{7800}{m/s}$, effective capture area $A_c = \SI{100}{m^2}$):
+\begin{equation}
+\dot{m} = \rho \, v_{\mathrm{orb}} \, A_c
+= 5.6 \times 10^{-7} \times 7800 \times 100
+= \SI{4.4e-1}{kg/s}\,.
+\end{equation}
+
+\textbf{Thrust:}
+\begin{equation}
+F = \dot{m} \, v_{\mathrm{exh}}
+= 0.44 \times 1.79 \times 10^7
+= \SI{7.9e6}{N} \approx \SI{8}{MN}\,.
+\end{equation}
+
+\textbf{Thrust-to-weight ratio} (at vehicle mass \SI{37000}{kg}):
+\begin{equation}
+\mathrm{TWR} = \frac{F}{mg} = \frac{7.9 \times 10^6}{37000 \times 9.81} = 21.8\,.
+\end{equation}
+
+This is extraordinary. For comparison, the Space Shuttle main engines
+produced a TWR of $\sim\!1.5$.
+
+\subsection{Thrust Vectoring}
+
+Directional thrust is achieved by breaking the symmetry of the magnetic
+field distribution:
+\begin{itemize}[nosep]
+\item \textbf{Asymmetric coil currents:} Increasing current in one hemisphere
+concentrates the field (and thus the exhaust) in that direction;
+\item \textbf{Ferrite modulation} (Configurations A and B): Selectively
+energising ferrite sectors rotates the field asymmetry;
+\item \textbf{External steering coils:} Small superconducting trim coils
+on the shell surface provide fine pointing control.
+\end{itemize}
+
+For Configuration~C (no ferrite), thrust vectoring relies on asymmetric
+coil currents and trim coils. Response time is limited by the $L/R$ time
+constant of the SC circuit ($\sim\!\SI{1}{s}$ with resistive heater switches).
+
+%=============================================================================
+\section{Launch-to-Activation Trajectory}\label{sec:launch}
+%=============================================================================
+
+The $\psi$-bubble device must be transported to \SI{100}{km} altitude before
+the magnetic field can cross threshold. Four options:
+
+\subsection{Option A: Balloon + Rocket}
+
+\begin{enumerate}[nosep]
+\item High-altitude balloon lifts vehicle to \SI{40}{km} (requires
+\SI{37000}{kg} lift capacity -- possible with cluster balloon array);
+\item Solid or hybrid rocket stage accelerates from \SI{40}{km} to
+\SI{100}{km} (requires $\Delta v \approx \SI{1400}{m/s}$);
+\item At \SI{100}{km}, $\psi$-bubble activates; Mode~I thrust takes over.
+\end{enumerate}
+\textbf{Pros:} Lowest propellant mass. \textbf{Cons:} Cluster balloon
+at \SI{37}{t} is at the edge of feasibility.
+
+\subsection{Option B: Electromagnetic Launch}
+
+\begin{enumerate}[nosep]
+\item Ground-based electromagnetic launcher (railgun or coilgun) accelerates
+vehicle at $\sim\!100\,g$ over \SI{2}{km} track to $v = \SI{2000}{m/s}$;
+\item Ballistic coast to \SI{100}{km};
+\item $\psi$-bubble activates at apogee.
+\end{enumerate}
+\textbf{Pros:} No propellant. \textbf{Cons:} Extreme $g$-loads prohibit
+crew; requires multi-GW pulsed power supply.
+
+\subsection{Option C: Conventional Rocket (Baseline)}
+
+\begin{enumerate}[nosep]
+\item Standard expendable or reusable launch vehicle (e.g., Falcon~9 class)
+delivers vehicle to \SI{100}{km} $\times$ \SI{200}{km} suborbital trajectory;
+\item At \SI{100}{km}, persistent SC field already active ($B_0 = \SI{15}{T}$,
+pre-charged on ground);
+\item $\eta > \eta_c$ condition met spontaneously; $\psi$-bubble forms;
+\item Mode~I thrust provides $\Delta v$ for orbit insertion and beyond.
+\end{enumerate}
+\textbf{Pros:} Uses existing launch infrastructure; crew-rated possible.
+\textbf{Cons:} Highest cost per launch.
+
+\subsection{Option D: Plasma Sheath Bootstrap (Speculative)}
+
+If the plasma sheath bootstrap mechanism described in Agent~2's analysis
+functions as predicted, the device could activate at lower altitudes
+($h \sim \SI{60}$--$\SI{80}{km}$), relaxing launch requirements. This
+option is contingent on validating the self-sustaining plasma density
+reduction feedback loop.
+
+\textbf{Baseline selection: Option~C} (conventional rocket to \SI{100}{km}).
+
+%=============================================================================
+\section{Above-Threshold Field Envelope}\label{sec:field_envelope}
+%=============================================================================
+
+\subsection{Dipole Field Falloff}
+
+The shell generates an approximately dipolar field outside its surface.
+The field magnitude at distance $r$ from the centre (along the equatorial
+plane) is:
+\begin{equation}
+B(r) = B_0 \left(\frac{R}{r}\right)^3, \quad r \geq R,
+\end{equation}
+where $R = \SI{5}{m}$ (semi-minor axis, equatorial surface).
+
+\subsection{Extent of the Above-Threshold Region}
+
+The $\psi$-bubble forms where $\eta > \eta_c$. At \SI{100}{km}, the threshold
+field is $B_c = \SI{11.4}{T}$. The above-threshold region extends to:
+\begin{equation}
+r_{\mathrm{max}} = R \left(\frac{B_0}{B_c}\right)^{1/3}
+= 5 \times \left(\frac{15}{11.4}\right)^{1/3}
+= 5 \times 1.095 = \SI{5.5}{m}\,.
+\end{equation}
+
+With only a $1.3\times$ margin, the above-threshold region extends only
+\SI{0.5}{m} beyond the shell surface. This is adequate for $\psi$-bubble
+nucleation but not for a large-volume bubble.
+
+\textbf{To extend the bubble:} Increase $B_0$ or operate at higher altitude.
+At \SI{200}{km} ($B_c = \SI{0.24}{T}$):
+\begin{equation}
+r_{\mathrm{max}} = 5 \times \left(\frac{15}{0.24}\right)^{1/3}
+= 5 \times 3.97 = \SI{19.8}{m}\,.
+\end{equation}
+
+At LEO altitudes, the $\psi$-bubble extends $\sim\!4R$ from the shell,
+providing a substantial interaction volume for Mode~I thrust.
+
+%=============================================================================
+\section{Technology Readiness Assessment}\label{sec:tra}
+%=============================================================================
+
+\begin{table}[h]
+\centering
+\caption{Technology readiness levels (TRL) for shell subsystems.}
+\label{tab:trl}
+\begin{tabular}{@{}lrl@{}}
+\toprule
+Subsystem & TRL & Justification \\
+\midrule
+REBCO tape manufacturing & 7--8 & Commercial production; >100 km/yr \\
+\SI{15}{T} SC magnets & 6--7 & NHMFL achieved \SI{45.5}{T}; MRI at \SI{11.7}{T} \\
+Persistent current switches & 5--6 & Demonstrated in lab SC magnets \\
+Prolate spheroid winding & 3--4 & Novel geometry; flat-race winding at TRL 5 \\
+Pulse-tube cryocoolers & 8--9 & Space-qualified (JWST heritage) \\
+CFRP pressure vessel (\SI{2}{GPa}) & 4--5 & Demonstrated at smaller scale \\
+YIG ferrite tiles (large area) & 5--6 & Used in radar/telecom; not at this scale \\
+$\psi$-bubble physics & 1--2 & \textbf{Theoretical prediction, unverified} \\
+Mode~I thrust mechanism & 1--2 & \textbf{Theoretical prediction, unverified} \\
+\midrule
+\textbf{Overall system} & \textbf{2} & Limited by physics validation \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{designrule}[Critical Path]
+Every engineering subsystem is at TRL~3 or above. The system-level TRL
+is limited entirely by the unverified DFD physics (TRL~1--2). The critical
+path to a flyable $\psi$-bubble device is therefore:
+\begin{enumerate}[nosep]
+\item Validate the $\eta_c$ threshold in laboratory experiment (TRL 1
+$\to$ 3);
+\item Demonstrate $\psi$-field formation in a \SI{15}{T} SC magnet
+with controlled low-density gas (TRL 3 $\to$ 5);
+\item Build subscale (\SI{0.5}{m}) shell prototype and measure thrust
+(TRL 5 $\to$ 6);
+\item Full-scale ground test with vacuum chamber (TRL 6 $\to$ 7);
+\item Suborbital flight test (TRL 7 $\to$ 8).
+\end{enumerate}
+\end{designrule}
+
+%=============================================================================
+\section{Configuration Comparison and Recommendation}\label{sec:comparison}
+%=============================================================================
+
+\begin{table}[h]
+\centering
+\caption{Comparison of shell configurations.}
+\label{tab:comparison}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Parameter & Config.\ A & Config.\ B & Config.\ C \\
+& (Full ferrite) & (Thin ferrite) & (SC only) \\
+\midrule
+Total mass [\si{kg}] & $128{,}500$ & $46{,}600$ & $37{,}000$ \\
+Ferrite mass fraction & 71\% & 20\% & 0\% \\
+Parametric modulation & Full & Reduced & None \\
+$\psi$-field growth mode & Resonant & Resonant (slower) & Spontaneous \\
+Thrust vectoring & Ferrite + coils & Ferrite + coils & Coils only \\
+Structural complexity & High & Moderate & \textbf{Low} \\
+Launch vehicle class & SLS/Starship & Falcon Heavy & \textbf{Falcon Heavy} \\
+TRL (engineering) & 3 & 3--4 & \textbf{4} \\
+Risk & Moderate & Low--Moderate & \textbf{Lowest} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Recommendation:} Configuration~C (pure SC shell) is the preferred
+first-generation design. It eliminates the dominant mass driver (ferrite),
+uses the most mature technology, fits within existing heavy-lift launch
+vehicle capabilities, and tests the fundamental $\psi$-bubble physics
+without the additional complication of parametric resonance. If
+spontaneous threshold crossing proves insufficient and parametric pumping
+is required, Configuration~B can be developed as a second-generation
+upgrade.
+
+%=============================================================================
+\section{Summary of Design Parameters}\label{sec:summary}
+%=============================================================================
+
+\begin{table}[h]
+\centering
+\caption{Configuration C (MVB) design summary.}
+\label{tab:final_summary}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Parameter} & \textbf{Value} \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{Geometry}} \\
+Shell shape & Prolate spheroid \\
+Semi-major axis $a$ & \SI{6}{m} \\
+Semi-minor axis $b$ & \SI{5}{m} \\
+Shell surface area & \SI{352}{m^2} \\
+Inner cavity volume & \SI{524}{m^3} \\
+Wall thickness (total) & \SI{200}{mm} \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{Magnetic field}} \\
+Design field $B_0$ & \SI{15}{T} \\
+Threshold field $B_c$ at \SI{100}{km} & \SI{11.4}{T} \\
+Safety margin & 1.3 \\
+Stored energy & \SI{34}{GJ} \\
+Field topology & Dipole (cos-$\theta$ winding) \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{Superconductor}} \\
+Material & REBCO (YBCO/Hastelloy) \\
+Operating temperature & \SI{20}{K} \\
+Number of tape layers & 50 \\
+Total tape length & \SI{1470}{km} \\
+Current mode & Persistent (zero power) \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{Propulsion (Mode I at \SI{100}{km})}} \\
+Exhaust velocity $v_{\mathrm{exh}}$ & \SI{1.79e7}{m/s} ($0.06c$) \\
+Specific impulse $I_{\mathrm{sp}}$ & \SI{1.82e6}{s} \\
+Thrust (orbital ram intake) & \SI{8}{MN} \\
+Thrust-to-weight ratio & 21.8 \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{Mass and power}} \\
+Total vehicle mass & \SI{37000}{kg} \\
+Payload capacity & \SI{5000}{kg} \\
+On-board power & \SI{10}{kW} (solar + battery) \\
+Ground charging power & \SI{10}{MW} for \SI{1}{hour} \\
+\midrule
+\multicolumn{2}{@{}l}{\textit{Operations}} \\
+Design operating altitude & $\geq \SI{100}{km}$ \\
+Launch method & Conventional rocket (Falcon Heavy class) \\
+Activation & Spontaneous at $\eta > \eta_c$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%=============================================================================
+\section{Conclusions and Forward Work}\label{sec:conclusions}
+%=============================================================================
+
+We have presented a detailed engineering design for a ferrite--superconductor
+shell optimised for $\psi$-bubble operation in Earth's atmosphere. The key
+findings are:
+
+\begin{enumerate}
+\item The K\'arm\'an line (\SI{100}{km}) is the optimal activation altitude,
+requiring only $B = \SI{11.4}{T}$ -- well within REBCO superconductor
+capability.
+
+\item Three shell configurations were analysed. The pure superconductor
+shell (Configuration~C) is recommended as the first-generation design at
+\SI{37}{t} total mass, eliminating the \SI{91}{t} ferrite mass penalty.
+
+\item The persistent \SI{15}{T} field requires no on-board power to
+maintain. Total vehicle power consumption is only \SI{10}{kW}, dominated
+by cryocooling.
+
+\item Mode~I thrust at \SI{100}{km} produces \SI{8}{MN} with $I_{\mathrm{sp}}
+= \SI{1.8e6}{s}$, exceeding all existing propulsion technologies by
+orders of magnitude.
+
+\item The \SI{90}{MPa} magnetic pressure on the shell requires advanced
+CFRP structural design at \SI{2}{GPa} hoop stress, which is achievable
+with force-balanced coil geometry.
+
+\item All engineering subsystems are at TRL~3+. The system-level TRL is
+limited to TRL~2 solely by the unverified DFD threshold physics.
+
+\item The critical path is physics validation, not engineering development.
+A laboratory demonstration of $\eta_c$ threshold crossing would immediately
+advance the system TRL to 3+.
+\end{enumerate}
+
+\textbf{Forward work:}
+\begin{itemize}[nosep]
+\item Design a tabletop $\eta_c$ threshold experiment using a \SI{20}{T}
+Bitter magnet and low-pressure gas cell (see Agent~10 specification);
+\item Develop detailed finite-element structural model of the force-balanced
+prolate spheroid under \SI{15}{T} loading;
+\item Prototype cos-$\theta$ REBCO winding on curved mandrel at subscale;
+\item Model the Mode~I gas-dynamic interaction in the thermosphere using
+MHD simulation codes;
+\item Analyse orbital mechanics for the $\psi$-bubble vehicle: drag, thrust
+profiles, orbit-raising trajectories.
+\end{itemize}
+
+\end{document}

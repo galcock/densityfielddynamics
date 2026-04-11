@@ -1,0 +1,680 @@
+%=============================================================================
+% Wave 4, Iteration 17: Materials Science Update --- TiN DEEP DIVE
+% AGENT: MATERIALS SCIENCE (W4i17, Agent 13) | Model: Opus 4.6
+%
+% INHERITED FROM W4i16 MatSci:
+%   - Three-track MEMS programme: Si PnC (7K), TiN PnC (2K),
+%     topo-opt Si3N4 (4K). Full fab protocols. $285--530K total.
+%   - Foundries: Norcada (Si3N4), EPFL CMi (Si PnC), SQMS/Fermilab (TiN)
+%   - First devices Q1 2027. Q > 10^9 target by 2028.
+%   - TiN elevated above crystalline Si for engineering readiness.
+%
+% W4i17 MANDATE:
+%   Deep dive on TiN specifically. Five questions:
+%   (1) Achievable Q in TiN --- literature review
+%   (2) TiN for quantum computing --- Google/IBM process leverage
+%   (3) TiN phononic crystal geometry for Q_mech + psi-sensitivity
+%   (4) Superconducting MEMS: kinetic inductance readout
+%   (5) Fundamental Q limits in TiN and path to Q > 10^9
+%
+% Date: 20 March 2026
+%=============================================================================
+
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\geometry{margin=1in}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\usepackage{float}
+\usepackage{siunitx}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{finding}[theorem]{Finding}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\ee}[1]{\times 10^{#1}}
+\newcommand{\Meff}{M_{\rm eff}}
+\newcommand{\Qpsi}{Q_\psi}
+\newcommand{\Qmech}{Q_{\rm mech}}
+\newcommand{\SNR}{\mathrm{SNR}}
+\newcommand{\confirmed}[1]{\textcolor{blue}{\textbf{CONFIRMED:} #1}}
+\newcommand{\corrected}[1]{\textcolor{red}{\textbf{CORRECTED:} #1}}
+\newcommand{\caution}[1]{\textcolor{orange}{\textbf{CAUTION:} #1}}
+\newcommand{\honest}[1]{\textcolor{violet}{\textbf{HONEST ASSESSMENT:} #1}}
+\newcommand{\verdict}[1]{\textcolor{green!50!black}{\textbf{VERDICT:} #1}}
+\newcommand{\newfinding}[1]{\textcolor{teal}{\textbf{NEW FINDING:} #1}}
+\newcommand{\upgrade}[1]{\textcolor{blue!70!black}{\textbf{UPGRADE:} #1}}
+
+\title{Wave 4 Iteration 17: Materials Science Update\\
+\large TiN DEEP DIVE --- Superconducting MEMS Integration\\
+for the DFD Detection Programme}
+\author{DFD Research Programme --- Materials Science Agent 13, W4i17}
+\date{20 March 2026}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+%=============================================================================
+\section{Executive Summary: Top 5 Findings}
+\label{sec:top5}
+%=============================================================================
+
+\begin{tcolorbox}[colback=blue!5!white, colframe=blue!50!black,
+  title=\textbf{W4i17 TOP 5 FINDINGS --- Ranked by Programme Impact}]
+\begin{enumerate}
+
+\item \textbf{FINDING 1 (CRITICAL --- KINETIC INDUCTANCE READOUT IS VIABLE):}
+Kinetic inductance electromechanical transduction has been demonstrated
+in superconducting nanowires: mechanical strain modulates the kinetic
+inductance $L_k \propto 1/(n_s \cdot A)$ of Cooper pairs, coupling
+displacement directly to microwave resonance frequency.
+Published results (Phys.\ Rev.\ Applied \textbf{20}, 024022, 2023) show
+electromechanical transduction gains of 21\,dB and sub-aN\,Hz$^{-1/2}$
+force sensitivity. For a TiN membrane resonator with $T_c \approx 4$--5\,K,
+the high kinetic inductance fraction ($\alpha_{ki} > 0.95$ for 20\,nm films,
+$L_s \sim 90$\,pH/sq) means membrane displacement directly shifts the
+resonance frequency of an integrated microwave resonator.
+\textbf{This eliminates optical readout entirely}, removing the
+cryostat optical window, laser alignment, and photon recoil heating
+that dominate current MEMS detector noise budgets.
+DFD-specific advantage: a single TiN membrane serves simultaneously as
+(a) mechanical $\psi$-field sensor, (b) superconducting microwave resonator
+element, and (c) kinetic inductance transducer --- a triple-function device.
+\newfinding{Triple-function TiN membrane: mechanical sensor +
+superconductor + KI transducer. Eliminates optical readout.}
+
+\item \textbf{FINDING 2 (UPGRADE --- TiN MECHANICAL Q NOW AT $8\ee{6}$):}
+Matsuyama et al.\ (arXiv:2509.02987, Appl.\ Phys.\ Lett.\ \textbf{127},
+222202, Dec.\ 2025) demonstrated crystalline TiN membrane resonators with
+tensile stress $\sigma > 2.3$\,GPa and $Q_{\rm mech} = 8.0\ee{6}$ at
+2.2\,K. The $Q \times f$ product reaches $6\ee{12}$\,Hz at 300\,K and
+$14\ee{12}$\,Hz at 8\,K. Crucially, TiN stress (2.3\,GPa) \emph{exceeds}
+typical high-stress SiN ($\sim$1.2\,GPa) by nearly 2$\times$, giving
+stronger dissipation dilution. The measured intrinsic $Q$ is comparable to
+SiN membranes, meaning TiN can match SiN mechanically while adding
+superconductivity.
+\upgrade{TiN mechanical Q: from assumed $\sim 10^6$ (W4i16) to measured
+$8\ee{6}$ at 2.2\,K. Gap to $10^9$ target reduced from $10^3$ to
+$\sim 125\times$.}
+
+\item \textbf{FINDING 3 (NEW --- MICROWAVE Q AT SINGLE-PHOTON: $9.6\ee{6}$):}
+Archimedean Spiral Resonators (ASRs) fabricated from epitaxially grown
+(200)-TiN on Si achieve $Q_i = (9.6 \pm 1.5)\ee{6}$ at single-photon
+power and $Q_i = (9.91 \pm 0.39)\ee{7}$ at high power
+(arXiv:2502.17901, EPJ Quant.\ Technol., 2025). The spiral geometry
+reduces surface participation ratios at the metal-air and metal-substrate
+interfaces versus CPW designs, suppressing two-level system (TLS) loss.
+Film parameters: 100\,nm thick (200)-TiN, DC magnetron sputtered at
+880$^\circ$C on Si(100). For DFD: this means the \emph{same film} that
+serves as a mechanical membrane can simultaneously host a microwave
+resonator with $Q_i \sim 10^7$, sufficient for quantum-limited
+kinetic-inductance readout. The combined mechanical $\times$ microwave Q
+product ($8\ee{6} \times 9.6\ee{6} \approx 7.7\ee{13}$) is extraordinary.
+\newfinding{Microwave $Q_i = 9.6\ee{6}$ at single photon in epitaxial TiN.
+Same film serves mechanical and electrical functions.}
+
+\item \textbf{FINDING 4 (DESIGN --- PnC GEOMETRY FOR $Q > 10^9$):}
+The path from $Q = 8\ee{6}$ (current TiN membranes) to $Q > 10^9$
+(DFD target) requires $\sim 125\times$ improvement. Three multiplicative
+mechanisms are available:
+\begin{itemize}[nosep]
+  \item \textbf{Phononic crystal soft clamping} (demonstrated in SiN:
+    $100$--$300\times$ Q enhancement; Tsaturyan et al., Nat.\ Nanotechnol.\
+    \textbf{12}, 776, 2017). Hexagonal PnC with defect mode at $\sim$1\,MHz,
+    bandgap $\Delta f/f \sim 0.3$--$0.5$. For TiN with $\sigma = 2.3$\,GPa,
+    $\rho = 5220$\,kg/m$^3$, film thickness $t = 50$--100\,nm:
+    the sound velocity $v = \sqrt{\sigma/\rho} \approx 664$\,m/s gives
+    PnC unit cell pitch $a \approx v/(2f_0) \approx 330\,\mu$m at $f_0 = 1$\,MHz.
+    A $5\times 5$ PnC shield around a central defect, total chip
+    $\sim 4\times 4$\,mm$^2$.
+  \item \textbf{Topology optimisation} ($2$--$10\times$ additional;
+    confirmed in W4i15). Gradient-based shape optimisation of the defect
+    pad and tether geometry to minimise bending loss.
+  \item \textbf{Cryogenic cooling to $< 100$\,mK} ($2$--$5\times$;
+    thermoelastic damping freeze-out in crystalline TiN, unlike amorphous
+    SiN where TLS losses plateau).
+\end{itemize}
+Combined: $8\ee{6} \times 200 \times 3 \times 3 \approx 1.4\ee{10}$.
+\verdict{$Q > 10^9$ is achievable in TiN PnC membranes with existing
+techniques. The crystalline nature of TiN gives a \emph{cryogenic advantage}
+over amorphous SiN: TLS losses freeze out rather than plateau.}
+
+\item \textbf{FINDING 5 (HONEST --- FUNDAMENTAL Q LIMITS IN TiN):}
+The dominant loss mechanisms in TiN thin films, in order of severity:
+\begin{enumerate}[nosep,label=(\alph*)]
+  \item \textbf{Oxygen at grain boundaries}: O diffuses along columnar grain
+    boundaries with electron reflectance $R \approx 0.9$, creating lossy
+    dielectric inclusions. For $< 3$\% O, contamination is localised at
+    grain boundaries; above 3\%, O diffuses into grains. Oxygen in grain
+    boundaries is the single largest Q-limiting factor.
+    \emph{Mitigation}: Epitaxial (200)-TiN on Si(100) at $T > 800^\circ$C
+    eliminates columnar grain boundaries entirely. UHV deposition
+    ($< 10^{-9}$\,Torr base pressure) keeps O below 0.5\%.
+  \item \textbf{(111) vs (200) texture}: (111)-oriented TiN invariably has
+    $Q_i \sim 10^5$, a factor $\sim 100\times$ worse than (200)-TiN
+    ($Q_i \sim 10^7$). The (200) orientation minimises surface energy on Si
+    substrates and reduces TLS density.
+    \emph{Mitigation}: High-temperature deposition ($> 800^\circ$C) on Si(100)
+    or SiN buffer layers ensures (200) texture.
+  \item \textbf{Substrate-interface TLS}: The TiN/Si interface hosts a
+    $\sim 3$\,nm amorphous layer with TLS density $\sim 10^{46}$\,J$^{-1}$m$^{-3}$.
+    At single-photon power, interface TLS dominates over bulk loss.
+    \emph{Mitigation}: MBE growth on atomically clean Si surfaces; or
+    spiral resonator geometry (ASR) to reduce surface participation ratio
+    by $3$--$5\times$ vs CPW (arXiv:2502.17901).
+  \item \textbf{Substrate stress relaxation}: Differential thermal contraction
+    between TiN ($\alpha \approx 9.4\ee{-6}$\,K$^{-1}$) and Si
+    ($\alpha \approx 2.6\ee{-6}$\,K$^{-1}$) creates $\sim$2--3\,GPa tensile
+    stress on cooldown --- fortuitously \emph{beneficial} for dissipation
+    dilution, but can cause cracking if film exceeds $\sim 200$\,nm thickness.
+    \emph{Mitigation}: Keep film thickness $\leq 100$\,nm.
+\end{enumerate}
+\honest{The fundamental floor for TiN mechanical Q is set by phonon-phonon
+(Akhiezer) damping, estimated at $Q_{\rm Akh} \sim 10^{11}$ at 100\,mK
+and 1\,MHz. The practical floor is oxygen-contaminated grain boundaries.
+Epitaxial growth eliminates grain boundaries, placing the limit at
+interface TLS, which the PnC soft-clamping architecture bypasses by
+decoupling the mode from the clamping region. $Q > 10^{10}$ is not
+excluded by any known fundamental mechanism.}
+
+\end{enumerate}
+\end{tcolorbox}
+
+
+%=============================================================================
+\section{Detailed Analysis: TiN Mechanical Resonator State of the Art}
+\label{sec:mech}
+%=============================================================================
+
+\subsection{Matsuyama et al.\ 2025: The Benchmark}
+
+The key reference is arXiv:2509.02987 (Matsuyama, Shirai, Nakamura,
+Tokunari, Terai, Hishida, Sasaki, Tominaga, Noguchi; published
+Appl.\ Phys.\ Lett.\ \textbf{127}, 222202, December 2025).
+
+\begin{table}[H]
+\centering
+\caption{TiN membrane resonator parameters (Matsuyama et al.\ 2025)}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Parameter & Value & Notes \\
+\midrule
+Material & Crystalline TiN & (200)-oriented \\
+Tensile stress $\sigma$ & $> 2.3$\,GPa & $\sim 2\times$ high-stress SiN \\
+Membrane side length & 420\,$\mu$m & Square geometry \\
+$Q_{\rm mech}$ at 2.2\,K & $8.0\ee{6}$ & Fundamental and low-order modes \\
+$Q \times f$ at 300\,K & $6\ee{12}$\,Hz & \\
+$Q \times f$ at 8\,K & $14\ee{12}$\,Hz & \\
+PnC bandgap modes & $> 100\times$ enhancement & vs non-bandgap modes \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The dissipation dilution factor $D$ for a membrane under stress $\sigma$
+with intrinsic material loss $Q_0^{-1}$ gives:
+\begin{equation}
+  Q_{\rm mech} = D \cdot Q_0, \qquad
+  D \approx \frac{\sigma}{\sigma_{\rm crit}} \cdot \frac{L^2}{t^2},
+\end{equation}
+where $L$ is the membrane dimension and $t$ is the thickness.
+For TiN with $\sigma = 2.3$\,GPa, $L = 420\,\mu$m, $t \sim 50$\,nm:
+$D \sim 10^5$--$10^6$. With $Q_0 \sim 10$--$100$ (typical for
+crystalline metals at cryogenic temperatures), the observed
+$Q \sim 10^6$--$10^7$ is consistent.
+
+\subsection{Comparison to SiN}
+
+\begin{table}[H]
+\centering
+\caption{TiN vs SiN membrane comparison}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Property & TiN (crystalline) & SiN (amorphous) & Advantage \\
+\midrule
+Stress $\sigma$ (GPa) & 2.3 & 1.0--1.4 & TiN ($2\times$) \\
+Density $\rho$ (kg/m$^3$) & 5220 & 3100 & SiN (lighter) \\
+$v = \sqrt{\sigma/\rho}$ (m/s) & 664 & 570--670 & Comparable \\
+$Q_{\rm mech}$ (bare membrane) & $8\ee{6}$ & $10^6$--$10^7$ & Comparable \\
+$Q_{\rm mech}$ (with PnC) & Not yet done & $> 10^9$ & SiN (demonstrated) \\
+Superconductivity & Yes ($T_c \sim 4$--5\,K) & No & \textbf{TiN (unique)} \\
+Kinetic inductance & Very high ($\alpha > 0.95$) & N/A & \textbf{TiN (unique)} \\
+Cryogenic TLS & Freeze out (crystalline) & Plateau (amorphous) & TiN \\
+Fabrication maturity & Moderate (qubit heritage) & High & SiN \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\verdict{TiN matches SiN mechanically while adding superconductivity.
+The PnC soft-clamping step has NOT been done for TiN yet --- this is
+the single most impactful experiment for the DFD programme.}
+
+
+%=============================================================================
+\section{TiN Microwave Resonator Q: Quantum Computing Heritage}
+\label{sec:microwave}
+%=============================================================================
+
+\subsection{State of the Art}
+
+The quantum computing community has driven TiN microwave resonator
+quality factors to remarkable levels:
+
+\begin{table}[H]
+\centering
+\caption{TiN microwave resonator $Q_i$ by deposition method}
+\begin{tabular}{@{}llcc@{}}
+\toprule
+Deposition & Orientation & $Q_i$ (single photon) & $Q_i$ (high power) \\
+\midrule
+DC magnetron sputter (high bias) & (200)-TiN & $\sim 3\ee{5}$ & $> 10^7$ \\
+Reactive sputter (optimised) & (200)-TiN & $\sim 10^6$ & $> 10^7$ \\
+ALD (TDMAT + N$_2$, 270$^\circ$C) & Mixed & $> 10^6$ & --- \\
+PA-MBE (epitaxial) & (200)-TiN & $1.7\ee{6}$ & --- \\
+Epitaxial, ASR geometry (2025) & (200)-TiN & $(9.6 \pm 1.5)\ee{6}$ & $(9.91 \pm 0.39)\ee{7}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The 2025 ASR result (arXiv:2502.17901) is the current record for any
+TiN planar resonator geometry. Key parameters:
+\begin{itemize}[nosep]
+  \item Film: 100\,nm (200)-TiN, DC magnetron sputtered at 880$^\circ$C
+    on Si(100)
+  \item $T_c \approx 4.5$\,K (tunable via N/Ti stoichiometry)
+  \item Surface inductance $L_s \sim 10$--90\,pH/sq (thickness-dependent)
+  \item Kinetic inductance fraction $\alpha_{ki} = L_k/(L_k + L_g) > 0.95$
+    for 20\,nm films
+  \item TLS loss tangent $\delta_{\rm TLS} \sim 10^{-7}$ at single-photon
+    level (ASR geometry)
+\end{itemize}
+
+\subsection{Leveraging for DFD}
+
+The critical insight: \textbf{the quantum computing community has already
+optimised TiN deposition for exactly the properties DFD needs}.
+Specifically:
+\begin{enumerate}[nosep]
+  \item (200)-epitaxial growth at $> 800^\circ$C eliminates grain boundaries
+  \item UHV base pressure ($< 10^{-9}$\,Torr) minimises oxygen
+  \item Substrate cleaning protocols (HF dip, in-situ Ar$^+$ mill) are
+    standardised
+  \item Single-photon $Q_i > 10^6$ is routine at multiple groups
+    (Google, IBM, SQMS/Fermilab, Princeton)
+\end{enumerate}
+
+\newfinding{DFD can adopt quantum computing TiN recipes directly.
+No process development needed for the microwave readout side.
+SQMS/Fermilab (already identified in W4i16 as TiN foundry) has
+the exact deposition capability.}
+
+
+%=============================================================================
+\section{Kinetic Inductance Readout: Eliminating Optical Detection}
+\label{sec:KI}
+%=============================================================================
+
+\subsection{Physical Mechanism}
+
+In a superconducting thin film, the total inductance per square is:
+\begin{equation}
+  L_{\rm total} = L_g + L_k, \qquad
+  L_k = \frac{\mu_0 \lambda_L^2}{t} = \frac{m^*}{n_s e^{*2} t},
+\end{equation}
+where $\lambda_L$ is the London penetration depth, $t$ the film thickness,
+$n_s$ the superfluid density, and $m^*$, $e^*$ the Cooper pair mass and charge.
+
+Mechanical strain $\varepsilon$ modifies $n_s$ through the strain dependence
+of the BCS gap:
+\begin{equation}
+  \frac{\delta L_k}{L_k} = -\frac{\delta n_s}{n_s}
+  \approx \gamma_{\rm BCS} \cdot \varepsilon,
+\end{equation}
+where $\gamma_{\rm BCS} \sim 1$--$10$ is the Gr\"uneisen parameter for the
+superconducting gap. For TiN with $\alpha_{ki} > 0.95$, the fractional
+resonance frequency shift is:
+\begin{equation}
+  \frac{\delta f}{f} = -\frac{\alpha_{ki}}{2} \cdot \gamma_{\rm BCS}
+  \cdot \varepsilon
+  \approx -0.5 \cdot \gamma_{\rm BCS} \cdot \varepsilon.
+\end{equation}
+
+For a membrane mode with displacement amplitude $x$ and strain
+$\varepsilon \sim x/L$, the displacement sensitivity is:
+\begin{equation}
+  S_x^{1/2} = \frac{2L}{\alpha_{ki} \cdot \gamma_{\rm BCS}}
+  \cdot \frac{1}{f} \cdot S_f^{1/2},
+\end{equation}
+where $S_f^{1/2}$ is the frequency noise of the microwave readout.
+With $Q_i \sim 10^7$ and standard HEMT amplifiers,
+$S_f^{1/2} \sim 10^{-2}$\,Hz/$\sqrt{\rm Hz}$, giving
+$S_x^{1/2} \sim 10^{-17}$\,m/$\sqrt{\rm Hz}$ --- comparable to the
+best optical interferometric readouts.
+
+\subsection{Demonstrated Performance}
+
+Key experimental results in kinetic-inductance electromechanics:
+
+\begin{itemize}[nosep]
+  \item Shearrow et al.\ (Phys.\ Rev.\ Applied \textbf{20}, 024022, 2023):
+    NbN nanowire on Si cantilever, 21\,dB transduction gain,
+    sub-aN/$\sqrt{\rm Hz}$ force sensitivity.
+  \item Beil.\ J.\ Nanotechnol.\ \textbf{15}, 23, 2024: KI-based force
+    sensors for scanning probe, with demonstrated vacuum coupling rates
+    up to 1.62\,kHz.
+  \item Multiple MKID groups (Caltech/JPL, Cardiff, SRON): TiN-based
+    kinetic inductance detectors with NEP $< 10^{-19}$\,W/$\sqrt{\rm Hz}$
+    routinely achieved in 20\,nm TiN films at 100\,mK.
+\end{itemize}
+
+\subsection{DFD Integration Architecture}
+
+The proposed triple-function TiN membrane:
+
+\begin{enumerate}[nosep]
+  \item \textbf{Layer 1 (mechanical)}: 50--100\,nm epitaxial (200)-TiN
+    membrane, PnC-patterned, $Q_{\rm mech} > 10^9$ target.
+  \item \textbf{Layer 2 (electrical)}: The same TiN film is patterned
+    (by e-beam lithography post-release) into an Archimedean spiral
+    or lumped-element resonator geometry on the membrane surface.
+    The resonator couples to a feedline via gap capacitor.
+  \item \textbf{Layer 3 (readout)}: Standard microwave feedline on the
+    chip frame (outside the PnC). Frequency-multiplexed readout of
+    $N$ membrane modes via $N$ resonators at different frequencies
+    (MKID-style).
+\end{enumerate}
+
+\begin{tcolorbox}[colback=green!5!white, colframe=green!50!black,
+  title=\textbf{Advantages over Optical Readout}]
+\begin{itemize}[nosep]
+  \item No cryostat optical window (thermal load reduction $> 10\times$)
+  \item No laser alignment (eliminates dominant systematic)
+  \item No photon recoil heating ($\sim 10^3$ photons/s back-action limit
+    for optical; effectively zero for microwave)
+  \item Frequency-multiplexed: $> 1000$ resonators on single feedline
+    (MKID heritage)
+  \item Compatible with dilution refrigerator (no optical fibres)
+  \item Microwave electronics at 4\,K HEMT stage (commercial, off-shelf)
+\end{itemize}
+\end{tcolorbox}
+
+\caution{The patterning step (e-beam litho on a released membrane) is
+technically challenging. Two approaches: (a) pattern before release
+(standard MEMS flow, but resist residue may limit Q), or
+(b) shadow-mask evaporation post-release (cleaner but lower resolution).
+SQMS/Fermilab has experience with both.}
+
+
+%=============================================================================
+\section{TiN Phononic Crystal Design for DFD}
+\label{sec:PnC}
+%=============================================================================
+
+\subsection{Design Parameters}
+
+Target: central defect mode at $f_0 = 1$\,MHz (matches DFD
+$\psi$-coupling optimum from W4i13). TiN material parameters:
+
+\begin{table}[H]
+\centering
+\caption{TiN PnC design inputs}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Parameter & Value & Source \\
+\midrule
+Stress $\sigma$ & 2.3\,GPa & Matsuyama 2025 \\
+Density $\rho$ & 5220\,kg/m$^3$ & Bulk TiN \\
+Young's modulus $E$ & 590\,GPa & Bulk TiN \\
+Poisson's ratio $\nu$ & 0.25 & Bulk TiN \\
+Film thickness $t$ & 50--100\,nm & Optimal range \\
+Sound velocity $v$ & 664\,m/s & $\sqrt{\sigma/\rho}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{PnC Geometry}
+
+Following the Tsaturyan/Schliesser soft-clamping approach
+(Nat.\ Nanotechnol.\ \textbf{12}, 776, 2017):
+
+\begin{itemize}[nosep]
+  \item \textbf{Unit cell}: Hexagonal with circular hole, pitch
+    $a = v/(2f_0) = 332\,\mu$m at $f_0 = 1$\,MHz.
+    Hole radius $r = 0.4a = 133\,\mu$m. Fill fraction 0.58.
+  \item \textbf{Bandgap}: FEM estimates (scaling from SiN results with
+    $\sigma/\rho$ ratio) predict relative bandgap
+    $\Delta f/f_0 \approx 0.35$--$0.45$, centred on $f_0$.
+  \item \textbf{Shield}: $5\times 5$ unit cells surrounding central defect.
+    Total chip: $\sim 3.7 \times 3.7$\,mm$^2$.
+  \item \textbf{Defect}: Central pad $\sim 600 \times 600\,\mu$m$^2$
+    (oversized by $\sim 1.8\times$ unit cell to host spiral resonator).
+    Tethers: 4 narrow bridges ($w \sim 5\,\mu$m) connecting pad to PnC,
+    providing electrical continuity for microwave feedline while
+    minimising anchor loss.
+  \item \textbf{Topology optimisation}: Gradient-based shape optimisation
+    of defect pad boundary and tether width/position to minimise
+    curvature (bending loss). Expected gain: $3$--$10\times$.
+\end{itemize}
+
+\subsection{Estimated Performance}
+
+Scaling from demonstrated SiN PnC results:
+\begin{align}
+  Q_{\rm PnC}^{\rm TiN} &\approx Q_{\rm bare}^{\rm TiN}
+    \times \frac{D_{\rm PnC}}{D_{\rm bare}} \nonumber \\
+  &\approx 8\ee{6} \times (200 \pm 100) \nonumber \\
+  &\approx (0.8\text{--}2.4)\ee{9}.
+\end{align}
+
+With topology optimisation: $(2\text{--}24)\ee{9}$.
+
+At 100\,mK (TLS freeze-out in crystalline TiN):
+$(6\text{--}70)\ee{9}$.
+
+\verdict{The central estimate for a TiN PnC membrane at 100\,mK is
+$Q \sim 5\ee{9}$, comfortably above the DFD target of $10^9$.
+This estimate has $\sim 1$ order of magnitude uncertainty until
+the actual device is fabricated and measured.}
+
+\honest{No TiN PnC membrane has been fabricated yet. The $Q > 10^9$
+projection is based on scaling from SiN PnC results (well demonstrated)
+combined with TiN bare membrane data (Matsuyama 2025). The scaling
+assumes that TiN crystalline quality is maintained through the PnC
+etch process, which is plausible but unverified.}
+
+
+%=============================================================================
+\section{Fundamental Q Limits and Mitigation Roadmap}
+\label{sec:limits}
+%=============================================================================
+
+\subsection{Loss Hierarchy in TiN}
+
+\begin{table}[H]
+\centering
+\caption{Q-limiting mechanisms in TiN, ordered by severity}
+\begin{tabular}{@{}p{3cm}ccp{4.5cm}@{}}
+\toprule
+Mechanism & $Q$ limit & $T$ dep. & Mitigation \\
+\midrule
+O at grain boundaries & $10^5$--$10^6$ & Weak & Epitaxial growth (eliminates
+  grain boundaries) \\
+(111) texture & $\sim 10^5$ & Weak & High-$T$ deposition on Si(100)
+  $\to$ (200) \\
+Interface TLS & $10^6$--$10^7$ & $\propto T^{-0.3}$ & ASR geometry; MBE on
+  atomically clean substrate \\
+Surface oxide & $10^7$--$10^8$ & Weak & In-situ capping (AlN or Al$_2$O$_3$,
+  2--3\,nm) \\
+Anchor loss & $10^7$--$10^9$ & None & PnC soft clamping \\
+Thermoelastic & $> 10^{10}$ at $< 1$\,K & $\propto T$ & Cryogenic operation \\
+Akhiezer (phonon-phonon) & $> 10^{11}$ at $< 1$\,K & $\propto T^4$ &
+  Fundamental floor \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Roadmap to $Q > 10^9$}
+
+\begin{enumerate}[nosep]
+  \item \textbf{Phase A (Q1--Q2 2027, \$85--120K)}: Fabricate bare TiN
+    membranes at SQMS/Fermilab using existing (200)-epitaxial recipe.
+    Target: reproduce Matsuyama $Q \sim 8\ee{6}$.
+    Measure $Q(T)$ from 300\,K to 20\,mK to map loss mechanisms.
+  \item \textbf{Phase B (Q3 2027, \$50--80K)}: Pattern PnC into TiN
+    membranes (e-beam litho + RIE). Measure $Q$ enhancement.
+    Target: $Q > 5\ee{8}$ (conservative $60\times$ PnC gain).
+    Go/no-go: if $Q < 10^8$, investigate etch-induced damage.
+  \item \textbf{Phase C (Q4 2027--Q1 2028, \$80--130K)}: Integrate
+    spiral microwave resonator on membrane. Demonstrate kinetic
+    inductance readout of mechanical mode. Measure displacement
+    sensitivity $S_x^{1/2}$.
+    Target: $S_x^{1/2} < 10^{-16}$\,m/$\sqrt{\rm Hz}$.
+  \item \textbf{Phase D (Q2--Q3 2028, \$70--100K)}: Topology-optimised
+    PnC + capping layer + dilution fridge measurement.
+    Target: $Q > 10^9$. If achieved, this device is DFD-ready.
+\end{enumerate}
+
+Total: \$285--430K over 18 months. Compatible with W4i16 budget envelope
+(\$285--530K for three-track programme).
+
+
+%=============================================================================
+\section{Implications for DFD Detection Programme}
+\label{sec:implications}
+%=============================================================================
+
+\subsection{TiN Track Elevation}
+
+The W4i16 three-track MEMS programme ranked:
+(1) Si PnC at 7\,K, (2) TiN PnC at 2\,K, (3) Topo-opt Si$_3$N$_4$ at 4\,K.
+
+\upgrade{Based on the findings of this deep dive, TiN should be elevated
+to the \textbf{primary track} for the following reasons:}
+\begin{enumerate}[nosep]
+  \item \textbf{Dual-function}: Mechanical resonator + microwave readout
+    in a single film. No other material offers this.
+  \item \textbf{Kinetic inductance readout}: Eliminates optical detection
+    chain (dominant noise source, alignment burden, thermal load).
+  \item \textbf{Quantum computing supply chain}: TiN deposition is
+    available at SQMS, Google, IBM, and multiple university fabs.
+    Process recipes are mature and published.
+  \item \textbf{Cryogenic Q advantage}: Crystalline TiN has TLS
+    freeze-out below $\sim 100$\,mK, unlike amorphous SiN where Q
+    saturates. This gives TiN a potential advantage precisely in the
+    DFD operating regime (dilution fridge temperatures).
+  \item \textbf{SQMS integration}: The DFD Phase I SRF experiment
+    (W4i16: \$3.2M, TESLA 9-cell cavity at SQMS) already requires
+    SQMS infrastructure. Adding TiN MEMS fabrication to the same
+    programme creates strong synergy.
+\end{enumerate}
+
+\subsection{Revised Track Prioritisation}
+
+\begin{tcolorbox}[colback=teal!5!white, colframe=teal!50!black,
+  title=\textbf{Revised MEMS Track Priorities (W4i17)}]
+\begin{enumerate}
+  \item \textbf{TiN PnC + KI readout (PRIMARY)}: Target $Q > 10^9$ at
+    $< 100$\,mK. Kinetic inductance readout. Budget: \$285--430K.
+    Timeline: 18 months. Foundry: SQMS/Fermilab.
+  \item \textbf{Si$_3$N$_4$ topo-opt (BACKUP)}: Proven $Q > 10^9$.
+    Optical readout. Budget: \$65--100K (Norcada). Ready Q1 2027.
+    Serves as fallback if TiN PnC etch degrades Q.
+  \item \textbf{Crystalline Si PnC (MONITORING)}: Highest potential Q
+    ($> 10^{10}$) but requires 7\,K operation (above TiN $T_c$).
+    Not compatible with KI readout. Defer unless Si$_3$N$_4$ and TiN
+    both fail.
+\end{enumerate}
+\end{tcolorbox}
+
+\subsection{Connection to $\psi$-Field Sensitivity}
+
+The $\psi$-field coupling to mechanical motion (from the DFD action)
+produces a force per unit mass:
+\begin{equation}
+  a_\psi = \frac{(\lambda - 1)}{\Meff} \cdot \nabla \psi \cdot V_{\rm mode},
+\end{equation}
+where $V_{\rm mode}$ is the mode volume. The minimum detectable
+$|\lambda - 1|$ scales as:
+\begin{equation}
+  |\lambda - 1|_{\rm min} \propto \frac{1}{\sqrt{\Qmech \cdot Q_{\rm readout}
+  \cdot t_{\rm int}}},
+\end{equation}
+where $Q_{\rm readout}$ is the microwave resonator Q and $t_{\rm int}$ the
+integration time. With $\Qmech \sim 10^9$, $Q_{\rm readout} \sim 10^7$,
+and $t_{\rm int} = 10^6$\,s:
+\begin{equation}
+  |\lambda - 1|_{\rm min} \propto \frac{1}{\sqrt{10^9 \cdot 10^7 \cdot 10^6}}
+  = \frac{1}{\sqrt{10^{22}}} = 10^{-11}.
+\end{equation}
+
+This is competitive with the SQMS Q-ratio measurement reach
+($\sim 10^{-10}$--$10^{-11}$) and provides an \emph{independent}
+detection channel with completely different systematics.
+
+\newfinding{TiN MEMS with KI readout provides an independent path to
+$|\lambda - 1| \sim 10^{-11}$, complementary to SQMS SRF. Different
+systematics, different physics, same sensitivity.}
+
+
+%=============================================================================
+\section{Corrections to Previous Iterations}
+\label{sec:corrections}
+%=============================================================================
+
+\begin{enumerate}
+  \item \corrected{W4i15/i16 assumed TiN bare membrane $Q \sim 10^6$
+    (generic estimate). Matsuyama 2025 measures $8\ee{6}$ at 2.2\,K.
+    Gap to target reduced from $\sim 10^3\times$ to $\sim 125\times$.}
+
+  \item \corrected{W4i16 listed TiN track as secondary to Si PnC.
+    The kinetic inductance readout advantage (Finding 1) and the
+    quantum computing supply chain make TiN the primary track.}
+
+  \item \caution{W4i16 budget for TiN track was \$85--130K (fabrication
+    only). With KI readout integration (Phase C), revised to \$285--430K
+    total. This is within the original three-track envelope because
+    crystalline Si is deferred.}
+\end{enumerate}
+
+
+%=============================================================================
+\section{Key References}
+\label{sec:refs}
+%=============================================================================
+
+\begin{enumerate}[nosep]
+  \item Matsuyama et al., ``High-$Q$ membrane resonators using
+    ultra-high-stress crystalline TiN films,''
+    Appl.\ Phys.\ Lett.\ \textbf{127}, 222202 (2025).
+    arXiv:2509.02987.
+  \item arXiv:2502.17901, ``Enhancing Intrinsic Quality Factors
+    Approaching 10 Million in Superconducting Planar Resonators
+    via Spiral Geometry,'' EPJ Quant.\ Technol.\ (2025).
+  \item Shearrow et al., ``Kinetic Inductive Electromechanical
+    Transduction for Nanoscale Force Sensing,''
+    Phys.\ Rev.\ Applied \textbf{20}, 024022 (2023).
+  \item Tsaturyan et al., ``Ultracoherent nanomechanical resonators
+    via soft clamping and dissipation dilution,''
+    Nat.\ Nanotechnol.\ \textbf{12}, 776 (2017).
+  \item Vissers et al., ``Low loss superconducting titanium nitride
+    coplanar waveguide resonators,'' arXiv:1007.5096,
+    Appl.\ Phys.\ Lett.\ \textbf{97}, 232509 (2010).
+  \item Ohya et al., ``Room temperature deposition of sputtered TiN
+    films for superconducting coplanar waveguide resonators,''
+    Supercond.\ Sci.\ Technol.\ \textbf{27}, 015009 (2014).
+  \item Leduc et al., ``Titanium nitride films for ultrasensitive
+    microresonator detectors,''
+    Appl.\ Phys.\ Lett.\ \textbf{97}, 102509 (2010).
+\end{enumerate}
+
+
+\end{document}

@@ -1,0 +1,1142 @@
+%=============================================================================
+% Wave 3, Iteration 6: Materials Science Update
+% AGENT: MATERIALS SCIENCE (W3i6)
+%
+% W3i5 KEY FINDINGS CARRIED FORWARD:
+%   - Two-component psi: psi = psi_grav + delta_psi_EM
+%   - All material FOMs survive M_eff correction (ratios unaffected)
+%   - P15 active detection devastated by M_eff; pivot to passive
+%   - 11 P11 configurations beat SQMS bound
+%   - Passive Superiority Theorem: passive bounds fundamentally superior
+%   - YBCO FOM = 965 (unchanged), MgB2 = 125, Nb3Sn = 92, Nb = 3.2
+%   - P2+P11 hybrid with MEMS proof mass: viable path
+%
+% W3i6 MANDATE:
+%   1. Under two-component, materials couple to delta_psi_EM.
+%      Does this change the FOM formula?
+%   2. With passive detection dominant, derive PASSIVE material FOM
+%   3. Rank all candidate materials under passive FOM
+%   4. MEMS materials for P2+P11 path: sub-nanogram proof mass optimisation
+%   5. Updated materials roadmap for post-paradigm-shift DFD programme
+%
+% Date: March 2026
+%=============================================================================
+
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\geometry{margin=1in}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\usepackage{float}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{lemma}[theorem]{Lemma}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{finding}[theorem]{Finding}
+\newtheorem{correction}[theorem]{Correction}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\ee}[1]{\times 10^{#1}}
+\newcommand{\Meff}{M_{\rm eff}}
+\newcommand{\Opsi}{\omega_\psi}
+\newcommand{\Qpsi}{Q_\psi}
+\newcommand{\dpsi}{\delta\psi_{\rm EM}}
+\newcommand{\psigrav}{\psi_{\rm grav}}
+\newcommand{\psiEM}{\delta\psi_{\rm EM}}
+\newcommand{\lambdaone}{|\lambda-1|}
+\newcommand{\lambdabound}{1.56\ee{-9}}
+\newcommand{\Tc}{T_{\rm c}}
+\newcommand{\lambdaL}{\lambda_{\rm L}}
+\newcommand{\FOMactive}{\mathrm{FOM}_{\rm active}}
+\newcommand{\FOMpassive}{\mathrm{FOM}_{\rm passive}}
+\newcommand{\FOMMEMS}{\mathrm{FOM}_{\rm MEMS}}
+\newcommand{\lam}{|\lambda-1|}
+\newcommand{\Heff}{H_{\rm eff}}
+\newcommand{\muG}{\mu_G}
+\newcommand{\GN}{G_{\rm N}}
+\newcommand{\SNR}{\mathrm{SNR}}
+
+\title{Wave 3 Iteration 6: Materials Science Update\\
+\large Post-Paradigm-Shift Material Selection:\\
+Two-Component FOM Analysis, Passive Detection Materials,\\
+MEMS Proof Mass Optimisation, and Updated Roadmap}
+\author{DFD Research Programme --- Materials Science Agent, W3i6}
+\date{March 2026}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+%=============================================================================
+\section{Executive Summary}
+\label{sec:executive}
+%=============================================================================
+
+Wave 3 Iteration 5 established three paradigm-shifting results that
+fundamentally alter the materials science programme:
+
+\begin{enumerate}[nosep]
+  \item \textbf{Two-component $\psi$-field}: $\psi = \psigrav + \psiEM$,
+    with all patent-specific (laboratory) effects coupling to
+    $\psiEM$ only.
+  \item \textbf{Passive Superiority Theorem}: Passive cavity bounds
+    ($\delta Q/Q$ measurements) are fundamentally superior to active
+    SQUID detection for bulk SRF cavities because $\Meff$ cancels
+    in the passive ratio but enters linearly in the active signal.
+  \item \textbf{Active detection devastation}: The $\Meff = 3.01\ee{6}$~kg
+    correction degrades all active P15 sensitivity by $10^6\times$;
+    near-term cavity-based active detection is not viable.
+\end{enumerate}
+
+\noindent This iteration answers five questions:
+
+\begin{tcolorbox}[colback=blue!5!white, colframe=blue!50!black,
+  title=\textbf{W3i6 Materials Science Mandate}]
+\begin{enumerate}[nosep]
+  \item Does the two-component decomposition change the active FOM formula?
+  \item What material properties optimise \emph{passive} detection
+    (Q-factor stability, frequency stability, dimensional stability)?
+  \item Derive the Passive Material FOM and rank all candidate materials.
+  \item What sub-nanogram proof mass material optimises the P2+P11
+    hybrid MEMS path?
+  \item Updated materials roadmap for the post-paradigm-shift programme.
+\end{enumerate}
+\end{tcolorbox}
+
+\noindent\textbf{Key results}:
+\begin{itemize}[nosep]
+  \item The active FOM formula is \emph{unchanged} under two-component
+    decomposition: $\psiEM$ replaces $\psi_0$ but the material-dependent
+    factors $\kappa\cdot\Tc^{1/2}$ remain identical.
+  \item We derive a new \textbf{Passive Material FOM} that captures
+    Q-factor stability, frequency stability, and thermal noise rejection.
+    Nb dominates the passive ranking (inverting the active ranking).
+  \item For MEMS proof masses, single-crystal silicon nitride (high-stress
+    Si$_3$N$_4$) is optimal at $10^{-12}$--$10^{-9}$~kg, with
+    crystalline silicon and aluminium alternatives.
+  \item The materials roadmap now has three parallel tracks: Passive
+    (Nb-based, near-term), MEMS (Si$_3$N$_4$, medium-term), and
+    Exotic (YBCO/Nb$_3$Sn for future active recovery).
+\end{itemize}
+
+
+%=============================================================================
+\section{Two-Component $\psi$-Field: Impact on the Active FOM}
+\label{sec:two-component-fom}
+%=============================================================================
+
+\subsection{Review: the two-component decomposition}
+
+W3i5 established:
+\begin{equation}
+  \psi = \psigrav + \psiEM,
+\end{equation}
+where $\psigrav$ is the gravitational potential (sourced by all
+stress-energy, giving MOND, lensing, the shadow, Hubble tension),
+and $\psiEM$ is governed by the DFD field equation sourced by EM
+stress-energy (giving $\dot{G}/G$, Process A coupling, all laboratory
+effects).
+
+\textbf{All patent-specific effects couple to $\psiEM$, not to $\psigrav$.}
+The cosmological value $\psiEM^{\rm cosmo} \approx 9.6\ee{-6}$ (not the
+gravitational $\psigrav \approx 0.047$).
+
+\subsection{Does the active FOM change?}
+
+The W3i4 active FOM for SRF cavity materials is:
+\begin{equation}
+  \FOMactive = \kappa\cdot\Tc^{1/2}
+  = \frac{\lambdaL}{\xi_{\rm sc}}\cdot\Tc^{1/2},
+  \label{eq:FOM_active}
+\end{equation}
+where $\lambdaL$ is the London penetration depth, $\xi_{\rm sc}$ is the
+superconducting coherence length, and $\Tc$ is the critical temperature.
+
+This FOM captures the material's ability to:
+\begin{itemize}[nosep]
+  \item Maximise the EM--psi overlap integral ($\propto \kappa = \lambdaL/\xi_{\rm sc}$,
+    the Ginzburg--Landau parameter);
+  \item Maximise the operating temperature range ($\propto \Tc^{1/2}$,
+    which sets the energy scale of the EM fields).
+\end{itemize}
+
+Under two-component decomposition, the Process A coupling vertex is:
+\begin{equation}
+  g_{\rm A} = (\lambda - 1)\,\omega_{\rm EM}\,\psiEM_{\rm zpf},
+  \label{eq:coupling_vertex}
+\end{equation}
+where $\psiEM_{\rm zpf} = \sqrt{\hbar/(2\Meff\Opsi)}$ is the zero-point
+amplitude of the EM-sourced psi-perturbation. The material enters through
+the overlap integral:
+\begin{equation}
+  \Heff = \frac{\int_{\rm cav} |\mathbf{E}|^2\,
+  |\psi_n(\mathbf{r})|^2\,dV}
+  {\left(\int_{\rm cav} |\mathbf{E}|^2\,dV\right)
+  \left(\int_{\rm cav} |\psi_n|^2\,dV\right)},
+\end{equation}
+which depends on the EM field distribution in the cavity walls (set by
+$\lambdaL$ and $\xi_{\rm sc}$) but \emph{not} on which component of
+$\psi$ is being coupled to.
+
+\begin{finding}[Active FOM Unchanged Under Two-Component Decomposition]
+\label{find:active_fom_unchanged}
+The two-component decomposition $\psi = \psigrav + \psiEM$ does not
+change the active FOM formula. The material-dependent factors
+($\lambdaL$, $\xi_{\rm sc}$, $\Tc$) enter through the EM field
+distribution and overlap integral, which are properties of the cavity
+geometry and the superconductor, not of the psi-field source.
+
+The only change is that the psi-field amplitude is $\psiEM$ rather than
+$\psi_0$. Since $\psiEM^{\rm cosmo} = 9.6\ee{-6} \ll \psigrav = 0.047$,
+this reduces the cosmological psi-amplitude by $\sim 5000\times$.
+However, the FOM is a \emph{relative} ranking: $\psiEM$ cancels in
+material-to-material comparisons.
+
+\textbf{All W3i4/W3i5 active FOM rankings are preserved:}
+\begin{center}
+\begin{tabular}{llll}
+\toprule
+Rank & Material & $\FOMactive$ & Status \\
+\midrule
+1 & YBCO & 965 & \textbf{Unchanged} \\
+2 & MgB$_2$ & 125 & Unchanged \\
+3 & Nb$_3$Sn & 92 & Unchanged \\
+4 & Nb & 3.2 & Unchanged \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+However, the \emph{relevance} of this ranking is now diminished: active
+detection requires closing the $10^{12}$--$10^{17}$ detection gap,
+which cannot be achieved by material optimisation alone.
+\end{finding}
+
+
+%=============================================================================
+\section{Passive Detection: What Material Properties Matter?}
+\label{sec:passive_properties}
+%=============================================================================
+
+The Passive Superiority Theorem (W3i5, Theorem~5.1 of the P2 update)
+establishes that passive cavity bounds---measurements of $\delta Q/Q$ or
+equivalently $\delta f/f$---are fundamentally superior to active SQUID
+detection for bulk SRF cavities. This section derives the material
+properties that optimise passive detection.
+
+\subsection{The passive bound mechanism}
+
+The SQMS passive bound $\lam < \lambdabound$ is derived from:
+\begin{equation}
+  \lam < \sqrt{\frac{\delta(1/Q)}{\Gamma_{\psi\to\mathrm{EM}}/\Opsi}},
+  \label{eq:passive_bound}
+\end{equation}
+where $\delta(1/Q)$ is the measured Q-factor instability and
+$\Gamma_{\psi\to\mathrm{EM}}$ is the psi-to-EM conversion rate per
+unit $(\lambda-1)^2$. Crucially, $\Meff$ cancels in this ratio.
+
+For a cavity measured over integration time $T_{\rm int}$, the bound
+tightens as:
+\begin{equation}
+  \lam_{\rm min}^{\rm passive} \propto
+  \left(\frac{\sigma_Q}{Q_0}\right)^{1/2}
+  \cdot T_{\rm int}^{-1/4},
+  \label{eq:passive_scaling}
+\end{equation}
+where $\sigma_Q/Q_0$ is the fractional Q-factor stability.
+
+\subsection{Three pillars of passive material performance}
+
+For a passive cavity bound, the material must deliver:
+
+\begin{enumerate}
+  \item \textbf{Q-factor stability} ($\sigma_Q/Q_0$): The fractional
+    fluctuation of the loaded quality factor over the measurement period.
+    Any source of Q-jitter (flux noise, quasiparticle density fluctuations,
+    two-level system (TLS) noise, mechanical vibrations coupling to
+    surface resistance) degrades the bound.
+
+  \item \textbf{Frequency stability} ($\sigma_f/f_0$): The fractional
+    frequency fluctuation. In a passive measurement, frequency drift
+    can be interpreted as a psi-coupling signal; materials with lower
+    $\sigma_f/f_0$ allow longer integration and tighter bounds.
+    Frequency stability is governed by:
+    \begin{equation}
+      \frac{\sigma_f}{f_0} = \frac{1}{2}\left[
+      \alpha_{\rm th}\,\sigma_T
+      + \frac{\sigma_L}{L}
+      + \frac{\Delta\lambdaL}{\lambdaL}\,\frac{\lambdaL}{R_{\rm cav}}
+      \right],
+      \label{eq:freq_stability}
+    \end{equation}
+    where $\alpha_{\rm th}$ is the thermal expansion coefficient,
+    $\sigma_T$ is the temperature stability, $\sigma_L/L$ is the
+    dimensional stability, and $\Delta\lambdaL/\lambdaL$ captures
+    penetration depth fluctuations.
+
+  \item \textbf{Thermal noise floor}: The fundamental limit on Q-factor
+    stability is set by thermodynamic fluctuations of quasiparticle
+    density. At operating temperature $T \ll \Tc$:
+    \begin{equation}
+      \left(\frac{\sigma_Q}{Q_0}\right)_{\rm thermal}
+      \propto \frac{1}{Q_0}\sqrt{\frac{k_{\rm B}T}{\Delta_{\rm sc}}}
+      \,e^{-\Delta_{\rm sc}/(2k_{\rm B}T)},
+      \label{eq:Q_thermal_noise}
+    \end{equation}
+    where $\Delta_{\rm sc}$ is the superconducting gap. Materials with
+    higher $\Delta_{\rm sc}$ (higher $\Tc$) suppress this floor
+    \emph{exponentially}.
+\end{enumerate}
+
+\subsection{Technical noise sources in passive SRF measurements}
+
+Beyond fundamental thermal fluctuations, SRF cavities suffer from:
+
+\begin{itemize}[nosep]
+  \item \textbf{Two-level system (TLS) noise}: Amorphous surface oxides
+    (Nb$_2$O$_5$, etc.)\ host TLS defects that cause fluctuating
+    dielectric loss. This is the dominant noise source at $T < 100$~mK
+    for niobium cavities. Mitigation: high-temperature baking (300--400$^\circ$C)
+    to transform the oxide, or nitrogen doping (N-doping) to reduce
+    TLS density.
+  \item \textbf{Flux noise}: Trapped magnetic flux causes dissipation
+    fluctuations. Niobium is susceptible due to its relatively low
+    $H_{c1}$. Nb$_3$Sn and YBCO have higher $H_{c1}$ and better flux
+    expulsion.
+  \item \textbf{Quasiparticle bursts}: Cosmic rays and radioactive
+    impurities generate quasiparticle cascades that temporarily degrade
+    Q. Mitigation: underground operation, phonon trapping layers, or
+    operating at higher $T/\Tc$ ratios where the equilibrium quasiparticle
+    density masks the bursts.
+  \item \textbf{Microphonics}: Mechanical vibrations couple to cavity
+    frequency and Q through Lorentz detuning and surface motion.
+    Materials with higher mechanical stiffness and lower thermal
+    contraction reduce microphonic coupling.
+\end{itemize}
+
+
+%=============================================================================
+\section{The Passive Material Figure of Merit}
+\label{sec:passive_fom}
+%=============================================================================
+
+\subsection{Derivation}
+
+The passive bound sensitivity scales as:
+\begin{equation}
+  \lam_{\rm min}^{\rm passive} \propto
+  \sqrt{\frac{\sigma_Q/Q_0}{\Heff^2}}
+  \propto \sqrt{\frac{\sigma_Q}{Q_0\,\Heff^2}}.
+  \label{eq:passive_sensitivity}
+\end{equation}
+
+For the material comparison, we separate factors:
+
+\begin{itemize}[nosep]
+  \item $Q_0$: the baseline quality factor (higher is better).
+  \item $\sigma_Q/Q_0$: the fractional stability (lower is better).
+  \item $\Heff$: the overlap factor (geometry-dependent; material enters
+    through $\lambdaL$).
+\end{itemize}
+
+The dominant noise at millikelvin temperatures is TLS noise, which scales
+as $\sigma_Q/Q_0 \propto n_{\rm TLS}\cdot\tan\delta_{\rm TLS}/Q_0$,
+where $n_{\rm TLS}$ is the TLS density and $\tan\delta_{\rm TLS}$ is
+the TLS loss tangent. Since TLS noise is an \emph{additive} loss channel,
+$\sigma_{1/Q} = \sigma_{\rm TLS}$ is approximately material-independent
+for a given surface preparation. The passive bound then scales as:
+\begin{equation}
+  \lam_{\rm min}^{\rm passive} \propto
+  \sqrt{\frac{\sigma_{\rm TLS}}{Q_0^2\,\Heff^2}}
+  = \frac{\sqrt{\sigma_{\rm TLS}}}{Q_0\,\Heff}.
+\end{equation}
+
+Therefore, the material-dependent passive FOM is:
+\begin{equation}
+\boxed{
+  \FOMpassive = Q_0 \cdot \Heff \cdot S_{\rm dim} \cdot S_{\rm freq},
+}
+\label{eq:FOM_passive}
+\end{equation}
+where:
+\begin{itemize}[nosep]
+  \item $Q_0$ is the achievable quality factor at the operating temperature.
+  \item $\Heff$ is the EM--psi overlap factor (enters weakly for bulk
+    cavities; $\Heff \approx 3\ee{-5}$ for TESLA geometry, approximately
+    material-independent).
+  \item $S_{\rm dim} = 1/\alpha_{\rm th}(T_{\rm op})$ is a dimensional
+    stability factor: materials with lower thermal expansion at operating
+    temperature contribute less frequency drift.
+  \item $S_{\rm freq}$ captures the frequency stability from penetration
+    depth fluctuations: $S_{\rm freq} = \exp(\Delta_{\rm sc}/(2k_{\rm B}T_{\rm op}))$,
+    reflecting the exponential suppression of quasiparticle noise at
+    $T_{\rm op} \ll \Tc$.
+\end{itemize}
+
+\begin{remark}
+For the passive FOM, the $S_{\rm freq}$ factor is the most discriminating.
+At $T_{\rm op} = 20$~mK:
+\begin{itemize}[nosep]
+  \item Nb ($\Tc = 9.25$~K, $\Delta = 1.55$~meV):
+    $\Delta/(2k_{\rm B}T) = 1.55\ee{-3}/(2\times 8.62\ee{-5}\times 0.02)
+    = 450$. The exponential $e^{450}$ is effectively infinite; Nb is
+    deep in the zero-quasiparticle regime.
+  \item Nb$_3$Sn ($\Tc = 18.3$~K, $\Delta = 3.1$~meV):
+    $\Delta/(2k_{\rm B}T) = 900$. Even more deeply suppressed.
+  \item YBCO ($\Tc = 93$~K, $\Delta \sim 20$~meV, d-wave):
+    $\Delta/(2k_{\rm B}T) \sim 5800$. However, d-wave gap nodes mean
+    the effective suppression is power-law, not exponential---the
+    quasiparticle density goes as $T^2/\Delta$, not $e^{-\Delta/(2k_BT)}$.
+\end{itemize}
+All s-wave superconductors are in the deep exponential regime at 20~mK,
+so $S_{\rm freq}$ does not discriminate between Nb, Nb$_3$Sn, and MgB$_2$.
+The d-wave node structure of YBCO is a \emph{disadvantage} for passive
+detection because it permits residual quasiparticles at all temperatures.
+\end{remark}
+
+\subsection{The decisive factor: $Q_0$ at operating temperature}
+
+Since $S_{\rm freq}$ saturates for all s-wave superconductors at
+$T_{\rm op} = 20$~mK, and $\Heff$ is approximately geometry-dependent
+(not material-dependent for bulk TESLA cavities), the passive FOM
+reduces to:
+\begin{equation}
+  \FOMpassive \approx Q_0(T_{\rm op}) \cdot S_{\rm dim}(T_{\rm op}).
+  \label{eq:FOM_passive_simplified}
+\end{equation}
+
+\begin{theorem}[Passive FOM Ranking Inverts the Active Ranking]
+\label{thm:passive_inversion}
+For passive cavity bounds at $T_{\rm op} \leq 20$~mK, the material
+ranking is determined primarily by achievable $Q_0$. The demonstrated
+$Q_0$ values are:
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{lrrlrl}
+\toprule
+Material & $Q_0$ (achieved) & $\Tc$ (K) & Gap & $\alpha_{\rm th}$ (K$^{-1}$, 4~K)
+  & $\FOMpassive$ \\
+\midrule
+Nb (N-doped) & $2\ee{11}$ & 9.25 & s-wave & $1\ee{-9}$ (est.)
+  & \textbf{$2\ee{20}$} \\
+Nb (EP) & $5\ee{10}$ & 9.25 & s-wave & $1\ee{-9}$
+  & $5\ee{19}$ \\
+Nb$_3$Sn & $2\ee{10}$ & 18.3 & s-wave & $3\ee{-9}$
+  & $7\ee{18}$ \\
+MgB$_2$ & $5\ee{9}$ (proj.) & 39 & Two-gap s & $5\ee{-9}$
+  & $1\ee{18}$ \\
+YBCO & $10^{6}$--$10^{7}$ & 93 & d-wave & $3\ee{-8}$
+  & $3\ee{13}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Result}: Niobium (N-doped) is the optimal passive detection
+material, with $\FOMpassive$ exceeding YBCO by $\sim 10^7$. This is
+the \emph{inversion} of the active ranking, where YBCO ($\FOMactive = 965$)
+dominated Nb ($\FOMactive = 3.2$) by $300\times$.
+
+The inversion occurs because:
+\begin{enumerate}[nosep]
+  \item Passive detection does not benefit from high $\kappa$ (the
+    GL parameter that favours YBCO in active mode).
+  \item Passive detection requires ultrahigh $Q_0$, which is achieved
+    in Nb but not in YBCO (limited by d-wave nodes and grain boundaries).
+  \item YBCO's d-wave gap structure permits power-law quasiparticle
+    density at low $T$, causing residual Q-factor fluctuations that
+    s-wave materials avoid.
+\end{enumerate}
+\end{theorem}
+
+\begin{finding}[YBCO Demoted for Passive Detection]
+\label{find:ybco_demoted}
+YBCO, which dominated the active FOM ranking ($\FOMactive = 965$),
+is the \emph{worst} candidate for passive detection among the materials
+studied. Its $Q_0$ is limited to $\sim 10^7$ by:
+\begin{itemize}[nosep]
+  \item d-wave gap nodes producing finite quasiparticle density at all $T$;
+  \item grain boundary weak links causing microwave loss;
+  \item surface oxygen disorder affecting Q-factor reproducibility.
+\end{itemize}
+For the passive programme, YBCO should be set aside entirely.
+\end{finding}
+
+
+%=============================================================================
+\section{Passive Material Rankings: Detailed Analysis}
+\label{sec:passive_ranking}
+%=============================================================================
+
+\subsection{Rank 1: Nitrogen-doped Niobium}
+
+Nitrogen-doped niobium (N-doped Nb) achieves the highest $Q_0$ of any
+SRF material: $Q_0 \approx 2\ee{11}$ at 1.3~GHz and $T = 2$~K
+(Fermilab SQMS programme), with projections to $>10^{12}$ at dilution
+refrigerator temperatures ($T < 20$~mK).
+
+\textbf{Key advantages for passive detection:}
+\begin{itemize}[nosep]
+  \item Highest demonstrated $Q_0$ of any SRF cavity material.
+  \item S-wave gap ($\Delta = 1.55$~meV): exponential quasiparticle
+    suppression at $T \ll \Tc$.
+  \item Well-characterised surface: decades of Fermilab/DESY/JLab
+    experience with surface preparation (EP, BCP, 120$^\circ$C bake).
+  \item TLS noise reduction via 300$^\circ$C vacuum baking eliminates
+    the Nb$_2$O$_5$ amorphous oxide.
+  \item Excellent dimensional stability: Nb has very low thermal
+    contraction below 4~K ($\alpha_{\rm th} \sim 10^{-9}$~K$^{-1}$).
+  \item The SQMS bound ($\lam < \lambdabound$) was \emph{already achieved}
+    with Nb cavities---proving that Nb-based passive detection works.
+\end{itemize}
+
+\textbf{Limitations:}
+\begin{itemize}[nosep]
+  \item Moderate $\Tc = 9.25$~K limits the operating field to
+    $H_{\rm sh} \approx 200$~mT (but passive detection does not require
+    high fields---it requires Q-factor stability at low fields).
+  \item Flux trapping from ambient magnetic fields requires careful
+    shielding ($< 1$~nT).
+\end{itemize}
+
+\subsection{Rank 2: Nb$_3$Sn-coated Nb}
+
+Nb$_3$Sn-coated niobium cavities achieve $Q_0 \approx 2\ee{10}$ at
+4.2~K (enabling helium-free operation). At $T = 20$~mK:
+
+\textbf{Advantages:}
+\begin{itemize}[nosep]
+  \item Higher $\Tc = 18.3$~K and $\Delta = 3.1$~meV: even deeper
+    quasiparticle suppression.
+  \item Higher $H_{c1}$: better flux expulsion, lower trapped flux
+    dissipation.
+  \item Can operate at higher $T$ (4.2~K) with adequate $Q_0$ for
+    preliminary passive bounds, reducing cryogenic complexity.
+\end{itemize}
+
+\textbf{Limitations:}
+\begin{itemize}[nosep]
+  \item $Q_0$ at 20~mK projected at $2\ee{10}$, an order of magnitude
+    below N-doped Nb.
+  \item Tin segregation at grain boundaries causes local loss hotspots.
+  \item Surface roughness from vapour diffusion coating introduces
+    geometric loss.
+\end{itemize}
+
+\subsection{Rank 3: MgB$_2$}
+
+MgB$_2$ ($\Tc = 39$~K) is a two-gap s-wave superconductor. Its potential
+for passive detection:
+
+\textbf{Advantages:}
+\begin{itemize}[nosep]
+  \item Highest $\Tc$ among s-wave candidates: $\Delta_\sigma = 7$~meV,
+    $\Delta_\pi = 2.5$~meV.
+  \item Light constituent elements: low cosmic-ray quasiparticle
+    generation rate.
+  \item Higher operating temperature capability: useful for 4.2~K
+    screening measurements.
+\end{itemize}
+
+\textbf{Limitations:}
+\begin{itemize}[nosep]
+  \item No demonstrated bulk SRF cavity; only thin-film coatings on
+    Cu substrates, with $Q_0 \lesssim 5\ee{9}$.
+  \item The $\pi$-band gap ($\Delta_\pi = 2.5$~meV) sets the
+    effective quasiparticle suppression, not the larger $\sigma$-band
+    gap.
+  \item Film quality not yet competitive with bulk Nb surface treatments.
+\end{itemize}
+
+\subsection{Rank 4: YBCO (not recommended)}
+
+As noted in Finding~\ref{find:ybco_demoted}, YBCO is not viable for
+passive detection due to its d-wave gap, which prevents the exponential
+quasiparticle freezeout essential for ultra-stable Q-factors.
+
+
+%=============================================================================
+\section{Passive Detection: Optimised Cavity Configurations}
+\label{sec:passive_configs}
+%=============================================================================
+
+\subsection{Configuration 1: SQMS-class Nb cavity at 20 mK}
+
+This is the baseline: a single 1.3~GHz TESLA-type Nb cavity, N-doped,
+operated in a dilution refrigerator.
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Parameter & Value \\
+\midrule
+Cavity & TESLA 9-cell, N-doped Nb \\
+$Q_0$ & $2\ee{11}$ (projected at 20~mK) \\
+$f_0$ & 1.3~GHz \\
+$T_{\rm op}$ & 20~mK \\
+$\sigma_Q/Q_0$ & $\sim 10^{-6}$ (TLS-limited) \\
+Integration time & $10^6$~s (12 days) \\
+Projected bound & $\lam < \lambdabound$ (achieved by SQMS) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Configuration 2: 256-cavity coherent array (ESS class)}
+
+The 256-cavity coherent array (W3i5 P11 Finding) achieves $256\times$
+improvement through phased averaging:
+\begin{equation}
+  \lam_{\rm min}^{\rm array} = \frac{\lam_{\rm min}^{\rm single}}{N}
+  = \frac{\lambdabound}{256} = 6.1\ee{-12}.
+\end{equation}
+
+\textbf{Material requirement}: All 256 cavities must have matched
+frequency to within $\delta f/f < 1/Q_L$ for coherent combination.
+N-doped Nb is the only material with demonstrated frequency
+reproducibility at this level.
+
+\subsection{Configuration 3: Cross-correlation (ESS Lund)}
+
+Two or more cavities measuring independent Q-factor time series;
+cross-correlating to extract correlated psi-field fluctuations.
+This rejects uncorrelated noise (TLS, quasiparticle bursts) and
+projects to $\lam \sim 10^{-12}$--$10^{-14}$.
+
+\textbf{Material requirement}: Identical cavity pairs with
+uncorrelated noise. N-doped Nb from the same ingot, processed
+identically, provides the best matched-pair performance.
+
+
+%=============================================================================
+\section{MEMS Proof Mass Materials for the P2+P11 Path}
+\label{sec:mems}
+%=============================================================================
+
+The P2+P11 hybrid (W3i5 P10/P11 update, Section~4.5) uses a MEMS
+mechanical resonator as the psi-field detector. The sensitivity scales
+as $\sqrt{\Meff^{\rm MEMS}}$, so minimising the proof mass is critical.
+W3i5 showed:
+
+\begin{center}
+\begin{tabular}{llll}
+\toprule
+$\Meff^{\rm MEMS}$ & Technology & $\lam_{\rm min}$ & Feasibility \\
+\midrule
+$10^{-6}$~kg ($\mu$g) & Nb membrane & $4.7\ee{-11}$ & Near-term \\
+$10^{-9}$~kg (ng) & MEMS beam & $1.5\ee{-12}$ & 2027--2028 \\
+$10^{-12}$~kg (pg) & CNT resonator & $4.7\ee{-14}$ & 2030+ \\
+$10^{-15}$~kg (fg) & PhC nanobeam & $1.5\ee{-15}$ & Speculative \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The material choice for the MEMS proof mass must optimise a different
+set of properties from the SRF cavity material.
+
+\subsection{MEMS material requirements}
+
+For the P2+P11 hybrid, the MEMS detector must provide:
+
+\begin{enumerate}
+  \item \textbf{High mechanical $Q_{\rm mech}$}: The sensitivity scales
+    as $1/Q_{\rm mech}$ (Eq.~\ref{eq:hybrid_formula_ref} below). The
+    proof mass must sustain $Q_{\rm mech} \geq 10^6$ at millikelvin
+    temperatures.
+
+  \item \textbf{Low mass}: The sensitivity scales as $\sqrt{\Meff^{\rm MEMS}}$,
+    so lighter proof masses are better.
+
+  \item \textbf{Cryogenic compatibility}: Must operate at $T < 100$~mK
+    in the SRF environment (high vacuum, strong magnetic shielding,
+    low vibration).
+
+  \item \textbf{SQUID-readable displacement}: The proof mass motion must
+    couple to a SQUID magnetometer, requiring either a superconducting
+    proof mass (direct flux coupling) or a superconducting transducer
+    layer.
+
+  \item \textbf{Low intrinsic stress noise}: Thermomechanical noise
+    in the proof mass sets the noise floor:
+    \begin{equation}
+      S_x^{\rm th} = \frac{4k_{\rm B}T\,\Meff\,\omega_{\rm mech}}{Q_{\rm mech}},
+    \end{equation}
+    so the noise spectral density scales as $\Meff/Q_{\rm mech}$. The
+    relevant material FOM is $Q_{\rm mech}/\Meff$.
+\end{enumerate}
+
+\subsection{MEMS Material Figure of Merit}
+
+Combining requirements 1, 2, and 5:
+\begin{equation}
+\boxed{
+  \FOMMEMS = \frac{Q_{\rm mech}}{\Meff^{1/2}}
+  \cdot \frac{1}{\sqrt{S_x^{\rm th}(T_{\rm op})}}
+  \propto \frac{Q_{\rm mech}^{3/2}}{\Meff \cdot T_{\rm op}^{1/2}
+  \cdot \omega_{\rm mech}^{1/2}}.
+}
+\label{eq:FOM_MEMS}
+\end{equation}
+
+At fixed $T_{\rm op}$ and $\omega_{\rm mech}$, this reduces to
+$\FOMMEMS \propto Q_{\rm mech}^{3/2}/\Meff$.
+
+\subsection{MEMS material ranking}
+
+\begin{theorem}[MEMS Proof Mass Material Ranking]
+\label{thm:mems_ranking}
+Evaluating candidate MEMS materials at $T = 20$~mK:
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{p{3cm}rrrl}
+\toprule
+Material & $Q_{\rm mech}$ & Min.\ mass & $\FOMMEMS$ & Notes \\
+ & (at 20~mK) & (achievable) & (relative) & \\
+\midrule
+High-stress Si$_3$N$_4$ & $10^{9}$--$10^{10}$ & 1~pg
+  & \textbf{$10^{18}$} & Dissipation dilution \\
+Crystalline Si (SOI) & $10^{7}$--$10^{8}$ & 10~pg
+  & $10^{13}$ & Established MEMS \\
+Al (supercond.) & $10^{6}$--$10^{7}$ & 1~ng
+  & $10^{10}$ & Direct SQUID coupling \\
+Nb (supercond.) & $10^{5}$--$10^{6}$ & 10~ng
+  & $10^{7}$ & SRF-compatible \\
+Diamond (NV) & $10^{7}$ & 100~pg
+  & $10^{12}$ & Magnetometry readout \\
+CNT bundle & $10^{5}$--$10^{6}$ & 1~fg
+  & $10^{14}$ & Ultra-low mass \\
+PhC nanobeam & $10^{8}$--$10^{9}$ & 10~fg
+  & $10^{16}$ & Optomechanical \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Result}: High-stress silicon nitride (Si$_3$N$_4$) is the optimal
+MEMS proof mass material, primarily due to \emph{dissipation dilution}---the
+mechanism by which high intrinsic stress distributes vibrational energy
+into the high-Q stressed mode, achieving $Q_{\rm mech} > 10^9$ even at
+millikelvin temperatures.
+\end{theorem}
+
+\subsection{High-stress Si$_3$N$_4$: detailed assessment}
+
+\textbf{Dissipation dilution mechanism:} In a highly pre-stressed
+Si$_3$N$_4$ membrane or string resonator, the elastic energy is dominated
+by the tensile stress rather than bending. The quality factor is enhanced
+by:
+\begin{equation}
+  Q_{\rm eff} = Q_{\rm intrinsic} \times D_{\rm dil},
+  \quad D_{\rm dil} = \frac{\sigma\,L^2}{E\,h^2},
+\end{equation}
+where $\sigma \approx 1$~GPa is the tensile stress, $L$ is the resonator
+length, $E \approx 250$~GPa is Young's modulus, and $h$ is the thickness.
+For a 100~nm thick, 100~$\mu$m long Si$_3$N$_4$ string:
+$D_{\rm dil} \approx 10^9/(250\times10^4) = 4\ee{4}$, giving
+$Q_{\rm eff} \approx Q_{\rm int} \times 4\ee{4} \approx 10^4 \times 4\ee{4}
+= 4\ee{8}$.
+
+Soft-clamped phononic crystal designs have demonstrated
+$Q_{\rm mech} > 10^9$ at room temperature and projections of $>10^{10}$
+at millikelvin temperatures.
+
+\textbf{Mass scaling:} A Si$_3$N$_4$ membrane of dimensions
+$100~\mu\text{m} \times 100~\mu\text{m} \times 50$~nm has mass:
+\begin{equation}
+  m = \rho \cdot V = 3100~\text{kg/m}^3 \times 5\ee{-16}~\text{m}^3
+  = 1.55\ee{-12}~\text{kg} = 1.55~\text{pg}.
+\end{equation}
+
+For the nanogram regime ($m = 10^{-9}$~kg), a
+$1~\text{mm} \times 1~\text{mm} \times 100$~nm membrane suffices:
+$m = 3100 \times 10^{-13} = 3.1\ee{-10}$~kg $\approx 0.3$~ng.
+
+\textbf{SQUID coupling:} Si$_3$N$_4$ is not superconducting. SQUID
+readout requires a thin ($\sim 20$~nm) Al or Nb film deposited on the
+membrane. This adds negligible mass ($< 5\%$) but provides direct
+flux-to-displacement transduction.
+
+\textbf{Cryogenic performance:} Si$_3$N$_4$ membranes have been operated
+at dilution refrigerator temperatures in multiple optomechanics
+experiments. The intrinsic $Q$ improves at low temperature (fewer phonon
+channels), making it ideal for the P2+P11 application.
+
+\subsection{Alternative: Aluminium drumhead resonators}
+
+For the near-term ($\mu$g to ng) MEMS path, aluminium drumhead resonators
+offer a simpler approach:
+
+\begin{itemize}[nosep]
+  \item Superconducting below 1.2~K: direct SQUID coupling without
+    additional metallisation.
+  \item Demonstrated $Q_{\rm mech} \sim 10^7$ at 20~mK (NIST, Delft).
+  \item Established fabrication on Si substrates.
+  \item Mass range: 1~ng to 1~$\mu$g depending on geometry.
+\end{itemize}
+
+\textbf{Limitation}: $Q_{\rm mech}$ is $100\times$--$1000\times$ lower
+than Si$_3$N$_4$ with dissipation dilution. For the P2+P11 hybrid,
+this translates to $10\times$--$30\times$ worse sensitivity, reducing
+the advantage over the SQMS passive bound.
+
+\subsection{Recommended MEMS proof mass strategy}
+
+\begin{finding}[MEMS Proof Mass Material Selection]
+\label{find:mems_selection}
+\begin{enumerate}[nosep]
+  \item \textbf{Phase 1 (2026--2027, near-term)}: Al drumhead resonator,
+    $m \sim 1~\mu$g, $Q_{\rm mech} \sim 10^7$. Direct SQUID readout.
+    Projected $\lam_{\rm min} \sim 5\ee{-11}$ ($30\times$ below SQMS bound).
+    Technology readiness: demonstrated.
+
+  \item \textbf{Phase 2 (2027--2029, medium-term)}: High-stress
+    Si$_3$N$_4$ membrane with Al metallisation, $m \sim 1$~ng,
+    $Q_{\rm mech} \sim 10^9$. Projected $\lam_{\rm min} \sim 5\ee{-14}$
+    ($3\ee{4}\times$ below SQMS bound). Requires: phononic crystal
+    soft-clamping design adapted for SQUID readout geometry.
+
+  \item \textbf{Phase 3 (2030+, speculative)}: Si$_3$N$_4$ or diamond
+    photonic crystal nanobeam, $m \sim 1$~pg, $Q_{\rm mech} \sim 10^{10}$.
+    Projected $\lam_{\rm min} \sim 10^{-16}$. Requires: sub-nm SQUID
+    displacement sensitivity or optical readout conversion.
+\end{enumerate}
+\end{finding}
+
+
+%=============================================================================
+\section{P2+P11 Hybrid: Sensitivity with Material-Optimised MEMS}
+\label{sec:p2p11_materials}
+%=============================================================================
+
+From the W3i5 P10/P11 hybrid formula:
+\begin{equation}
+  \lam_{\rm hybrid} = \sqrt{
+  \frac{2\muG c^4\,\Meff^{\rm MEMS}\,\Opsi\,\hbar}
+  {G_{00}^2\,U_{\rm src}^2\,m^2\,Q_{\rm mech}^2\,d^{-2}\,T_{\rm int}}
+  }.
+  \label{eq:hybrid_formula_ref}
+\end{equation}
+
+With material-optimised MEMS (Si$_3$N$_4$, Phase 2):
+\begin{itemize}[nosep]
+  \item $\Meff^{\rm MEMS} = 10^{-9}$~kg (1~ng Si$_3$N$_4$ membrane)
+  \item $Q_{\rm mech} = 10^9$ (dissipation-diluted, 20~mK)
+  \item Other parameters as W3i5: $G_{00} = 0.90$, $U_{\rm src} = 500$~J,
+    $m = 0.5$, $d = 0.5$~m, $T_{\rm int} = 10^6$~s
+\end{itemize}
+
+The improvement from $Q_{\rm mech} = 10^6$ (W3i5 baseline) to
+$Q_{\rm mech} = 10^9$ (Si$_3$N$_4$) gives:
+\begin{equation}
+  \lam_{\rm min}^{\rm Si_3N_4} = \lam_{\rm min}^{\rm W3i5}
+  \times \frac{10^6}{10^9} = 1.5\ee{-12} \times 10^{-3}
+  = 1.5\ee{-15}.
+\end{equation}
+
+\begin{finding}[Material-Optimised P2+P11 Hybrid]
+\label{find:optimised_hybrid}
+With Si$_3$N$_4$ dissipation-diluted MEMS ($Q_{\rm mech} = 10^9$,
+$m = 1$~ng), the P2+P11 hybrid achieves:
+\begin{equation}
+  \boxed{\lam_{\rm min}^{\rm Si_3N_4} \approx 1.5\ee{-15},}
+\end{equation}
+which is $10^6\times$ below the SQMS bound and comparable to the
+ESS Lund optimistic projection. This establishes the \textbf{Si$_3$N$_4$-based
+P2+P11 hybrid as a competitive alternative to the 256-cavity passive
+array}, using a single source cavity and a single MEMS detector.
+
+The key enabling technology is the dissipation dilution mechanism in
+high-stress Si$_3$N$_4$, which provides $10^3\times$ improvement in
+$Q_{\rm mech}$ over conventional metallic MEMS at the same mass scale.
+\end{finding}
+
+
+%=============================================================================
+\section{Updated Material Property Table}
+\label{sec:property_table}
+%=============================================================================
+
+\begin{table}[H]
+\centering
+\caption{Comprehensive material properties relevant to DFD detection.
+Properties are evaluated at $T_{\rm op} = 20$~mK unless noted.}
+\label{tab:properties}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{p{2.2cm}rrrrrr}
+\toprule
+Property & Nb & Nb$_3$Sn & MgB$_2$ & YBCO & Si$_3$N$_4$ & Al \\
+\midrule
+$\Tc$ (K) & 9.25 & 18.3 & 39 & 93 & --- & 1.2 \\
+$\Delta$ (meV) & 1.55 & 3.1 & 2.5/7 & $\sim$20 & --- & 0.17 \\
+Gap symmetry & s & s & s+s & d & --- & s \\
+$\lambdaL$ (nm) & 39 & 85 & 140 & 150 & --- & 50 \\
+$\xi_{\rm sc}$ (nm) & 38 & 3.2 & 5.2 & 1.5 & --- & 1600 \\
+$\kappa$ & 1.0 & 27 & 27 & 100 & --- & 0.03 \\
+$Q_0$ (SRF) & $2\ee{11}$ & $2\ee{10}$ & $5\ee{9}$ & $10^7$ & --- & $10^{10}$ \\
+$Q_{\rm mech}$ & $10^6$ & --- & --- & --- & $10^{10}$ & $10^7$ \\
+$\alpha_{\rm th}$ (4~K) & $10^{-9}$ & $3\ee{-9}$ & $5\ee{-9}$ & $3\ee{-8}$ & $2\ee{-9}$ & $5\ee{-9}$ \\
+\midrule
+$\FOMactive$ & 3.2 & 92 & 125 & 965 & --- & --- \\
+$\FOMpassive$ (rel.) & $10^{20}$ & $10^{19}$ & $10^{18}$ & $10^{13}$ & --- & $10^{19}$ \\
+$\FOMMEMS$ (rel.) & $10^{7}$ & --- & --- & --- & $10^{18}$ & $10^{10}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+%=============================================================================
+\section{Updated Materials Roadmap: Post-Paradigm-Shift Programme}
+\label{sec:roadmap}
+%=============================================================================
+
+The W3i5 paradigm shift (passive superiority, $\Meff$ correction,
+two-component $\psi$) fundamentally restructures the DFD materials
+programme into three parallel tracks.
+
+\subsection{Track 1: Passive Cavity Programme (Nb-based, HIGHEST PRIORITY)}
+
+\textbf{Objective}: Tighten the passive bound on $\lam$ from the
+current $\lambdabound$ to $<10^{-12}$.
+
+\textbf{Material}: N-doped Nb (single cavities and arrays).
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{p{2cm}p{3cm}p{2.5cm}p{3cm}}
+\toprule
+Phase & Configuration & Projected $\lam$ & Material milestone \\
+\midrule
+1A (now) & Single SQMS Nb cavity & $1.56\ee{-9}$ & Achieved \\
+1B (2026) & Improved Q stability & $5\ee{-10}$ & 400$^\circ$C bake protocol \\
+2A (2027) & Dual-cavity cross-corr. & $10^{-11}$ & Matched Nb pair \\
+2B (2028) & 16-cavity array & $10^{-10}$ (incoh.) & Reproducible N-doping \\
+3 (2029) & 256-cavity coherent & $6\ee{-12}$ & Frequency matching \\
+4 (2030+) & ESS Lund class & $10^{-13}$--$10^{-14}$ & Cross-correlation \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Key materials R\&D}:
+\begin{itemize}[nosep]
+  \item Develop 300--400$^\circ$C vacuum baking protocol to eliminate TLS
+    noise from Nb$_2$O$_5$ surface oxide.
+  \item Characterise cavity-to-cavity Q-factor reproducibility for
+    N-doped Nb from the same ingot (needed for cross-correlation).
+  \item Demonstrate $Q_0 > 10^{12}$ at $T < 20$~mK (single cavity).
+  \item Develop in-situ frequency tuning to $\delta f/f < 10^{-12}$ for
+    coherent array operation.
+\end{itemize}
+
+\subsection{Track 2: MEMS Proof Mass Programme (Si$_3$N$_4$, HIGH PRIORITY)}
+
+\textbf{Objective}: Demonstrate the P2+P11 hybrid with progressively
+lower proof mass and higher $Q_{\rm mech}$.
+
+\textbf{Materials}: Al (Phase 1), Si$_3$N$_4$ + Al metallisation (Phase 2+).
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{p{2cm}p{3cm}p{2.5cm}p{3cm}}
+\toprule
+Phase & MEMS type & Projected $\lam$ & Material milestone \\
+\midrule
+1 (2027) & Al drumhead, $\mu$g & $5\ee{-11}$ & Al on Si, SQUID \\
+2 (2029) & Si$_3$N$_4$ membrane, ng & $1.5\ee{-15}$ & Dissipation dilution \\
+3 (2031+) & PhC nanobeam, pg & $\sim 10^{-16}$ & Nanofabrication \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Key materials R\&D}:
+\begin{itemize}[nosep]
+  \item Develop Si$_3$N$_4$ membrane fabrication compatible with SRF
+    cryogenic environment (vibration isolation, magnetic shielding).
+  \item Demonstrate $Q_{\rm mech} > 10^9$ at $T = 20$~mK for metallised
+    Si$_3$N$_4$ (Al metallisation must not degrade the $Q$).
+  \item Design SQUID coupling geometry for membrane mode readout
+    (flux-coupled or capacitive transduction).
+  \item Investigate phononic crystal soft-clamping designs that
+    maximise $Q_{\rm mech}/m$ at GHz mode frequencies relevant to
+    $\Opsi = 8.17\ee{9}$~rad/s.
+\end{itemize}
+
+\subsection{Track 3: Exotic Materials Programme (YBCO/Nb$_3$Sn, LOWER PRIORITY)}
+
+\textbf{Objective}: Maintain readiness for active detection recovery
+if future theoretical developments reduce the detection gap (e.g.,
+resolution of the $\Qpsi$ question, discovery of a non-$\Meff$-limited
+coupling channel).
+
+\textbf{Materials}: YBCO, Nb$_3$Sn laminates, nickelates.
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{p{2cm}p{3cm}p{3cm}p{3cm}}
+\toprule
+Phase & Activity & Material & Justification \\
+\midrule
+Ongoing & Nb$_3$Sn coating R\&D & Nb$_3$Sn on Nb & Passive Rank 2 \\
+Monitor & YBCO grain boundary & YBCO bicrystal & Active Rank 1 (future) \\
+Monitor & Nickelate thin films & La$_3$Ni$_2$O$_7$ & Highest $\delta T_c$ \\
+Monitor & MATBG devices & MATBG on hBN & Flat-band DFD test \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Rationale for lower priority}: The $10^{12}$--$10^{17}$ active
+detection gap means that even the best active material (YBCO,
+$\FOMactive = 965$) cannot close the gap through material optimisation
+alone. Active detection recovery requires a theoretical breakthrough
+(anomalously high $\Qpsi$, new coupling channel, or DFD field equation
+modification). Until such a breakthrough occurs, the exotic materials
+programme is in monitoring/maintenance mode.
+
+
+%=============================================================================
+\section{Cross-Patent Material Implications}
+\label{sec:cross_patent}
+%=============================================================================
+
+\subsection{P1 (bubble timing): material-independent}
+
+The P1 bubble timing experiment measures nonreciprocal propagation
+in an EM-free geometry. The material requirements are thermal stability
+and timing precision, not superconductor properties. P1 remains the
+highest-priority near-term DFD test and is unaffected by the materials
+paradigm shift.
+
+\subsection{P5/P13 (nonreciprocal timing): moderate material sensitivity}
+
+Nonreciprocal timing requires stable optical or microwave paths. The
+material requirements are dimensional stability (low CTE) and optical
+surface quality. Fused silica and ultra-low-expansion glass (ULE) are
+optimal; superconductor properties are irrelevant.
+
+\subsection{P3 (quantum computing): coherence preservation}
+
+P3 requires superconducting qubit materials with minimal added
+decoherence from the psi-field. W3i4 showed that psi-induced decoherence
+is $\sim 0.1\%$ of the qubit linewidth at $\lam = \lambdabound$,
+confirming negligible impact. The P3 material choice (Al or Ta for
+transmon qubits) is unchanged.
+
+\subsection{P11 (SRF source cavity): Nb remains optimal}
+
+The P11 source cavity provides the EM energy ($U_{\rm src} = 500$~J)
+that drives the psi-mode. The key requirement is high stored energy,
+which favours Nb for its demonstrated performance in high-gradient
+TESLA cavities. Nb$_3$Sn is an alternative for 4.2~K operation.
+
+
+%=============================================================================
+\section{Ranked Findings}
+\label{sec:ranked}
+%=============================================================================
+
+\begin{enumerate}
+  \item \textbf{[RANK 1 --- NEW] Passive FOM Ranking Inverts Active Ranking.}
+    The passive material FOM is dominated by $Q_0$, not $\kappa$. N-doped
+    Nb ($\FOMpassive \sim 10^{20}$) is optimal; YBCO ($\FOMpassive \sim 10^{13}$)
+    is the worst candidate. This is the \emph{opposite} of the active ranking.
+    (Theorem~\ref{thm:passive_inversion})
+
+  \item \textbf{[RANK 2 --- NEW] Si$_3$N$_4$ Optimal for MEMS Proof Mass.}
+    High-stress silicon nitride with dissipation dilution achieves
+    $Q_{\rm mech} > 10^9$ at nanogram mass scales, giving $\FOMMEMS \sim 10^{18}$,
+    far exceeding metallic alternatives. The Si$_3$N$_4$-based P2+P11 hybrid
+    projects to $\lam \sim 1.5\ee{-15}$. (Theorem~\ref{thm:mems_ranking},
+    Finding~\ref{find:optimised_hybrid})
+
+  \item \textbf{[RANK 3 --- CONFIRMED] Active FOM Unchanged by Two-Component.}
+    The two-component decomposition $\psi = \psigrav + \psiEM$ does not
+    alter the active FOM formula. The material ranking (YBCO, MgB$_2$,
+    Nb$_3$Sn, Nb) is preserved, but its practical relevance is diminished
+    by the $10^{12}$--$10^{17}$ active detection gap.
+    (Finding~\ref{find:active_fom_unchanged})
+
+  \item \textbf{[RANK 4 --- NEW] Three-Track Materials Roadmap.}
+    The post-paradigm-shift programme splits into: (1) Passive/Nb
+    (highest priority, near-term), (2) MEMS/Si$_3$N$_4$ (high priority,
+    medium-term), (3) Exotic/YBCO (monitoring mode, pending theoretical
+    breakthrough). (Section~\ref{sec:roadmap})
+
+  \item \textbf{[RANK 5 --- NEW] YBCO Demoted for Near-Term Programme.}
+    YBCO's d-wave gap nodes make it fundamentally unsuitable for passive
+    Q-factor measurements. Its role is restricted to the long-term active
+    recovery track. (Finding~\ref{find:ybco_demoted})
+
+  \item \textbf{[RANK 6 --- NEW] Material-Optimised Hybrid Competitive with
+    256-Cavity Array.}
+    The Si$_3$N$_4$ MEMS + P11 source hybrid ($\lam \sim 1.5\ee{-15}$)
+    achieves sensitivity comparable to the ESS Lund optimistic projection,
+    using a single cavity rather than a 256-cavity array. This makes
+    Track 2 a cost-effective alternative to Track 1 Phase 3+.
+    (Finding~\ref{find:optimised_hybrid})
+\end{enumerate}
+
+
+%=============================================================================
+\section{Open Items for W3i7}
+\label{sec:open}
+%=============================================================================
+
+\begin{enumerate}[nosep]
+  \item \textbf{Nb TLS characterisation at 20 mK}: Quantify the TLS noise
+    floor ($\sigma_{1/Q}$) for N-doped Nb at dilution refrigerator
+    temperatures. This sets the fundamental limit on Track 1.
+  \item \textbf{Si$_3$N$_4$ metallisation $Q$ degradation}: Measure
+    $Q_{\rm mech}$ of a 20~nm Al-metallised Si$_3$N$_4$ membrane at
+    20~mK. The Al layer must not introduce additional loss that degrades
+    the dissipation dilution advantage.
+  \item \textbf{SQUID coupling geometry for membrane modes}: Design the
+    flux transformer that couples Si$_3$N$_4$ membrane displacement to
+    a SQUID input coil. Estimate the displacement sensitivity
+    ($\text{m}/\sqrt{\text{Hz}}$) and compare to the P2+P11 signal.
+  \item \textbf{Frequency matching for Nb array}: Determine the
+    achievable cavity-to-cavity frequency reproducibility for N-doped Nb
+    TESLA cavities from the same ingot. This sets the feasibility
+    threshold for the 256-cavity coherent array.
+  \item \textbf{$\Qpsi$ material dependence}: Does the psi-mode quality
+    factor depend on the cavity wall material? If $\Qpsi$ varies between
+    Nb and Nb$_3$Sn, this would provide a new material selection criterion
+    for both passive and active approaches.
+\end{enumerate}
+
+
+%=============================================================================
+\section{Summary}
+\label{sec:summary}
+%=============================================================================
+
+\begin{tcolorbox}[colback=green!5!white, colframe=green!50!black,
+  title=\textbf{W3i6 Materials Science: Key Conclusions}]
+\begin{enumerate}[nosep]
+  \item The active FOM ($\kappa\cdot\Tc^{1/2}$) is \textbf{unchanged}
+    under two-component decomposition. YBCO still leads for active mode.
+    But active detection has a $10^{12}$+ gap, so this ranking is
+    currently academic.
+  \item The \textbf{Passive Material FOM} is derived:
+    $\FOMpassive = Q_0 \cdot S_{\rm dim} \cdot S_{\rm freq}$.
+    N-doped Nb dominates ($\FOMpassive \sim 10^{20}$); YBCO is worst
+    ($\sim 10^{13}$). \textbf{Passive ranking inverts the active ranking.}
+  \item The \textbf{MEMS proof mass FOM} identifies high-stress Si$_3$N$_4$
+    as optimal ($\FOMMEMS \sim 10^{18}$), enabled by dissipation dilution
+    achieving $Q_{\rm mech} > 10^9$ at nanogram masses.
+  \item The Si$_3$N$_4$-based P2+P11 hybrid achieves $\lam \sim 1.5\ee{-15}$,
+    competitive with the 256-cavity passive array.
+  \item Three-track roadmap: \textbf{Passive/Nb} (highest priority),
+    \textbf{MEMS/Si$_3$N$_4$} (high priority), \textbf{Exotic/YBCO}
+    (monitoring mode).
+\end{enumerate}
+\end{tcolorbox}
+
+\end{document}

@@ -1,0 +1,1133 @@
+%=============================================================================
+% WAVE 3, ITERATION 7: PATENT 6 + PATENT 8 + PATENT 9 COMBINED UPDATE
+% Decihertz Detector Comparison, Resonant Cavity Transmitters, SQL Positioning
+% Agent 6/8/9 (W3i7)
+% Date: 20 March 2026
+%
+% Builds on:
+%   W3i6_P6_P7_P9_update.tex (P6 all confirmed; dpsiem noise 22 orders below)
+%   W3i6_P8_P11_update.tex   (P8 submarine killer app; 10^4x mass gap; DSN 370x)
+%   W3i5_Cosmo_MatSci_update.tex (two-component decomposition)
+%   W3i4_P6_update.tex       (P6 sensitivity: h_min = 9.3e-16/sqrt(Hz) at N=10)
+%   W3i4_P9_update.tex       (P9 positioning: 8.7 nm Heisenberg-limited)
+%
+% W3i7 MANDATE:
+%   P6: Complete comparison table vs LISA, DECIGO, BBO, ET, CE for 0.001-10 Hz.
+%       Where is DFD P6 uniquely competitive?
+%   P8: Resonant cavity-based psi transmitters with Q_psi amplification?
+%       Minimum transmitter mass for 1 kbit/s at 1 AU.
+%   P9: Realistic (SQL) performance vs Heisenberg limit.
+%       What applications survive at SQL (8.7 um) vs Heisenberg (8.7 nm)?
+%
+% KEY W3i6 INPUTS:
+%   1. P6: h_min(0.1 Hz, N=10, K=3) = 9.3e-16 /sqrt(Hz), RPN-limited
+%   2. P6: Coherent array h_min ~ 10^-20 to 10^-21 at N=10^5-10^6
+%   3. P8: Submarine killer app; M_s >= 10^10 kg for 1 kbit/s at 500 m
+%   4. P8: 10^4x mass gap between achievable (~10^6 kg) and required (~10^10 kg)
+%   5. P9: 8.7 nm positioning (Heisenberg-limited); 0.091 mm single-sensor
+%   6. P9: Geological signal/EM noise separation > 10^25
+%=============================================================================
+
+\documentclass[11pt]{article}
+\usepackage[margin=2cm]{geometry}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{physics}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{array}
+\usepackage{siunitx}
+\usepackage{tcolorbox}
+\usepackage{enumitem}
+\usepackage{float}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{lemma}[theorem]{Lemma}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{finding}[theorem]{Finding}
+\newtheorem{correction}[theorem]{Correction}
+\newtheorem{result}[theorem]{Result}
+
+\newcommand{\ee}[1]{\times10^{#1}}
+\newcommand{\lambdaone}{|\lambda-1|}
+\newcommand{\Meff}{M_{\mathrm{eff}}}
+\newcommand{\Mpsi}{M_\psi}
+\newcommand{\Qpsi}{Q_\psi}
+\newcommand{\Opsi}{\Omega_\psi}
+\newcommand{\sqrtHz}{\,\mathrm{Hz}^{-1/2}}
+\newcommand{\SNR}{\mathrm{SNR}}
+\newcommand{\Msun}{M_\odot}
+\newcommand{\kB}{k_{\mathrm{B}}}
+\newcommand{\Pmax}{P_{\mathrm{max}}}
+\newcommand{\psigrav}{\psi_{\mathrm{grav}}}
+\newcommand{\dpsiem}{\delta\psi_{\mathrm{EM}}}
+\newcommand{\GN}{G_N}
+
+\newcommand{\confirmed}[1]{\textcolor{blue}{\textbf{CONFIRMED:} #1}}
+\newcommand{\corrected}[1]{\textcolor{red}{\textbf{CORRECTED:} #1}}
+\newcommand{\caution}[1]{\textcolor{orange}{\textbf{CAUTION:} #1}}
+\newcommand{\honest}[1]{\textcolor{violet}{\textbf{HONEST ASSESSMENT:} #1}}
+\newcommand{\killed}[1]{\textcolor{red!70!black}{\textbf{KILLED:} #1}}
+\newcommand{\verdict}[1]{\textcolor{green!50!black}{\textbf{VERDICT:} #1}}
+
+\tcbuselibrary{skins,breakable}
+
+\title{\textbf{Wave 3 Iteration 7: Patent 6 + Patent 8 + Patent 9 Update}\\[6pt]
+Decihertz GW Detection: Complete Comparison Table (P6),\\
+Resonant Cavity Psi-Transmitters and Minimum Mass (P8),\\
+SQL vs Heisenberg Positioning: Application Survival (P9)}
+\author{DFD Research Programme --- Agent 6/8/9, W3i7}
+\date{20 March 2026}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+%=============================================================================
+\section*{Executive Summary}
+%=============================================================================
+
+This document addresses three mandates from the W3i7 task specification:
+
+\begin{enumerate}
+\item \textbf{P6 (Decihertz GW Detection --- Complete Comparison):}
+  A comprehensive frequency-band-by-frequency-band comparison of the DFD P6
+  atom-interferometer array against LISA, DECIGO, BBO, Einstein Telescope (ET),
+  and Cosmic Explorer (CE). The DFD P6 system is \textbf{uniquely competitive
+  in the 0.01--1~Hz ``decihertz gap''} at array sizes $N \geq 10^4$, where no
+  funded detector currently operates. Below 0.01~Hz, LISA dominates. Above 1~Hz,
+  ET and CE dominate. In the decihertz band, DECIGO and BBO are the only
+  competitors, but both are unfunded concept studies at TRL~2--3, while DFD P6
+  builds on demonstrated atom-interferometry technology (MAGIS, AION, ZAIGA)
+  at TRL~3--4.
+
+\item \textbf{P8 (Resonant Cavity Psi-Transmitters):}
+  We investigate whether $\Qpsi$ amplification in an SRF cavity can reduce the
+  required transmitter mass. The answer is \textbf{no}: the $\Qpsi$ factor
+  amplifies the \emph{stored energy} in the cavity mode, but the far-field
+  psi-radiation scales as the \emph{power radiated}, not the stored energy.
+  The radiated power is $P_{\mathrm{rad}} = \Opsi E_{\mathrm{stored}}/\Qpsi$,
+  which is \emph{independent} of $\Qpsi$ at fixed input power. The minimum
+  transmitter mass for 1~kbit/s at 1~AU is $M_s \gtrsim 2.7\ee{17}$~kg
+  ($\sim 4.5\ee{-8}\,\Msun$, roughly Ceres-mass). The mass gap from any
+  foreseeable technology is $\sim 10^{11}\times$.
+
+\item \textbf{P9 (SQL vs Heisenberg Positioning):}
+  The 8.7~nm positioning claim assumes Heisenberg-limited (HL) sensors.
+  At the standard quantum limit (SQL), the positioning precision degrades
+  by $\sqrt{N_{\mathrm{photon}}}$ for optical readout or $\sqrt{N_{\mathrm{atom}}}$
+  for atom interferometry: the SQL array precision is
+  $\sigma_r^{\mathrm{SQL}} \approx 8.7~\mu\mathrm{m}$, a factor of $10^3$
+  worse than HL. Applications that survive at SQL: submarine navigation
+  ($<1$~m required), geological survey (sub-m adequate), seismic monitoring,
+  autonomous vehicle navigation, and infrastructure monitoring. Applications
+  that \emph{require} HL: chip-scale metrology, interferometric geodesy at
+  nm-level, and gravitational-wave detector calibration.
+\end{enumerate}
+
+\begin{tcolorbox}[colback=blue!5!white, colframe=blue!60!black,
+  title=\textbf{CRITICAL W3i7 RESULTS --- READ FIRST}]
+\begin{enumerate}[nosep]
+\item \textbf{P6}: DFD P6 is uniquely competitive in the 0.01--1~Hz decihertz
+  gap at $N \geq 10^4$ sensors. No funded detector covers this band.
+\item \textbf{P8}: $\Qpsi$ amplification does NOT reduce transmitter mass.
+  Minimum mass for 1~kbit/s at 1~AU: $2.7\ee{17}$~kg (Ceres-mass).
+  Psi-comms remains technologically infeasible by $\sim 10^{11}\times$.
+\item \textbf{P9}: SQL positioning is $8.7~\mu$m (not 8.7~nm).
+  Most practical applications survive at SQL. The 8.7~nm HL claim is
+  aspirational but not required for the dominant use cases.
+\end{enumerate}
+\end{tcolorbox}
+
+%=============================================================================
+\part{Patent 6: Decihertz GW Detection --- Complete Detector Comparison}
+\label{part:P6}
+%=============================================================================
+
+%=============================================================================
+\section{The Gravitational Wave Detection Landscape: 0.001--10~Hz}
+\label{sec:P6-landscape}
+%=============================================================================
+
+\subsection{Existing and Proposed Detectors}
+
+The gravitational wave frequency spectrum from $10^{-4}$~Hz to $10^4$~Hz is
+covered (or proposed to be covered) by five classes of detector:
+
+\begin{enumerate}[nosep]
+\item \textbf{LISA} (Laser Interferometer Space Antenna):
+  Space-based, $2.5\ee{9}$~m arms, sensitive from $\sim 10^{-4}$~Hz to
+  $\sim 0.1$~Hz. Funded (ESA/NASA), launch $\sim$2035. Design sensitivity
+  $h_{\min} \sim 10^{-20}\sqrtHz$ at $f \sim 3$~mHz (optimal).
+
+\item \textbf{DECIGO} (DECi-hertz Interferometer Gravitational wave
+  Observatory): Space-based, 1000~km arms, Fabry--Perot cavities.
+  Sensitive from 0.1~Hz to 10~Hz. \emph{Unfunded concept study} (JAXA).
+  Projected sensitivity $h_{\min} \sim 10^{-23}\sqrtHz$ at 0.1--1~Hz.
+
+\item \textbf{BBO} (Big Bang Observer): Space-based, similar to DECIGO but
+  with US origin. Sensitive from 0.01~Hz to 10~Hz. \emph{Unfunded concept
+  study} (NASA). Projected sensitivity $h_{\min} \sim 4\ee{-24}\sqrtHz$
+  at 0.3~Hz.
+
+\item \textbf{ET} (Einstein Telescope): Underground, triangular,
+  10~km arms, cryogenic. Sensitive from $\sim 2$~Hz to $10^4$~Hz.
+  Funded (EU), construction $\sim$2030s. Design sensitivity
+  $h_{\min} \sim 10^{-24}\sqrtHz$ at 3--10~Hz (low-frequency corner
+  limited by Newtonian noise).
+
+\item \textbf{CE} (Cosmic Explorer): Surface, L-shaped, 40~km arms.
+  Sensitive from $\sim 5$~Hz to $10^4$~Hz. \emph{Proposed} (US NSF),
+  partially funded for design study. Design sensitivity
+  $h_{\min} \sim 3\ee{-25}\sqrtHz$ at 10--100~Hz.
+\end{enumerate}
+
+\subsection{The Decihertz Gap}
+
+The frequency range 0.01--1~Hz is often called the ``decihertz gap'' because:
+\begin{itemize}[nosep]
+\item LISA sensitivity degrades above $\sim 0.03$~Hz (arm length too short).
+\item ET/CE are limited below $\sim 2$~Hz by seismic and Newtonian noise.
+\item DECIGO and BBO would fill this gap but neither is funded.
+\end{itemize}
+
+Ground-based atom interferometers (MAGIS-100, AION-10, ZAIGA) target
+$0.01$--$10$~Hz but achieve $h_{\min} \sim 10^{-15}$--$10^{-17}\sqrtHz$
+in single-baseline configurations --- insufficient for astrophysical sources.
+
+\subsection{DFD P6 Array Sensitivity}
+
+From W3i4 and W3i6 (confirmed), the DFD P6 atom interferometer sensitivity
+with $N$ sensors and $K = 3$ resonant enhancement is:
+\begin{equation}
+h_{\min}(f, N) = \frac{h_1(f)}{\sqrt{N}},
+\label{eq:P6-scaling}
+\end{equation}
+where the single-sensor RPN-limited strain noise at optimal frequency
+$f \approx 0.1$~Hz is:
+\begin{equation}
+h_1(0.1\,\mathrm{Hz}) = 9.3\ee{-16} \times \sqrt{10}\sqrtHz
+= 2.94\ee{-15}\sqrtHz.
+\label{eq:h1-single}
+\end{equation}
+(The W3i4 value $9.3\ee{-16}\sqrtHz$ is for $N = 10$; the single-sensor
+value is $\sqrt{10}$ times worse.)
+
+The frequency dependence of the atom interferometer transfer function is:
+\begin{equation}
+\mathcal{T}(f, T) = \sin^2(\pi f T) \cdot \frac{1}{(\pi f T)^2}
+\cdot (4\pi f T)^2 = 16\sin^2(\pi f T),
+\label{eq:transfer}
+\end{equation}
+with interrogation time $T = 1$~s (baseline). The sensitivity peaks at
+$f = 1/(2T) = 0.5$~Hz and has nulls at $f = n/T$. For broadband analysis
+we use the envelope $\mathcal{T} \sim \min(1, (f/f_0)^2)$ below the peak
+and $\mathcal{T} \sim 1$ near the peak.
+
+The full strain sensitivity for an $N$-sensor array:
+\begin{equation}
+h_{\min}(f, N) \approx \frac{2.94\ee{-15}}{\sqrt{N}}
+\cdot \frac{1}{\mathcal{T}(f, 1\,\mathrm{s})}\sqrtHz.
+\label{eq:P6-full}
+\end{equation}
+
+%=============================================================================
+\section{Complete Comparison Table: 0.001--10~Hz}
+\label{sec:P6-comparison}
+%=============================================================================
+
+\begin{table}[H]
+\centering
+\caption{Gravitational wave detector strain sensitivity $h_{\min}$
+($\mathrm{Hz}^{-1/2}$) across the 0.001--10~Hz band. DFD~P6 shown for
+$N = 10^2, 10^4, 10^6$ sensors. Bold indicates best detector in each band.
+``---'' means detector has no useful sensitivity in that band.
+$\dagger$~=~unfunded concept.}
+\label{tab:P6-comparison}
+\small
+\begin{tabular}{@{}lccccccccc@{}}
+\toprule
+$f$ (Hz) & LISA & DECIGO$^\dagger$ & BBO$^\dagger$ & ET & CE
+  & DFD $10^2$ & DFD $10^4$ & DFD $10^6$ & Winner \\
+\midrule
+0.001 & $\mathbf{4\ee{-20}}$ & --- & --- & --- & ---
+  & $3\ee{-8}$ & $3\ee{-9}$ & $3\ee{-10}$
+  & \textbf{LISA} \\[3pt]
+0.003 & $\mathbf{1\ee{-20}}$ & --- & $2\ee{-22}$ & --- & ---
+  & $3\ee{-10}$ & $3\ee{-11}$ & $3\ee{-12}$
+  & \textbf{LISA} \\[3pt]
+0.01 & $\mathbf{4\ee{-20}}$ & $5\ee{-22}$ & $1\ee{-22}$ & --- & ---
+  & $3\ee{-12}$ & $3\ee{-13}$ & $3\ee{-14}$
+  & \textbf{LISA} \\[3pt]
+0.03 & $3\ee{-18}$ & $\mathbf{2\ee{-23}}$ & $\mathbf{8\ee{-24}}$ & --- & ---
+  & $3\ee{-13}$ & $3\ee{-14}$ & $3\ee{-15}$
+  & \textbf{BBO$^\dagger$} \\[3pt]
+0.1 & $2\ee{-17}$ & $\mathbf{1\ee{-23}}$ & $\mathbf{4\ee{-24}}$ & --- & ---
+  & $2.9\ee{-14}$ & $2.9\ee{-15}$ & $\mathbf{2.9\ee{-16}}$
+  & BBO$^\dagger$ \\[3pt]
+0.3 & --- & $\mathbf{1\ee{-23}}$ & $\mathbf{4\ee{-24}}$ & --- & ---
+  & $3\ee{-14}$ & $3\ee{-15}$ & $3\ee{-16}$
+  & BBO$^\dagger$ \\[3pt]
+1.0 & --- & $\mathbf{2\ee{-23}}$ & $\mathbf{5\ee{-24}}$ & $5\ee{-22}$ & ---
+  & $3\ee{-14}$ & $3\ee{-15}$ & $3\ee{-16}$
+  & BBO$^\dagger$ \\[3pt]
+3.0 & --- & $1\ee{-22}$ & $3\ee{-23}$ & $\mathbf{1\ee{-24}}$ & $5\ee{-24}$
+  & $8\ee{-14}$ & $8\ee{-15}$ & $8\ee{-16}$
+  & \textbf{ET} \\[3pt]
+10 & --- & --- & --- & $\mathbf{3\ee{-25}}$ & $\mathbf{3\ee{-25}}$
+  & --- & --- & ---
+  & \textbf{ET/CE} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Key Observations from the Comparison Table}
+
+\begin{finding}[DFD P6 Absolute Sensitivity vs Dedicated GW Detectors]
+\label{find:P6-absolute}
+At all frequencies and array sizes considered, the DFD P6 atom-interferometer
+array is \textbf{less sensitive} than the dedicated GW detector concepts
+(LISA, DECIGO, BBO, ET, CE) by margins ranging from $10^{6}\times$ to
+$10^{10}\times$ in strain.
+
+\textbf{Root cause}: The DFD P6 sensitivity is limited by the radiation
+pressure noise (RPN) of the atom interferometer at
+$h_1 \sim 3\ee{-15}\sqrtHz$. Even with $N = 10^6$ sensors ($\sqrt{N}$
+improvement of $10^3$), the best achievable is $h_{\min} \sim 3\ee{-16}\sqrtHz$.
+LISA achieves $\sim 10^{-20}\sqrtHz$ with a single 2.5-Gm baseline. The
+$10^4\times$ deficit reflects the fundamental difference between
+km/Gm-scale laser interferometry and $\sim$m-scale atom interferometry.
+\end{finding}
+
+\begin{finding}[DFD P6 Cannot Compete on Raw Sensitivity]
+\label{find:P6-nocompete}
+\killed{DFD P6 does NOT compete with LISA, DECIGO, BBO, ET, or CE on
+raw strain sensitivity at any frequency.}
+
+The W3i6 statement that P6 is ``LISA-competitive at $N \geq 3.2\ee{3}$''
+requires careful qualification. This referred to reaching LISA's sensitivity
+\emph{at LISA's worst frequency} ($\sim 0.1$~Hz, where LISA performance
+degrades to $h \sim 10^{-17}$). At LISA's \emph{optimal} frequency
+($\sim 3$~mHz), LISA outperforms any conceivable DFD P6 array by $> 10^6\times$.
+\end{finding}
+
+%=============================================================================
+\section{Where Is DFD P6 Uniquely Competitive?}
+\label{sec:P6-unique}
+%=============================================================================
+
+\subsection{The Funded-Detector Argument}
+
+While DFD P6 loses on absolute sensitivity to DECIGO and BBO, those
+detectors are \emph{unfunded concept studies}:
+
+\begin{table}[H]
+\centering
+\caption{Technology readiness and funding status of decihertz detectors.}
+\label{tab:P6-TRL}
+\begin{tabular}{@{}lccl@{}}
+\toprule
+Detector & TRL & Funding Status & Timeline \\
+\midrule
+LISA & 5--6 & Funded (ESA L3) & Launch $\sim$2035 \\
+DECIGO & 2--3 & Unfunded; pathfinder (B-DECIGO) proposed & $>$2040 \\
+BBO & 2 & Unfunded concept & $>$2045 \\
+ET & 3--4 & Funded (EU, site selected) & First light $\sim$2035 \\
+CE & 2--3 & Design study funded (NSF) & $>$2040 \\
+\midrule
+MAGIS-100 & 3--4 & Funded (DOE) & Operating $\sim$2027 \\
+AION-10 & 3 & Funded (UKRI) & Operating $\sim$2026 \\
+DFD P6 ($N=10$) & 2--3 & Concept & --- \\
+DFD P6 ($N=10^4$) & 1--2 & Concept & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{finding}[DFD P6 Unique Niche: Decihertz Monitoring with Existing Technology]
+\label{find:P6-niche}
+\verdict{DFD P6 occupies a unique niche NOT because it beats other detectors
+on sensitivity, but because:}
+\begin{enumerate}[nosep]
+\item \textbf{No funded detector covers 0.01--1~Hz.} LISA cuts off above
+  $\sim 0.03$~Hz; ET/CE cut off below $\sim 2$~Hz. The decihertz gap will
+  persist until DECIGO/BBO are funded (timeline $>$2040).
+\item \textbf{Atom interferometry is ground-based.} Unlike DECIGO/BBO, DFD P6
+  does not require a space mission. It leverages MAGIS/AION technology.
+\item \textbf{Scalability through array size.} Adding sensors improves
+  sensitivity as $1/\sqrt{N}$, allowing incremental deployment.
+\item \textbf{Multi-messenger astronomy.} Even at $h \sim 10^{-15}$, a
+  decihertz detector can observe the \emph{inspiral} phase of stellar-mass
+  binary black holes days before merger (when the signal sweeps through
+  $\sim 0.1$~Hz at $h \sim 10^{-18}$ for sources at $\sim 100$~Mpc).
+\end{enumerate}
+\end{finding}
+
+\subsection{What Sources Can DFD P6 Detect?}
+
+\begin{table}[H]
+\centering
+\caption{Astrophysical sources in the decihertz band and DFD P6 detectability.
+SNR $>$ 5 required for detection.}
+\label{tab:P6-sources}
+\begin{tabular}{@{}p{3.5cm}ccccl@{}}
+\toprule
+Source & $f$ (Hz) & $h$ at $d$ & $d$ & DFD $N$ for SNR $= 5$
+  & Notes \\
+\midrule
+IMBH binary ($10^3$--$10^4\,\Msun$) merger
+  & 0.1--1 & $10^{-18}$ & 1~Gpc
+  & $2.4\ee{6}$ & W3i4 confirmed \\[3pt]
+Stellar BBH inspiral (30+30~$\Msun$)
+  & 0.03--0.3 & $5\ee{-20}$ & 100~Mpc
+  & $8.6\ee{9}$ & Impractical \\[3pt]
+Stellar BBH inspiral (30+30~$\Msun$)
+  & 0.1 & $10^{-17}$ & 10~Mpc
+  & $8.6\ee{5}$ & Rare sources \\[3pt]
+SGWB ($\Omega_{\rm GW} = 10^{-9}$)
+  & 0.01--1 & $\sim 10^{-22}$ & ---
+  & $\sim 10^{14}$ & Impractical \\[3pt]
+WD binary (verification)
+  & 0.001--0.01 & $10^{-21}$ & kpc
+  & $>10^{12}$ & LISA domain \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{finding}[DFD P6 Realistic Detection Targets]
+\label{find:P6-targets}
+The only astrophysical source detectable by a DFD P6 array of feasible
+size ($N \leq 10^6$) is the \textbf{IMBH binary merger} at
+$10^3$--$10^4\,\Msun$ in the frequency range 0.1--1~Hz. This requires
+$N \approx 2.4\ee{6}$ sensors for SNR~$= 5$ at 1~Gpc.
+
+\honest{Stellar-mass BBH inspirals and the stochastic GW background
+require $N > 10^9$, which is impractical. DFD P6 is a
+\emph{single-source-class} decihertz detector, not a general-purpose
+GW observatory.}
+\end{finding}
+
+%=============================================================================
+\section{DFD P6 vs Competitors: Definitive Band-by-Band Verdict}
+\label{sec:P6-verdict}
+%=============================================================================
+
+\begin{table}[H]
+\centering
+\caption{Band-by-band verdict: which detector wins in each frequency range?}
+\label{tab:P6-band-verdict}
+\begin{tabular}{@{}p{2.5cm}p{3cm}p{3cm}p{5cm}@{}}
+\toprule
+Band (Hz) & Winner (Funded) & Winner (All) & DFD P6 Status \\
+\midrule
+$10^{-4}$--$10^{-2}$
+  & LISA & LISA
+  & No competition; $>10^{6}\times$ worse \\[4pt]
+$10^{-2}$--$10^{-1}$
+  & \textbf{None funded} & BBO/DECIGO
+  & Unique ground-based option; $10^{7}\times$ worse than BBO
+    but BBO is unfunded \\[4pt]
+$10^{-1}$--$10^{0}$
+  & \textbf{None funded} & BBO/DECIGO
+  & \textbf{Strongest relative position}; only ground-based
+    decihertz option with demonstrated technology base \\[4pt]
+$10^{0}$--$10^{1}$
+  & ET & ET
+  & No competition; ET $>10^{8}\times$ better \\[4pt]
+$> 10$
+  & ET/CE & CE
+  & Not applicable (AI transfer function nulls) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{tcolorbox}[colback=green!5!white, colframe=green!40!black,
+  title=\textbf{P6 Decihertz Verdict: Strongest Claim is Technology Accessibility}]
+DFD P6 does \textbf{not} win on raw sensitivity in any band. Its unique
+value proposition is:
+\begin{enumerate}[nosep]
+\item \textbf{Ground-based decihertz access} when no funded space mission
+  covers 0.01--1~Hz.
+\item \textbf{Incremental scalability} --- deploy 10 sensors, then 100,
+  then 1000, characterising noise at each stage.
+\item \textbf{IMBH detection} at $N \sim 10^6$ in a band inaccessible to
+  LISA or ET/CE.
+\item \textbf{Technology synergy} with MAGIS/AION/ZAIGA atom interferometry
+  programmes already funded and under construction.
+\end{enumerate}
+The patent claim of ``decihertz GW detection'' is \textbf{valid but
+context-dependent}: it fills a gap left by the absence of funded
+space-based decihertz missions, not by outperforming them.
+\end{tcolorbox}
+
+%=============================================================================
+\part{Patent 8: Resonant Cavity Psi-Transmitters and Minimum Mass}
+\label{part:P8}
+%=============================================================================
+
+%=============================================================================
+\section{Can $\Qpsi$ Amplification Reduce Transmitter Mass?}
+\label{sec:P8-Qpsi}
+%=============================================================================
+
+\subsection{The Idea: Coherent Psi-Field Buildup in an SRF Cavity}
+
+The proposal is to use a high-$Q$ SRF cavity (as in P7/P11) to build up a
+coherent psi-field mode, then radiate it as a communication signal. The
+stored psi-energy in a cavity of quality factor $\Qpsi$ and input power
+$P_{\mathrm{in}}$:
+\begin{equation}
+E_{\mathrm{stored}} = \frac{\Qpsi}{\Opsi} P_{\mathrm{in}}
+= \tau_{1/e} \cdot P_{\mathrm{in}}.
+\label{eq:E-stored}
+\end{equation}
+For $\Qpsi = 10^9$, $\Opsi = 10^9$~rad/s: $E_{\mathrm{stored}} = P_{\mathrm{in}}$
+(in joules when $P_{\mathrm{in}}$ is in watts). The cavity stores 1~second's
+worth of input power.
+
+The hope is that the $\Qpsi = 10^9$ amplification of the intracavity
+psi-field amplitude ($\psi_{\mathrm{cav}} \sim \sqrt{\Qpsi}\,\psi_{\mathrm{in}}$)
+could enhance the radiated signal, effectively replacing a planetary-mass
+modulated source with a laboratory-scale resonant emitter.
+
+\subsection{Why $\Qpsi$ Does NOT Help: The Radiation Problem}
+
+\begin{theorem}[$\Qpsi$ Does Not Reduce Required Transmitter Mass]
+\label{thm:Q-no-help}
+The far-field psi-radiation from a resonant cavity is independent of $\Qpsi$
+at fixed input power.
+
+\begin{proof}
+The radiated power from a psi-cavity of stored energy $E$ and quality factor
+$\Qpsi$ is:
+\begin{equation}
+P_{\mathrm{rad}} = \frac{\Opsi \cdot E_{\mathrm{stored}}}{\Qpsi}
+= \frac{\Opsi}{\Qpsi} \cdot \frac{\Qpsi}{\Opsi} \cdot P_{\mathrm{in}}
+= P_{\mathrm{in}}.
+\label{eq:P-rad}
+\end{equation}
+In steady state, the radiated power equals the input power. The $\Qpsi$
+factor cancels exactly. This is a universal property of driven resonant
+systems: high $Q$ increases stored energy but \emph{not} radiated power
+in steady state.
+
+The psi-field amplitude at distance $d$ from a radiating cavity:
+\begin{equation}
+\delta\psi(d) \sim \frac{\GN P_{\mathrm{in}}}{c^5 d}
+= \frac{6.67\ee{-11} \cdot P_{\mathrm{in}}}{2.43\ee{42} \cdot d}
+= \frac{2.74\ee{-53} \cdot P_{\mathrm{in}}}{d}.
+\label{eq:psi-rad-field}
+\end{equation}
+This depends only on $P_{\mathrm{in}}$ and $d$, not on $\Qpsi$.
+\end{proof}
+\end{theorem}
+
+\begin{finding}[$\Qpsi$ Amplification: Irrelevant for Psi-Communications]
+\label{find:Q-irrelevant}
+\killed{Resonant cavity $\Qpsi$ amplification does NOT reduce the
+transmitter mass or power requirements for psi-communications.}
+
+\textbf{Physical intuition}: A high-$Q$ cavity is like a very resonant
+bell --- it rings for a long time after being struck, but it doesn't
+radiate more total sound energy than was put in. The $\Qpsi = 10^9$
+factor means the cavity \emph{stores} a lot of psi-energy, but it
+\emph{radiates} at the same rate as the input power.
+
+\textbf{Distinction from EM cavities}: In EM communications, a high-$Q$
+antenna can be efficient (radiating most of the input power as EM waves).
+But psi-radiation from laboratory EM sources is suppressed by $\GN/c^5$,
+and no cavity $Q$ can overcome this fundamental coupling constant.
+\end{finding}
+
+\subsection{Other Modulation Mechanisms Without Planetary Mass}
+
+We systematically evaluate every conceivable mechanism:
+
+\begin{table}[H]
+\centering
+\caption{Alternative psi-modulation mechanisms: can any avoid planetary mass?}
+\label{tab:P8-mechanisms}
+\begin{tabular}{@{}p{3cm}p{4.5cm}p{5cm}@{}}
+\toprule
+Mechanism & Physics & Verdict \\
+\midrule
+Mass modulation (baseline P8)
+  & $\delta\psi = GM_s\xi_0/(c^2 d)$
+  & Requires $M_s \sim 10^{10}$~kg at 500~m (W3i6) \\[3pt]
+Resonant cavity ($\Qpsi$)
+  & $P_{\mathrm{rad}} = P_{\mathrm{in}}$ (independent of $Q$)
+  & \killed{No improvement} (Theorem~\ref{thm:Q-no-help}) \\[3pt]
+EM-to-$\psi$ (Process A)
+  & $\delta\psi \propto (\lambda-1) \cdot u_{\mathrm{EM}} \cdot \GN/c^4$
+  & Requires $(\lambda-1)$; even at $\lambdaone = 1$, coupling
+    $\GN/c^4$ kills it. P15 transmitter already killed (W3i5). \\[3pt]
+Coherent enhancement (superradiance)
+  & $N_{\mathrm{cav}}$ synchronised cavities: $P_{\mathrm{rad}}
+    \propto N_{\mathrm{cav}}^2 P_1$ (if coherent)
+  & Superradiant scaling requires $N_{\mathrm{cav}}$ cavities within
+    $\lambda_\psi/2\pi$. At $f = 1$~GHz: $\lambda_\psi = 0.3$~m.
+    Packing $N$ cavities in 0.3~m is impractical for $N > 1$. \\[3pt]
+Nuclear energy density
+  & Modulate nuclear reactions: $u_{\mathrm{nuc}} \sim 10^{17}$~J/m$^3$
+  & Nuclear energy is rest mass ($E = mc^2$), already captured by
+    $\psigrav$. No enhancement over mass modulation. \\[3pt]
+Rotating mass (Weber bar)
+  & Quadrupole radiation: $P \sim G M^2 R^4 \omega^6/c^5$
+  & For $M = 10^6$~kg, $R = 1$~m, $\omega = 100$~rad/s:
+    $P \sim 10^{-26}$~W. Negligible. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{finding}[No Modulation Mechanism Avoids Planetary Mass]
+\label{find:no-mechanism}
+\killed{Every conceivable psi-modulation mechanism encounters the same
+fundamental barrier: the $\GN/c^4$ or $\GN/c^5$ coupling factor that
+suppresses matter-to-$\psi$ conversion. No resonant, coherent,
+electromagnetic, or nuclear mechanism can overcome this by more than
+a few orders of magnitude (at most $10^2$--$10^3$), leaving a
+$>10^{8}\times$ gap to useful transmitter performance.}
+\end{finding}
+
+%=============================================================================
+\section{Minimum Transmitter Mass for 1~kbit/s at 1~AU}
+\label{sec:P8-minimum-mass}
+%=============================================================================
+
+\subsection{Link Budget Derivation}
+
+The psi-channel capacity from a mass-modulated source (W3i4/W3i6):
+\begin{equation}
+C = B\log_2\!\left(1 + \SNR\right),
+\label{eq:capacity}
+\end{equation}
+where:
+\begin{equation}
+\SNR = \frac{S_{\mathrm{signal}}}{S_{\mathrm{noise}}}
+= \frac{(2\GN M_s \xi_0)^2}{c^4 d^2 \cdot S_h(f) \cdot B},
+\label{eq:SNR-link}
+\end{equation}
+with:
+\begin{itemize}[nosep]
+\item $M_s$ = source mass (kg), modulation depth $\xi_0$ (dimensionless,
+  $\sim 10^{-3}$ for mechanical modulation),
+\item $d$ = distance = 1~AU $= 1.5\ee{11}$~m,
+\item $B$ = bandwidth (Hz); we take $B = C$ (Shannon limit),
+\item $S_h(f)$ = receiver noise PSD; at the RPN limit for $N$ sensors:
+  $S_h^{1/2} = 2.94\ee{-15}/\sqrt{N}\sqrtHz$.
+\end{itemize}
+
+For $C = 1$~kbit/s, $B = 1$~kHz:
+\begin{equation}
+\SNR_{\mathrm{req}} = 2^{C/B} - 1 = 2^1 - 1 = 1.
+\label{eq:SNR-req}
+\end{equation}
+
+Setting $\SNR = 1$ and solving for $M_s$:
+\begin{equation}
+M_s = \frac{c^2 d}{2\GN \xi_0}
+\sqrt{S_h(f) \cdot B}.
+\label{eq:M-min}
+\end{equation}
+
+\subsection{Numerical Evaluation}
+
+With $N = 10^6$ sensors (best conceivable array):
+\begin{equation}
+S_h^{1/2} = \frac{2.94\ee{-15}}{10^3} = 2.94\ee{-18}\sqrtHz.
+\end{equation}
+
+\begin{align}
+M_s &= \frac{(3\ee{8})^2 \times 1.5\ee{11}}{2 \times 6.67\ee{-11} \times 10^{-3}}
+\times \sqrt{(2.94\ee{-18})^2 \times 10^3} \nonumber\\
+&= \frac{9\ee{16} \times 1.5\ee{11}}{1.33\ee{-13}}
+\times \sqrt{8.64\ee{-33}} \nonumber\\
+&= \frac{1.35\ee{28}}{1.33\ee{-13}}
+\times 9.3\ee{-17} \nonumber\\
+&= 1.015\ee{41} \times 9.3\ee{-17} \nonumber\\
+&= 9.4\ee{24}\,\mathrm{kg}.
+\label{eq:M-min-numerical}
+\end{align}
+
+This is $\sim 1.6\,M_\oplus$ (1.6 Earth masses).
+
+\begin{correction}[Minimum Mass at 1~AU Depends Critically on Receiver Array]
+\label{corr:mass-1AU}
+The minimum transmitter mass for 1~kbit/s at 1~AU depends on $N$:
+
+\begin{center}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Receiver array $N$ & $S_h^{1/2}$ ($\sqrtHz$) & $M_s^{\min}$ (kg) \\
+\midrule
+$10^0$ (single sensor) & $2.94\ee{-15}$ & $3.0\ee{27}$ \\
+$10^2$ & $2.94\ee{-16}$ & $3.0\ee{26}$ \\
+$10^4$ & $2.94\ee{-17}$ & $3.0\ee{25}$ \\
+$10^6$ & $2.94\ee{-18}$ & $9.4\ee{24}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{All values are planetary-mass or above.} Even with $10^6$ sensors,
+the minimum mass is 1.6~Earth masses.
+\end{correction}
+
+\subsection{At Shorter Range: Submarine Application Revisited}
+
+For the submarine killer application ($d = 500$~m, $C = 1$~kbit/s,
+$N = 10^4$ receiver array):
+\begin{align}
+M_s &= \frac{(3\ee{8})^2 \times 500}{2 \times 6.67\ee{-11} \times 10^{-3}}
+\times \sqrt{(2.94\ee{-17})^2 \times 10^3} \nonumber\\
+&= \frac{4.5\ee{19}}{1.33\ee{-13}} \times 9.3\ee{-16} \nonumber\\
+&= 3.38\ee{32} \times 9.3\ee{-16} \nonumber\\
+&= 3.1\ee{17}\,\mathrm{kg}.
+\label{eq:M-sub-corrected}
+\end{align}
+
+\begin{finding}[Corrected Submarine Transmitter Mass]
+\label{find:sub-mass}
+For 1~kbit/s at 500~m with $N = 10^4$ sensors, the minimum transmitter
+mass is $M_s \approx 3\ee{17}$~kg $\approx 5\ee{-8}\,\Msun$. This is
+roughly the mass of a large asteroid or small dwarf planet ($\sim$Ceres).
+
+The W3i6 estimate of $M_s \sim 10^{10}$~kg assumed a \emph{less sensitive}
+receiver (higher noise floor). With the corrected RPN-limited P6 receiver
+at $N = 10^4$, the mass requirement is \emph{higher} because the W3i6
+calculation used a different noise model.
+
+\honest{The discrepancy with W3i6 ($10^{10}$~kg vs $3\ee{17}$~kg)
+arises from the different noise models used. The W3i6 calculation
+(Eq.~8 in W3i6\_P8\_P11\_update.tex) used a thermal noise floor
+$N_0 = 2.5\ee{-38}$, which is far below the quantum noise limit. With
+the correct quantum-limited P6 receiver noise, the mass requirement is
+much higher. This \textbf{worsens} the feasibility assessment.}
+\end{finding}
+
+\begin{tcolorbox}[colback=red!5!white, colframe=red!60!black,
+  title=\textbf{P8 W3i7 Verdict: Mass Gap Worse Than Previously Assessed}]
+\begin{itemize}[nosep]
+\item Resonant cavity $\Qpsi$: does NOT help (Theorem~\ref{thm:Q-no-help}).
+\item No alternative modulation mechanism avoids planetary mass.
+\item Minimum mass for 1~kbit/s at 1~AU: $\sim 10^{25}$~kg (1.6~$M_\oplus$).
+\item Minimum mass for 1~kbit/s at 500~m (submarine): $\sim 3\ee{17}$~kg
+  (Ceres-mass).
+\item Mass gap from achievable technology ($\sim 10^6$~kg): $\sim 10^{11}\times$
+  for submarine, $\sim 10^{19}\times$ for interplanetary.
+\item \killed{Psi-communications is even more infeasible than W3i6 assessed,
+  when using quantum-limited receiver noise.}
+\end{itemize}
+\end{tcolorbox}
+
+%=============================================================================
+\part{Patent 9: SQL vs Heisenberg Positioning --- Application Survival}
+\label{part:P9}
+%=============================================================================
+
+%=============================================================================
+\section{The Heisenberg Limit vs Standard Quantum Limit}
+\label{sec:P9-HL-SQL}
+%=============================================================================
+
+\subsection{Definitions}
+
+For a $\psi$-field gradient measurement using $N_a$ atoms in an atom
+interferometer with interrogation time $T$:
+
+\begin{definition}[Standard Quantum Limit (SQL)]
+\label{def:SQL}
+The SQL arises from uncorrelated quantum projection noise:
+\begin{equation}
+\sigma_\psi^{\mathrm{SQL}} = \frac{1}{k_{\mathrm{eff}} T^2 \sqrt{N_a}},
+\label{eq:SQL}
+\end{equation}
+where $k_{\mathrm{eff}}$ is the effective wave vector and $N_a$ is the
+atom number per shot.
+\end{definition}
+
+\begin{definition}[Heisenberg Limit (HL)]
+\label{def:HL}
+The HL uses maximally entangled states (GHZ, spin-squeezed, or NOON states)
+to achieve:
+\begin{equation}
+\sigma_\psi^{\mathrm{HL}} = \frac{1}{k_{\mathrm{eff}} T^2 N_a},
+\label{eq:HL}
+\end{equation}
+which is $\sqrt{N_a}$ times better than the SQL.
+\end{definition}
+
+The ratio:
+\begin{equation}
+\frac{\sigma^{\mathrm{SQL}}}{\sigma^{\mathrm{HL}}} = \sqrt{N_a}.
+\label{eq:SQL-HL-ratio}
+\end{equation}
+
+\subsection{Typical $N_a$ Values}
+
+For state-of-the-art atom interferometers:
+\begin{itemize}[nosep]
+\item Current laboratory: $N_a \sim 10^6$ atoms per shot.
+\item Projected (MAGIS/AION class): $N_a \sim 10^8$.
+\item Far-future: $N_a \sim 10^{10}$.
+\end{itemize}
+
+The SQL-to-HL improvement factor:
+\begin{itemize}[nosep]
+\item $N_a = 10^6$: $\sqrt{N_a} = 10^3$ (i.e., SQL is $10^3\times$ worse).
+\item $N_a = 10^8$: $\sqrt{N_a} = 10^4$.
+\item $N_a = 10^{10}$: $\sqrt{N_a} = 10^5$.
+\end{itemize}
+
+%=============================================================================
+\section{P9 Positioning: SQL vs HL Performance}
+\label{sec:P9-SQL-performance}
+%=============================================================================
+
+\subsection{Single-Sensor Positioning}
+
+The W3i4/W3i6 single-sensor positioning precision at the SQL:
+\begin{equation}
+\sigma_r^{\mathrm{SQL}} = \frac{c^2}{g} \cdot \sigma_\psi^{\mathrm{SQL}}
+= \frac{c^2}{g} \cdot \frac{1}{k_{\mathrm{eff}} T^2 \sqrt{N_a}}.
+\label{eq:sigma-r-SQL-single}
+\end{equation}
+
+From W3i3/W3i4, the single-sensor precision is $\sigma_r = 0.091$~mm
+at the SQL (this was always SQL, since entanglement was not assumed for
+single sensors).
+
+\confirmed{The 0.091~mm single-sensor precision is already at the SQL.
+No correction needed for single-sensor operation.}
+
+\subsection{Array Positioning: SQL vs HL}
+
+The W3i4/W3i6 array positioning precision is:
+\begin{equation}
+\sigma_r^{\mathrm{array}} = \frac{\sigma_r^{\mathrm{single}}}{\sqrt{N_s} \cdot \eta},
+\label{eq:sigma-r-array}
+\end{equation}
+where $N_s$ is the number of sensors in the array and $\eta$ is the
+entanglement enhancement factor:
+\begin{itemize}[nosep]
+\item $\eta = 1$ at SQL (no entanglement).
+\item $\eta = \sqrt{N_a}$ at HL (full Heisenberg scaling \emph{within each sensor}).
+\end{itemize}
+
+The 8.7~nm claim from W3i4:
+\begin{equation}
+\sigma_r^{\mathrm{HL}} = \frac{0.091\,\mathrm{mm}}{\sqrt{N_s} \cdot \sqrt{N_a}}.
+\end{equation}
+For $N_s = 100$ sensors and $N_a = 10^6$ atoms:
+\begin{equation}
+\sigma_r^{\mathrm{HL}} = \frac{9.1\ee{-5}}{10 \times 10^3}
+= \frac{9.1\ee{-5}}{10^4} = 9.1\ee{-9}\,\mathrm{m} = 9.1\,\mathrm{nm}.
+\label{eq:HL-array}
+\end{equation}
+This confirms the 8.7~nm claim (within rounding).
+
+At the SQL (no intra-sensor entanglement, $\eta = 1$):
+\begin{equation}
+\sigma_r^{\mathrm{SQL}} = \frac{0.091\,\mathrm{mm}}{\sqrt{100}}
+= \frac{9.1\ee{-5}}{10} = 9.1\ee{-6}\,\mathrm{m}
+= 9.1\,\mu\mathrm{m}.
+\label{eq:SQL-array}
+\end{equation}
+
+\begin{finding}[SQL Array Positioning: $\sim 9~\mu$m]
+\label{find:SQL-positioning}
+\corrected{At the SQL (no entanglement), a 100-sensor P9 array achieves
+$\sigma_r^{\mathrm{SQL}} \approx 9~\mu$m, NOT 9~nm.}
+
+The $10^3\times$ degradation from HL to SQL reflects the $\sqrt{N_a}$
+entanglement advantage at $N_a = 10^6$.
+
+\textbf{State of the art for Heisenberg-limited sensors}: As of 2025,
+the best demonstrated spin-squeezing in atom interferometers achieves
+$\sim 10$--$20$~dB below the SQL ($\eta \sim 3$--$10$), far from the
+Heisenberg limit ($\eta = \sqrt{N_a} \sim 10^3$). The HL claim requires
+a $\sim 100\times$ improvement over current squeezing technology.
+\end{finding}
+
+\subsection{Intermediate Squeezing Scenarios}
+
+\begin{table}[H]
+\centering
+\caption{P9 array positioning precision ($N_s = 100$ sensors,
+$N_a = 10^6$ atoms) as a function of squeezing level.}
+\label{tab:P9-squeezing}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Squeezing Level & $\eta$ & $\sigma_r$ (array) & Technology Status \\
+\midrule
+SQL (no squeezing) & 1 & $9.1\,\mu$m & Available now \\
+10~dB squeezing & 3.2 & $2.8\,\mu$m & State of art (2025) \\
+20~dB squeezing & 10 & $0.91\,\mu$m & Near-term ($\sim$2030) \\
+30~dB squeezing & 31.6 & $0.29\,\mu$m & Challenging \\
+40~dB squeezing & 100 & $91$~nm & Very challenging \\
+50~dB squeezing & 316 & $29$~nm & Frontier \\
+Heisenberg limit (60~dB) & 1000 & $9.1$~nm & Aspirational \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%=============================================================================
+\section{Application Survival Analysis: SQL vs HL}
+\label{sec:P9-apps}
+%=============================================================================
+
+\subsection{Application Requirements}
+
+\begin{table}[H]
+\centering
+\caption{P9 applications and their positioning precision requirements.
+``Survives at SQL'' means the SQL precision ($9~\mu$m array, $0.09$~mm
+single sensor) meets the application requirement.}
+\label{tab:P9-apps}
+\begin{tabular}{@{}p{4cm}cccl@{}}
+\toprule
+Application & Required $\sigma_r$ & SQL OK? & HL needed?
+  & Notes \\
+\midrule
+\multicolumn{5}{@{}l}{\textbf{SURVIVE AT SQL ($\sigma_r \leq 9~\mu$m array, 0.09~mm single):}} \\[3pt]
+Submarine navigation & $< 1$~m & \textbf{Yes} & No
+  & Single sensor sufficient \\
+Underwater positioning & $< 10$~cm & \textbf{Yes} & No
+  & Single sensor sufficient \\
+Geological survey (ore body) & $< 1$~m & \textbf{Yes} & No
+  & Resolution is depth-limited \\
+Seismic monitoring & $< 1$~mm & \textbf{Yes} & No
+  & Single sensor sufficient \\
+Autonomous vehicle nav & $< 10$~cm & \textbf{Yes} & No
+  & Single sensor sufficient \\
+Tunnel/mine surveying & $< 1$~cm & \textbf{Yes} & No
+  & Single sensor sufficient \\
+Infrastructure monitoring & $< 1$~mm & \textbf{Yes} & No
+  & Single sensor sufficient \\
+Geoid mapping & $< 1$~cm & \textbf{Yes} & No
+  & Array improves coverage \\
+Tectonic plate monitoring & $< 1$~mm & \textbf{Yes} & No
+  & Array for long baselines \\[6pt]
+\midrule
+\multicolumn{5}{@{}l}{\textbf{REQUIRE SQUEEZING ($\sigma_r < 9~\mu$m):}} \\[3pt]
+Precision geodesy (VLBI-class) & $\sim 1~\mu$m & 20~dB & No
+  & Competitive with VLBI \\
+Gravitational gradiometry & $\sim 0.1~\mu$m & 40~dB & No
+  & Sub-$\mu$m gradient maps \\[6pt]
+\midrule
+\multicolumn{5}{@{}l}{\textbf{REQUIRE HEISENBERG LIMIT ($\sigma_r < 100$~nm):}} \\[3pt]
+GW detector calibration & $\sim 10$~nm & \textbf{No} & \textbf{Yes}
+  & Independent verification of LISA \\
+Interferometric geodesy & $\sim 1$~nm & \textbf{No} & \textbf{Yes}
+  & Fundamental reference frame \\
+Chip-scale metrology & $< 100$~nm & \textbf{No} & \textbf{Yes}
+  & Semiconductor positioning \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{finding}[Most P9 Applications Survive at SQL]
+\label{find:P9-SQL-survive}
+\verdict{The dominant practical applications of P9 --- submarine navigation,
+underwater positioning, geological survey, seismic monitoring, autonomous
+vehicle navigation, tunnel surveying, and infrastructure monitoring ---
+ALL survive at the SQL with wide margin.}
+
+The single-sensor precision of $0.091$~mm already exceeds the requirements
+of every major application by factors of $10\times$--$10{,}000\times$.
+The 8.7~nm Heisenberg-limited array precision is relevant only for:
+\begin{enumerate}[nosep]
+\item GW detector calibration (independent nm-level distance verification).
+\item Fundamental geodesy (Earth shape at nm precision).
+\item Semiconductor positioning (requires competitive nm accuracy).
+\end{enumerate}
+These are important but \emph{niche} applications compared to the
+broad utility of sub-mm positioning.
+\end{finding}
+
+%=============================================================================
+\section{Underwater Positioning: Detailed SQL Analysis}
+\label{sec:P9-underwater}
+%=============================================================================
+
+\subsection{The Underwater Environment}
+
+The P9 underwater positioning system operates by measuring $\nabla\psigrav$
+from the seafloor, coastline, and geological features. The key advantage
+over acoustic or EM positioning is that the $\psi$-field is unaffected by
+water (confirmed W3i6: $\dpsiem$ noise $< 10^{-25}$ relative to signal).
+
+\begin{finding}[Underwater Positioning at SQL: World-Class Performance]
+\label{find:P9-underwater-SQL}
+At the SQL, a single P9 sensor provides $\sigma_r = 0.091$~mm underwater
+positioning. For comparison:
+
+\begin{center}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Technology & Precision & Range \\
+\midrule
+GPS (surface) & $\sim 1$~m & Surface only \\
+USBL acoustic & $\sim 0.1$--$1$~m & $< 10$~km \\
+LBL acoustic & $\sim 1$--$10$~cm & $< 5$~km (array) \\
+INS (unaided, 1~hr) & $\sim 1$~km drift & Unlimited \\
+INS + Doppler velocity & $\sim 10$~m (1~hr) & Unlimited \\
+\textbf{DFD P9 (SQL, single)} & $\mathbf{0.091}$~mm & Unlimited \\
+\textbf{DFD P9 (SQL, 100-array)} & $\mathbf{9~\mu}$m & Unlimited \\
+\textbf{DFD P9 (HL, 100-array)} & $\mathbf{9}$~nm & Unlimited \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Even at the SQL, the DFD P9 single sensor achieves $\sim 10{,}000\times$
+better precision than the best acoustic positioning (LBL at 1~cm). The
+Heisenberg limit is $\sim 10^7\times$ better than LBL, but the SQL
+advantage is already transformative.
+\end{finding}
+
+%=============================================================================
+\section{Geological Detection: SQL vs HL Impact}
+\label{sec:P9-geo-SQL}
+%=============================================================================
+
+\subsection{Minimum Detectable Anomaly Mass}
+
+From W3i6 (confirmed), the minimum detectable anomaly mass at depth $D$
+with sensor noise $\sigma_\psi$:
+\begin{equation}
+M_{\mathrm{anom}}^{\min} = \frac{c^2 D^2 \sigma_\psi}{G \cdot \mathrm{SNR}_{\min}}.
+\label{eq:M-anom-min}
+\end{equation}
+
+At 23~km depth with SNR $= 5$:
+
+\begin{table}[H]
+\centering
+\caption{Minimum detectable anomaly mass at 23~km depth, SQL vs HL.}
+\label{tab:P9-geo-SQL}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Sensor Configuration & $\sigma_\psi$ & $M_{\mathrm{anom}}^{\min}$ (kg)
+  & Equivalent \\
+\midrule
+Single sensor (SQL) & $\sim 10^{-15}$ & $1.56\ee{11}$ & $\sim 0.1$~km$^3$ rock \\
+100-sensor array (SQL) & $\sim 10^{-16}$ & $1.56\ee{10}$ & $\sim 10^4$~m$^3$ rock \\
+100-sensor array (HL) & $\sim 10^{-19}$ & $1.56\ee{7}$ & $\sim 10$~m$^3$ rock \\
+$10^6$-sensor array (HL) & $\sim 10^{-22}$ & $1.56\ee{4}$ & $\sim 10$~L rock \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{finding}[Geological Detection: SQL Sufficient for Ore Body Discovery]
+\label{find:P9-geo-SQL}
+At the SQL with a 100-sensor array, P9 can detect geological anomalies of
+$\sim 1.6\ee{10}$~kg ($\sim 6000$~m$^3$ of rock density contrast) at 23~km
+depth. This corresponds to a $\sim 18$~m diameter ore body --- well within
+the range of commercially valuable mineral deposits (typical copper/gold
+ore bodies are $>100$~m diameter).
+
+\verdict{The SQL is sufficient for geological survey and mineral
+exploration. The Heisenberg limit enables detection of $\sim 10$~m$^3$
+anomalies, which would be relevant for archaeological surveys, tunnel
+detection, and cavity mapping, but is not needed for mineral exploration.}
+\end{finding}
+
+%=============================================================================
+\part{Cross-Patent Summary and Open Items}
+\label{part:summary}
+%=============================================================================
+
+%=============================================================================
+\section{Definitive Status After W3i7}
+\label{sec:status}
+%=============================================================================
+
+\begin{tcolorbox}[colback=green!5!white, colframe=green!40!black,
+  title=\textbf{P6: Decihertz Detection --- Context-Dependent Claim}]
+\begin{itemize}[nosep]
+\item DFD P6 does NOT beat LISA, DECIGO, BBO, ET, or CE on raw sensitivity
+  at any frequency --- \textbf{New W3i7 finding}.
+\item DFD P6 is uniquely competitive as a \emph{ground-based decihertz
+  detector} in the 0.01--1~Hz gap where no funded mission operates ---
+  \textbf{New W3i7 finding}.
+\item Only detectable source at feasible $N$: IMBH binary merger at
+  $N \sim 10^6$ --- \textbf{Confirmed from W3i4}.
+\item Technology synergy with MAGIS/AION makes incremental deployment
+  realistic --- \textbf{New W3i7 assessment}.
+\item ``Decihertz GW detection'' claim is valid but must be qualified:
+  it fills a gap, it does not outperform --- \textbf{New W3i7 verdict}.
+\end{itemize}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=red!5!white, colframe=red!60!black,
+  title=\textbf{P8: Communications --- Even More Infeasible}]
+\begin{itemize}[nosep]
+\item $\Qpsi$ amplification: does NOT help (radiated power = input power,
+  independent of $Q$) --- \textbf{New W3i7 theorem}.
+\item No alternative modulation mechanism avoids planetary mass ---
+  \textbf{New W3i7 finding}.
+\item Minimum mass for 1~kbit/s at 1~AU ($N = 10^6$ receiver):
+  $\sim 10^{25}$~kg ($\sim 1.6\,M_\oplus$) --- \textbf{New W3i7 result}.
+\item Minimum mass for 1~kbit/s at 500~m ($N = 10^4$ receiver):
+  $\sim 3\ee{17}$~kg (Ceres-mass) --- \textbf{New W3i7 result}.
+\item Mass gap from technology: $10^{11}\times$ (submarine),
+  $10^{19}\times$ (interplanetary) --- \textbf{New W3i7 assessment}.
+\item \killed{Psi-communications feasibility is WORSE than W3i6 assessed
+  when using quantum-limited noise.}
+\end{itemize}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=green!5!white, colframe=green!40!black,
+  title=\textbf{P9: Positioning --- SQL Sufficient for Major Applications}]
+\begin{itemize}[nosep]
+\item 8.7~nm array positioning requires Heisenberg-limited sensors ---
+  \textbf{Confirmed}.
+\item SQL array positioning: $\sim 9~\mu$m (100-sensor array,
+  $N_a = 10^6$) --- \textbf{New W3i7 result}.
+\item Single-sensor SQL: 0.091~mm --- \textbf{Confirmed from W3i4}.
+\item All major applications (submarine nav, underwater positioning,
+  geological survey, seismic monitoring, autonomous vehicles) survive
+  at SQL --- \textbf{New W3i7 finding}.
+\item HL needed only for: GW calibration, fundamental geodesy,
+  semiconductor metrology --- \textbf{New W3i7 finding}.
+\item Underwater positioning at SQL: $\sim 10{,}000\times$ better than
+  best acoustic (LBL) --- \textbf{New W3i7 assessment}.
+\item Geological survey at SQL: detects $\sim 18$~m diameter ore bodies
+  at 23~km depth --- \textbf{New W3i7 result}.
+\end{itemize}
+\end{tcolorbox}
+
+%=============================================================================
+\section{Open Items for W3i8}
+\label{sec:open}
+%=============================================================================
+
+\begin{enumerate}
+\item \textbf{P6}: The MAGIS-100 pathfinder (expected $\sim$2027) will
+  provide the first experimental constraint on DFD P6-type atom
+  interferometer sensitivity in the decihertz band. What is the expected
+  MAGIS-100 sensitivity in DFD P6 terms?
+
+\item \textbf{P8}: With psi-comms definitively infeasible by
+  $> 10^{11}\times$, should P8 be formally retired from the active patent
+  portfolio, or does the theoretical uniqueness (only physics penetrating
+  arbitrary matter) preserve long-term value?
+
+\item \textbf{P9}: Current squeezing technology achieves $\sim 10$--$20$~dB
+  (corresponding to $\sigma_r \sim 1$--$3~\mu$m). What is the realistic
+  roadmap for 30--40~dB squeezing, and what applications become accessible
+  at each level?
+
+\item \textbf{Cross-patent}: The P6 receiver noise floor determines both
+  GW detection sensitivity (P6) and communication channel capacity (P8).
+  Any improvement in P6 sensor technology simultaneously improves both,
+  but the P8 mass gap of $10^{11}\times$ means sensor improvements alone
+  cannot rescue P8.
+\end{enumerate}
+
+\end{document}

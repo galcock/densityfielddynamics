@@ -1,0 +1,96 @@
+% fig_cost_comparison.tex - Cost per kg to various destinations
+% Standalone compilation: pdflatex fig_cost_comparison.tex
+\documentclass[tikz,border=5pt]{standalone}
+\usepackage{pgfplots}
+\usepackage{amsmath}
+\pgfplotsset{compat=1.18}
+
+\begin{document}
+\begin{tikzpicture}
+
+\definecolor{chemBlue}{RGB}{60,90,160}
+\definecolor{psiRed}{RGB}{180,50,50}
+
+\begin{axis}[
+    width=13cm, height=8.5cm,
+    ybar,
+    bar width=18pt,
+    ymode=log,
+    ymin=1, ymax=5e7,
+    ylabel={Cost per kg (\$/kg)},
+    ylabel style={font=\footnotesize\sffamily},
+    xlabel style={font=\footnotesize\sffamily},
+    tick label style={font=\scriptsize\sffamily},
+    symbolic x coords={LEO, GEO, Lunar Surface, Mars Surface},
+    xtick=data,
+    x tick label style={font=\footnotesize\sffamily},
+    enlarge x limits=0.18,
+    grid=major,
+    grid style={black!10, thin},
+    legend style={
+        font=\scriptsize\sffamily,
+        at={(0.03,0.97)},
+        anchor=north west,
+        draw=black!30,
+    },
+    nodes near coords,
+    nodes near coords style={
+        font=\tiny\sffamily, rotate=60, anchor=west,
+        /pgf/number format/.cd, fixed, precision=0, use comma, 1000 sep={\,},
+    },
+    every axis plot/.append style={thick},
+    clip=false,
+]
+
+% Chemical rocket costs
+\addplot[fill=chemBlue!60, draw=chemBlue!90!black]
+    coordinates {
+        (LEO, 2720)
+        (GEO, 14000)
+        (Lunar Surface, 1000000)
+        (Mars Surface, 10000000)
+    };
+\addlegendentry{Chemical rocket (current)}
+
+% Psi-bubble costs (dominated by energy cost only)
+\addplot[fill=psiRed!50, draw=psiRed!90!black]
+    coordinates {
+        (LEO, 5)
+        (GEO, 8)
+        (Lunar Surface, 15)
+        (Mars Surface, 50)
+    };
+\addlegendentry{$\psi$-bubble (projected)}
+
+% --- Cost reduction annotations ---
+\foreach \dest/\factor/\ypos in {
+    LEO/544$\times$/1500,
+    GEO/1{,}750$\times$/7000,
+    {Lunar Surface}/66{,}667$\times$/400000,
+    {Mars Surface}/200{,}000$\times$/4000000%
+} {
+    \draw[->, black!40, thin]
+        (axis cs:\dest,\ypos) -- ++(0,-0.5)
+        node[midway, right, font=\tiny\sffamily\bfseries, text=red!60!black] {\factor};
+}
+
+% --- Annotation box ---
+\node[draw=black!30, rounded corners=2pt, fill=yellow!8,
+      font=\tiny\sffamily, align=left, anchor=north east]
+    at (axis cs:Mars Surface,3e7)
+    {$\psi$-bubble cost drivers:\\
+     -- Electricity for RF ($\sim$\$0.05/kWh equiv.)\\
+     -- No propellant mass\\
+     -- Vehicle fully reusable\\
+     -- 90\% payload fraction};
+
+\end{axis}
+
+% ============================================================
+% TITLE
+% ============================================================
+\node[font=\normalsize\sffamily\bfseries, anchor=south] at (6.5,9)
+    {Launch Cost Comparison: Chemical Rocket vs.\ $\psi$-Bubble};
+
+\end{tikzpicture}
+\end{document}

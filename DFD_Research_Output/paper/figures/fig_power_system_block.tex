@@ -1,0 +1,184 @@
+% fig_power_system_block.tex - Power system block diagram
+% Standalone compilation: pdflatex fig_power_system_block.tex
+\documentclass[tikz,border=5pt]{standalone}
+\usepackage{tikz}
+\usepackage{amsmath}
+\usetikzlibrary{arrows.meta,calc,positioning,fit}
+
+\begin{document}
+\begin{tikzpicture}[
+    >=Stealth,
+    every node/.style={font=\footnotesize\sffamily},
+    block/.style={
+        draw=#1!70!black, thick, rounded corners=3pt,
+        fill=#1!15, minimum width=2.5cm, minimum height=1.1cm,
+        font=\scriptsize\sffamily, align=center, text=black
+    },
+    block/.default={blue!60},
+    smallblock/.style={
+        draw=#1!70!black, thick, rounded corners=2pt,
+        fill=#1!10, minimum width=2cm, minimum height=0.8cm,
+        font=\tiny\sffamily, align=center, text=black
+    },
+    smallblock/.default={gray},
+    powerarrow/.style={-{Stealth[length=2.5mm]}, very thick, #1!60!black},
+    powerarrow/.default={red},
+    infoarrow/.style={-{Stealth[length=2mm]}, thick, dashed, #1!50!black},
+    infoarrow/.default={blue},
+    heatlabel/.style={font=\tiny\sffamily, text=orange!60!black},
+]
+
+\definecolor{reactorRed}{RGB}{180,60,60}
+\definecolor{heatOrange}{RGB}{200,130,40}
+\definecolor{turbGreen}{RGB}{60,140,80}
+\definecolor{genBlue}{RGB}{50,90,170}
+\definecolor{condYellow}{RGB}{180,170,50}
+\definecolor{rfPurple}{RGB}{130,60,160}
+\definecolor{feedTeal}{RGB}{40,140,140}
+\definecolor{cavityRed}{RGB}{170,50,50}
+\definecolor{wasteOrange}{RGB}{200,100,30}
+\definecolor{ctrlGray}{RGB}{100,100,110}
+
+% ============================================================
+% MAIN POWER CHAIN (left to right)
+% ============================================================
+
+% Nuclear reactor
+\node[block=reactorRed, minimum width=2.8cm, minimum height=1.4cm]
+    (reactor) at (0,0)
+    {Nuclear Reactor\\(50\,MW$_\text{th}$)\\[2pt]\tiny U-235 / HALEU};
+
+% Heat exchanger
+\node[block=heatOrange, right=1.5cm of reactor]
+    (hx) {Heat\\Exchanger};
+
+% Turbine
+\node[block=turbGreen, right=1.5cm of hx]
+    (turb) {Brayton\\Turbine\\[2pt]\tiny $\eta = 40\%$};
+
+% Generator
+\node[block=genBlue, right=1.5cm of turb]
+    (gen) {Generator\\[2pt]\tiny 20\,MW$_\text{e}$};
+
+% Power conditioning
+\node[block=condYellow, right=1.5cm of gen]
+    (cond) {Power\\Conditioning\\[2pt]\tiny DC bus, regulation};
+
+% RF amplifiers
+\node[block=rfPurple, below=1.5cm of cond]
+    (rf) {RF Amplifiers\\[2pt]\tiny 10\,MW @ 2.45\,GHz\\klystrons $\times$ 8};
+
+% Feed network
+\node[block=feedTeal, left=1.5cm of rf]
+    (feed) {Feed Network\\[2pt]\tiny Phase \& amplitude\\control};
+
+% Cavity (shell)
+\node[block=cavityRed, minimum width=3cm, minimum height=1.4cm, left=1.5cm of feed]
+    (cavity) {Resonant Shell\\(Ferrite Cavity)\\[2pt]\tiny $Q \approx 10^6$};
+
+% ============================================================
+% POWER FLOW ARROWS
+% ============================================================
+
+\draw[powerarrow=reactorRed] (reactor) -- (hx)
+    node[midway, above, font=\tiny\sffamily] {50\,MW$_\text{th}$};
+\draw[powerarrow=heatOrange] (hx) -- (turb)
+    node[midway, above, font=\tiny\sffamily] {hot gas};
+\draw[powerarrow=turbGreen] (turb) -- (gen)
+    node[midway, above, font=\tiny\sffamily] {shaft};
+\draw[powerarrow=genBlue] (gen) -- (cond)
+    node[midway, above, font=\tiny\sffamily] {20\,MW$_\text{e}$};
+\draw[powerarrow=condYellow] (cond) -- (rf)
+    node[midway, right, font=\tiny\sffamily] {regulated\\DC};
+\draw[powerarrow=rfPurple] (rf) -- (feed)
+    node[midway, above, font=\tiny\sffamily] {10\,MW RF};
+\draw[powerarrow=feedTeal] (feed) -- (cavity)
+    node[midway, above, font=\tiny\sffamily] {4 feeds};
+
+% ============================================================
+% WASTE HEAT PATH
+% ============================================================
+
+% Radiator
+\node[block=wasteOrange, below=1.8cm of turb]
+    (rad) {Radiators\\[2pt]\tiny 30\,MW$_\text{th}$\\droplet / heat pipe};
+
+\draw[powerarrow=wasteOrange, dashed] (turb.south) -- (rad.north)
+    node[midway, right, font=\tiny\sffamily] {waste heat};
+\draw[powerarrow=wasteOrange, dashed] (hx.south) |- (rad.west)
+    node[near end, above, font=\tiny\sffamily] {};
+
+% Heat rejection arrows (to space)
+\foreach \dx in {-0.8,0,0.8} {
+    \draw[->, wasteOrange!50, thick] ($(rad.south)+({\dx},0)$) -- ++(0,-0.7);
+}
+\node[heatlabel, below=0.7cm of rad] {Radiated to space};
+
+% ============================================================
+% CONTROL SYSTEM
+% ============================================================
+
+\node[smallblock=ctrlGray, minimum width=3cm, above=1.5cm of turb]
+    (ctrl) {Flight Control Computer};
+
+% Control connections
+\draw[infoarrow=ctrlGray] (ctrl) -| (reactor.north)
+    node[near start, above, font=\tiny\sffamily] {reactor power cmd};
+\draw[infoarrow=ctrlGray] (ctrl) -- (turb.north)
+    node[midway, right, font=\tiny\sffamily] {throttle};
+\draw[infoarrow=ctrlGray] (ctrl) -| (cond.north)
+    node[near start, above, font=\tiny\sffamily] {};
+\draw[infoarrow=ctrlGray] (ctrl.east) -| ($(rf.north)+(0.5,0.7)$) -- (rf.north east)
+    node[near start, above, font=\tiny\sffamily] {phase/amp cmds};
+
+% ============================================================
+% REDUNDANCY PATH (backup)
+% ============================================================
+
+\node[smallblock=blue!40, below=1.8cm of cavity]
+    (batt) {Battery Bank\\(emergency, 1\,MWh)};
+
+\draw[infoarrow=blue, thick] (cond.south) |- (batt.east)
+    node[near end, above, font=\tiny\sffamily] {charge};
+\draw[powerarrow=blue, dashed] (batt.west) -| ($(feed.south)-(0.3,0)$)
+    node[near start, below, font=\tiny\sffamily] {backup power};
+
+% ============================================================
+% CRYOGENIC SUBSYSTEM
+% ============================================================
+
+\node[smallblock=cyan!60, above=1.5cm of cavity]
+    (cryo) {Cryogenic Plant\\(LN$_2$ at 77\,K)};
+
+\draw[infoarrow=cyan] (cryo) -- (cavity)
+    node[midway, right, font=\tiny\sffamily] {SC cooling};
+\draw[infoarrow=ctrlGray] (ctrl) -| (cryo)
+    node[near start, above, font=\tiny\sffamily] {};
+
+% ============================================================
+% OUTPUT (psi field)
+% ============================================================
+
+\draw[powerarrow=cavityRed, line width=2pt] (cavity.west) -- ++(-1.5,0)
+    node[left, font=\scriptsize\sffamily\bfseries, cavityRed!70!black]
+    {$\psi$ field\\generation};
+
+% ============================================================
+% EFFICIENCY ANNOTATION
+% ============================================================
+\node[draw=black!30, rounded corners=2pt, fill=yellow!8,
+      font=\tiny\sffamily, align=center, anchor=north west]
+    at ($(reactor.north west)+(0,2)$)
+    {Overall efficiency chain:\\
+     50\,MW$_\text{th}$ $\to$ 20\,MW$_\text{e}$ $\to$ 10\,MW$_\text{RF}$
+     $\to$ cavity\\
+     Wall-plug to RF: $\sim$20\%};
+
+% ============================================================
+% TITLE
+% ============================================================
+\node[font=\normalsize\sffamily\bfseries, anchor=south] at ($(turb)+(0,3.5)$)
+    {Power System Block Diagram};
+
+\end{tikzpicture}
+\end{document}

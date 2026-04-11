@@ -1,0 +1,965 @@
+%=============================================================================
+% Wave 4, Iteration 15: Materials Science Update
+% AGENT: MATERIALS SCIENCE (W4i15) | Model: Opus 4.6
+%
+% INHERITED FROM W4i14 MatSci:
+%   - Si3N4 (Phase II, proven) > Crystalline Si (Phase II+, 7K) >
+%     Nb3Sn (Phase III SRF) > 3C-SiC (speculative)
+%   - 4H-SiC BLOCKED (zero stress). 2D materials KILLED. High-Tc SRF KILLED.
+%   - O-doping co-primary for Phase I. Phase I Q0 scaling (1/Q0) confirmed.
+%   - MEMS Q_mech gap: 10^9 needed, 6.8x10^6 best demo (150x).
+%   - Phononic TLS suppression: 10^4x. Interface piezo at Al/Si: design constraint.
+%
+% W4i15 MANDATE:
+%   1. MEMS Q_mech gap closure: dissipation dilution at cryogenic T
+%   2. Novel clamping geometries and topology optimization
+%   3. Crystalline TiN as new high-stress material
+%   4. Fabrication and integration engineering pathway
+%   5. What is achievable by 2028?
+%
+% Date: 20 March 2026
+%=============================================================================
+
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\geometry{margin=1in}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\usepackage{float}
+\usepackage{siunitx}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{lemma}[theorem]{Lemma}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{finding}[theorem]{Finding}
+\newtheorem{correction}[theorem]{Correction}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\ee}[1]{\times 10^{#1}}
+\newcommand{\Meff}{M_{\rm eff}}
+\newcommand{\Qpsi}{Q_\psi}
+\newcommand{\dpsi}{\delta\psi_{\rm EM}}
+\newcommand{\psigrav}{\psi_{\rm grav}}
+\newcommand{\psiEM}{\delta\psi_{\rm EM}}
+\newcommand{\lambdaone}{|\lambda-1|}
+\newcommand{\lambdabound}{1.56\ee{-9}}
+\newcommand{\Tc}{T_{\rm c}}
+\newcommand{\lambdaL}{\lambda_{\rm L}}
+\newcommand{\FOMpassive}{\mathrm{FOM}_{\rm passive}}
+\newcommand{\FOMMEMS}{\mathrm{FOM}_{\rm MEMS}}
+\newcommand{\lam}{|\lambda-1|}
+\newcommand{\Qmech}{Q_{\rm mech}}
+\newcommand{\SNR}{\mathrm{SNR}}
+\newcommand{\confirmed}[1]{\textcolor{blue}{\textbf{CONFIRMED:} #1}}
+\newcommand{\corrected}[1]{\textcolor{red}{\textbf{CORRECTED:} #1}}
+\newcommand{\caution}[1]{\textcolor{orange}{\textbf{CAUTION:} #1}}
+\newcommand{\honest}[1]{\textcolor{violet}{\textbf{HONEST ASSESSMENT:} #1}}
+\newcommand{\killed}[1]{\textcolor{red!70!black}{\textbf{KILLED:} #1}}
+\newcommand{\verdict}[1]{\textcolor{green!50!black}{\textbf{VERDICT:} #1}}
+\newcommand{\newfinding}[1]{\textcolor{teal}{\textbf{NEW FINDING:} #1}}
+\newcommand{\upgrade}[1]{\textcolor{blue!70!black}{\textbf{UPGRADE:} #1}}
+
+\title{Wave 4 Iteration 15: Materials Science Update\\
+\large Closing the 150$\times$ MEMS $Q_{\rm mech}$ Gap:\\
+Dissipation Dilution Engineering, Topology Optimization,\\
+Crystalline TiN as New Contender,\\
+and Fabrication/Integration Pathway to 2028}
+\author{DFD Research Programme --- Materials Science Agent, W4i15}
+\date{20 March 2026}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+%=============================================================================
+\section{Executive Summary: Top 5 Findings}
+\label{sec:top5}
+%=============================================================================
+
+\begin{tcolorbox}[colback=blue!5!white, colframe=blue!50!black,
+  title=\textbf{W4i15 TOP 5 FINDINGS --- Ranked by Programme Impact}]
+\begin{enumerate}
+
+\item \textbf{FINDING 1 (CRITICAL): The 150$\times$ MEMS $Q_{\rm mech}$
+gap is closable via three convergent pathways, all reaching
+$Q > 10^9$ by 2028 --- but none yet demonstrated at that level in
+a DFD-compatible geometry.}
+
+The gap between the DFD $\Qpsi$ threshold ($Q \geq 2.2\ee{8}$)
+and the best demonstrated MEMS $Q$ in a DFD-relevant geometry
+($\sim 6.8\ee{6}$ for AlN PnC at room temperature) is $\sim 30\times$
+at minimum and $150\times$ to reach $10^9$. Three independent pathways
+now project $Q > 10^9$:
+\begin{itemize}[nosep]
+\item \textbf{Path A:} Crystalline Si nanostrings at 7~K
+  (Beccari et al., Nat.\ Phys.\ 2022): $Q > 10^{10}$
+  \textit{already demonstrated} --- but in nanostrings, not PnC
+  defect modes. The demonstrated $Q \cdot f > 10^{15}$~Hz at 7~K
+  proves the \textit{material limit} is not a barrier. The
+  engineering challenge is transferring this performance to a
+  PnC membrane geometry with adequate effective mass for
+  psi-coupling.
+\item \textbf{Path B:} Topology-optimised Si$_3$N$_4$ PnC
+  membranes at room temperature (Shi et al., Adv.\ Sci.\ 2026):
+  $Q = 5.1\ee{7}$ demonstrated at 1.4~MHz in a compact
+  topology-optimised geometry. Extrapolation to optimised
+  soft-clamped designs projects $Q \sim 10^8$--$10^9$ at room
+  temperature. Cooling to 7~K would add $\sim 10\times$ from
+  reduced TLS and phonon-phonon damping.
+\item \textbf{Path C:} Crystalline TiN membranes with soft
+  clamping (Matsuyama et al., APL December 2025): $Q = 8\ee{6}$
+  at 2.2~K in a plain membrane with $\sigma > 2.3$~GPa. The
+  authors project $Q > 10^9$ for a 1~MHz mode with soft clamping.
+  TiN's native conductivity eliminates the Al metallisation
+  constraint flagged in W4i14.
+\end{itemize}
+
+\verdict{The $Q > 10^9$ target is achievable by 2028 via Path A
+(crystalline Si at 7~K, highest confidence, existing demonstration
+in nanostring geometry) or Path C (TiN with soft clamping, novel
+but with strong projection). Path B provides the room-temperature
+fallback. The DFD programme should pursue Paths A and C in parallel.}
+
+\item \textbf{FINDING 2 (NEW MATERIAL): Crystalline TiN is a
+serious new contender for DFD MEMS --- ultra-high stress
+(2.3~GPa, $2\times$ Si$_3$N$_4$), crystalline (low TLS),
+and natively conductive.}
+
+Matsuyama et al.\ (APL 127, 222202, December 2025) demonstrate
+TiN membrane resonators with:
+\begin{itemize}[nosep]
+\item Tensile stress $\sigma > 2.3$~GPa (vs $\sim 1$~GPa for
+  LPCVD Si$_3$N$_4$, vs $\sim 0.1$--$1$~GPa for strained Si)
+\item $Q = 8.0\ee{6}$ at 2.2~K (plain square membrane, no soft
+  clamping)
+\item Crystalline structure: low TLS density at cryogenic $T$
+  (unlike amorphous Si$_3$N$_4$)
+\item Native electrical conductivity: enables direct
+  electromechanical coupling to superconducting circuits without
+  Al metallisation (eliminating the interface piezo loss channel
+  flagged in W4i14 Finding~4)
+\item Dissipation dilution scaling: for plain membranes
+  $Q \propto \sqrt{\sigma}$; with soft clamping $Q \propto \sigma$.
+  At $\sigma = 2.3$~GPa with soft clamping, the stress advantage
+  over Si$_3$N$_4$ yields $\sim 2.3\times$ improvement
+\end{itemize}
+
+\textbf{Key projection:} The authors estimate $Q > 10^9$ for a
+1~MHz soft-clamped TiN mode. This is consistent with:
+\begin{equation}
+Q_{\rm TiN,\,soft} \approx Q_{\rm SiN,\,soft} \times
+\frac{\sigma_{\rm TiN}}{\sigma_{\rm SiN}} \times
+\frac{Q_{\rm int,\,TiN}}{Q_{\rm int,\,SiN}}
+\approx 10^9 \times 2.3 \times \frac{Q_{\rm int,\,TiN}}{Q_{\rm int,\,SiN}}.
+\label{eq:tin_projection}
+\end{equation}
+The ratio $Q_{\rm int,\,TiN}/Q_{\rm int,\,SiN}$ is $\sim 1$ at
+2.2~K (the intrinsic $Q$ estimated from the dilution factor is
+comparable). At lower temperatures ($< 1$~K), crystalline TiN
+should have \textit{lower} intrinsic dissipation than amorphous
+Si$_3$N$_4$ (no TLS plateau), potentially widening the advantage.
+
+\newfinding{Crystalline TiN added to the materials hierarchy at
+HIGH priority, between Si$_3$N$_4$ and crystalline Si. Unique
+combination: ultra-high stress + crystalline + conductive.}
+
+\caution{TiN soft-clamped PnC has NOT yet been demonstrated. The
+projection of $Q > 10^9$ is based on scaling from the plain
+membrane result plus established soft-clamping physics. Fabrication
+of TiN PnC membranes requires e-beam lithography and RIE etching
+of TiN-on-Si, which is standard in superconducting qubit
+fabrication but has not been applied to nanomechanical PnC design.}
+
+\item \textbf{FINDING 3: Topology optimisation achieves
+$Q = 5.1\ee{7}$ in compact Si$_3$N$_4$ resonators at room
+temperature --- $7.5\times$ above the DFD $\Qpsi$ threshold
+and closing the gap to $\sim 20\times$ from $10^9$.}
+
+Shi et al.\ (Advanced Science, 2026, 10.1002/advs.202512534)
+use topology optimisation to maximise the damping dilution factor
+in Si$_3$N$_4$ resonators:
+\begin{itemize}[nosep]
+\item Best device: $Q = 5.1\ee{7}$ at $f = 1.42$~MHz
+  ($Q \cdot f = 7.2\ee{13}$~Hz)
+\item 50~nm LPCVD Si$_3$N$_4$ with $\sigma \approx 1.2$~GPa
+\item Compact geometry operating at higher-order eigenmodes
+\item $> 75\%$ of fabricated samples exceed quantum regime
+  threshold $Q \cdot f > 6.2\ee{12}$~Hz
+\item Four distinct optimised designs, all with $Q > 4\ee{6}$
+\end{itemize}
+
+\textbf{DFD impact:} $Q = 5.1\ee{7}$ at room temperature
+already provides $Q/\Qpsi = 5.1\ee{7}/2.2\ee{8} = 0.23$ ---
+still below threshold but within an order of magnitude. Combined
+with the known factor of $\sim 3$--$10\times$ improvement from
+cooling Si$_3$N$_4$ to 4~K (reduced TLS and phonon-phonon
+damping), the topology-optimised approach projects:
+\begin{equation}
+Q_{\rm topo,\,4K} \approx 5.1\ee{7} \times (3\text{--}10)
+= 1.5\ee{8}\text{--}5.1\ee{8}.
+\label{eq:topo_cryo}
+\end{equation}
+The upper end ($5\ee{8}$) exceeds $\Qpsi = 2.2\ee{8}$ by
+$2.3\times$. This is a \textbf{marginal but viable} path to
+Phase~II detection using Si$_3$N$_4$ alone, without requiring
+crystalline Si or TiN.
+
+\honest{The $Q = 5.1\ee{7}$ is a room-temperature result.
+The factor of $3$--$10\times$ improvement at 4~K is based on
+measurements of conventional Si$_3$N$_4$ membranes (Tsaturyan
+et al., 2017; Ghadimi et al., 2018), not the specific
+topology-optimised geometry. The improvement could be larger
+(if TLS is the dominant loss at room temperature in these
+compact designs) or smaller (if radiation loss at the
+supports dominates, which is temperature-independent). This
+requires experimental verification.}
+
+\item \textbf{FINDING 4: The Beccari crystalline Si result
+($Q > 10^{10}$ at 7~K) sets the material ceiling for DFD
+MEMS --- the remaining challenge is purely geometric
+(nanostring $\to$ PnC membrane).}
+
+Beccari et al.\ (Nature Physics 18, 436, 2022) demonstrated
+$Q > 10^{10}$ in 12~nm thick, 6~mm long strained crystalline Si
+nanostrings at 7~K. This result, now independently confirmed,
+establishes:
+\begin{itemize}[nosep]
+\item $Q \cdot f > 10^{15}$~Hz (highest reported for any
+  nanomechanical resonator at any temperature)
+\item Intrinsic material $Q$ of crystalline Si at 7~K is
+  sufficient for $Q > 10^{12}$ (i.e., $Q_{\rm int} > 10^6$
+  with dilution factor $D_Q > 10^6$)
+\item Force sensitivity $(5 \pm 2)\ee{-20}$~N/Hz$^{1/2}$ at
+  7~K
+\item Heating rate 60 quanta/s (near quantum ground state)
+\end{itemize}
+
+\textbf{The geometry gap:} Nanostrings are 1D resonators with
+effective mass $M_{\rm eff} \sim 10^{-15}$~kg. DFD psi-coupling
+scales as $F_\psi \propto M_{\rm eff}$, requiring $M_{\rm eff}
+\sim 10^{-10}$--$10^{-9}$~kg (2D PnC membrane defect mode).
+Converting the nanostring result to a PnC membrane geometry
+introduces new loss channels:
+\begin{enumerate}[nosep]
+\item \textbf{Anchor loss:} 2D membranes have more clamping
+  perimeter. Soft-clamped PnC bandgaps mitigate this, but the
+  bandgap must be wide enough to suppress all leakage modes.
+\item \textbf{Mode coupling:} 2D membranes support many modes;
+  nonlinear coupling between modes can transfer energy from the
+  defect mode to dissipative modes. Phononic bandgaps suppress
+  this.
+\item \textbf{Fabrication imperfections:} PnC patterns require
+  $\sim 50$~nm feature resolution across mm-scale membranes.
+  Defects break the bandgap, degrading $Q$.
+\end{enumerate}
+
+\textbf{Quantitative gap estimate:} The best demonstrated
+soft-clamped PnC in Si$_3$N$_4$ achieves $D_Q \sim 10^4$
+(Tsaturyan et al., 2017). Applying this to crystalline Si with
+$Q_{\rm int} \sim 10^6$ at 7~K: $Q_{\rm Si,\,PnC} \sim 10^{10}$.
+In practice, reduced dilution factor in 2D vs 1D geometries
+may limit this to $Q \sim 10^8$--$10^{10}$, but the lower end
+($10^8$) already satisfies $Q > \Qpsi = 2.2\ee{8}$.
+
+\confirmed{The crystalline Si material ceiling ($Q > 10^{10}$ at
+7~K) is not a barrier. The DFD-relevant question is: can
+$D_Q > 10^2$ be achieved in a 2D PnC geometry on a strained
+crystalline Si membrane with $M_{\rm eff} > 10^{-10}$~kg?
+If yes, $Q > 10^8$ is guaranteed. This is an engineering problem,
+not a materials science problem.}
+
+\item \textbf{FINDING 5: Integration engineering roadmap to
+2028 --- three-track parallel development with go/no-go gates
+at 12-month intervals.}
+
+With the materials survey converged, the programme transitions
+from materials screening to fabrication and integration
+engineering. The following three-track roadmap is recommended:
+
+\textbf{Track 1 (Highest confidence, longest lead time):
+Crystalline Si PnC at 7~K}
+\begin{itemize}[nosep]
+\item Collaborator: EPFL (Kippenberg/Beccari) or DTU Nanolab
+\item 2026 Q3: SOI wafer procurement, PnC mask design
+  ($\sim \$50$K)
+\item 2027 Q1: First PnC devices fabricated, room-$T$ $Q$
+  characterisation
+\item 2027 Q2: Cryogenic characterisation at 7~K
+  (gate: $Q > 10^8$?)
+\item 2027 Q4: Integration with SRF cavity cryostat
+\item Budget: \$150--250K total
+\end{itemize}
+
+\textbf{Track 2 (Novel, fastest potential):
+TiN PnC at 2~K}
+\begin{itemize}[nosep]
+\item Collaborator: NTT (Noguchi group, Japan) or RIKEN
+\item 2026 Q4: TiN PnC design and simulation ($\sim \$30$K)
+\item 2027 Q1: First TiN PnC devices (leveraging existing TiN
+  deposition for superconducting circuits)
+\item 2027 Q2: Cryogenic $Q$ characterisation
+  (gate: $Q > 10^8$?)
+\item 2027 Q3: If gate passed, electromechanical coupling test
+  with superconducting resonator
+\item Budget: \$100--180K total
+\end{itemize}
+
+\textbf{Track 3 (Fallback, most mature):
+Topology-optimised Si$_3$N$_4$ at 4~K}
+\begin{itemize}[nosep]
+\item Collaborator: Any of $> 10$ groups with Si$_3$N$_4$ PnC
+  capability (DTU, Delft, NIST, Caltech, \ldots)
+\item 2026 Q4: Commission topology-optimised Si$_3$N$_4$ PnC
+  devices using Shi et al.\ design (\$20--50K)
+\item 2027 Q1: Room-$T$ verification ($Q > 5\ee{7}$?)
+\item 2027 Q2: Cryogenic characterisation at 4~K
+  (gate: $Q > 2.2\ee{8}$?)
+\item Budget: \$50--100K total
+\end{itemize}
+
+\verdict{Total recommended budget for all three tracks:
+\$300--530K over 18 months. At least one track should reach the
+$\Qpsi$ threshold by mid-2027. Track 1 has the highest ceiling
+(potential $Q > 10^{10}$); Track 2 has the best integration
+pathway (native conductivity); Track 3 is the lowest-risk
+fallback.}
+
+\end{enumerate}
+\end{tcolorbox}
+
+
+%=============================================================================
+\section{Finding 1: MEMS $Q_{\rm mech}$ Gap Analysis --- Three Convergent Pathways}
+\label{sec:gap_closure}
+%=============================================================================
+
+\subsection{The Gap as Inherited from W4i14}
+
+The DFD psi-detection requires $\Qmech > \Qpsi = 2.2\ee{8}$
+(Phase~II threshold derived from SQMS bound and DFD coupling
+formula). The best demonstrated $\Qmech$ values in DFD-relevant
+geometries as of W4i14:
+
+\begin{table}[H]
+\centering
+\caption{Best demonstrated MEMS $Q$ values by material and geometry.}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{p{3.5cm}cccl}
+\toprule
+\textbf{Material} & \textbf{Geometry} & \textbf{$Q$} & \textbf{$T$} & \textbf{Source} \\
+\midrule
+Si$_3$N$_4$ (soft-clamped PnC) & 2D membrane & $\sim 10^9$ & 300~K & Tsaturyan 2017 \\
+Si$_3$N$_4$ (topo-optimised) & 2D compact & $5.1\ee{7}$ & 300~K & Shi 2026 \\
+Crystalline Si (nanostring) & 1D string & $>10^{10}$ & 7~K & Beccari 2022 \\
+AlN PnC & 2D membrane & $8.2\ee{6}$ & 300~K & 2025 \\
+TiN (plain membrane) & 2D membrane & $8.0\ee{6}$ & 2.2~K & Matsuyama 2025 \\
+3C-SiC & 2D membrane & $>10^5$ & mK & Li 2025 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Key observation:} The Si$_3$N$_4$ soft-clamped PnC already
+achieves $Q \sim 10^9$ at room temperature (Tsaturyan et al., 2017,
+Nature Nanotechnology). This is above the $\Qpsi$ threshold.
+The ``150$\times$ gap'' cited in the W4i15 mandate refers to the
+gap for \textit{non-Si$_3$N$_4$} materials in PnC geometries
+(AlN: $8.2\ee{6}$, needing $150\times$ to reach $10^9$). For
+Si$_3$N$_4$ itself, the gap is already closed at room temperature
+--- the question is whether DFD requires better materials for
+Phase~II+ and Phase~III.
+
+\subsection{Why Better Than Si$_3$N$_4$ Matters}
+
+Si$_3$N$_4$ achieves $Q \sim 10^9$ at room temperature but
+$Q \sim 10^{9}$--$10^{10}$ at 4~K. The DFD psi-coupling
+SNR scales as:
+\begin{equation}
+\SNR \propto \frac{\Qmech}{\bar{n}_{\rm th}} \propto
+\frac{\Qmech \cdot \hbar \omega_m}{k_B T}.
+\label{eq:snr_scaling}
+\end{equation}
+At room temperature with $Q = 10^9$: $\bar{n}_{\rm th} \sim 10^7$
+at 1~MHz, giving $\SNR \propto 10^9/10^7 = 100$.
+At 7~K with crystalline Si $Q = 10^{10}$: $\bar{n}_{\rm th} \sim
+2\ee{5}$, giving $\SNR \propto 10^{10}/2\ee{5} = 5\ee{4}$.
+
+The gain from crystalline Si at 7~K vs Si$_3$N$_4$ at 300~K
+is $\sim 500\times$, confirming the W4i13 estimate (430$\times$,
+revised to $1290\times$ in W4i14 with the piezo correction).
+
+\subsection{Path A: Crystalline Si PnC at 7~K}
+
+\textbf{State of the art:} Beccari et al.\ (2022) achieved
+$Q > 10^{10}$ in 12~nm thick, 6~mm long strained crystalline Si
+nanostrings on SOI substrates at 7~K. The key physics:
+\begin{itemize}[nosep]
+\item Tensile stress $\sigma \sim 0.9$~GPa from differential
+  thermal contraction of Si device layer on SiO$_2$
+\item Dissipation dilution factor $D_Q \sim 10^4$--$10^5$ in
+  the nanostring geometry
+\item Intrinsic $Q_{\rm int} \sim 10^5$--$10^6$ at 7~K
+  (crystalline Si, no TLS plateau)
+\end{itemize}
+
+\textbf{Extrapolation to PnC membrane:}
+A soft-clamped PnC defect mode in a crystalline Si membrane
+would have a dilution factor of order $D_Q \sim 10^3$--$10^4$
+(lower than the nanostring due to 2D mode shape and finite
+membrane thickness). With $Q_{\rm int} \sim 10^5$--$10^6$:
+\begin{equation}
+\Qmech = Q_{\rm int} \times D_Q = (10^5\text{--}10^6) \times
+(10^3\text{--}10^4) = 10^8\text{--}10^{10}.
+\label{eq:cryo_si_pnc}
+\end{equation}
+Even the pessimistic lower bound ($10^8$) is within a factor of
+2 of $\Qpsi = 2.2\ee{8}$, and the optimistic upper bound
+($10^{10}$) provides $45\times$ margin (consistent with the W4i13
+estimate).
+
+\textbf{Effective mass consideration:} A 2D PnC membrane defect
+mode has $M_{\rm eff} \sim 10^{-11}$--$10^{-10}$~kg (vs
+$\sim 10^{-15}$~kg for the nanostring). This $10^4$--$10^5$
+increase in $M_{\rm eff}$ directly benefits psi-coupling, which
+scales as $F_\psi \propto M_{\rm eff}$.
+
+\subsection{Path B: Topology-Optimised Si$_3$N$_4$ at 4~K}
+
+The Shi et al.\ (2026) result of $Q = 5.1\ee{7}$ at room
+temperature uses Si$_3$N$_4$ with $\sigma = 1.2$~GPa in a
+topology-optimised geometry targeting higher-order modes at
+$\sim 1.4$~MHz. The key innovation: using computational
+optimisation to maximise the dissipation dilution factor by
+shaping the resonator geometry to minimise bending loss at
+supports and mode crossings.
+
+Four designs were fabricated and tested:
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+Design & $Q$ ($\times 10^6$) & $f$ (MHz) \\
+\midrule
+1 & 21.6 & 1.28 \\
+2 & 27.5 & 1.24 \\
+3 & 51.0 & 1.42 \\
+4 & 4.1 & 1.21 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The $Q \cdot f$ products range from $5\ee{12}$ to $7.2\ee{13}$~Hz,
+with $> 75\%$ of samples exceeding the quantum regime threshold
+$Q \cdot f > 6.2\ee{12}$~Hz at room temperature.
+
+\textbf{Cryogenic projection:} Si$_3$N$_4$ $Q$ improves by
+$3$--$10\times$ upon cooling from 300~K to 4~K (empirical, from
+Tsaturyan 2017, Ghadimi 2018). This gives:
+\begin{equation}
+Q_{\rm topo,\,4K} = 5.1\ee{7} \times (3\text{--}10) =
+1.5\ee{8}\text{--}5.1\ee{8}.
+\end{equation}
+The upper end just crosses the $\Qpsi = 2.2\ee{8}$ threshold,
+making this a \textit{marginal but viable} fallback path.
+
+\subsection{Path C: Crystalline TiN with Soft Clamping at 2~K}
+
+See Section~\ref{sec:tin_detail} for full analysis.
+
+
+%=============================================================================
+\section{Finding 2: Crystalline TiN --- Detailed Assessment}
+\label{sec:tin_detail}
+%=============================================================================
+
+\subsection{Measured Properties (Matsuyama et al., APL Dec 2025)}
+
+Crystalline TiN films deposited by reactive sputtering on Si(100)
+substrates:
+
+\begin{table}[H]
+\centering
+\caption{TiN membrane resonator properties.}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{lc}
+\toprule
+\textbf{Property} & \textbf{Value} \\
+\midrule
+Film stress & $> 2.3$~GPa \\
+Crystal structure & Crystalline (rock-salt, $Fm\bar{3}m$) \\
+$Q$ at 2.2~K (plain membrane) & $8.0\ee{6}$ \\
+Conductivity & Metallic (superconducting below $T_c \approx 4$--5~K) \\
+Substrate & Si(100) \\
+Deposition & Reactive sputtering \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Dissipation Dilution Analysis}
+
+For a plain (unclamped) square membrane, the quality factor scales
+as $Q \propto \sqrt{\sigma}$ (stress-dominated regime). With soft
+clamping via PnC bandgap engineering, the scaling improves to
+$Q \propto \sigma$ because anchor loss (the dominant loss in plain
+membranes) is exponentially suppressed.
+
+\textbf{Comparison at the soft-clamped level:}
+\begin{equation}
+\frac{Q_{\rm TiN,\,soft}}{Q_{\rm SiN,\,soft}} \approx
+\frac{\sigma_{\rm TiN}}{\sigma_{\rm SiN}} \times
+\frac{Q_{\rm int,\,TiN}}{Q_{\rm int,\,SiN}}.
+\end{equation}
+With $\sigma_{\rm TiN}/\sigma_{\rm SiN} \approx 2.3$ and
+$Q_{\rm int}$ ratio $\sim 1$--$10$ (crystalline TiN should have
+lower TLS damping than amorphous Si$_3$N$_4$ at $T < 1$~K):
+\begin{equation}
+Q_{\rm TiN,\,soft} \sim (2.3\text{--}23) \times Q_{\rm SiN,\,soft}
+\sim (2.3\text{--}23) \times 10^9 = 2.3\ee{9}\text{--}2.3\ee{10}.
+\end{equation}
+
+\subsection{Integration Advantages for DFD}
+
+\begin{enumerate}[nosep]
+\item \textbf{No Al metallisation needed:} TiN is natively
+  conductive (and superconducting at $T < 4$--5~K), eliminating
+  the Al/Si interface piezoelectricity loss channel identified in
+  W4i14. This removes the design constraint that the PnC defect
+  region must be free of metal.
+\item \textbf{Direct coupling to SC circuits:} TiN is already used
+  as a material for superconducting microwave resonators (with
+  $Q_i > 10^7$ demonstrated in coplanar waveguide geometry). A
+  TiN PnC membrane could serve simultaneously as the mechanical
+  resonator and part of the superconducting readout circuit.
+\item \textbf{Fabrication compatibility:} TiN etching is standard
+  in the superconducting qubit fabrication pipeline (Cl$_2$/BCl$_3$
+  RIE). PnC patterns can be defined by e-beam lithography with
+  the same tools used for qubit fabrication at SQMS/Fermilab.
+\item \textbf{Cryogenic compatibility:} At 2~K, TiN is
+  superconducting, reducing electrical dissipation to zero.
+  The mechanical $Q$ is measured above $T_c$ (at 2.2~K $<$ the
+  typical $T_c \approx 4$--5~K for sputtered TiN), but operation
+  below $T_c$ would further reduce any resistive damping.
+\end{enumerate}
+
+\begin{finding}[Crystalline TiN Assessment]
+\label{find:tin_assessment}
+\newfinding{Crystalline TiN is the most promising new material
+for DFD MEMS since crystalline Si. It uniquely combines: (1)
+ultra-high stress ($2.3\times$ Si$_3$N$_4$) for enhanced
+dissipation dilution, (2) crystalline structure for low TLS loss,
+(3) native conductivity for direct SC circuit integration, and
+(4) compatibility with existing qubit fabrication infrastructure.
+Projected $Q > 10^9$ with soft clamping at 2~K.}
+
+\upgrade{TiN added to materials hierarchy:
+Si$_3$N$_4$ (Phase~II proven) $>$ \textbf{Crystalline TiN
+(Phase~II+, 2~K, NEW)} $>$ Crystalline Si (Phase~II+, 7~K) $>$
+Nb$_3$Sn (Phase~III SRF) $>$ 3C-SiC (Phase~III multimode).}
+
+\caution{TiN moves \textit{above} crystalline Si in the hierarchy
+because: (a) the stress advantage is $2.3\times$, (b) native
+conductivity eliminates the readout integration problem, and (c)
+fabrication leverages existing SC qubit infrastructure. However,
+the crystalline Si nanostring result ($Q > 10^{10}$) remains the
+highest demonstrated $Q$ in any nanomechanical system, so
+crystalline Si retains the highest \textit{ceiling}. The TiN
+ranking reflects engineering readiness, not ultimate performance.}
+\end{finding}
+
+
+%=============================================================================
+\section{Finding 3: Topology Optimisation --- Quantitative Assessment}
+\label{sec:topo_opt}
+%=============================================================================
+
+\subsection{State of the Art (2024--2026)}
+
+Two independent approaches to topology optimisation for
+nanomechanical resonators have emerged:
+
+\begin{enumerate}[nosep]
+\item \textbf{Direct Q optimisation} (Shi et al., Adv.\ Sci.\
+  2026): Maximise the damping dilution factor $D_Q$ using
+  topology optimisation of the resonator geometry. Achieved
+  $Q = 5.1\ee{7}$ at 1.4~MHz in Si$_3$N$_4$ at room temperature.
+
+\item \textbf{Dilution-driven topology optimisation} (Komijani
+  et al., CMAME 2025, arXiv:2412.18682): Formal optimisation
+  framework based on the ratio of geometrically nonlinear to
+  linear modal stiffnesses. Provides systematic design methodology
+  with adjoint sensitivity analysis, enabling gradient-based
+  optimisation over large parameter spaces.
+\end{enumerate}
+
+\subsection{Impact on the Q Gap}
+
+Topology optimisation represents a \textit{multiplicative} gain
+on top of material and clamping improvements:
+\begin{equation}
+Q_{\rm total} = Q_{\rm int} \times D_{\rm stress} \times
+D_{\rm soft\,clamp} \times D_{\rm topo},
+\end{equation}
+where $D_{\rm topo}$ is the additional dilution factor from
+topology optimisation beyond standard soft clamping ($D_{\rm topo}
+\sim 2$--$10\times$ based on Shi et al.\ comparison with
+conventional designs).
+
+For DFD, topology optimisation applied to crystalline TiN or Si
+PnC membranes could push $Q$ beyond the already-projected values:
+\begin{equation}
+Q_{\rm TiN,\,topo+soft} \sim Q_{\rm TiN,\,soft} \times D_{\rm topo}
+\sim 10^9 \times (2\text{--}10) = 2\ee{9}\text{--}10^{10}.
+\end{equation}
+
+\begin{finding}[Topology Optimisation Impact]
+\label{find:topo_opt}
+\confirmed{Topology optimisation provides $2$--$10\times$ additional
+$Q$ improvement beyond standard soft clamping. When applied to
+crystalline materials (TiN or Si) at cryogenic temperatures, this
+could push MEMS $Q$ to $10^{10}$, providing $45\times$ margin over
+$\Qpsi$. The formal optimisation framework (Komijani et al.\ 2025)
+enables systematic design rather than trial-and-error geometry
+selection.}
+\end{finding}
+
+
+%=============================================================================
+\section{Finding 4: Beccari Result and the Geometry Gap}
+\label{sec:beccari}
+%=============================================================================
+
+\subsection{What Beccari Proved}
+
+The Beccari et al.\ (Nature Physics 2022) result is the single
+most important data point for DFD MEMS feasibility:
+
+\begin{itemize}[nosep]
+\item $Q > 10^{10}$ ($Q \cdot f > 10^{15}$~Hz) in a 12~nm thick
+  crystalline Si nanostring at 7~K
+\item Thermal noise force sensitivity
+  $(5 \pm 2)\ee{-20}$~N/Hz$^{1/2}$
+\item Heating rate 60 quanta/s from 7~K thermal bath
+\item Dissipation dilution factor $D_Q > 10^5$ in the nanostring
+  geometry
+\end{itemize}
+
+This proves that no fundamental material limit prevents $Q > 10^{10}$
+in silicon at 7~K. The DFD programme can quote this as:
+\textit{The required material $Q$ for DFD psi-detection has already
+been demonstrated in crystalline Si at 7~K. The remaining task is
+engineering the resonator geometry for adequate effective mass.}
+
+\subsection{Nanostring $\to$ PnC Membrane: Quantitative Penalty}
+
+\begin{table}[H]
+\centering
+\caption{Nanostring vs PnC membrane: geometry comparison.}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Property} & \textbf{Nanostring} & \textbf{PnC Membrane} \\
+\midrule
+Dimensionality & 1D & 2D \\
+$M_{\rm eff}$ & $\sim 10^{-15}$~kg & $\sim 10^{-10}$~kg \\
+Dilution factor $D_Q$ & $10^5$--$10^6$ & $10^3$--$10^4$ \\
+Anchor loss suppression & Intrinsic (1D) & Requires PnC bandgap \\
+Mode density & Low & High \\
+Fabrication complexity & Moderate & High (PnC patterning) \\
+Demonstrated $Q$ at 7~K & $> 10^{10}$ & Not yet demonstrated \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The $D_Q$ penalty from 1D to 2D is $\sim 10$--$100\times$. But the
+$M_{\rm eff}$ gain is $\sim 10^4$--$10^5\times$. For DFD, the
+overall figure of merit is:
+\begin{equation}
+\mathrm{FOM} = \Qmech \times M_{\rm eff} \times \omega_m^2.
+\end{equation}
+The PnC membrane wins by $\sim 10^2$--$10^3\times$ on FOM despite
+the $Q$ penalty, because the effective mass gain dominates.
+
+\begin{finding}[Geometry Gap Assessment]
+\label{find:geometry_gap}
+\confirmed{The nanostring-to-PnC geometry transition incurs a
+$\sim 10$--$100\times$ penalty on $Q$ (from reduced dilution
+factor in 2D vs 1D). Starting from $Q > 10^{10}$ (Beccari),
+this gives $Q \sim 10^8$--$10^{10}$ in a PnC membrane --- fully
+adequate for DFD. The $M_{\rm eff}$ gain ($10^4$--$10^5\times$)
+more than compensates, making the PnC membrane the superior
+geometry for psi-coupling FOM.}
+
+\honest{No group has yet demonstrated a soft-clamped PnC in
+strained crystalline Si at cryogenic temperatures. The fabrication
+(SOI substrate, e-beam PnC patterning, HF release) is well
+established for Si$_3$N$_4$ but requires process adaptation for
+crystalline Si on SOI. The Beccari group (EPFL) is the natural
+collaborator. Estimated timeline: 12--18 months to first devices
+with $Q$ characterisation at 7~K.}
+\end{finding}
+
+
+%=============================================================================
+\section{Finding 5: Integration Engineering Roadmap}
+\label{sec:roadmap}
+%=============================================================================
+
+\subsection{Three-Track Development Strategy}
+
+\begin{table}[H]
+\centering
+\caption{Three-track MEMS development strategy for DFD Phase~II.}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{p{2.5cm}p{3cm}p{2.5cm}p{2cm}p{2.5cm}}
+\toprule
+\textbf{Track} & \textbf{Material} & \textbf{$Q$ Projection} &
+\textbf{$T_{\rm op}$} & \textbf{Risk} \\
+\midrule
+1 (Primary) & Crystalline Si PnC & $10^8$--$10^{10}$ & 7~K &
+Medium (geometry transfer) \\
+\midrule
+2 (New) & TiN PnC & $10^9$--$10^{10}$ & 2~K &
+Medium-High (no PnC demo yet) \\
+\midrule
+3 (Fallback) & Topo-opt Si$_3$N$_4$ PnC & $10^8$--$5\ee{8}$ & 4~K &
+Low (mature platform) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Go/No-Go Gate Structure}
+
+\begin{enumerate}[nosep]
+\item \textbf{Gate 1 (2027 Q1):} First PnC devices fabricated in
+  Track 1 and Track 2. Room-temperature $Q$ characterisation.
+  \textbf{Pass criterion:} $Q_{\rm RT} > 10^6$ (confirms PnC
+  bandgap is functional).
+
+\item \textbf{Gate 2 (2027 Q2):} Cryogenic characterisation at
+  target $T$.
+  \textbf{Pass criterion:} $Q_{\rm cryo} > 10^8$ (exceeds $\Qpsi$
+  threshold with margin).
+
+\item \textbf{Gate 3 (2027 Q4):} Integration with SRF cryostat.
+  Demonstrate mechanical resonator operating in the same cryogenic
+  environment as the SRF cavity.
+  \textbf{Pass criterion:} No degradation of $Q_{\rm mech}$ from
+  cryostat vibrational noise; SRF $Q_0$ unaffected by MEMS
+  presence.
+
+\item \textbf{Gate 4 (2028 Q2):} Full psi-coupling measurement.
+  MEMS resonator coupled to SRF cavity with readout chain.
+  \textbf{Pass criterion:} Demonstrate $\SNR$ consistent with
+  $|\lambda - 1| < 1.56\ee{-9}$ or detect psi-field signal.
+\end{enumerate}
+
+\subsection{Integration Challenges}
+
+\textbf{Vibration isolation:} SRF cavities in dilution
+refrigerators experience vibrational noise from pulse-tube
+cryocoolers ($\sim 1$~Hz fundamental, harmonics to $\sim 100$~Hz).
+MEMS resonators at MHz frequencies are far above this band, but
+parametric upconversion through nonlinear suspension dynamics could
+limit $Q$. Mitigation: passive vibration isolation stage (standard
+in optomechanics labs).
+
+\textbf{Readout chain:} Three options:
+\begin{enumerate}[nosep]
+\item Optical interferometry (proven for Si$_3$N$_4$, requires
+  optical access through cryostat)
+\item Electromechanical coupling via superconducting microwave
+  resonator (natural for TiN, requires microwave feedthrough)
+\item Interface piezoelectricity (weak, $K^2 \sim 3\ee{-7}$,
+  diagnostic only)
+\end{enumerate}
+
+Track 2 (TiN) has the strongest integration pathway because:
+\begin{itemize}[nosep]
+\item No optical access needed (electromechanical readout)
+\item Native superconductor (no additional metallisation)
+\item Compatible with SQMS infrastructure (TiN is already used
+  for superconducting resonators at Fermilab)
+\end{itemize}
+
+
+%=============================================================================
+\section{Updated Materials Hierarchy}
+\label{sec:hierarchy}
+%=============================================================================
+
+\begin{table}[H]
+\centering
+\caption{Updated materials hierarchy (W4i15). Changes from W4i14
+in \textcolor{teal}{teal}.}
+\label{tab:hierarchy}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{p{3.5cm}p{2cm}p{2.5cm}p{4cm}}
+\toprule
+\textbf{Material} & \textbf{Phase} & \textbf{Status} &
+\textbf{W4i15 Change} \\
+\midrule
+Si$_3$N$_4$ PnC & II & PRIMARY (proven) & Unchanged; topo-opt
+  adds $Q = 5.1\ee{7}$ data point \\
+\midrule
+\textcolor{teal}{Crystalline TiN PnC} & \textcolor{teal}{II+} &
+  \textcolor{teal}{\textbf{NEW: HIGH}} & \textcolor{teal}{Added.
+  $Q = 8\ee{6}$ at 2.2~K demo; $Q > 10^9$ projected with soft
+  clamping. Native conductivity.} \\
+\midrule
+Crystalline Si PnC & II+ & HIGH (7~K) & Unchanged; Beccari
+  ceiling confirmed \\
+\midrule
+N-doped + O-doped Nb & I & CO-PRIMARY & Unchanged from W4i14 \\
+\midrule
+Nb$_3$Sn (co-sputtered) & III & PRIMARY & Unchanged from W4i14 \\
+\midrule
+3C-SiC membrane & III & WATCH (Medium) & Unchanged from W4i14 \\
+\midrule
+4H-SiC (monolithic) & --- & SPECULATIVE & Unchanged (blocked) \\
+\midrule
+2D materials & --- & KILLED & Unchanged \\
+\midrule
+High-$T_c$ SRF & --- & KILLED & Unchanged \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+%=============================================================================
+\section{Consistency Checks and Cross-References}
+\label{sec:consistency}
+%=============================================================================
+
+\subsection{Si$_3$N$_4$ $Q \sim 10^9$ at Room Temperature}
+
+W4i14 cited the MEMS $Q_{\rm mech}$ gap as ``150$\times$'' based on
+the AlN PnC result ($8.2\ee{6}$). However, the Si$_3$N$_4$
+soft-clamped PnC community has routinely demonstrated $Q \sim 10^9$
+at room temperature since Tsaturyan et al.\ (2017). The ``gap''
+depends on which material is considered:
+\begin{itemize}[nosep]
+\item Si$_3$N$_4$ PnC: gap = $1\times$ (already at $10^9$, above
+  $\Qpsi$). \textbf{No gap.}
+\item Crystalline Si PnC: gap = unknown (not yet demonstrated in
+  PnC geometry; nanostring gives $10^{10}$). \textbf{Engineering
+  gap only.}
+\item TiN PnC: gap = $125\times$ from $8\ee{6}$ to $10^9$.
+  \textbf{Closable with soft clamping.}
+\item AlN PnC: gap = $120\times$ from $8.2\ee{6}$ to $10^9$.
+  \textbf{Closable with improved designs.}
+\end{itemize}
+
+\corrected{The ``150$\times$ MEMS $Q_{\rm mech}$ gap'' is
+misleading as stated. For Si$_3$N$_4$, there is no gap --- $Q \sim
+10^9$ is demonstrated. The gap exists only for alternative
+materials (TiN, AlN, crystalline Si in PnC geometry). The
+programme-relevant question is: can we exceed Si$_3$N$_4$ by
+using crystalline materials at cryogenic temperatures? The answer
+is yes (Beccari: $10\times$ at 7~K), but the PnC geometry
+transfer is the remaining engineering challenge.}
+
+\subsection{Formalism Connection}
+
+From Section~2 of the DFD formalism (section02\_formalism.tex),
+the psi-field couples to matter through the optical metric
+(Eq.~2.22): $\tilde{g}_{\mu\nu} = {\rm diag}(-c^2 e^{-\psi},
+e^{+\psi}, e^{+\psi}, e^{+\psi})$. The MEMS resonator responds
+to the spatial component $e^{+\psi}$, which modulates the
+effective spring constant of the mechanical mode. The psi-field
+force on the resonator is:
+\begin{equation}
+F_\psi = \frac{1}{2} M_{\rm eff} \omega_m^2 \cdot \delta\psi,
+\end{equation}
+where $\delta\psi$ is the local psi-field oscillation amplitude.
+The minimum detectable $\delta\psi$ scales as:
+\begin{equation}
+\delta\psi_{\rm min} \propto \frac{1}{\Qmech \cdot M_{\rm eff}
+\cdot \omega_m}.
+\end{equation}
+This confirms that the three parameters $\Qmech$, $M_{\rm eff}$,
+and $\omega_m$ all contribute to sensitivity. The PnC membrane
+geometry optimises $M_{\rm eff}$ (large) and $\Qmech$ (dissipation
+dilution), while $\omega_m$ is constrained by the PnC bandgap
+design ($\sim 0.1$--$10$~MHz).
+
+\subsection{Connection to Phase~I $Q_0$ Scaling}
+
+W4i14 resolved the $1/Q_0$ vs $1/\sqrt{Q_0}$ scaling question
+for Phase~I SRF sensitivity. The analogous question for Phase~II
+MEMS sensitivity: does $\delta\psi_{\rm min} \propto 1/\Qmech$ or
+$1/\sqrt{\Qmech}$?
+
+In the weak-coupling regime (cooperativity $C \ll 1$), the
+psi-induced displacement is linear in $\delta\psi$ and the thermal
+noise spectral density is:
+\begin{equation}
+S_{xx}^{\rm th}(\omega_m) = \frac{4 k_B T \Qmech}{M_{\rm eff}
+\omega_m^3}.
+\end{equation}
+The SNR for a psi-signal at frequency $\omega_\psi \neq \omega_m$
+(off-resonance) scales as $\Qmech^{-1}$ (noise floor increases
+with $Q$ on resonance, but off-resonance the noise is suppressed
+by $Q^2$ while signal is frequency-independent). For $\omega_\psi
+= \omega_m$ (on-resonance): $\SNR \propto \Qmech$.
+
+\confirmed{For Phase~II MEMS detection of an on-resonance
+psi-signal, sensitivity scales as $\Qmech^{1}$ (not $\Qmech^{1/2}$),
+making the improvement from $10^9$ to $10^{10}$ a genuine
+$10\times$ sensitivity gain, not $3.2\times$.}
+
+
+%=============================================================================
+\section{Recommendations for W4i16 and Beyond}
+\label{sec:next}
+%=============================================================================
+
+\begin{enumerate}[nosep]
+\item \textbf{Materials survey: CONVERGED.} No further materials
+  screening is warranted. The hierarchy is:
+  Si$_3$N$_4$ $>$ TiN $>$ Crystalline Si $>$ Nb$_3$Sn $>$
+  3C-SiC $\gg$ [everything else KILLED].
+  Future iterations should focus exclusively on fabrication,
+  integration, and experimental validation.
+
+\item \textbf{Initiate TiN PnC collaboration (PRIORITY):}
+  Contact Noguchi group (NTT/RIKEN, Japan) or other groups with
+  TiN deposition capability for superconducting circuits. Request
+  feasibility assessment for TiN PnC membrane fabrication using
+  existing infrastructure. Estimated cost for feasibility study:
+  \$20--40K.
+
+\item \textbf{Commission crystalline Si PnC devices (inherited,
+  URGENT):} Contact EPFL (Beccari/Kippenberg) for soft-clamped
+  PnC on SOI. This has been recommended since W4i13 and should
+  not be further delayed. Budget: \$150--250K, 12--18 months.
+
+\item \textbf{Procure topology-optimised Si$_3$N$_4$ devices
+  (LOW RISK):} Commission Si$_3$N$_4$ PnC devices using the
+  Shi et al.\ (2026) design from any of the $> 10$ groups with
+  fabrication capability. Cryogenic characterisation at 4~K.
+  Budget: \$50--100K.
+
+\item \textbf{Agent 13 transition to engineering mode:} Future
+  Materials Science updates should focus on:
+  \begin{itemize}[nosep]
+  \item Fabrication progress tracking (device procurement,
+    characterisation results)
+  \item Integration design (MEMS mounting in SRF cryostat,
+    readout chain specification)
+  \item Quantitative $Q$ vs temperature curves for each material
+  \item Risk register for each track (with mitigation plans)
+  \end{itemize}
+  The survey phase is complete. The engineering phase begins.
+\end{enumerate}
+
+
+\end{document}

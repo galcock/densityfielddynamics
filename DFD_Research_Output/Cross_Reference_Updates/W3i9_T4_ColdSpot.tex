@@ -1,0 +1,1537 @@
+%=============================================================================
+% W3i9_T4_ColdSpot.tex
+% Wave 3, Iteration 9 (FINAL): Definitive T4 Cold Spot Resolution
+%
+% Agent: T4 Cold Spot Resolution Agent
+% Date: 2026-03-20
+%
+% STATUS: T4 is the ONLY remaining quantitative tension in canonical
+%   two-component DFD. This document provides the definitive assessment.
+%
+% PRIOR WORK:
+%   W3i7: Full ISW path integral -> 5-8x static overprediction.
+%         Discovery of void-evolution cancellation (~73%), reducing
+%         to 1-2x (optimistic). Caveat: linear growth rate used.
+%   W3i8: Confirmed W3i7 results, flagged nonlinear growth as the
+%         key remaining uncertainty.
+%
+% THIS DOCUMENT:
+%   1. Full nonlinear DFD-modified ISW integral with all effects
+%   2. MOND-enhanced void growth and its impact on cancellation
+%   3. Systematic parameter sweep
+%   4. Definitive T4 verdict
+%   5. Decisive observation to settle T4
+%=============================================================================
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{physics}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{xcolor}
+\usepackage[most]{tcolorbox}
+\usepackage{hyperref}
+\usepackage{longtable}
+\usepackage{cancel}
+
+% Custom commands (consistent with prior iterations)
+\newcommand{\LCDM}{$\Lambda$CDM}
+\newcommand{\Hzero}{H_0}
+\newcommand{\aM}{a_0}
+\newcommand{\mufd}{\mu_{\rm DFD}}
+\newcommand{\mumin}{\mu_{\rm min}}
+\newcommand{\psigrav}{\psi_{\rm grav}}
+\newcommand{\dpsiEM}{\delta\psi_{\rm EM}}
+\newcommand{\GN}{G_{\rm N}}
+\newcommand{\ee}[1]{\times 10^{#1}}
+\newcommand{\Omm}{\Omega_m}
+
+\newcounter{findingctr}
+\newenvironment{finding}[1][]{%
+  \refstepcounter{findingctr}%
+  \begin{tcolorbox}[colback=blue!3!white, colframe=blue!50!black,
+    title=\textbf{Finding \thefindingctr: #1}]
+}{%
+  \end{tcolorbox}%
+}
+
+\title{\textbf{W3i9: Definitive T4 Cold Spot Assessment}\\[0.5em]
+\large Full Nonlinear DFD ISW Integral with MOND-Enhanced Void Evolution}
+
+\author{T4 Cold Spot Resolution Agent --- Wave 3, Iteration 9 (FINAL)}
+\date{20 March 2026}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+%=============================================================================
+\part{The T4 Problem: Summary of Prior Results}
+\label{part:prior}
+%=============================================================================
+
+\section{What W3i7 Established}
+
+The integrated Sachs--Wolfe (ISW) effect from the Eridanus supervoid
+in DFD gives:
+\begin{equation}
+\Delta T_{\rm ISW}^{\rm DFD,static}
+= \frac{\Delta T_{\rm ISW}^{\rm GR}}{\langle\mufd\rangle_{\rm eff}},
+\label{eq:static-ratio}
+\end{equation}
+where $\langle\mufd\rangle_{\rm eff} \approx 0.012$ for the canonical
+Gaussian void ($\delta_v = -0.20$, $\sigma_v = 130$~Mpc,
+$\delta_{\rm ridge} = +0.08$), and $\Delta T_{\rm ISW}^{\rm GR}
+\approx -7\,\mu$K. This yields
+$\Delta T_{\rm ISW}^{\rm DFD,static} \approx -580\,\mu$K, a
+$5$--$8\times$ overprediction against the ISW-only target
+($-75\,\mu$K at 50\% primordial attribution).
+
+W3i7 then discovered the \textbf{void-evolution partial cancellation}:
+the full time derivative of the DFD-modified potential is
+\begin{equation}
+\dot{\Phi}_{\rm DFD} = \frac{\dot{\Phi}_{\rm GR}}{\mufd(x)}
++ \Phi_{\rm GR}\,\frac{d}{dt}\!\left(\frac{1}{\mufd(x)}\right).
+\label{eq:Phi-dot-full}
+\end{equation}
+The second term is positive (warming), partially cancelling the first
+(cooling). Using the linear growth rate, the cancellation fraction was
+estimated at $\sim 73\%$, reducing the net ISW by a factor of
+$\sim 3.7$.
+
+\textbf{The W3i7/W3i8 caveat}: The $73\%$ cancellation uses the
+linear growth rate $f(\Omm) \approx \Omm^{0.55}$. In DFD, void
+growth is MOND-enhanced, changing $d\delta_v/dt$ and hence $dx/dt$.
+This is the single most important correction to compute.
+
+\section{What This Document Resolves}
+
+We now perform the full nonlinear calculation:
+\begin{enumerate}[nosep]
+\item Derive the exact cancellation factor with MOND-enhanced growth.
+\item Include the compensating ridge evolution.
+\item Include the external field effect (EFE).
+\item Sweep the full parameter space ($\delta_v$, $R_v$, primordial fraction).
+\item Deliver the definitive T4 verdict.
+\end{enumerate}
+
+
+%=============================================================================
+\part{The Full Nonlinear DFD ISW Integral}
+\label{part:derivation}
+%=============================================================================
+
+\section{Setup: Gaussian Void Model}
+\label{sec:void-model}
+
+The density contrast profile:
+\begin{equation}
+\delta(r,t) = \delta_v(t)\,e^{-r^2/2\sigma_v^2}
++ \delta_{\rm ridge}(t)\,\frac{r^2}{\sigma_v^2}\,e^{-r^2/2\sigma_v^2},
+\label{eq:void-profile}
+\end{equation}
+with fiducial parameters at $z = 0.15$ (the Eridanus supervoid redshift):
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+\textbf{Parameter} & \textbf{Fiducial} & \textbf{Range} \\
+\midrule
+$\delta_v$ (central underdensity) & $-0.14$ & $[-0.25,\,-0.10]$ \\
+$\sigma_v$ (Gaussian width) & $130$~Mpc & $[100,\,160]$~Mpc \\
+$\delta_{\rm ridge}$ (compensating ridge) & $+0.08$ & $[+0.05,\,+0.12]$ \\
+$z_{\rm void}$ (void redshift) & $0.15$ & --- \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The enclosed mass deficit:
+\begin{equation}
+M_{\rm def}(r) = 4\pi\bar{\rho}\int_0^r \delta(r')\,r'^2\,dr',
+\end{equation}
+and the gravitational acceleration:
+\begin{equation}
+g(r) = \frac{\GN M_{\rm def}(r)}{r^2}
+= \frac{\Hzero^2\Omm}{2r^2}\int_0^r \delta(r')\,r'^2\,dr'.
+\label{eq:g-profile}
+\end{equation}
+
+The MOND parameter:
+\begin{equation}
+x(r) \equiv \frac{g(r)}{\aM}, \qquad
+\mufd(x) = \frac{x}{1+x}.
+\label{eq:x-def}
+\end{equation}
+
+For the fiducial void, $x(r) \sim 10^{-3}$ everywhere
+(deep-MOND regime), as established in W3i7.
+
+
+\section{The Two-Term ISW Integral}
+\label{sec:two-term}
+
+The ISW temperature perturbation along the central line of sight:
+\begin{equation}
+\Delta T_{\rm ISW}^{\rm DFD}
+= T_0\,\frac{2}{c^3}\int_0^{\chi_{\rm void}}
+\dot{\Phi}_{\rm DFD}(r,t)\,d\chi,
+\label{eq:ISW-DFD}
+\end{equation}
+where $\dot{\Phi}_{\rm DFD}$ has two contributions from
+Eq.~(\ref{eq:Phi-dot-full}):
+\begin{equation}
+\dot{\Phi}_{\rm DFD}
+= \underbrace{\frac{\dot{\Phi}_{\rm GR}}{\mufd(x)}}_{\text{Term A: enhanced GR decay}}
++ \underbrace{\Phi_{\rm GR}\,\frac{d}{dt}\!\left(\frac{1}{\mufd(x)}\right)}_{\text{Term B: mu-evolution (warming)}}.
+\label{eq:two-terms}
+\end{equation}
+
+\subsection{Term A: Enhanced GR potential decay}
+
+In \LCDM, the Newtonian potential in a void decays as:
+\begin{equation}
+\dot{\Phi}_{\rm GR}(r) = -H(z)\,(1 - \Omm(z))\,\Phi_{\rm GR}(r),
+\label{eq:Phi-dot-GR}
+\end{equation}
+where $\Phi_{\rm GR}(r) \propto M_{\rm def}(r)/r$ and
+$1 - \Omm(z) = \Omega_\Lambda(z)$.
+At $z = 0.15$: $\Omm(0.15) \approx 0.37$, so
+$1 - \Omm \approx 0.63$.
+
+The DFD enhancement:
+\begin{equation}
+\text{Term A} = \frac{\dot{\Phi}_{\rm GR}(r)}{\mufd(x(r))}
+\approx \frac{\dot{\Phi}_{\rm GR}(r)}{x(r)}
+\qquad (x \ll 1).
+\end{equation}
+
+The path-averaged result (from W3i7):
+\begin{equation}
+\Delta T_{\rm A} = \frac{\Delta T_{\rm ISW}^{\rm GR}}{\langle\mufd\rangle_{\rm eff}}
+= \frac{-7\,\mu\text{K}}{0.012} = -580\,\mu\text{K}
+\qquad (\delta_v = -0.20).
+\label{eq:term-A}
+\end{equation}
+
+
+\subsection{Term B: The $\mufd$-evolution warming contribution}
+\label{sec:term-B}
+
+This is the critical term. As the void evolves, $\delta_v(t)$
+grows more negative, $g(r,t)$ decreases, $x(r,t)$ decreases, and
+$1/\mufd(x)$ increases. We need:
+\begin{equation}
+\frac{d}{dt}\!\left(\frac{1}{\mufd(x)}\right)
+= \frac{d}{dt}\!\left(\frac{1+x}{x}\right)
+= -\frac{1}{x^2}\,\frac{dx}{dt}.
+\label{eq:dmu-dt}
+\end{equation}
+
+Now, $x = g/\aM$, and $g \propto |\delta_v|\,\bar{\rho}\,r$ (at fixed
+comoving $r$), so:
+\begin{equation}
+\frac{1}{x}\frac{dx}{dt}
+= \frac{1}{\delta_v}\frac{d\delta_v}{dt}
++ \frac{1}{\bar{\rho}}\frac{d\bar{\rho}}{dt}
+= \frac{1}{\delta_v}\frac{d\delta_v}{dt} - 3H.
+\label{eq:xdot}
+\end{equation}
+
+The $-3H$ term from the background dilution is common to GR and DFD
+and does not produce a net ISW signal (it is already accounted for in
+$\dot{\Phi}_{\rm GR}$). The novel DFD contribution comes from the
+first term: the \emph{growth rate of the void contrast}.
+
+\begin{tcolorbox}[colback=red!5!white, colframe=red!60!black,
+  title=\textbf{Key Correction: MOND-Enhanced Void Growth}]
+
+In \LCDM, the linear growth rate is:
+\begin{equation}
+f_{\rm GR} \equiv \frac{d\ln|\delta|}{d\ln a}
+= \Omm(a)^{0.55} \approx 0.53
+\qquad (z = 0.15).
+\label{eq:f-GR}
+\end{equation}
+
+In DFD, the MOND enhancement of gravity modifies the growth equation.
+The linearised density perturbation equation in the MOND regime becomes:
+\begin{equation}
+\ddot{\delta} + 2H\dot{\delta}
+= \frac{4\pi\GN\bar{\rho}\,\delta}{\mufd(x)}.
+\label{eq:growth-MOND}
+\end{equation}
+
+For $\mufd(x) \approx x \sim 10^{-3}$, the effective gravitational
+coupling is enhanced by $1/\mufd \sim 10^3$. However, this does
+\emph{not} mean $f_{\rm DFD} \sim 10^3\,f_{\rm GR}$. The growth
+equation is nonlinear in $\delta$ through $x(\delta)$.
+
+The self-consistent MOND growth rate for a void with $|\delta| \ll 1$
+in the deep-MOND regime follows from the scaling
+$g_{\rm eff} \sim \sqrt{g_N\,\aM}$ (the deep-MOND limit):
+\begin{equation}
+\ddot{\delta} + 2H\dot{\delta}
+= \frac{3}{2}\,H^2\,\Omm\,\frac{|\delta|}{\mufd}
+\approx \frac{3}{2}\,H^2\,\Omm\,\frac{|\delta|}{x}.
+\label{eq:growth-deep}
+\end{equation}
+
+Since $x \propto |\delta|\,r$ and the path-averaged $x$ scales as
+$|\delta|$, we have $|\delta|/x \propto |\delta|/|\delta| = \text{const}$
+(the $|\delta|$-dependence cancels in the deep-MOND regime). This gives
+a growth equation of the form:
+\begin{equation}
+\ddot{\delta} + 2H\dot{\delta}
+= \frac{3}{2}\,H^2\,\Omm\,C_{\rm MOND}\,\delta,
+\label{eq:growth-eff}
+\end{equation}
+where $C_{\rm MOND} = \langle 1/\mufd \rangle_{\rm eff, growth}$ is
+the growth-weighted MOND enhancement.
+
+\textbf{Critical subtlety}: The MOND enhancement of growth is
+\emph{not} simply $1/\mufd \sim 10^3$, because the potential is
+sourced nonlinearly. In the deep-MOND regime, the effective
+gravitational acceleration scales as $g_{\rm eff} \sim \sqrt{g_N\,\aM}$,
+so:
+\begin{equation}
+g_{\rm eff} \propto \sqrt{|\delta|}, \qquad
+\text{not} \quad g_{\rm eff} \propto |\delta|/\mufd(|\delta|).
+\end{equation}
+
+This means the MOND-enhanced growth equation is:
+\begin{equation}
+\ddot{\delta} + 2H\dot{\delta}
+= \frac{3}{2}\,H^2\,\Omm\,\sqrt{\frac{\aM}{\Hzero^2\,\Omm\,R_{\rm eff}}}
+\,\sqrt{|\delta|}\,\text{sgn}(\delta),
+\label{eq:growth-sqrt}
+\end{equation}
+where $R_{\rm eff} \sim \sigma_v$ is the effective void scale.
+
+For $|\delta| = 0.14$, $\sigma_v = 130$~Mpc, this gives a growth
+rate enhanced by a factor:
+\begin{equation}
+\frac{f_{\rm DFD}}{f_{\rm GR}}
+\sim \frac{1}{\sqrt{\mufd(x_{\rm eff})}}
+\sim \frac{1}{\sqrt{x_{\rm eff}}}
+\sim \frac{1}{\sqrt{8.5\ee{-3}}}
+\approx 11.
+\label{eq:f-enhancement}
+\end{equation}
+
+So the MOND-enhanced growth rate is:
+\begin{equation}
+\boxed{f_{\rm DFD} \approx 11\,f_{\rm GR} \approx 5.8}
+\qquad (z = 0.15,\;\delta_v = -0.14).
+\label{eq:f-DFD}
+\end{equation}
+
+\end{tcolorbox}
+
+
+\subsection{Recomputing the Cancellation Factor}
+\label{sec:cancel-recompute}
+
+From Eq.~(\ref{eq:dmu-dt}), the ratio of Term~B to Term~A at each
+radius is (cf.\ W3i7 Eq.~(38)):
+\begin{equation}
+\mathcal{R} \equiv \frac{\text{Term B}}{\text{Term A}}
+= \frac{\Phi_{\rm GR}\,\dot{(1/\mufd)}}{\dot{\Phi}_{\rm GR}/\mufd}.
+\label{eq:ratio-def}
+\end{equation}
+
+Using $\dot{\Phi}_{\rm GR} = -H(1-\Omm)\Phi_{\rm GR}$ and
+$\dot{(1/\mufd)} = -(1/x^2)\dot{x}$:
+\begin{align}
+\mathcal{R}
+&= \frac{\Phi\cdot(-(1/x^2)\dot{x})}{(-H(1-\Omm)\Phi)/\mufd}
+\nonumber\\
+&= \frac{(1/x^2)\dot{x}\cdot\mufd}{H(1-\Omm)}
+\nonumber\\
+&= \frac{(1/x^2)\cdot x\cdot\dot{x}}{H(1-\Omm)}
+\qquad (\mufd \approx x)
+\nonumber\\
+&= \frac{\dot{x}}{x\,H\,(1-\Omm)}.
+\label{eq:ratio-calc}
+\end{align}
+
+Now, $\dot{x}/x = \dot{g}/g$. In the deep-MOND regime,
+$g_{\rm eff} \propto \sqrt{g_N\,\aM}$, but for the ISW what matters
+is $\dot{\Phi}_{\rm grav}$ where $\Phi_{\rm grav}$ is the MOND-modified
+potential. In the deep-MOND regime:
+\begin{equation}
+\Phi_{\rm MOND}(r) \propto \sqrt{\GN\,\aM\,M_{\rm def}(r)}\,\ln(r/r_0),
+\end{equation}
+and $M_{\rm def} \propto |\delta_v|$, so $\Phi_{\rm MOND} \propto
+\sqrt{|\delta_v|}$.
+
+However, for the $x$-evolution itself, $x = g_N/\aM$ where $g_N$ is
+the \emph{Newtonian} acceleration (appearing in the argument of
+$\mufd$). The Newtonian acceleration scales as:
+\begin{equation}
+g_N(r,t) \propto \bar{\rho}(t)\,|\delta_v(t)|\,r
+\propto a^{-3}\,D(t)\,|\delta_{v,0}|\,r,
+\end{equation}
+where $D(t)$ is the growth factor. Thus:
+\begin{equation}
+\frac{\dot{x}}{x} = \frac{\dot{g}_N}{g_N}
+= -3H + \frac{\dot{D}}{D}
+= -3H + Hf,
+\label{eq:xdot-over-x}
+\end{equation}
+where $f = d\ln D/d\ln a$ is the growth rate.
+
+\textbf{Here is where the MOND-enhanced growth enters.}
+
+In \LCDM:
+\begin{equation}
+\frac{\dot{x}}{x}\bigg|_{\rm GR} = H(-3 + f_{\rm GR})
+= H(-3 + 0.53) = -2.47\,H.
+\end{equation}
+
+In DFD with MOND-enhanced growth (Eq.~\ref{eq:f-DFD}):
+\begin{equation}
+\frac{\dot{x}}{x}\bigg|_{\rm DFD} = H(-3 + f_{\rm DFD})
+= H(-3 + 5.8) = +2.8\,H.
+\label{eq:xdot-DFD}
+\end{equation}
+
+\begin{finding}[Sign Reversal of $\dot{x}$]
+\label{find:sign-reversal}
+In GR, $\dot{x}/x < 0$ (the void acceleration parameter decreases
+because background dilution dominates over growth). In DFD with
+MOND-enhanced growth, $\dot{x}/x > 0$ (the MOND-enhanced growth is
+fast enough to \emph{increase} $x$ despite background dilution).
+
+This reverses the sign of the $\mufd$-evolution term: instead of
+producing a warming contribution (partial cancellation), it produces
+an \emph{additional cooling} contribution.
+
+\textbf{Wait --- this requires very careful analysis.}
+\end{finding}
+
+\subsection{Self-Consistent Analysis of Term B}
+\label{sec:self-consistent}
+
+The above finding reveals a crucial subtlety. Let us be extremely
+careful. The question is: what determines $\dot{\Phi}_{\rm DFD}$?
+
+In the DFD framework, the MOND-modified Poisson equation is:
+\begin{equation}
+\nabla\cdot[\mufd(|\nabla\psigrav|/a_\star)\,\nabla\psigrav]
+= -\frac{4\pi\GN}{c^2}\,\rho.
+\label{eq:MOND-Poisson}
+\end{equation}
+
+For a spherically symmetric void, this gives:
+\begin{equation}
+\mufd(x)\,g_{\rm DFD}(r) = g_N(r),
+\label{eq:MOND-relation}
+\end{equation}
+where $g_N = \GN M_{\rm def}(r)/r^2$ is the Newtonian acceleration
+and $g_{\rm DFD} = c^2|\nabla\psigrav|/2$ is the DFD gravitational
+acceleration. The MOND parameter is $x = g_{\rm DFD}/\aM$, not
+$x = g_N/\aM$.
+
+In the deep-MOND regime ($x \ll 1$, $\mufd \approx x$):
+\begin{equation}
+x\,\aM\,x = g_N \quad\Rightarrow\quad
+x = \sqrt{\frac{g_N}{\aM}},
+\label{eq:x-deep-MOND}
+\end{equation}
+so $x \propto \sqrt{g_N} \propto \sqrt{|\delta_v|\,\bar{\rho}\,r}$.
+
+Now the time derivative:
+\begin{equation}
+\frac{\dot{x}}{x} = \frac{1}{2}\,\frac{\dot{g}_N}{g_N}
+= \frac{1}{2}\,(-3H + Hf_{\delta}),
+\label{eq:xdot-deep-MOND}
+\end{equation}
+where $f_{\delta} = d\ln|\delta|/d\ln a$ is the growth rate of the
+density contrast.
+
+\textbf{Now}: what is $f_{\delta}$ in DFD?
+
+The density perturbation evolves according to the continuity +
+Euler equations with MOND gravity. In the deep-MOND limit, the
+effective gravitational force scales as $\sqrt{g_N\,\aM}$, so the
+linear perturbation equation becomes:
+\begin{equation}
+\ddot{\delta} + 2H\dot{\delta}
+= 4\pi\GN\bar{\rho}\,\frac{\delta}{\mufd_{\rm eff}}
+\sim \frac{3}{2}H^2\Omm\,\frac{\delta}{\sqrt{x_{\rm eff}\,|\delta|/|\delta|}}
+= \frac{3}{2}H^2\Omm\,\frac{\sqrt{|\delta|}}{\sqrt{g_{N,0}/(\aM\,|\delta_0|)}}\,\text{sgn}(\delta).
+\end{equation}
+
+This is complicated. Let us instead use the known result from MOND
+cosmological perturbation theory (Nusser 2002; Sanders 2001):
+
+In the deep-MOND regime, the modified Poisson equation gives an
+effective gravitational coupling that scales as $\sqrt{G_N\,\aM/\ell}$
+where $\ell$ is the perturbation scale. The growth rate for a
+perturbation of scale $R$ and amplitude $|\delta|$ satisfies:
+\begin{equation}
+f_{\rm MOND} \approx f_{\rm GR}\,\left(\frac{1}{\mufd(x_{\rm eff})}\right)^{1/2},
+\label{eq:f-MOND-general}
+\end{equation}
+where $x_{\rm eff}$ is evaluated at the scale $R$ of the perturbation.
+
+For our void with $x_{\rm eff} \approx 8.5\ee{-3}$ (from W3i7
+Table~1):
+\begin{equation}
+f_{\rm MOND} \approx 0.53\times\left(\frac{1}{8.5\ee{-3}}\right)^{1/2}
+= 0.53\times 10.8 = 5.8.
+\label{eq:f-MOND-value}
+\end{equation}
+
+Substituting into Eq.~(\ref{eq:xdot-deep-MOND}):
+\begin{equation}
+\frac{\dot{x}}{x}\bigg|_{\rm DFD}
+= \frac{H}{2}\,(-3 + f_{\rm MOND})
+= \frac{H}{2}\,(-3 + 5.8)
+= +1.4\,H.
+\label{eq:xdot-value}
+\end{equation}
+
+So $\dot{x} > 0$: the void's $x$-parameter is \emph{increasing}
+(the void is being driven \emph{out of} the deep-MOND regime by its
+own enhanced growth). This means $\mufd$ is increasing and $1/\mufd$
+is decreasing.
+
+From Eq.~(\ref{eq:dmu-dt}):
+\begin{equation}
+\frac{d}{dt}\!\left(\frac{1}{\mufd}\right)
+= -\frac{\dot{x}}{x^2}
+= -\frac{1.4\,H}{x} < 0
+\qquad (\text{since } x > 0).
+\label{eq:dmu-dt-value}
+\end{equation}
+
+So $d(1/\mufd)/dt < 0$: the enhancement factor is \emph{decreasing}
+with time. Term~B is:
+\begin{equation}
+\text{Term B} = \Phi_{\rm GR}\times\left(-\frac{1.4\,H}{x}\right).
+\end{equation}
+
+Since $\Phi_{\rm GR} < 0$ (potential well) and $x > 0$:
+\begin{equation}
+\text{Term B} = -\Phi_{\rm GR}\times\frac{1.4\,H}{x} > 0
+\qquad (\text{warming, since } \Phi_{\rm GR} < 0).
+\end{equation}
+
+\begin{finding}[Term B Sign Confirmed: Still Warming]
+\label{find:term-B-sign}
+Despite the MOND-enhanced growth making $\dot{x} > 0$, Term~B is
+still a \emph{warming} contribution. The physical reason: as the void
+grows faster under MOND, the density contrast deepens, but because
+$x \propto \sqrt{g_N}$ in the deep-MOND regime, $x$ actually
+\emph{increases} (the effective DFD acceleration grows faster than
+linear). This means $1/\mufd$ is decreasing, and the time-derivative
+contribution to $\dot{\Phi}_{\rm DFD}$ partially cancels the enhanced
+decay.
+
+The previous W3i7 analysis arrived at the correct sign for the
+cancellation but used a different route. Let us now compute the
+exact magnitude.
+\end{finding}
+
+
+\subsection{The Cancellation Ratio with MOND-Enhanced Growth}
+\label{sec:cancel-ratio}
+
+The ratio of Term~B to Term~A (Eq.~\ref{eq:ratio-calc}), using
+$\mufd \approx x$ in the deep-MOND regime:
+\begin{align}
+\mathcal{R}
+&= \frac{\Phi\cdot d(1/\mufd)/dt}{\dot{\Phi}_{\rm GR}/\mufd}
+\nonumber\\
+&= \frac{\Phi\cdot(-\dot{x}/x^2)}{(-H(1-\Omm)\Phi)/x}
+\nonumber\\
+&= \frac{\dot{x}/x^2}{H(1-\Omm)/x}
+\nonumber\\
+&= \frac{\dot{x}}{x\,H\,(1-\Omm)}.
+\label{eq:R-exact}
+\end{align}
+
+With $\dot{x}/x = +1.4\,H$ (Eq.~\ref{eq:xdot-value}) and
+$1 - \Omm(0.15) \approx 0.63$:
+\begin{equation}
+\boxed{\mathcal{R}_{\rm DFD}
+= \frac{1.4}{0.63} = 2.22.}
+\label{eq:R-DFD}
+\end{equation}
+
+The net DFD ISW is:
+\begin{equation}
+\Delta T_{\rm ISW}^{\rm DFD,net}
+= \Delta T_{\rm A}\,(1 - \mathcal{R})
+= \Delta T_{\rm A}\,(1 - 2.22)
+= -1.22\,\Delta T_{\rm A}.
+\label{eq:net-naive}
+\end{equation}
+
+\begin{tcolorbox}[colback=red!5!white, colframe=red!60!black,
+  title=\textbf{Problem: Over-Cancellation}]
+The naive calculation gives $|\mathcal{R}| > 1$, meaning Term~B
+\emph{over-cancels} Term~A and the net ISW \emph{changes sign} to
+a warming effect. This is unphysical for a void that should produce
+net cooling.
+
+\textbf{This signals that the linearised treatment of Term~B breaks
+down.} We are treating the void evolution as a small perturbation on
+a static background, but with $f_{\rm MOND} \approx 5.8$, the void
+is evolving so rapidly that the adiabatic approximation fails.
+
+\textbf{Resolution}: We need a more careful treatment.
+\end{tcolorbox}
+
+
+\section{Beyond the Adiabatic Approximation}
+\label{sec:beyond-adiabatic}
+
+\subsection{The correct ISW integral for a rapidly evolving void}
+
+The ISW effect arises from the time variation of the metric potential
+$\Phi$ along the photon path. For a photon traversing the void in a
+time $\Delta t_{\rm cross} \sim 2R_v/c$, the relevant quantity is:
+\begin{equation}
+\frac{\Delta T}{T}\bigg|_{\rm ISW}
+= \frac{2}{c^3}\int \dot{\Phi}\,d\chi
+\approx \frac{2}{c^2}\,\Delta\Phi_{\rm exit-entry}\,R_v,
+\end{equation}
+where $\Delta\Phi_{\rm exit-entry}$ is the change in the potential
+between the photon's entry and exit from the void.
+
+The crossing time for a void of radius $R_v = 300$~Mpc:
+\begin{equation}
+\Delta t_{\rm cross} = \frac{2R_v}{c} = \frac{600\;\text{Mpc}}{c}
+= \frac{600\times 3.086\ee{22}\;\text{m}}{3\ee{8}\;\text{m/s}}
+= 6.2\ee{16}\;\text{s} = 1.96\;\text{Gyr}.
+\label{eq:crossing-time}
+\end{equation}
+
+The Hubble time at $z = 0.15$:
+\begin{equation}
+t_H = 1/H(0.15) \approx 13\;\text{Gyr}.
+\end{equation}
+
+So $\Delta t_{\rm cross}/t_H \approx 0.15$. The void evolution during
+crossing is not negligible, but it is still perturbative.
+
+\subsection{The finite-crossing-time ISW integral}
+
+For a photon entering the void at time $t_1$ and exiting at $t_2
+= t_1 + \Delta t_{\rm cross}$, the ISW integral is:
+\begin{equation}
+\Delta T_{\rm ISW} = T_0\,\frac{2}{c^3}\int_{\ell_1}^{\ell_2}
+\dot{\Phi}_{\rm DFD}(r(\ell),\,t(\ell))\,d\ell,
+\label{eq:ISW-finite}
+\end{equation}
+where $t(\ell) = t_1 + \ell/c$ and $r(\ell) = |\ell - \ell_{\rm centre}|$
+for the central ray.
+
+The DFD potential in the deep-MOND regime:
+\begin{equation}
+\Phi_{\rm DFD}(r,t) = -\frac{\sqrt{\GN\,\aM\,M_{\rm def}(r,t)}}{r^{1/2}}
+\times \phi(r/\sigma_v),
+\label{eq:Phi-DFD-deep}
+\end{equation}
+where $\phi$ is a dimensionless profile function that depends on the
+void shape, and $M_{\rm def} \propto |\delta_v(t)|$.
+
+In the deep-MOND regime, $\Phi_{\rm DFD} \propto \sqrt{|\delta_v(t)|}$,
+so:
+\begin{equation}
+\dot{\Phi}_{\rm DFD} = \frac{\Phi_{\rm DFD}}{2|\delta_v|}\,\dot{|\delta_v|}
+= \frac{1}{2}\,Hf_{\rm MOND}\,\Phi_{\rm DFD}.
+\label{eq:Phi-dot-DFD-deep}
+\end{equation}
+
+But we also need to account for the background expansion contribution
+to $\dot{\Phi}$, which in GR gives the standard ISW. The total is:
+\begin{equation}
+\dot{\Phi}_{\rm DFD}^{\rm total}
+= \underbrace{-H(1-\Omm)\,\Phi_{\rm DFD}}_{\text{dark energy decay}}
++ \underbrace{\frac{1}{2}\,Hf_{\rm MOND}\,\Phi_{\rm DFD}}_{\text{growth replenishment}}.
+\label{eq:Phi-dot-total}
+\end{equation}
+
+The first term causes the potential to decay (ISW cooling for a void);
+the second causes it to deepen (ISW warming --- the growing void
+replenishes the potential). The net:
+\begin{equation}
+\dot{\Phi}_{\rm DFD}^{\rm total}
+= H\Phi_{\rm DFD}\left(\frac{f_{\rm MOND}}{2} - (1 - \Omm)\right).
+\label{eq:Phi-dot-net}
+\end{equation}
+
+At $z = 0.15$:
+\begin{equation}
+\frac{f_{\rm MOND}}{2} - (1 - \Omm)
+= \frac{5.8}{2} - 0.63
+= 2.9 - 0.63 = +2.27.
+\label{eq:net-factor}
+\end{equation}
+
+\begin{finding}[The DFD Void Potential Deepens, Not Decays]
+\label{find:deepening}
+In DFD, the MOND-enhanced growth rate ($f_{\rm MOND} \approx 5.8$)
+overwhelms the dark-energy-driven potential decay ($1 - \Omm \approx
+0.63$). The DFD void potential is \emph{deepening} with time, not
+decaying.
+
+This means $\dot{\Phi}_{\rm DFD} < 0$ for a void ($\Phi_{\rm DFD} < 0$,
+and $\dot{\Phi} = +2.27\,H\,\Phi < 0$). The photon enters a
+potential well that is deeper when it exits than when it entered.
+
+The ISW effect is therefore a \textbf{net blueshift} (warming), not
+a redshift (cooling)!
+\end{finding}
+
+\subsection{Reconciling with observation}
+\label{sec:reconcile}
+
+This is a striking result that requires careful interpretation:
+
+\begin{enumerate}
+\item The \emph{standard} ISW effect from a void produces cooling:
+the photon enters a potential well, which decays while the photon
+crosses, so the photon exits a shallower well and loses energy (net
+redshift).
+
+\item In DFD, the potential well \emph{deepens} during crossing.
+The photon exits a deeper well than it entered, gaining energy (net
+blueshift). This is the Rees--Sciama effect with reversed sign.
+
+\item Numerically, the DFD ISW contribution is:
+\begin{equation}
+\Delta T_{\rm ISW}^{\rm DFD}
+= T_0\,\frac{2}{c^3}\int \dot{\Phi}_{\rm DFD}\,d\chi
+= T_0\,\frac{2}{c^3}\,2.27\,H\int \Phi_{\rm DFD}\,d\chi.
+\end{equation}
+
+Since $\Phi_{\rm DFD} < 0$ throughout the void:
+$\Delta T_{\rm ISW}^{\rm DFD} < 0 \times 2.27 < 0$?
+
+No --- let us be more careful with signs.
+\end{enumerate}
+
+\subsection{Careful sign analysis}
+\label{sec:signs}
+
+Define conventions:
+\begin{itemize}[nosep]
+\item The Newtonian potential $\Phi < 0$ inside a mass concentration
+  (well), $\Phi > 0$ inside a void (hill, since matter is removed).
+
+  \textbf{Actually}: for an underdense void ($\delta < 0$), the
+  potential perturbation is $\Phi \propto -\delta > 0$. The void
+  is a potential \emph{hill}, not a well. Photons entering a void
+  gain energy (blueshift), and if the hill decays while the photon
+  crosses, the photon exits with a net redshift (cooling).
+\item Standard ISW from a void: $\dot{\Phi} < 0$ (hill decaying),
+  $\Delta T_{\rm ISW} < 0$ (cooling). This matches the Cold Spot.
+\end{itemize}
+
+In GR:
+\begin{equation}
+\Phi_{\rm GR} \propto -\delta_v > 0 \quad (\text{for } \delta_v < 0).
+\end{equation}
+The potential hill decays during dark energy domination:
+\begin{equation}
+\dot{\Phi}_{\rm GR} = -H(1-\Omm)\,\Phi_{\rm GR} < 0.
+\end{equation}
+
+In DFD (deep-MOND), the MOND-modified potential hill is enhanced:
+\begin{equation}
+\Phi_{\rm DFD} \propto \frac{\Phi_{\rm GR}}{\langle\mufd\rangle_{\rm eff}}
+\gg \Phi_{\rm GR} > 0.
+\end{equation}
+
+The time derivative has two contributions:
+\begin{align}
+\dot{\Phi}_{\rm DFD}
+&= \frac{\dot{\Phi}_{\rm GR}}{\mufd}
++ \Phi_{\rm GR}\,\frac{d}{dt}\!\left(\frac{1}{\mufd}\right)
+\nonumber\\
+&= \underbrace{-\frac{H(1-\Omm)\,\Phi_{\rm GR}}{\mufd}}_{< 0\;\text{(cooling)}}
++ \underbrace{\Phi_{\rm GR}\times\left(-\frac{\dot{x}}{x^2}\right)}_{\text{sign depends on }\dot{x}}.
+\label{eq:Phi-dot-signs}
+\end{align}
+
+From Eq.~(\ref{eq:xdot-deep-MOND}) with MOND-enhanced growth:
+$\dot{x}/x = H(-3+f_{\rm MOND})/2 = H(5.8-3)/2 = +1.4\,H > 0$.
+
+So $d(1/\mufd)/dt = -\dot{x}/x^2 < 0$, and since $\Phi_{\rm GR} > 0$:
+\begin{equation}
+\text{Term B} = \Phi_{\rm GR}\times(-\dot{x}/x^2) < 0
+\qquad (\text{also cooling!}).
+\end{equation}
+
+\begin{finding}[Both Terms Cool --- No Cancellation]
+\label{find:no-cancel}
+With MOND-enhanced growth ($f_{\rm MOND} > 3$), \emph{both} terms in
+$\dot{\Phi}_{\rm DFD}$ are negative (cooling). The void-evolution
+``cancellation'' found in W3i7 relied on $f < 3$, which holds for
+GR ($f_{\rm GR} \approx 0.53$) but \emph{not} for MOND-enhanced
+growth.
+
+The W3i7 cancellation factor of $73\%$ is \textbf{invalid} when
+MOND-enhanced growth is included self-consistently.
+
+Instead, the two terms \emph{add constructively}, making the
+overprediction \emph{worse} than the static estimate.
+\end{finding}
+
+\textbf{Wait.} This is an extremely important finding that requires
+a sanity check. Let us verify by a different route.
+
+
+\section{Sanity Check: Direct Potential Evolution}
+\label{sec:sanity}
+
+In the deep-MOND regime, the gravitational potential at radius $r$
+in a spherical void satisfies (from solving the MOND Poisson equation):
+\begin{equation}
+\Phi_{\rm DFD}(r) = \int_r^\infty \frac{g_{\rm DFD}(r')}{r'}\,dr'
+\sim \int_r^\infty \frac{\sqrt{g_N(r')\,\aM}}{r'}\,dr',
+\end{equation}
+where in the deep-MOND limit $g_{\rm DFD} = \sqrt{g_N\,\aM}$.
+
+Since $g_N \propto \bar{\rho}\,|\delta_v|$, we have
+$g_{\rm DFD} \propto \sqrt{\bar{\rho}\,|\delta_v|\,\aM}$, and:
+\begin{equation}
+\Phi_{\rm DFD} \propto \sqrt{\bar{\rho}\,|\delta_v|\,\aM}\,\sigma_v.
+\end{equation}
+
+The time derivative (at fixed comoving $r$):
+\begin{align}
+\frac{\dot{\Phi}_{\rm DFD}}{\Phi_{\rm DFD}}
+&= \frac{1}{2}\,\frac{\dot{\bar{\rho}}}{\bar{\rho}}
++ \frac{1}{2}\,\frac{\dot{|\delta_v|}}{|\delta_v|}
+\nonumber\\
+&= \frac{1}{2}\,(-3H) + \frac{1}{2}\,Hf_{\rm MOND}
+\nonumber\\
+&= \frac{H}{2}\,(f_{\rm MOND} - 3).
+\label{eq:Phi-dot-check}
+\end{align}
+
+For $f_{\rm MOND} = 5.8$: $\dot{\Phi}/\Phi = 1.4\,H > 0$.
+
+Since $\Phi_{\rm DFD} > 0$ (void is a potential hill),
+$\dot{\Phi}_{\rm DFD} > 0$: the hill is \emph{growing}.
+
+But the ISW effect is:
+\begin{equation}
+\Delta T_{\rm ISW} \propto \int \dot{\Phi}\,d\chi.
+\end{equation}
+
+With $\dot{\Phi} > 0$: the ISW effect from a growing potential hill
+is a net \textbf{heating} (positive $\Delta T$), not cooling.
+
+\begin{finding}[DFD Predicts ISW Warming from Voids, Not Cooling]
+\label{find:warming}
+If the MOND-enhanced growth rate exceeds $f_{\rm MOND} > 3$ (which
+it does at $f_{\rm MOND} \approx 5.8$), the DFD void potential hill
+\emph{grows} during the photon crossing. The ISW effect is therefore
+a net \textbf{warming}, not cooling.
+
+This means DFD predicts the Eridanus supervoid should produce a
+\emph{hot spot}, not a cold spot. This is the \textbf{opposite sign}
+from observation.
+
+However, this conclusion depends critically on $f_{\rm MOND} > 3$,
+which depends on the self-consistent MOND growth rate.
+\end{finding}
+
+
+\section{Critical Examination of $f_{\rm MOND}$}
+\label{sec:f-MOND-critical}
+
+The result above depends entirely on whether $f_{\rm MOND} > 3$ or
+$f_{\rm MOND} < 3$. Let us examine this carefully.
+
+\subsection{The $f_{\rm MOND}$ estimate}
+
+Equation~(\ref{eq:f-MOND-general}) gave:
+\begin{equation}
+f_{\rm MOND} = f_{\rm GR}\,/\,\sqrt{\mufd(x_{\rm eff})}.
+\end{equation}
+
+This comes from the growth equation in the deep-MOND regime. However,
+this formula applies to \emph{linear} perturbations in the MOND regime.
+For a void with $|\delta_v| = 0.14$--$0.25$, we are not in the
+strictly linear regime.
+
+More importantly, there is a \textbf{crucial distinction}: the growth
+equation governs the evolution of \emph{density perturbations},
+while the ISW integral involves the evolution of the \emph{potential}.
+In GR, these are simply related through Poisson's equation. In MOND,
+the nonlinear relation between density and potential means they evolve
+differently.
+
+\subsection{The correct MOND growth equation for voids}
+
+For a spherical void in the MOND regime, the evolution is governed by
+the spherical collapse model with MOND gravity. The key equations
+(following Nusser 2002, Sanders 2008) are:
+\begin{equation}
+\ddot{R} = -\frac{g_{\rm eff}(R)}{R}
+= -\frac{\sqrt{G_N\,\aM\,M(<R)}}{R},
+\label{eq:shell-MOND}
+\end{equation}
+where $R$ is the physical radius of a shell enclosing mass $M$.
+
+For a void ($\delta < 0$), the shell \emph{expands faster} than the
+Hubble flow. The density contrast evolves approximately as:
+\begin{equation}
+1 + \delta \propto (R/R_H)^{-3},
+\end{equation}
+where $R_H = a(t)\,r_i$ is the unperturbed Hubble-flow radius.
+
+The growth rate $f_\delta$ depends on the MOND enhancement, but for
+voids there is an important \textbf{saturation effect}: as the void
+empties ($\delta \to -1$), the enclosed mass vanishes, MOND
+enhancement goes to infinity, but the actual acceleration goes to
+zero. The void cannot grow faster than the ``empty void'' limit
+$\delta = -1$.
+
+\subsection{Effective growth rate for cosmological voids}
+
+For a void at $z \sim 0.15$ with $|\delta_v| \sim 0.14$, the
+departure from linearity is modest. The MOND-modified linear growth
+rate for the perturbation $\delta$ at scale $R$ is (Llinares \&
+Knebe 2009; Zhao \& Li 2010):
+\begin{equation}
+f_{\rm MOND}(R,z) \approx f_{\rm GR}(z)\left[1 +
+\frac{1}{3}\ln\!\left(\frac{1}{\mufd(x_R)}\right)\right]^{1/2},
+\label{eq:f-MOND-corrected}
+\end{equation}
+where the $1/3$ factor arises from the fact that MOND modifies the
+Poisson equation but not the continuity or Euler equations in the
+linearised system.
+
+For $\mufd(x_R) \approx 8.5\ee{-3}$:
+\begin{equation}
+\ln(1/\mufd) = \ln(118) = 4.77,
+\end{equation}
+so:
+\begin{equation}
+f_{\rm MOND} \approx 0.53\times(1 + 1.59)^{1/2}
+= 0.53\times 1.61 = 0.85.
+\label{eq:f-MOND-corrected-value}
+\end{equation}
+
+\textbf{Alternatively}, using the simpler scaling
+$f_{\rm MOND} = f_{\rm GR}/\mufd^{1/3}$ (from $N$-body MOND
+simulations, Llinares et al.\ 2008):
+\begin{equation}
+f_{\rm MOND} \approx 0.53\times (8.5\ee{-3})^{-1/3}
+= 0.53\times 4.9 = 2.6.
+\label{eq:f-MOND-sim}
+\end{equation}
+
+The exact value depends on which MOND growth formula is used:
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Growth formula} & $f_{\rm MOND}$ & $f_{\rm MOND} > 3$? \\
+\midrule
+$f_{\rm GR}/\sqrt{\mufd}$ (naive) & 5.8 & Yes \\
+$f_{\rm GR}/\mufd^{1/3}$ (simulations) & 2.6 & No \\
+$f_{\rm GR}\,(1+\frac{1}{3}\ln(1/\mufd))^{1/2}$ (linearised) & 0.85 & No \\
+$f_{\rm GR}\,(1/\mufd)^{1/4}$ (intermediate) & 1.75 & No \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{finding}[The MOND Growth Rate Is Likely Sub-Critical]
+\label{find:f-sub-critical}
+The naive estimate $f_{\rm MOND} = f_{\rm GR}/\sqrt{\mufd} \approx
+5.8$ overestimates the growth rate because it conflates the
+gravitational force enhancement with the density growth rate. In MOND,
+the nonlinear Poisson equation means that a factor-$N$ enhancement in
+the gravitational force produces only a factor-$N^{1/3}$ to
+$N^{1/2}$ enhancement in the growth rate (depending on the
+approximation scheme).
+
+For the most physically motivated estimates ($f_{\rm MOND} \sim
+0.85$--$2.6$), the critical threshold $f = 3$ is \emph{not} exceeded.
+This means the W3i7 void-evolution cancellation operates with the
+\emph{correct sign} (warming, partially cancelling cooling), but with
+a modified magnitude.
+\end{finding}
+
+
+\section{The Definitive Cancellation Factor}
+\label{sec:definitive-cancel}
+
+Using the result from Section~\ref{sec:f-MOND-critical}, we
+parametrise $f_{\rm MOND} = \beta\,f_{\rm GR}$ where
+$\beta = 1/\mufd^{1/3}$ (our best estimate from simulations).
+
+The cancellation ratio (Eq.~\ref{eq:R-exact}) with
+$\dot{x}/x = H(-3 + f_{\rm MOND})/2$:
+\begin{equation}
+\mathcal{R}
+= \frac{(-3 + f_{\rm MOND})/2}{1 - \Omm}.
+\label{eq:R-general}
+\end{equation}
+
+\subsection{Case 1: $f_{\rm MOND} = 2.6$ (simulation-calibrated)}
+
+\begin{equation}
+\mathcal{R}_1 = \frac{(-3 + 2.6)/2}{0.63}
+= \frac{-0.2}{0.63} = -0.32.
+\label{eq:R1}
+\end{equation}
+
+The net ISW factor: $1 - \mathcal{R}_1 = 1 - (-0.32) = 1.32$.
+
+\textbf{Interpretation}: Term~B is a \emph{cooling} contribution
+(same sign as Term~A), making the net ISW 32\% \emph{larger} than
+the static estimate. The background dilution ($-3H$) still
+dominates over growth ($+2.6H$), so $\dot{x} < 0$, $1/\mufd$
+increases, and the $\mufd$-evolution contribution adds to the cooling.
+
+
+\subsection{Case 2: $f_{\rm MOND} = 0.85$ (linearised MOND)}
+
+\begin{equation}
+\mathcal{R}_2 = \frac{(-3 + 0.85)/2}{0.63}
+= \frac{-1.075}{0.63} = -1.71.
+\label{eq:R2}
+\end{equation}
+
+Net factor: $1 - (-1.71) = 2.71$. The net ISW is 2.7$\times$ the
+static estimate.
+
+
+\subsection{Case 3: $f_{\rm MOND} = f_{\rm GR} = 0.53$ (W3i7 linear GR)}
+
+This reproduces the W3i7 result:
+\begin{equation}
+\mathcal{R}_3 = \frac{(-3 + 0.53)/2}{0.63}
+= \frac{-1.235}{0.63} = -1.96.
+\end{equation}
+
+Net factor: $1 - (-1.96) = 2.96$.
+
+\textbf{But W3i7 obtained a factor of $0.27$, i.e.\ a 73\% reduction.}
+There is a discrepancy. Let us identify the source.
+
+\subsection{Reconciling with the W3i7 Cancellation}
+\label{sec:reconcile-W3i7}
+
+The W3i7 calculation (their Eq.~(38)) computed:
+\begin{equation}
+\frac{\Phi\,\dot{(1/\mufd)}}{\dot{\Phi}/\mufd}
+= \frac{0.5}{1-\Omm} = \frac{0.5}{0.685} = 0.73.
+\end{equation}
+
+They used $\dot{(1/\mufd)} \approx +0.5\,\Hzero/x$, which comes from
+$d\ln x/dt \approx -0.5\,H$ (i.e.\ $f_\delta = f_{\rm GR} = 0.53$
+and the background dilution exactly $-3H$, with the net being
+$\dot{x}/x \approx H(f - 3)/2 \approx -H$... but they wrote
+$d\ln x/dt \sim -0.5H$.)
+
+The issue is that W3i7 used $\dot{x}/x = -Hf_{\rm GR}$ rather
+than $\dot{x}/x = H(f-3)/2$. In the deep-MOND regime
+($x = \sqrt{g_N/\aM}$), the correct expression is
+Eq.~(\ref{eq:xdot-deep-MOND}): $\dot{x}/x = H(f-3)/2$.
+
+For $f = f_{\rm GR} = 0.53$: $\dot{x}/x = H(0.53-3)/2 = -1.24\,H$.
+
+Substituting into the cancellation ratio:
+\begin{equation}
+\mathcal{R} = \frac{-1.24}{0.63} = -1.96.
+\end{equation}
+
+This gives a net factor of $1+1.96 = 2.96$, meaning the void
+evolution makes the ISW signal \emph{larger}, not smaller.
+
+\begin{tcolorbox}[colback=orange!5!white, colframe=orange!60!black,
+  title=\textbf{Resolution of the W3i7 Discrepancy}]
+
+The W3i7 cancellation derivation contains a sign/factor error. Their
+Eq.~(38) used $d\ln(1/\mufd)/dt \approx +0.5H/x$, but in the
+deep-MOND regime where $\mufd \approx x$ and $x = \sqrt{g_N/\aM}$,
+the correct expression involves $\dot{x}/x = H(f-3)/2$, not $-Hf/2$.
+
+The factor of $1/2$ comes from $x \propto \sqrt{g_N}$ in the deep-MOND
+regime (Eq.~\ref{eq:x-deep-MOND}), and the $-3$ comes from background
+dilution $\dot{\bar{\rho}}/\bar{\rho} = -3H$.
+
+W3i7 appears to have used $\dot{x}/x \approx -Hf/2$ (omitting the
+$-3H/2$ background term), which gives the opposite sign for the net
+effect. With the correct expression:
+
+\textbf{The void-evolution contribution does NOT partially cancel
+the ISW. It AMPLIFIES it.}
+
+The physical reason: the background dilution ($\bar{\rho} \propto
+a^{-3}$) reduces $g_N$ faster than the growth of $|\delta_v|$
+replenishes it (since $f_{\rm MOND} < 3$ for all realistic estimates).
+Therefore $x$ decreases, $1/\mufd$ increases, and the MOND
+enhancement grows with time. This makes $\dot{\Phi}_{\rm DFD}$
+\emph{more negative} (stronger cooling), not less.
+\end{tcolorbox}
+
+
+\section{Revised Static + Evolution ISW Prediction}
+\label{sec:revised}
+
+Dropping the erroneous W3i7 cancellation, the full DFD ISW
+prediction is:
+\begin{equation}
+\Delta T_{\rm ISW}^{\rm DFD}
+= (1 + |\mathcal{R}|)\times\Delta T_{\rm A},
+\label{eq:full-ISW}
+\end{equation}
+where $\Delta T_{\rm A}$ is the static enhanced ISW (W3i7
+Eq.~\ref{eq:term-A}) and $\mathcal{R}$ is given by
+Eq.~(\ref{eq:R-general}).
+
+However, there is now a \textbf{second subtlety}: the above
+analysis treats Term~A as though $\mufd$ is frozen at its $z = 0.15$
+value. In reality, $\mufd$ varies along the photon path because the
+void is at different evolutionary stages as the photon traverses it.
+This is a correction of order $\Delta t_{\rm cross}/t_H \sim 15\%$,
+which we include as a systematic uncertainty.
+
+Furthermore, the factor $|\mathcal{R}|$ amplification must be
+path-averaged (it varies with $r$ because $x(r)$ varies). The
+dominant contribution comes from $r \sim 0.5$--$2\sigma_v$ where
+$\dot{\Phi}_{\rm GR}$ is peaked. In this region, $x$ is relatively
+uniform ($x \sim 5$--$10 \times 10^{-3}$), so the path-averaging
+changes $|\mathcal{R}|$ by $\lesssim 20\%$.
+
+\textbf{Best estimate for the amplification factor}:
+
+Using $f_{\rm MOND} = 2.6$ (simulation-calibrated, our
+fiducial) and propagating the systematic uncertainties:
+\begin{equation}
+1 + |\mathcal{R}| = 1.32^{+0.5}_{-0.3}.
+\label{eq:amplification}
+\end{equation}
+
+The lower bound ($1.0$) corresponds to $f_{\rm MOND} = 3.0$ (exact
+cancellation of background dilution), and the upper bound ($1.8$)
+to $f_{\rm MOND} = 0.85$ (linearised MOND).
+
+
+\section{Including the External Field Effect}
+\label{sec:EFE}
+
+The Eridanus supervoid is not isolated; it sits in the cosmic web
+with an external gravitational field:
+\begin{equation}
+g_{\rm ext} \sim H_0^2\times 50\;\text{Mpc}\times 0.05
+\approx 4\ee{-13}\;\text{m/s}^2,
+\end{equation}
+giving $x_{\rm ext} = g_{\rm ext}/\aM \approx 4\ee{-3}$.
+
+The external field effect (EFE) in MOND adds a floor to $x$:
+$x_{\rm eff}(r) = \sqrt{x_{\rm int}(r)^2 + x_{\rm ext}^2}$ (in
+the deep-MOND regime, the external and internal fields add in
+quadrature for the interpolation function argument).
+
+Since $x_{\rm int} \sim 5$--$10\times 10^{-3}$ in the annular
+region that dominates the ISW integral, and $x_{\rm ext} \sim
+4\times 10^{-3}$:
+\begin{equation}
+x_{\rm eff} \approx \sqrt{(8.5\ee{-3})^2 + (4\ee{-3})^2}
+= 9.4\ee{-3},
+\end{equation}
+a $\sim 10\%$ increase. This reduces $1/\mufd$ by $\sim 10\%$.
+
+\textbf{EFE correction}: $\langle\mufd\rangle_{\rm eff}$ increases from
+$0.012$ to $\sim 0.013$, reducing the enhancement factor from $83$
+to $\sim 77$. A modest $\sim 8\%$ correction, within other
+uncertainties.
+
+
+%=============================================================================
+\part{Systematic Parameter Sweep}
+\label{part:sweep}
+%=============================================================================
+
+\section{Full T4 Predictions}
+
+We now compile the DFD ISW prediction for the full parameter range,
+using:
+\begin{itemize}[nosep]
+\item $\Delta T_{\rm ISW}^{\rm GR} = -7\,(\delta_v/-0.20)\,
+  (\sigma_v/130)^2\,\mu$K
+  (scaling from the fiducial; the exact dependence is
+  $\propto \delta_v\,\sigma_v^2\,(1-\Omm)$)
+\item $\langle\mufd\rangle_{\rm eff}$ from numerical integration
+  (W3i7 Table~\ref{tab:T4-sensitivity})
+\item Amplification factor $1 + |\mathcal{R}| = 1.3$ (fiducial;
+  range $1.0$--$1.8$)
+\item EFE correction: $-8\%$
+\item Observed total: $\Delta T_{\rm obs} = -150 \pm 50\,\mu$K
+\item ISW-only target (50\% primordial): $-75 \pm 35\,\mu$K
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Definitive T4 predictions: DFD ISW through the Eridanus
+supervoid.}
+\label{tab:T4-definitive}
+\begin{tabular}{cccccc}
+\toprule
+$\delta_v$ & $\sigma_v$ & $\langle\mufd\rangle_{\rm eff}$ &
+$\Delta T_{\rm static}$ & $\Delta T_{\rm full}$ &
+\textbf{vs.\ ISW-only} \\
+& [Mpc] & & [$\mu$K] & [$\mu$K] & \\
+\midrule
+$-0.25$ & 130 & 0.009 & $-780$ & $-930$ & $12\times$ \\
+$-0.20$ & 130 & 0.012 & $-580$ & $-690$ & $9.2\times$ \\
+$-0.15$ & 130 & 0.018 & $-390$ & $-465$ & $6.2\times$ \\
+$-0.14$ & 130 & 0.020 & $-350$ & $-415$ & $5.5\times$ \\
+$-0.10$ & 130 & 0.032 & $-220$ & $-260$ & $3.5\times$ \\
+$-0.10$ & 150 & 0.025 & $-280$ & $-335$ & $4.5\times$ \\
+$-0.10$ & 200 & 0.020 & $-350$ & $-415$ & $5.5\times$ \\
+\midrule
+\multicolumn{6}{l}{\textit{Conservative (amplification = 1.0, no void-evolution term):}} \\
+$-0.14$ & 130 & 0.020 & $-350$ & $-350$ & $4.7\times$ \\
+$-0.10$ & 130 & 0.032 & $-220$ & $-220$ & $2.9\times$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{finding}[Definitive T4 Result: 3--9$\times$ Overprediction]
+\label{find:T4-definitive}
+The full DFD ISW prediction for the Eridanus supervoid, including
+void evolution with MOND-enhanced growth and EFE, gives an
+overprediction of $\sim 3$--$9\times$ relative to the ISW-only
+target ($-75\,\mu$K at 50\% primordial attribution), or
+$\sim 1.5$--$4.5\times$ relative to the total Cold Spot
+($-150\,\mu$K).
+
+\textbf{The W3i7 ``tentative resolution'' is revoked.} The 73\%
+void-evolution cancellation was based on an incorrect treatment
+of $\dot{x}$ in the deep-MOND regime. The corrected calculation
+shows that void evolution either has no net effect ($f_{\rm MOND}
+= 3$, exact cancellation of background and growth) or
+\emph{amplifies} the signal ($f_{\rm MOND} < 3$).
+
+The most optimistic scenario ($\delta_v = -0.10$, no
+void-evolution amplification) still gives $\sim 3\times$
+overprediction.
+\end{finding}
+
+
+\section{Sensitivity to the Primordial Fraction}
+
+If the primordial CMB contribution is larger than 50\%:
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+Primordial fraction & ISW target & \multicolumn{3}{c}{Overprediction factor} \\
+& [$\mu$K] & $\delta_v = -0.20$ & $-0.14$ & $-0.10$ \\
+\midrule
+0\% (all ISW) & $-150$ & $4.6\times$ & $2.8\times$ & $1.7\times$ \\
+25\% & $-112$ & $6.2\times$ & $3.7\times$ & $2.3\times$ \\
+50\% (fiducial) & $-75$ & $9.2\times$ & $5.5\times$ & $3.5\times$ \\
+75\% & $-37$ & $18.6\times$ & $11.2\times$ & $7.0\times$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Even in the most favourable scenario (0\% primordial, all ISW;
+$\delta_v = -0.10$), the overprediction is $1.7\times$. This is
+within the $\sim 2\sigma$ observational uncertainty and might be
+considered acceptable. However, 0\% primordial attribution is
+unrealistic --- the Cold Spot region has a primordial CMB contribution
+at least at the $\sim 30\%$ level from the standard $\Lambda$CDM
+power spectrum.
+
+
+%=============================================================================
+\part{Definitive T4 Verdict}
+\label{part:verdict}
+%=============================================================================
+
+\section{Assessment Categories}
+
+\begin{enumerate}
+\item \textbf{Resolved}: prediction within $1\sigma$ of observation.
+\item \textbf{Mild tension}: prediction within $2$--$3\sigma$.
+\item \textbf{Serious tension}: prediction $>3\sigma$ from observation.
+\item \textbf{Falsified}: prediction contradicts observation with
+  no plausible resolution pathway.
+\end{enumerate}
+
+\section{The Verdict}
+
+\begin{tcolorbox}[colback=orange!5!white, colframe=red!60!black,
+  title=\textbf{DEFINITIVE T4 ASSESSMENT}]
+
+\textbf{T4 is a SERIOUS TENSION, not a falsification.}
+
+\begin{itemize}
+\item \textbf{Canonical prediction}: For the best-fit Eridanus
+  supervoid ($\delta_v \approx -0.14$, $\sigma_v \approx 130$~Mpc),
+  canonical two-component DFD with $\mufd(x) = x/(1+x)$ predicts
+  an ISW temperature decrement of $\sim -350$ to $-415\,\mu$K.
+
+\item \textbf{Observational target}: The ISW-only component is
+  $\sim -75 \pm 35\,\mu$K (at 50\% primordial attribution),
+  or $-150 \pm 50\,\mu$K (total Cold Spot).
+
+\item \textbf{Overprediction}: $\sim 5\times$ (vs.\ ISW-only) or
+  $\sim 2.5\times$ (vs.\ total).
+
+\item \textbf{Why not falsification}: Three legitimate sources of
+  systematic uncertainty prevent definitive falsification at this time:
+
+  \begin{enumerate}
+  \item \textbf{Void parameters}: Current constraints on $\delta_v$
+    are photometric, with $\sim 30\%$ uncertainty. Spectroscopic
+    confirmation (DESI DR2) could shift $\delta_v$ to $-0.10$, reducing
+    the tension to $\sim 3\times$.
+
+  \item \textbf{Primordial fraction}: The Cold Spot's primordial
+    component is uncertain. If $<30\%$ is primordial (which is within
+    the range allowed by \LCDM\ simulations for rare cold spots), the
+    ISW target increases to $\sim -105\,\mu$K and the tension reduces
+    to $\sim 3\times$.
+
+  \item \textbf{MOND growth rate}: The exact value of $f_{\rm MOND}$
+    at void scales is uncertain by a factor of $\sim 2$--$3$,
+    depending on the treatment of the nonlinear MOND Poisson equation.
+    If $f_{\rm MOND} \approx 3$ (exact cancellation of background
+    dilution and growth), the void-evolution amplification vanishes,
+    and the static prediction applies.
+  \end{enumerate}
+
+\item \textbf{Best-case scenario}: $\delta_v = -0.10$, primordial
+  fraction $= 25\%$, $f_{\rm MOND} = 3$ (no amplification):
+  overprediction $\sim 2\times$. This is a \emph{mild tension},
+  within $\sim 2\sigma$.
+
+\item \textbf{Worst-case scenario}: $\delta_v = -0.20$, primordial
+  fraction $= 50\%$, $f_{\rm MOND} = 2.6$:
+  overprediction $\sim 9\times$. This would be a clear falsification
+  of the canonical $\mufd(x) = x/(1+x)$.
+\end{itemize}
+
+\end{tcolorbox}
+
+\section{Implications for DFD}
+
+\begin{enumerate}
+\item \textbf{The canonical $\mufd(x) = x/(1+x)$ is under pressure.}
+  Any MOND interpolation function with $\mufd \to x$ as $x \to 0$
+  (the ``simple'' or ``standard'' functions) will produce $1/\mufd
+  \sim 1/x \sim 10^3$ enhancement in voids, leading to the
+  $\sim 5\times$ or greater overprediction.
+
+\item \textbf{A steeper $\mufd$ at low $x$ would help.} If
+  $\mufd(x) \to x^{1/2}$ as $x \to 0$ (rather than $x$), then
+  $1/\mufd \sim x^{-1/2} \sim 30$ instead of $\sim 100$, reducing
+  the overprediction to $\sim 2\times$. However, this would violate
+  the standard MOND asymptotic ($\mufd \to x$ as $x \to 0$) required
+  for flat rotation curves.
+
+\item \textbf{Environmental dependence could save the theory.} If the
+  MOND transition depends on the \emph{total} acceleration (including
+  the cosmological background, e.g.\ the cosmic expansion), the
+  effective $\mufd$ in a cosmological void could be larger than predicted
+  by the local ($g/\aM$) formula. This is physically motivated: the
+  void is embedded in an expanding universe, and the Hubble flow
+  provides an acceleration $\sim H_0^2\,R \gg \aM$ at the void scale.
+
+  If the MOND transition includes the Hubble-flow acceleration:
+  $x_{\rm eff} = g/\aM + H_0^2 R/\aM \sim 10^{-3} + 0.5 \sim 0.5$,
+  then $\mufd(0.5) \approx 0.33$, and the enhancement is only $\sim 3$
+  (instead of $\sim 100$). This would resolve T4 entirely.
+
+  \textbf{However}: this introduces a new environmental parameter and
+  requires careful theoretical justification within DFD.
+
+\item \textbf{T4 restricts the domain of validity.} If unresolved,
+  T4 means DFD's MOND mechanism operates correctly at galaxy scales
+  ($R \sim 10$--$100$~kpc) but breaks down at void scales ($R \sim
+  100$--$300$~Mpc). This is not necessarily fatal: it may indicate
+  that the simple MOND interpolation function requires modification
+  at extremely low accelerations ($g \ll 10^{-3}\,\aM$), which are
+  never probed by galaxy rotation curves.
+\end{enumerate}
+
+
+%=============================================================================
+\part{The Decisive Observation}
+\label{part:observation}
+%=============================================================================
+
+\section{What Would Definitively Settle T4?}
+
+\begin{tcolorbox}[colback=green!5!white, colframe=green!60!black,
+  title=\textbf{The T4 Decision Experiment}]
+
+\textbf{DESI DR2 spectroscopic mapping of the Eridanus supervoid
+(expected 2027--2028).}
+
+DESI's spectroscopic survey will provide:
+\begin{enumerate}
+\item \textbf{Precise void depth}: $\delta_v$ to $\pm 0.02$ (currently
+  $\pm 0.04$). This eliminates the largest systematic uncertainty.
+
+\item \textbf{Void profile shape}: Whether the void is Gaussian,
+  top-hat, or has a more complex profile. This affects the
+  path-averaged $\langle\mufd\rangle_{\rm eff}$ by $\sim 30\%$.
+
+\item \textbf{Compensating ridge}: Spectroscopic confirmation of
+  the overdense ridge ($\delta_{\rm ridge}$), which affects the
+  outer void profile and the ISW weighting.
+
+\item \textbf{Void redshift and extent}: Precise $z_{\rm void}$
+  and angular extent, fixing $R_v$ and $\sigma_v$.
+\end{enumerate}
+
+\textbf{Decision criteria with DESI DR2 void parameters:}
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{DESI result} & \textbf{T4 implication} \\
+\midrule
+$\delta_v > -0.08$ & T4 resolved (shallow void, small ISW) \\
+$-0.12 < \delta_v < -0.08$ & Mild tension ($2$--$3\times$), viable \\
+$-0.18 < \delta_v < -0.12$ & Serious tension ($4$--$6\times$) \\
+$\delta_v < -0.18$ & Near-falsification ($>8\times$) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{If $\delta_v$ is confirmed at $-0.14 \pm 0.02$:}
+The overprediction is $5 \pm 1.5\times$, which constitutes a
+$\sim 3\sigma$ tension. This would establish T4 as a serious
+problem for canonical DFD, requiring either:
+\begin{itemize}[nosep]
+\item Modification of $\mufd$ at $x \ll 10^{-2}$ (very deep MOND), or
+\item Environmental MOND screening at cosmological scales, or
+\item Restriction of DFD's MOND mechanism to galaxy scales only.
+\end{itemize}
+
+\end{tcolorbox}
+
+\section{Complementary Observations}
+
+\begin{enumerate}
+\item \textbf{CMB lensing of the Cold Spot region} (Planck/SO/CMB-S4):
+  Gravitational lensing independently constrains the void's projected
+  mass. In DFD, the lensing signal is also MOND-enhanced, providing
+  a cross-check.
+
+\item \textbf{Stacked void ISW} (DES/DESI): The ISW signal from
+  stacked voids can be compared to DFD predictions. If the $\sim 5\times$
+  overprediction applies to all voids (not just Eridanus), the
+  stacked signal would be dramatically too large. Current DES
+  stacked void ISW measurements show a $\sim 2\sigma$ excess over
+  \LCDM, which would be a $\sim 10\sigma$ excess in DFD. This is
+  potentially already problematic but requires careful modelling.
+
+\item \textbf{kSZ and tSZ from voids} (ACT/SPT): The kinematic and
+  thermal Sunyaev--Zel'dovich effects from voids probe the velocity
+  field, which is MOND-enhanced in DFD. This provides an independent
+  probe of $f_{\rm MOND}$ at void scales.
+\end{enumerate}
+
+
+%=============================================================================
+\part{Summary}
+\label{part:summary}
+%=============================================================================
+
+\begin{tcolorbox}[colback=yellow!5!white, colframe=red!60!black,
+  title=\textbf{W3i9 Final T4 Summary}]
+
+\textbf{1. The W3i7 void-evolution cancellation is incorrect.}
+
+The 73\% cancellation factor derived in W3i7 used an incomplete
+treatment of $\dot{x}$ in the deep-MOND regime. When the background
+dilution term ($-3H$) is properly included, and $x \propto \sqrt{g_N}$
+(deep-MOND), the void-evolution contribution either amplifies the ISW
+signal (for $f_{\rm MOND} < 3$, which is the expected regime) or
+cancels to zero (for $f_{\rm MOND} = 3$). The W3i7 scenario of
+73\% cancellation requires $f_{\rm MOND} \approx f_{\rm GR} \approx
+0.5$ AND a missing factor of $1/2$ from the $\sqrt{g_N}$ scaling,
+which was not accounted for.
+
+\textbf{2. T4 status: SERIOUS TENSION.}
+
+The canonical DFD ISW prediction for the Eridanus supervoid is:
+\begin{equation}
+\Delta T_{\rm ISW}^{\rm DFD} \approx -350\;\text{to}\;-700\,\mu\text{K},
+\end{equation}
+depending on void parameters ($\delta_v = -0.10$ to $-0.20$) and
+the MOND growth rate. The observational target is $-75 \pm 35\,\mu$K
+(ISW-only, 50\% primordial) or $-150 \pm 50\,\mu$K (total).
+
+The overprediction is $\sim 3$--$9\times$ (vs.\ ISW-only) or
+$\sim 1.5$--$4.5\times$ (vs.\ total).
+
+\textbf{3. Not yet a falsification} because:
+\begin{itemize}[nosep]
+\item Void parameters are uncertain at the $\sim 30\%$ level.
+\item The primordial fraction is uncertain.
+\item The MOND growth rate at void scales is theoretically uncertain.
+\item Environmental screening (EFE + Hubble flow) could reduce the
+  enhancement by a factor of $\sim 30$ if properly treated.
+\end{itemize}
+
+\textbf{4. The decisive observation}: DESI DR2 spectroscopic
+characterisation of the Eridanus supervoid ($\sim 2028$). If
+$\delta_v = -0.14 \pm 0.02$ is confirmed, the overprediction is
+$\sim 5\times$, establishing T4 as a $\sim 3\sigma$ tension.
+
+\textbf{5. The most promising resolution pathway}: Environmental
+MOND screening via the Hubble-flow acceleration. At void scales
+($R \sim 300$~Mpc), $H_0^2 R \sim 0.5\,\aM$, which would place the
+void in the transition regime ($x \sim 0.5$) rather than deep-MOND
+($x \sim 10^{-3}$). This requires theoretical development within DFD.
+
+\textbf{Status upgrade from W3i7/W3i8}:
+\begin{center}
+\textcolor{green!50!black}{\textbf{Tentatively resolved} (W3i7/W3i8)}
+$\;\longrightarrow\;$
+\textcolor{red!60!black}{\textbf{Serious tension} (W3i9)}
+\end{center}
+
+The void-evolution cancellation that provided the tentative resolution
+is not valid when MOND-enhanced growth and the deep-MOND $x \propto
+\sqrt{g_N}$ scaling are properly treated. T4 returns to its
+pre-cancellation status as the single most serious quantitative
+challenge to canonical DFD.
+
+\end{tcolorbox}
+
+
+\section{Impact on Cross-Reference Matrix}
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Tension} & \textbf{W3i8 Status} & \textbf{W3i9 Status} \\
+\midrule
+T1 (Lensing convergence) & \textcolor{green!50!black}{Resolved} &
+  \textcolor{green!50!black}{Resolved} \\
+T2 ($\Gdot/G$ sign) & \textcolor{green!50!black}{Resolved} &
+  \textcolor{green!50!black}{Resolved} \\
+T3 ($\sigma_8$) & \textcolor{green!50!black}{Tentatively resolved} &
+  \textcolor{green!50!black}{Tentatively resolved} \\
+T4 (Cold Spot ISW) & \textcolor{green!50!black}{Tentatively resolved} &
+  \textcolor{red!60!black}{\textbf{Serious tension}} \\
+T5 (Dual-role $\psi$) & \textcolor{green!50!black}{Resolved} &
+  \textcolor{green!50!black}{Resolved} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+
+\end{document}

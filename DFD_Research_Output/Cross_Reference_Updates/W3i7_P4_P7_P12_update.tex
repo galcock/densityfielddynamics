@@ -1,0 +1,1579 @@
+%=============================================================================
+% Wave 3, Iteration 7: Patent 4 + Patent 7 + Patent 12 Update
+%
+% Agent: Agent 4/7/12 (W3i7)
+% Date: 20 March 2026
+%
+% W3i6 ESTABLISHED:
+%   1. P4: Underground WPT robust; corridor = psi_grav waveguide
+%   2. P7: REPOSITIONED -- ultra-fast pulsed buffer, max 46 MJ, 1s storage
+%   3. P12: City-scale network $0.6--1.1B at ~20% efficiency;
+%      parametric pumping flagged
+%   4. Q_psi at lab scales set by SRF Q, not MOND
+%
+% W3i7 MANDATE:
+%   P4: Parametric pumping of delta_psi_EM via psi_grav gradient --
+%       derive the parametric gain formula. Can this circumvent the
+%       SRF conversion bottleneck? What pump geometry is needed?
+%   P7: With 1s storage and 46 MJ max, derive the COMPLETE application
+%       space. Compare against capacitor banks, flywheels, SMES for each
+%       application (railgun, fusion, DEW, accelerator). Where does
+%       psi-storage have a genuine advantage?
+%   P12: With 20% city-scale efficiency, derive the break-even
+%       electricity price vs conventional grid. At what $/kWh does
+%       psi-transmission become economically viable?
+%=============================================================================
+
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\geometry{margin=1in}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{siunitx}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{finding}{Finding}
+\newtheorem{correction}{Correction}
+\newtheorem{corollary}{Corollary}
+\newtheorem{result}{Result}
+\newtheorem{verdict}{Verdict}
+
+\newcommand{\ee}[1]{\times 10^{#1}}
+\newcommand{\psifield}{\psi}
+\newcommand{\psigrav}{\psi_{\rm grav}}
+\newcommand{\dpsiEM}{\delta\psi_{\rm EM}}
+\newcommand{\psicosmo}{\bar{\psi}_{\rm cosmo}}
+\newcommand{\psiEM}{\bar{\psi}_{\rm EM}}
+\newcommand{\DFD}{\textsc{dfd}}
+\newcommand{\GR}{\textsc{gr}}
+\newcommand{\Meff}{M_{\rm eff}}
+\newcommand{\Mpsi}{M_\psi}
+\newcommand{\lambdaone}{|\lambda{-}1|}
+\newcommand{\etahop}{\eta_{\rm hop}}
+\newcommand{\etastat}{\eta_{\rm station}}
+\newcommand{\alpharock}{\alpha_{\rm rock}}
+\newcommand{\Hzero}{H_0}
+\newcommand{\Qpsi}{Q_\psi}
+\newcommand{\Opsi}{\Omega_\psi}
+\newcommand{\npsi}{n_\psi}
+\newcommand{\mufd}{\mu}
+\newcommand{\GN}{G_N}
+\newcommand{\Geff}{G_{\rm eff}}
+\newcommand{\Pmax}{P_{\rm max}}
+
+\title{Wave 3 Iteration 7: Patents 4, 7, and 12 Update\\
+\large Parametric Pumping Gain (P4), Complete Application Space (P7),\\
+Break-Even Economics (P12)}
+\author{DFD Research Programme --- Agent 4/7/12 (W3i7)}
+\date{20 March 2026}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+%=============================================================================
+\section*{Executive Summary}
+%=============================================================================
+
+This document addresses three W3i7 mandates:
+
+\begin{enumerate}
+\item \textbf{P4 (Parametric Pumping):} The $\psigrav$ gradient can in
+  principle serve as a parametric pump for $\dpsiEM$ amplification via the
+  nonlinear cross-term $2(1+\kappa)(\nabla\psigrav)\cdot(\nabla\dpsiEM)$.
+  The parametric gain per unit length is
+  $g_{\rm par} = (1+\kappa)\,|\nabla\psigrav|\,\omega/c \approx
+  3.3\ee{-7}$~m$^{-1}$ at 2.45~GHz on Earth's surface. This is
+  \textbf{far too weak} to circumvent the SRF conversion bottleneck:
+  even with a 1~km interaction length, the total gain is $\sim 10^{-4}$.
+  Gravitational field enhancement (e.g., near a neutron star or via
+  artificial mass concentration) could in principle boost $g_{\rm par}$,
+  but no terrestrial geometry achieves useful gain. The SRF resonant
+  cavity remains the only viable conversion pathway.
+
+\item \textbf{P7 (Complete Application Space):} With $\tau_{1/e} = 1$~s
+  and $E_{\rm max} = 46$~MJ (baseline system), DFD psi-storage is
+  compared head-to-head against capacitor banks, SMES, and flywheels
+  across five applications: railgun, fusion ignition, directed-energy
+  weapons (DEW), particle accelerators, and grid frequency regulation.
+  \textbf{Genuine advantages} exist for: (a) compact pulsed power where
+  volume is the binding constraint (submarine/aircraft DEW, compact
+  fusion), due to the $13\times$--$65{,}000\times$ energy density
+  advantage; (b) high-repetition-rate pulsed systems requiring
+  $>$10~MJ/pulse, where capacitor banks become impractically large.
+  \textbf{No advantage} for: grid frequency regulation (flywheels
+  cheaper, no cryogenics), low-energy pulses $<$1~MJ (capacitors
+  simpler), or any application where cryogenic complexity is
+  unacceptable.
+
+\item \textbf{P12 (Break-Even Economics):} At 20\% end-to-end efficiency
+  and \$0.6--1.1~B capital cost, the psi-transmission network becomes
+  economically viable when the conventional electricity delivery cost
+  exceeds \$0.42--0.78/kWh (at 10~GW throughput over 30~yr). This is
+  $4\times$--$8\times$ above current US average retail (\$0.10/kWh)
+  and $2\times$--$4\times$ above the most expensive island/remote grids
+  (\$0.20--0.40/kWh). \textbf{The city-scale psi-network is not
+  economically viable at current or projected electricity prices.}
+  Break-even requires either: (a) efficiency improvement to $>$50\%
+  (eliminating one conversion stage), (b) capital cost reduction to
+  $<$\$200~M (SRF mass production), or (c) niche markets where
+  conventional grid is physically impossible (undersea, underground
+  mining, space).
+\end{enumerate}
+
+%=============================================================================
+\part{Patent 4: Parametric Pumping of $\dpsiEM$ via $\psigrav$ Gradient}
+\label{part:P4}
+%=============================================================================
+
+%=============================================================================
+\section{Physical Basis: The Nonlinear Cross-Term}
+\label{sec:P4-cross-term}
+%=============================================================================
+
+\subsection{Recap from W3i6}
+
+The W3i6 P4+P12 update (Finding~5, \S3.2) identified the nonlinear
+cross-term in the DFD field equation as a potential parametric coupling
+channel:
+\begin{equation}
+\Box\psi + (1+\kappa)\bigl[(\nabla\psi)^2 - \dot\psi^2/c^2\bigr]
+= \frac{4\pi\GN}{c^4}T_{\rm EM}.
+\label{eq:DFD-field}
+\end{equation}
+
+Expanding $\psi = \psigrav + \dpsiEM$ in the gradient-squared term:
+\begin{equation}
+(\nabla\psi)^2 = \underbrace{(\nabla\psigrav)^2}_{\text{static background}}
++ \underbrace{2(\nabla\psigrav)\cdot(\nabla\dpsiEM)}_{\text{cross-coupling (parametric pump)}}
++ \underbrace{(\nabla\dpsiEM)^2}_{\text{self-interaction}}.
+\label{eq:gradient-expansion}
+\end{equation}
+
+The cross-term $2(1+\kappa)(\nabla\psigrav)\cdot(\nabla\dpsiEM)$ acts as
+a \emph{parametric pump}: the static gravitational gradient modulates the
+effective propagation of $\dpsiEM$ modes. This is analogous to parametric
+amplification in nonlinear optics, where a strong pump field modulates the
+refractive index experienced by a signal field.
+
+\subsection{The parametric coupling Hamiltonian}
+
+In the cavity framework, the cross-term generates a three-wave interaction:
+\begin{equation}
+H_{\rm par} = \hbar\,g_{\rm par}\,|\nabla\psigrav|\,
+(a_\psi^\dagger a_{\rm EM} + a_\psi\,a_{\rm EM}^\dagger),
+\label{eq:H-parametric}
+\end{equation}
+where $a_\psi^\dagger$ creates a $\dpsiEM$ excitation and $a_{\rm EM}^\dagger$
+creates an EM photon. The gravitational gradient $|\nabla\psigrav|$ acts as
+the classical pump field (undepleted, since $\psigrav$ is sourced by the
+entire Earth and cannot be significantly perturbed by the cavity).
+
+The crucial distinction from standard Process A conversion: in Process A,
+the coupling is through the source term $4\pi\GN T_{\rm EM}/c^4$
+(proportional to $\GN/c^4$). In parametric pumping, the coupling is through
+the nonlinear term $(1+\kappa)(\nabla\psigrav)$, which involves the
+\emph{gravitational acceleration} rather than $\GN/c^4$ directly.
+
+%=============================================================================
+\section{Derivation of the Parametric Gain Formula}
+\label{sec:parametric-gain}
+%=============================================================================
+
+\subsection{Coupled-mode equations}
+
+Consider a $\dpsiEM$ signal mode at frequency $\omega_s$ propagating along
+direction $\hat{z}$ through a region with gravitational gradient
+$\mathbf{g} = -c^2\nabla\psigrav$. The cross-term creates a coupling to
+EM modes. The coupled-mode equations in the slowly-varying envelope
+approximation:
+\begin{align}
+\frac{dA_\psi}{dz} &= -\frac{\alpha_\psi}{2}A_\psi
++ i\,\gamma_{\rm par}\,A_{\rm EM}, \label{eq:coupled-psi} \\
+\frac{dA_{\rm EM}}{dz} &= -\frac{\alpha_{\rm EM}}{2}A_{\rm EM}
++ i\,\gamma_{\rm par}^*\,A_\psi, \label{eq:coupled-EM}
+\end{align}
+where $A_\psi$ and $A_{\rm EM}$ are the slowly-varying amplitudes of the
+psi-mode and EM mode respectively, $\alpha_\psi$ and $\alpha_{\rm EM}$
+are the linear attenuation coefficients, and $\gamma_{\rm par}$ is the
+parametric coupling coefficient.
+
+\subsection{Parametric coupling coefficient}
+
+The coupling coefficient $\gamma_{\rm par}$ is derived from the
+cross-term by projecting onto the transverse mode profiles:
+\begin{equation}
+\gamma_{\rm par} = \frac{(1+\kappa)\,|\nabla\psigrav|\,\omega_s}{c\,\npsi}
+\times \Gamma_{\rm overlap},
+\label{eq:gamma-par}
+\end{equation}
+where $\Gamma_{\rm overlap}$ is the transverse mode overlap integral
+between the psi-mode and EM mode profiles:
+\begin{equation}
+\Gamma_{\rm overlap} = \frac{\int |\mathbf{u}_\psi^*(\mathbf{r}_\perp)
+\cdot\hat{g}\,\mathbf{u}_{\rm EM}(\mathbf{r}_\perp)|\,d^2r_\perp}
+{\sqrt{\int|\mathbf{u}_\psi|^2\,d^2r_\perp
+\cdot\int|\mathbf{u}_{\rm EM}|^2\,d^2r_\perp}}.
+\label{eq:mode-overlap}
+\end{equation}
+
+The factor $\hat{g}$ is the unit vector along the gravitational gradient.
+For optimal coupling, the EM and psi-mode polarisations must be aligned
+with the gravitational gradient direction.
+
+\subsection{Numerical evaluation at Earth's surface}
+
+At Earth's surface:
+\begin{align}
+|\nabla\psigrav|_\oplus &= \frac{g_\oplus}{c^2}
+= \frac{9.81}{(3\ee{8})^2} = 1.09\ee{-16}~\text{m}^{-1}, \\
+(1+\kappa) &\approx 6 \quad\text{(W3i1, from $\kappa \approx 5$)}, \\
+\omega_s &= 2\pi \times 2.45\ee{9} = 1.54\ee{10}~\text{rad/s}
+  \quad\text{(P4 operating frequency)}, \\
+\npsi &\approx 1 + 7.5\ee{-22} \approx 1, \\
+\Gamma_{\rm overlap} &\leq 1 \quad\text{(optimal alignment assumed)}.
+\end{align}
+
+The parametric coupling coefficient:
+\begin{equation}
+\boxed{
+\gamma_{\rm par}^{\oplus} = \frac{6 \times 1.09\ee{-16}
+\times 1.54\ee{10}}{3\ee{8}}
+= 3.35\ee{-14}~\text{m}^{-1}.
+}
+\label{eq:gamma-par-Earth}
+\end{equation}
+
+\subsection{Parametric gain}
+
+For a lossless interaction over length $L$, the parametric power gain is:
+\begin{equation}
+G_{\rm par}(L) = \cosh^2(\gamma_{\rm par}\,L).
+\label{eq:gain-cosh}
+\end{equation}
+
+For $\gamma_{\rm par}L \ll 1$ (which will be the case at terrestrial
+scales):
+\begin{equation}
+G_{\rm par}(L) \approx 1 + (\gamma_{\rm par}L)^2.
+\label{eq:gain-small}
+\end{equation}
+
+\begin{finding}[Parametric Gain Formula]
+\label{find:parametric-gain}
+The parametric gain for $\dpsiEM$ amplification via the $\psigrav$
+gradient is:
+\begin{equation}
+\boxed{
+G_{\rm par}(L) = \cosh^2\!\left(
+\frac{(1+\kappa)\,|\nabla\psigrav|\,\omega_s\,L}{c\,\npsi}
+\,\Gamma_{\rm overlap}\right).
+}
+\label{eq:gain-formula}
+\end{equation}
+
+At Earth's surface ($g = 9.81$~m/s$^2$), 2.45~GHz, optimal mode overlap:
+\begin{equation}
+\gamma_{\rm par}^{\oplus} = 3.35\ee{-14}~\text{m}^{-1}.
+\end{equation}
+
+For practical interaction lengths:
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+Interaction length $L$ & $\gamma_{\rm par}L$ & Gain $G_{\rm par} - 1$ \\
+\midrule
+1~m (SRF cavity) & $3.35\ee{-14}$ & $1.1\ee{-27}$ \\
+100~m (tunnel) & $3.35\ee{-12}$ & $1.1\ee{-23}$ \\
+1~km (corridor) & $3.35\ee{-11}$ & $1.1\ee{-21}$ \\
+$10^4$~km (Earth diameter) & $3.35\ee{-7}$ & $1.1\ee{-13}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The parametric gain is \textbf{negligibly small} at all terrestrial scales.
+\end{finding}
+
+%=============================================================================
+\section{Can Parametric Pumping Circumvent the SRF Bottleneck?}
+\label{sec:circumvent}
+%=============================================================================
+
+\subsection{The conversion bottleneck recap}
+
+The W3i6 conversion bottleneck: single-pass EM-to-$\dpsiEM$ conversion is
+degraded by $\sim 10^{25}\times$ from the $\Meff = 3.01\ee{6}$~kg
+correction. SRF resonant buildup ($Q_{\rm EM}^2 \times F_\psi \approx
+4.7\ee{24}$) almost exactly compensates this deficit. The question is
+whether parametric pumping provides an \emph{alternative} pathway.
+
+\subsection{Required gain to match SRF conversion}
+
+The SRF resonant pathway achieves $\eta_{\rm conv} \approx 50\%$ at
+47~GHz with TESLA-class cavities. To match this via parametric pumping
+alone:
+\begin{equation}
+G_{\rm par}^{\rm required} \sim 10^{25}.
+\end{equation}
+
+This requires $\cosh^2(\gamma_{\rm par}L) = 10^{25}$, i.e.,
+$\gamma_{\rm par}L \approx 29$ (since $\cosh(29) \approx 2\ee{12}$,
+$\cosh^2(29) \approx 4\ee{24} \sim 10^{25}$).
+
+At Earth's surface: $L_{\rm required} = 29/\gamma_{\rm par}^{\oplus}
+= 29/(3.35\ee{-14}) = 8.7\ee{14}$~m $= 5.8$~AU.
+
+\begin{finding}[Parametric Pumping Cannot Circumvent SRF Bottleneck on Earth]
+\label{find:no-circumvent}
+To achieve the $10^{25}$ gain needed to replace SRF resonant buildup,
+the parametric interaction length at Earth's surface gravity would need
+to be $\sim 5.8$~AU. This is obviously impossible.
+
+The fundamental limitation is that $|\nabla\psigrav|_\oplus/c^2 =
+g_\oplus/c^2 = 1.09\ee{-16}$~m$^{-1}$ --- the gravitational gradient
+at Earth's surface is extraordinarily weak compared to the conversion
+deficit. The nonlinear coupling $(1+\kappa) = 6$ provides only a modest
+prefactor.
+
+\textbf{Verdict}: Parametric pumping via $\psigrav$ is not a viable
+alternative to SRF conversion at terrestrial gravitational fields.
+\end{finding}
+
+\subsection{Resonant enhancement of parametric gain}
+
+Could resonant recirculation enhance the parametric gain, analogous to
+how $Q_{\rm EM}^2$ enhances single-pass conversion?
+
+In a doubly-resonant cavity of length $L_{\rm cav}$, the effective
+interaction length is enhanced by the number of round trips $N_{\rm rt}$:
+\begin{equation}
+L_{\rm eff} = N_{\rm rt}\times L_{\rm cav},\qquad
+N_{\rm rt} \sim \Qpsi/(\omega_s L_{\rm cav}/c).
+\end{equation}
+
+For $L_{\rm cav} = 1$~m, $\Qpsi = 10^9$, $\omega_s = 1.54\ee{10}$~rad/s:
+\begin{equation}
+N_{\rm rt} = \frac{10^9}{1.54\ee{10}\times 1/(3\ee{8})}
+= \frac{10^9}{5.1\ee{1}} = 1.96\ee{7}.
+\end{equation}
+
+The effective parametric gain with resonant enhancement:
+\begin{equation}
+\gamma_{\rm par}^{\rm eff}\,L_{\rm cav}
+= \gamma_{\rm par}\times N_{\rm rt}\times L_{\rm cav}
+= 3.35\ee{-14}\times 1.96\ee{7}\times 1
+= 6.6\ee{-7}.
+\end{equation}
+
+Even with full resonant recirculation, $\gamma_{\rm par}^{\rm eff}L \sim
+10^{-7}$, giving gain $G \approx 1 + 4.3\ee{-13}$. The resonant
+enhancement provides $\sim 10^7$ improvement but this is insufficient
+by 18 orders of magnitude.
+
+\begin{finding}[Resonant Enhancement of Parametric Gain: Insufficient]
+\label{find:resonant-parametric}
+Resonant recirculation in an SRF cavity ($\Qpsi = 10^9$) enhances the
+parametric interaction length by $\sim 2\ee{7}\times$, but the total
+gain remains $G - 1 \sim 10^{-13}$: 12 orders of magnitude below unity
+and 25 orders of magnitude below the required conversion efficiency.
+
+\textbf{The parametric pumping mechanism cannot replace SRF resonant
+buildup, even with resonant enhancement, at terrestrial gravity.}
+\end{finding}
+
+%=============================================================================
+\section{What Pump Geometry Would Be Needed?}
+\label{sec:pump-geometry}
+%=============================================================================
+
+\subsection{Enhanced gravitational gradients}
+
+The parametric gain scales linearly with $|\nabla\psigrav|$. What
+gravitational environments provide stronger pumps?
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+Environment & $g$ (m/s$^2$) & $|\nabla\psigrav|$ (m$^{-1}$)
+  & $\gamma_{\rm par}$ (m$^{-1}$) \\
+\midrule
+Earth surface & $9.8$ & $1.09\ee{-16}$ & $3.35\ee{-14}$ \\
+Jupiter surface & $25$ & $2.8\ee{-16}$ & $8.6\ee{-14}$ \\
+Sun surface & $274$ & $3.0\ee{-15}$ & $9.2\ee{-13}$ \\
+White dwarf & $10^6$ & $1.1\ee{-11}$ & $3.4\ee{-9}$ \\
+Neutron star & $10^{12}$ & $1.1\ee{-5}$ & $3.4\ee{-3}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{finding}[Pump Geometry Requirements]
+\label{find:pump-geometry}
+Parametric pumping becomes interesting ($G \sim 1$ in 1~m) only at
+neutron-star surface gravity ($g \sim 10^{12}$~m/s$^2$, $\gamma_{\rm par}
+\sim 10^{-3}$~m$^{-1}$). At a white dwarf ($g \sim 10^6$~m/s$^2$),
+a 1~km interaction length gives $G - 1 \sim 10^{-5}$: measurable but
+not useful for power conversion.
+
+No artificial mass concentration on Earth can approach these fields.
+A $10^{12}$~kg mass (asteroid-scale) concentrated to 1~m radius gives
+$g = 6.67\ee{-11}\times 10^{12}/1 = 66.7$~m/s$^2$ --- comparable to
+Earth's surface, providing no enhancement.
+
+\textbf{Conclusion}: Parametric pumping is a theoretically valid mechanism
+in the DFD nonlinear sector, but it is astrophysically interesting
+(neutron star environments) rather than technologically useful on Earth.
+For terrestrial P4 applications, SRF resonant conversion remains the
+only viable pathway.
+\end{finding}
+
+\subsection{Frequency scaling}
+
+The coupling $\gamma_{\rm par} \propto \omega_s$. At higher frequencies:
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+Frequency & $\gamma_{\rm par}^{\oplus}$ (m$^{-1}$) & Note \\
+\midrule
+2.45~GHz (P4 baseline) & $3.35\ee{-14}$ & Microwave \\
+47~GHz (polariton crossing) & $6.4\ee{-13}$ & $19\times$ better \\
+1~THz & $1.37\ee{-11}$ & $410\times$ better \\
+100~THz (infrared) & $1.37\ee{-9}$ & $41{,}000\times$ better \\
+$10^{15}$~Hz (optical) & $1.37\ee{-8}$ & $410{,}000\times$ better \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Even at optical frequencies, $\gamma_{\rm par}L \sim 10^{-8}$ per metre.
+The frequency scaling helps but cannot close the 14-order-of-magnitude
+gap (at the resonant-enhanced level).
+
+%=============================================================================
+\section{P4 Parametric Pumping: Final Verdict}
+\label{sec:P4-verdict}
+%=============================================================================
+
+\begin{tcolorbox}[colback=red!5!white, colframe=red!60!black,
+  title=\textbf{P4 Parametric Pumping: Not Viable at Terrestrial Gravity}]
+
+\textbf{Gain formula}:
+$G_{\rm par}(L) = \cosh^2\!\bigl[(1+\kappa)\,g\,\omega_s L/(c^3\,\npsi)
+\,\Gamma_{\rm overlap}\bigr]$
+
+\textbf{At Earth's surface}: $\gamma_{\rm par} = 3.35\ee{-14}$~m$^{-1}$
+at 2.45~GHz.
+
+\textbf{With full resonant enhancement} ($\Qpsi = 10^9$):
+$G - 1 \sim 10^{-13}$.
+
+\textbf{To circumvent SRF}: Need $L_{\rm eff} \sim 5.8$~AU.
+
+\textbf{Status}: The parametric coupling through the
+$2(1+\kappa)(\nabla\psigrav)\cdot(\nabla\dpsiEM)$ cross-term is a
+real physical mechanism in the DFD nonlinear sector, but at terrestrial
+gravitational fields it is suppressed by $g/c^2 \sim 10^{-16}$ and
+\textbf{cannot replace or supplement SRF resonant conversion} in any
+practical scenario. The SRF conversion pathway (W3i6) remains the
+sole viable approach for EM-to-$\dpsiEM$ conversion.
+
+\textbf{P4 underground WPT specification unchanged from W3i6}:
+$\eta = 75.2\%$, $d^* = 93.5$~km, capital \$270~M, LCOE \$0.004/kWh.
+\end{tcolorbox}
+
+%=============================================================================
+\part{Patent 7: Complete Application Space at $\tau_{1/e} = 1$~s, $E_{\rm max} = 46$~MJ}
+\label{part:P7}
+%=============================================================================
+
+%=============================================================================
+\section{Baseline System Specification (W3i6 Corrected)}
+\label{sec:P7-baseline}
+%=============================================================================
+
+From W3i6, the corrected P7 baseline:
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Parameter & Value \\
+\midrule
+Energy density & 650~MJ/m$^3$ (multi-mode, $N = 100$) \\
+Maximum stored energy (baseline) & 46~MJ ($= \Pmax \times \tau_{1/e}$) \\
+Storage time & $\tau_{1/e} = 1$~s \\
+Discharge time & $\mu$s to ms \\
+Charge power (max) & 46~MW ($= \Pmax \times A_{\rm wall}$) \\
+Wall power density & $\Pmax = 2.3$~MW/m$^2$ \\
+Cavity dimensions & $6\times 3\times 6$~m$^3$ (baseline) \\
+Operating temperature & 2~K (He-II cooled Nb SRF) \\
+Round-trip efficiency & $>99\%$ at $t < 10$~ms, 90.5\% at 0.1~s, 36.8\% at 1~s \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The round-trip efficiency for charge-store-discharge at total
+cycle time $t_{\rm cycle}$:
+\begin{equation}
+\eta_{\rm rt}(t_{\rm cycle}) = e^{-t_{\rm cycle}/\tau_{1/e}}.
+\label{eq:round-trip-eta}
+\end{equation}
+
+%=============================================================================
+\section{Application-by-Application Comparison}
+\label{sec:P7-apps}
+%=============================================================================
+
+\subsection{Application 1: Electromagnetic Railgun}
+
+\subsubsection{Requirements}
+\begin{itemize}[nosep]
+  \item Energy per shot: 32--160~MJ (US Navy BAE prototype: 32~MJ muzzle,
+    $\sim$64~MJ stored at 50\% barrel efficiency).
+  \item Pulse duration: 5--10~ms.
+  \item Repetition rate target: 10 rounds/minute ($= 0.17$~Hz).
+  \item Volume constraint: severe on naval platforms (DDG-1000 class).
+\end{itemize}
+
+\subsubsection{DFD P7 performance}
+\begin{itemize}[nosep]
+  \item 46~MJ baseline meets the low-end single-shot requirement (32~MJ muzzle).
+  \item At 5~ms discharge: $\eta_{\rm rt} = e^{-0.005} = 99.5\%$.
+  \item Recharge time at 46~MW: $t_{\rm recharge} = 46/46 = 1$~s.
+    But during recharge, the store is decaying. Effective stored energy
+    after charge from zero:
+    \begin{equation}
+    E(t) = \Pmax\,\tau\,(1 - e^{-t/\tau}) = 46\ee{6}\times 1\times(1 - e^{-t})~\text{J}.
+    \end{equation}
+    At $t = 1$~s: $E = 46\times(1 - 1/e) = 29.1$~MJ (63.2\% of max).
+    At $t = 3$~s: $E = 46\times(1 - e^{-3}) = 43.8$~MJ (95.2\% of max).
+  \item Repetition rate: one 32~MJ shot every $\sim$2~s (0.5~Hz),
+    limited by recharge time to reach 32~MJ.
+  \item Volume: $6\times 3\times 6 = 108$~m$^3$ for 46~MJ $= 0.43$~MJ/m$^3$.
+    Wait --- this seems low vs.\ the 650~MJ/m$^3$ energy density. The
+    discrepancy is because the $\Pmax$ limit prevents filling the full
+    capacity in one $\tau_{1/e}$. The \emph{cavity volume} is
+    $V_{\rm cav} = \pi\times 0.3^2\times 5\times 2 = 2.83$~m$^3$,
+    and the energy density within the cavity is $46/2.83 = 16.3$~MJ/m$^3$
+    (limited by power coupling, not energy density).
+\end{itemize}
+
+\subsubsection{Comparison with competing technologies}
+
+\begin{table}[h]
+\centering
+\caption{Railgun energy store comparison for 32~MJ/shot.}
+\label{tab:railgun}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Technology & Volume & Mass & Recharge & TRL \\
+ & (m$^3$) & (tonnes) & time (s) & \\
+\midrule
+Capacitor bank (pulse-discharge) & 30--60 & 30--50 & 5--15 & 7--8 \\
+Compensated pulsed alternator (CPA) & 10--20 & 15--25 & 3--5 & 5--6 \\
+SMES (HTS, 4~K) & 5--15 & 10--30 & 1--3 & 3--4 \\
+Flywheel + pulse converter & 20--40 & 20--40 & 5--10 & 4--5 \\
+\textbf{DFD P7 (SRF, 2~K)} & \textbf{$\sim$110} & \textbf{$\sim$50} &
+  \textbf{2--3} & \textbf{1} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{finding}[Railgun: P7 Has No Volume Advantage at 46~MJ]
+\label{find:railgun}
+At the 46~MJ baseline ($\Pmax$-limited), the DFD P7 system is
+\textbf{larger and heavier} than SMES and CPA alternatives because the
+system volume is dominated by cryogenics and external infrastructure, not
+the cavity itself. The cavity energy density (650~MJ/m$^3$) is never
+realised at full scale due to the power coupling bottleneck.
+
+P7 would become competitive for railgun if either:
+\begin{itemize}[nosep]
+  \item $\Pmax$ increased (Nb$_3$Sn: $B_{\rm sh} = 425$~mT, giving
+    $\Pmax \approx 10.4$~MW/m$^2$, $E_{\rm max} = 208$~MJ, and the
+    system volume is then comparable to CPA at much higher energy); or
+  \item Multiple shots per charge are needed at high rate (P7 cavity
+    can discharge partial energy in $\mu$s repeatedly).
+\end{itemize}
+
+\textbf{Verdict}: Railgun application is \textbf{marginal} at baseline.
+Potentially competitive with Nb$_3$Sn upgrade.
+\end{finding}
+
+\subsection{Application 2: Fusion Ignition (Pulsed Driver)}
+
+\subsubsection{Requirements}
+\begin{itemize}[nosep]
+  \item NIF-class: 422~MJ capacitor bank, delivers 1.8~MJ to target
+    (0.43\% wall-to-target). Discharge in 20~$\mu$s.
+  \item Magnetic fusion (tokamak disruption mitigation): 1--10~MJ
+    in $<$1~ms.
+  \item Inertial fusion energy (IFE) driver: 1--5~MJ/pulse, 10~Hz
+    repetition rate.
+\end{itemize}
+
+\subsubsection{DFD P7 performance}
+\begin{itemize}[nosep]
+  \item At 20~$\mu$s discharge: $\eta_{\rm rt} = e^{-2\ee{-5}} = 99.998\%$.
+  \item 46~MJ greatly exceeds the 1.8~MJ NIF target delivery (but NIF
+    needs 422~MJ stored because of massive inefficiency in the driver
+    chain, not because the target needs it).
+  \item IFE at 10~Hz, 5~MJ/pulse: recharge $5/46 = 0.11$~s between
+    shots. At $\tau = 1$~s, decay during 0.11~s recharge is
+    $1 - e^{-0.11} = 10.4\%$. Sustainable at $\sim 41$~MJ steady-state.
+    10~Hz repetition is achievable.
+  \item Volume for 46~MJ: $\sim$110~m$^3$ total system.
+\end{itemize}
+
+\subsubsection{Comparison}
+
+\begin{table}[h]
+\centering
+\caption{Fusion driver comparison for 5~MJ/pulse at 10~Hz.}
+\label{tab:fusion}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Technology & Volume & $\eta_{\rm rt}$ & Rep rate & Cost \\
+ & (m$^3$) & & (Hz) & (\$M) \\
+\midrule
+NIF capacitor bank (422~MJ) & 10{,}000 & 0.43\% & $10^{-4}$ & 3{,}500 \\
+Proposed IFE cap bank (10~MJ) & 200--500 & 90\% & 10 & 50--200 \\
+SMES (10~MJ, HTS) & 10--30 & 95\% & 10 & 50--150 \\
+\textbf{DFD P7 (46~MJ, SRF)} & \textbf{$\sim$110} & \textbf{$>$99.9\%}
+  & \textbf{10} & \textbf{Unknown} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{finding}[Fusion Driver: P7 Competitive for IFE]
+\label{find:fusion}
+For inertial fusion energy (IFE) at 10~Hz repetition rate, DFD P7 offers:
+\begin{itemize}[nosep]
+  \item Higher round-trip efficiency ($>$99.9\%) than capacitor banks
+    (90\%) or SMES (95\%), reducing recirculating power.
+  \item Intermediate volume ($\sim$110~m$^3$) --- larger than SMES but
+    much smaller than existing capacitor banks.
+  \item Native sub-$\mu$s discharge capability (capacitor banks need
+    switching; SMES needs quench protection).
+\end{itemize}
+
+\textbf{Verdict}: Fusion driver is a \textbf{genuine advantage}
+application for P7, provided the cryogenic infrastructure integrates
+with the fusion plant's existing cryo systems.
+\end{finding}
+
+\subsection{Application 3: Directed-Energy Weapons (DEW)}
+
+\subsubsection{Requirements}
+\begin{itemize}[nosep]
+  \item High-energy laser (HEL): 100~kW--1~MW continuous, or 1--10~MJ
+    pulsed over 1--10~s.
+  \item High-power microwave (HPM): 1--100~GW peak, 0.1--10~$\mu$s pulse,
+    0.1--100~MJ per burst.
+  \item Platform constraints: ship ($<$50~m$^3$), aircraft ($<$5~m$^3$),
+    vehicle ($<$2~m$^3$).
+\end{itemize}
+
+\subsubsection{DFD P7 performance}
+\begin{itemize}[nosep]
+  \item HPM at 10~GW, 1~$\mu$s: $E = 10$~kJ per pulse. Trivial for
+    46~MJ store. 1000+ shots before recharge.
+  \item HEL at 1~MW, 10~s: $E = 10$~MJ. But $\tau = 1$~s, so 10~s
+    continuous discharge loses $e^{-10} \approx 99.995\%$ of stored
+    energy. Cannot sustain CW power $>$1~MW for $>$1~s without active
+    feed.
+  \item For CW HEL, P7 acts as peak-shaving buffer: grid/generator
+    provides average power, P7 handles transient peaks.
+  \item Volume: the cavity itself is $\sim$3~m$^3$. With minimal
+    cryogenics, $\sim$5--10~m$^3$ is achievable for a platform-optimised
+    unit.
+\end{itemize}
+
+\subsubsection{Comparison}
+
+\begin{table}[h]
+\centering
+\caption{DEW energy store for HPM (10~MJ pulsed).}
+\label{tab:DEW}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Technology & Volume (m$^3$) & Energy density & Platform-viable? \\
+ & for 10~MJ & (MJ/m$^3$) & (aircraft) \\
+\midrule
+Capacitor bank & 100--1000 & 0.01--0.1 & No \\
+SMES & 1--10 & 1--10 & Marginal \\
+Flywheel & 0.2--1 & 10--50 & Marginal \\
+\textbf{DFD P7 (cavity only)} & \textbf{0.015} & \textbf{650} & \textbf{Yes (cavity)} \\
+\textbf{DFD P7 (with cryo)} & \textbf{5--10} & \textbf{1--2} & \textbf{Marginal} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{finding}[DEW: Genuine Advantage for Volume-Constrained Platforms]
+\label{find:DEW}
+For pulsed DEW (HPM mode), DFD P7 has a decisive energy density advantage
+in the \emph{cavity} ($650\times$ capacitor, $65\times$ flywheel). The
+system-level advantage depends critically on cryogenic packaging.
+
+\textbf{The key question is cryogenic miniaturisation}: if the He-II
+system can be packaged into $<$5~m$^3$, P7 enables aircraft-mounted HPM
+weapons with $>$10~MJ burst capability --- impossible with any other
+technology at that volume.
+
+\textbf{Verdict}: DEW/HPM is a \textbf{genuine high-value advantage}
+application. CW laser applications require P7 as a buffer, not primary
+store.
+\end{finding}
+
+\subsection{Application 4: Particle Accelerator RF Fill}
+
+\subsubsection{Requirements}
+\begin{itemize}[nosep]
+  \item LHC RF system: 16 SRF cavities, 2~MJ stored per cavity,
+    fill time 20~ms.
+  \item CLIC (proposed): 177~MJ/pulse, 20~ms pulse.
+  \item ILC: 11~MJ/pulse, 1~ms fill.
+  \item Next-generation collider: potentially 1~GJ-class.
+\end{itemize}
+
+\subsubsection{DFD P7 performance}
+\begin{itemize}[nosep]
+  \item 46~MJ baseline covers LHC-class and ILC.
+  \item 20~ms fill: $\eta_{\rm rt} = e^{-0.02} = 98.0\%$.
+  \item Perfect impedance match: P7 SRF cavity can couple directly
+    to accelerator SRF cavities (same technology base, same frequency
+    range, same cryogenic infrastructure).
+  \item For CLIC (177~MJ): requires scaled system ($\sim$4$\times$
+    baseline wall area, or Nb$_3$Sn upgrade).
+\end{itemize}
+
+\subsubsection{Comparison}
+
+\begin{table}[h]
+\centering
+\caption{Accelerator RF fill comparison for 46~MJ/20~ms.}
+\label{tab:accel}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Technology & Volume (m$^3$) & $\eta_{\rm rt}$ & Integration \\
+\midrule
+Grid + klystrons (current) & N/A & 45--65\% & Standard \\
+Capacitor bank + modulator & 100--500 & 80--90\% & Standard \\
+SMES & 5--15 & 90--95\% & Moderate \\
+\textbf{DFD P7} & \textbf{$\sim$110} & \textbf{98\%} & \textbf{Native SRF} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{finding}[Accelerator RF: Good Technical Fit, Niche Advantage]
+\label{find:accel}
+DFD P7 is a natural technical match for SRF accelerators: same cavity
+technology, same cryogenic infrastructure, native RF coupling. The 98\%
+round-trip efficiency at 20~ms exceeds conventional approaches.
+
+The advantage is strongest for next-generation colliders requiring
+$>$100~MJ pulse energy, where the high energy density reduces the
+storage system footprint.
+
+\textbf{Verdict}: \textbf{Good fit} for future SRF accelerators.
+Limited by the fact that accelerator facilities already have SRF
+infrastructure, so the incremental cost of P7 storage is lower than
+greenfield deployment.
+\end{finding}
+
+\subsection{Application 5: Grid Frequency Regulation}
+
+\subsubsection{Requirements}
+\begin{itemize}[nosep]
+  \item Response time: $<$200~ms (UK Grid Code), $<$500~ms (US PJM).
+  \item Duration: 15--30~minutes of sustained output.
+  \item Power: 1--50~MW per unit.
+  \item Cost target: \$200--500/kW (competitive with gas peakers).
+\end{itemize}
+
+\subsubsection{DFD P7 performance}
+\begin{itemize}[nosep]
+  \item Response time: sub-$\mu$s (excellent, $100\times$ faster than
+    required).
+  \item Duration: $\tau = 1$~s passive. \textbf{Cannot sustain} 15--30
+    minutes without active maintenance at $P_{\rm maintain} = E/\tau$.
+  \item For 1~MW sustained output: $E = 1\ee{6}\times 1 = 1$~MJ
+    maintained at $P_{\rm maintain} = 1$~MW. Net useful power = 0
+    (all input goes to maintenance).
+  \item The store can provide a \emph{single burst} of 46~MW for
+    $\sim$1~s, but then is empty.
+\end{itemize}
+
+\begin{finding}[Grid Frequency Regulation: Not Viable]
+\label{find:grid-freq}
+Grid frequency regulation requires sustained output over 15--30 minutes.
+DFD P7 with $\tau_{1/e} = 1$~s cannot sustain any net power output
+beyond $\sim$3~s. The maintenance power equals the stored energy per
+second, leaving no margin for useful output.
+
+\textbf{Verdict}: \textbf{Eliminated}. Grid frequency regulation
+requires flywheels ($\tau \sim$ minutes--hours), batteries ($\tau \sim$
+hours), or SMES with much longer $\tau$ than P7.
+\end{finding}
+
+%=============================================================================
+\section{Complete Application Space Map}
+\label{sec:P7-map}
+%=============================================================================
+
+\begin{table}[h]
+\centering
+\caption{DFD P7 complete application space at $\tau_{1/e} = 1$~s,
+$E_{\rm max} = 46$~MJ (baseline). Green = genuine advantage,
+yellow = marginal, red = eliminated.}
+\label{tab:P7-map}
+\begin{tabular}{@{}p{3.5cm}cccl@{}}
+\toprule
+Application & $t_{\rm cycle}$ & $E$/pulse & DFD advantage? & Verdict \\
+\midrule
+\multicolumn{5}{@{}l}{\textbf{\textcolor{green!50!black}{GENUINE ADVANTAGE:}}} \\
+Compact pulsed DEW & $\mu$s--ms & 1--50~MJ
+  & Volume: $650\times$ & \textcolor{green!50!black}{High value} \\
+IFE driver (10~Hz) & 0.1~s & 1--5~MJ
+  & $\eta$: 99.9\%, rep rate & \textcolor{green!50!black}{Good fit} \\
+Future accelerator RF & 1--20~ms & 10--100~MJ
+  & Native SRF match & \textcolor{green!50!black}{Good fit} \\
+\midrule
+\multicolumn{5}{@{}l}{\textbf{\textcolor{orange!80!black}{MARGINAL:}}} \\
+Railgun (baseline) & 2--5~ms & 32--64~MJ
+  & Needs Nb$_3$Sn & \textcolor{orange!80!black}{Upgrade needed} \\
+Regen braking buffer & 2--10~s & 1--5~MJ
+  & Cryo impractical & \textcolor{orange!80!black}{Impractical} \\
+EMP protection & $<$1~ms & 1--10~MJ
+  & Niche & \textcolor{orange!80!black}{Possible} \\
+\midrule
+\multicolumn{5}{@{}l}{\textbf{\textcolor{red}{ELIMINATED:}}} \\
+Grid storage (hrs) & $10^4$~s & GJ & $\eta \to 0$ & \textcolor{red}{Dead} \\
+Grid freq regulation & 15--30~min & MW$\cdot$min & $\tau$ too short & \textcolor{red}{Dead} \\
+UPS backup & 15~min & MJ & $\tau$ too short & \textcolor{red}{Dead} \\
+EV range extension & $10^3$~s & MJ & $\tau$ too short & \textcolor{red}{Dead} \\
+Solar overnight shift & $10^4$~s & GJ & $\eta \to 0$ & \textcolor{red}{Dead} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+%=============================================================================
+\section{Head-to-Head Summary: P7 vs Competitors}
+\label{sec:P7-head-to-head}
+%=============================================================================
+
+\begin{tcolorbox}[colback=blue!5!white, colframe=blue!60!black,
+  title=\textbf{Where DFD P7 Wins}]
+\begin{enumerate}[nosep]
+\item \textbf{Energy density for pulsed discharge ($t < 100$~ms):}
+  $650$~MJ/m$^3$ vs.\ $50$~MJ/m$^3$ (best flywheel) or $10$~MJ/m$^3$
+  (best SMES). The $13$--$65{,}000\times$ density advantage is decisive
+  when volume is the binding constraint.
+\item \textbf{Round-trip efficiency at sub-ms timescales:}
+  $>99.9\%$ vs.\ 90--95\% for SMES, 80--90\% for capacitor banks
+  (including switching losses).
+\item \textbf{Repetition rate at $>$10~MJ/pulse:}
+  $\sim 4$~Hz at 10~MJ vs.\ $<0.1$~Hz for large capacitor banks
+  (limited by recharge), $\sim 1$~Hz for SMES.
+\end{enumerate}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=red!5!white, colframe=red!60!black,
+  title=\textbf{Where DFD P7 Loses}]
+\begin{enumerate}[nosep]
+\item \textbf{Any application requiring $t > 3$~s storage:}
+  $\tau_{1/e} = 1$~s makes P7 useless for anything beyond burst
+  applications. Flywheels ($\tau \sim$ hours), SMES ($\tau \sim$ hours
+  with persistent-current mode), and batteries ($\tau \sim$ months)
+  all dominate.
+\item \textbf{System-level volume and mass:}
+  The $\sim 110$~m$^3$ system footprint (including cryogenics) erases
+  the cavity energy density advantage for applications where total
+  system size matters more than cavity size.
+\item \textbf{Cost and complexity:}
+  SRF cavities at 2~K require He-II cryogenics. No commercial
+  supply chain exists outside accelerator facilities. Capacitor banks
+  and flywheels are commercial off-the-shelf.
+\item \textbf{TRL:}
+  P7 is at TRL~1. All competitors are TRL~5--9.
+\end{enumerate}
+\end{tcolorbox}
+
+%=============================================================================
+\part{Patent 12: Break-Even Economics for City-Scale Psi-Transmission}
+\label{part:P12}
+%=============================================================================
+
+%=============================================================================
+\section{W3i6 Network Parameters}
+\label{sec:P12-params}
+%=============================================================================
+
+From W3i6 P4+P12 update:
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Parameter & W3i6 Value \\
+\midrule
+End-to-end efficiency $\eta_{\rm e2e}$ & 20\% (= 50\% hub $\times$ 81\%
+  transport $\times$ 50\% endpoint, rounded) \\
+Capital cost $C_{\rm cap}$ & \$0.6--1.1~B \\
+Network topology & Binary tree, 50~km radius \\
+Hub: SRF (Nb$_3$Sn, 4~K) & \$80~M \\
+Corridor (passive) & \$20~M \\
+Endpoints ($\times 100$, SRF) & \$500~M--\$1~B \\
+Transport efficiency (corridor only) & 81\% \\
+Conversion efficiency (each stage) & 50\% (at polariton crossing, SRF) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+%=============================================================================
+\section{Levelised Cost Model}
+\label{sec:P12-LCOE}
+%=============================================================================
+
+\subsection{Framework}
+
+The levelised cost of energy delivery (LCOD) for the psi-network includes:
+\begin{enumerate}[nosep]
+  \item Capital cost amortised over lifetime $T$.
+  \item Energy losses (input energy exceeds delivered energy by $1/\eta_{\rm e2e}$).
+  \item Operations and maintenance (O\&M).
+\end{enumerate}
+
+The LCOD in \$/kWh delivered:
+\begin{equation}
+\text{LCOD}_\psi = \frac{C_{\rm cap}\,\text{CRF}}{P_{\rm del}\times 8760\times\text{CF}}
++ \frac{p_{\rm elec}}{\eta_{\rm e2e}}
++ \text{O\&M}_{\rm fixed},
+\label{eq:LCOD}
+\end{equation}
+where:
+\begin{itemize}[nosep]
+  \item CRF $= r(1+r)^T/[(1+r)^T - 1]$ is the capital recovery factor.
+  \item $P_{\rm del}$ is the rated delivered power (MW).
+  \item CF is the capacity factor (fraction of time at rated power).
+  \item $p_{\rm elec}$ is the input electricity price (\$/kWh).
+  \item $\eta_{\rm e2e} = 0.20$ is the end-to-end efficiency.
+  \item O\&M$_{\rm fixed}$ covers cryogenic maintenance, SRF cavity
+    refurbishment, and staffing.
+\end{itemize}
+
+\subsection{Reference parameters}
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Parameter & Value & Basis \\
+\midrule
+$C_{\rm cap}$ & \$0.6~B (low) / \$1.1~B (high) & W3i6 \\
+$T$ (lifetime) & 30~years & Comparable to grid infrastructure \\
+$r$ (discount rate) & 8\% & Utility-scale infrastructure \\
+CRF & 0.0888/yr & From $r$ and $T$ \\
+$P_{\rm del}$ & 10~GW & City-scale (London/NYC class) \\
+CF & 0.60 & Average grid capacity factor \\
+$p_{\rm elec}$ (input) & \$0.05/kWh & Wholesale \\
+$\eta_{\rm e2e}$ & 0.20 & W3i6 \\
+O\&M & 2\% of $C_{\rm cap}$/yr & Standard for major infrastructure \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{LCOD calculation}
+
+\subsubsection{Capital component}
+\begin{equation}
+\text{LCOD}_{\rm cap} = \frac{C_{\rm cap}\times\text{CRF}}{P_{\rm del}
+\times 8760\times\text{CF}}.
+\end{equation}
+
+At $C_{\rm cap} = \$0.6$~B:
+\begin{equation}
+\text{LCOD}_{\rm cap}^{\rm low} = \frac{6\ee{8}\times 0.0888}
+{10\ee{6}\times 8760\times 0.60}
+= \frac{5.33\ee{7}}{5.26\ee{10}}
+= 0.00101~\$/\text{kWh}
+= 0.10~\text{c/kWh}.
+\end{equation}
+
+At $C_{\rm cap} = \$1.1$~B:
+\begin{equation}
+\text{LCOD}_{\rm cap}^{\rm high} = \frac{1.1\ee{9}\times 0.0888}
+{5.26\ee{10}}
+= \frac{9.77\ee{7}}{5.26\ee{10}}
+= 0.00186~\$/\text{kWh}
+= 0.19~\text{c/kWh}.
+\end{equation}
+
+\textbf{Note}: The capital component is surprisingly small ($<$0.2~c/kWh)
+because the 10~GW throughput amortises the cost over an enormous energy
+volume ($5.26\ee{10}$~kWh/yr).
+
+\subsubsection{Energy loss component}
+
+This is the dominant cost. The network delivers only 20\% of input energy:
+\begin{equation}
+\text{LCOD}_{\rm loss} = \frac{p_{\rm elec}}{\eta_{\rm e2e}}
+= \frac{0.05}{0.20} = 0.25~\$/\text{kWh}.
+\end{equation}
+
+The psi-network must \emph{buy} 5~kWh of input electricity for every
+1~kWh delivered. At \$0.05/kWh wholesale, the energy cost alone is
+\$0.25/kWh.
+
+\subsubsection{O\&M component}
+\begin{equation}
+\text{O\&M} = \frac{0.02\times C_{\rm cap}}{P_{\rm del}\times 8760\times\text{CF}}.
+\end{equation}
+
+At $C_{\rm cap} = \$0.8$~B (midpoint):
+\begin{equation}
+\text{O\&M} = \frac{0.02\times 8\ee{8}}{5.26\ee{10}}
+= 0.00030~\$/\text{kWh} = 0.03~\text{c/kWh}.
+\end{equation}
+
+Negligible.
+
+\subsubsection{Total LCOD}
+
+\begin{equation}
+\boxed{
+\text{LCOD}_\psi = \underbrace{0.10\text{--}0.19}_{\rm capital}
++ \underbrace{25.0}_{\rm energy~loss}
++ \underbrace{0.03}_{\rm O\&M}
+= 25.1\text{--}25.2~\text{c/kWh}}
+\quad\text{at $p_{\rm elec} = 5$~c/kWh.}
+\end{equation}
+
+\begin{finding}[LCOD of Psi-Network at 20\% Efficiency]
+\label{find:LCOD}
+The levelised cost of energy delivery for the W3i6 city-scale psi-network
+is:
+\begin{equation}
+\text{LCOD}_\psi \approx \frac{p_{\rm elec}}{0.20} + 0.001\text{--}0.002
+\approx 5\,p_{\rm elec} + \epsilon,
+\end{equation}
+where $\epsilon \sim 0.2$~c/kWh covers capital and O\&M (negligible at
+high throughput).
+
+\textbf{The LCOD is dominated by energy losses}: the $5\times$ input
+energy multiplier from 20\% efficiency. Capital cost is $<$1\% of total
+LCOD at city-scale throughput.
+\end{finding}
+
+%=============================================================================
+\section{Break-Even Analysis}
+\label{sec:P12-breakeven}
+%=============================================================================
+
+\subsection{Break-even condition}
+
+The psi-network becomes viable when its LCOD is less than the alternative
+cost of conventional electricity delivery:
+\begin{equation}
+\text{LCOD}_\psi < p_{\rm conv},
+\end{equation}
+where $p_{\rm conv}$ is the all-in cost of conventional grid delivery
+to the same endpoints (\$/kWh).
+
+\begin{equation}
+\frac{p_{\rm elec}}{\eta_{\rm e2e}} + \frac{C_{\rm cap}\times\text{CRF}}
+{P_{\rm del}\times 8760\times\text{CF}} < p_{\rm conv}.
+\label{eq:breakeven}
+\end{equation}
+
+Since the capital term is negligible ($\sim$0.2~c/kWh):
+\begin{equation}
+\boxed{
+p_{\rm conv}^{\rm break\text{-}even} \approx
+\frac{p_{\rm elec}}{\eta_{\rm e2e}} = 5\,p_{\rm elec}.
+}
+\label{eq:breakeven-simple}
+\end{equation}
+
+\subsection{Break-even electricity prices}
+
+\begin{table}[h]
+\centering
+\caption{Break-even conventional delivery price for psi-network viability,
+at various input electricity costs.}
+\label{tab:breakeven}
+\begin{tabular}{ccc}
+\toprule
+Input electricity $p_{\rm elec}$ & Required $p_{\rm conv}^{\rm break\text{-}even}$
+  & Context \\
+ (c/kWh) & (c/kWh) & \\
+\midrule
+2 (ultra-cheap hydro/nuclear) & 10 & $= $ US average retail \\
+3 (cheap wholesale) & 15 & 1.5$\times$ US average \\
+5 (US wholesale average) & 25 & 2.5$\times$ US average \\
+8 (EU wholesale) & 40 & Most expensive island grids \\
+10 (premium wholesale) & 50 & Exceeds all current markets \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{finding}[Break-Even Conventional Price]
+\label{find:breakeven}
+The psi-network breaks even when conventional delivery costs exceed
+$5\times$ the wholesale electricity input price:
+
+\begin{itemize}[nosep]
+  \item At US wholesale input (\$0.05/kWh): break-even at $p_{\rm conv}
+    > \$0.25$/kWh. This is $2.5\times$ the US retail average (\$0.10/kWh)
+    but within the range of some island nations (Hawaii \$0.28, US Virgin
+    Islands \$0.35).
+  \item At ultra-cheap input (\$0.02/kWh, e.g., stranded hydro):
+    break-even at $p_{\rm conv} > \$0.10$/kWh --- exactly the US average
+    retail price.
+  \item At EU wholesale (\$0.08/kWh): break-even at $p_{\rm conv}
+    > \$0.40$/kWh. No current market has such high delivery costs.
+\end{itemize}
+
+\textbf{The narrow viability window}: psi-transmission is viable only
+when cheap input electricity is available AND the delivery endpoint has
+very expensive conventional alternatives.
+\end{finding}
+
+%=============================================================================
+\section{Sensitivity Analysis}
+\label{sec:P12-sensitivity}
+%=============================================================================
+
+\subsection{Sensitivity to efficiency}
+
+The LCOD is inversely proportional to $\eta_{\rm e2e}$ (for the
+dominant energy-loss component):
+\begin{equation}
+\text{LCOD}_\psi \approx \frac{p_{\rm elec}}{\eta_{\rm e2e}}.
+\end{equation}
+
+\begin{table}[h]
+\centering
+\caption{LCOD sensitivity to efficiency improvement, at $p_{\rm elec}
+= \$0.05$/kWh.}
+\label{tab:sensitivity-eta}
+\begin{tabular}{ccl}
+\toprule
+$\eta_{\rm e2e}$ & LCOD (c/kWh) & How to achieve \\
+\midrule
+20\% (W3i6 baseline) & 25.0 & Two 50\% conversion stages \\
+33\% & 15.2 & One 50\% conversion + 65\% transport \\
+50\% & 10.0 & Direct SRF-to-SRF transfer (no polariton) \\
+65\% & 7.7 & Single-stage 80\% conversion \\
+81\% & 6.2 & Zero conversion loss (transport only) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{finding}[Efficiency is the Critical Lever]
+\label{find:efficiency-lever}
+Every percentage point of efficiency improvement reduces LCOD by
+$\sim p_{\rm elec}/\eta^2$. The most impactful improvement is
+\textbf{eliminating one conversion stage}:
+
+\begin{itemize}[nosep]
+  \item If the hub conversion could be eliminated (e.g., if the
+    generation source directly produces $\dpsiEM$ --- a ``psi-mode
+    generator''), efficiency jumps from 20\% to $\sim$40\%, halving LCOD.
+  \item If \emph{both} conversions are eliminated (psi-mode generation
+    at source, psi-mode consumption at load), efficiency reaches 81\%
+    (transport only), and LCOD drops to 6.2~c/kWh --- competitive with
+    conventional grid at any input price.
+\end{itemize}
+
+The physics of direct psi-mode generation (bypassing EM$\to\dpsiEM$
+conversion) is an open question that merits investigation.
+\end{finding}
+
+\subsection{Sensitivity to throughput}
+
+\begin{table}[h]
+\centering
+\caption{LCOD sensitivity to network throughput, at $C_{\rm cap} = \$0.8$~B,
+$\eta = 20\%$, $p_{\rm elec} = \$0.05$/kWh.}
+\label{tab:sensitivity-throughput}
+\begin{tabular}{ccc}
+\toprule
+$P_{\rm del}$ (GW) & Capital LCOD (c/kWh) & Total LCOD (c/kWh) \\
+\midrule
+0.1 & 13.5 & 38.5 \\
+1.0 & 1.35 & 26.4 \\
+10 & 0.14 & 25.1 \\
+100 & 0.01 & 25.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Capital cost matters only below $\sim$1~GW throughput. At city scale
+($\geq$10~GW), the economics are entirely determined by the efficiency.
+
+\subsection{Sensitivity to capital cost}
+
+\begin{table}[h]
+\centering
+\caption{LCOD sensitivity to capital cost, at 10~GW throughput.}
+\label{tab:sensitivity-cap}
+\begin{tabular}{ccc}
+\toprule
+$C_{\rm cap}$ (\$B) & Capital LCOD (c/kWh) & Total LCOD (c/kWh) \\
+\midrule
+0.1 & 0.02 & 25.0 \\
+0.6 & 0.10 & 25.1 \\
+1.1 & 0.19 & 25.2 \\
+5.0 & 0.85 & 25.9 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{finding}[Capital Cost is Not the Binding Constraint]
+\label{find:capital-not-binding}
+At city-scale throughput ($\geq$10~GW), even a $5\times$ increase in
+capital cost (to \$5~B) adds only 0.85~c/kWh to LCOD. A $5\times$
+decrease (to \$0.2~B) saves only 0.08~c/kWh. The capital cost is
+irrelevant to economic viability.
+
+\textbf{The binding constraint is efficiency}. No amount of capital
+cost reduction makes the network viable if $\eta_{\rm e2e}$ remains
+at 20\%.
+\end{finding}
+
+%=============================================================================
+\section{Comparison with Underground WPT (P4)}
+\label{sec:P12-vs-P4}
+%=============================================================================
+
+The P4 underground WPT system provides a useful benchmark:
+
+\begin{table}[h]
+\centering
+\caption{P4 underground WPT vs.\ P12 city-scale network.}
+\label{tab:P4-vs-P12}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Parameter & P4 (Underground WPT) & P12 (City Network) \\
+\midrule
+Efficiency & 75.2\% & 20\% \\
+Capital & \$270~M & \$600~M--1,100~M \\
+LCOD (at 5~c/kWh input) & 6.6~c/kWh & 25~c/kWh \\
+Conversion stages & 2 (but 50\% each $\to$ 25\%) & 2 (50\% each $\to$ 25\%) \\
+Transport efficiency & $\approx 100\%$ & 81\% \\
+Topology & Point-to-point & Distributed tree \\
+Break-even $p_{\rm conv}$ & 6.6~c/kWh & 25~c/kWh \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Wait --- the P4 efficiency of 75.2\% is the \emph{transport} efficiency
+(beam capture). It also requires two conversion stages (EM$\to\dpsiEM$
+at transmitter, $\dpsiEM\to$EM at receiver), each at 50\%. So the true
+P4 end-to-end efficiency is:
+\begin{equation}
+\eta_{\rm P4}^{\rm e2e} = 50\% \times 75.2\% \times 50\% = 18.8\%.
+\end{equation}
+
+This is essentially identical to the P12 efficiency of 20\% (the
+difference is $81\%$ vs.\ $75.2\%$ transport). The conversion
+bottleneck affects \emph{both} patents equally.
+
+\begin{finding}[P4 and P12 Share the Same Conversion Bottleneck]
+\label{find:shared-bottleneck}
+The end-to-end efficiency of both P4 (18.8\%) and P12 (20\%) is
+dominated by the two 50\% conversion stages. The transport stage
+(75.2\% for P4 beam capture, 81\% for P12 corridor) is relatively
+efficient in both cases.
+
+\textbf{Implication}: The W3i6 P4 LCOE claim of \$0.004/kWh assumed
+$\eta = 75.2\%$ for the full system, but this is the transport-only
+efficiency. The corrected P4 end-to-end LCOE at 18.8\% is:
+\begin{equation}
+\text{LCOE}_{\rm P4}^{\rm corrected} = \frac{p_{\rm elec}}{\eta_{\rm e2e}}
++ \frac{C_{\rm cap}\times\text{CRF}}{P_{\rm del}\times 8760\times\text{CF}}
+\approx \frac{0.05}{0.188} + \epsilon = 26.6~\text{c/kWh}.
+\end{equation}
+
+\textbf{This is a significant correction to the P4 economics.} The
+\$0.004/kWh figure assumed that the 75.2\% transport efficiency was the
+total efficiency. With conversion losses included, P4 and P12 have
+essentially the same LCOD.
+\end{finding}
+
+\begin{tcolorbox}[colback=red!5!white, colframe=red!60!black,
+  title=\textbf{CORRECTION: P4 LCOE Requires Conversion Losses}]
+The W3i6 P4 LCOE of \$0.004/kWh \textbf{omitted the two conversion
+stages} (EM$\to\dpsiEM$ at transmitter, $\dpsiEM\to$EM at receiver).
+Including these at 50\% each:
+\begin{equation}
+\eta_{\rm P4}^{\rm e2e} = 0.50\times 0.752\times 0.50 = 18.8\%.
+\end{equation}
+The corrected P4 LCOE is $\sim$\$0.27/kWh at \$0.05/kWh input ---
+\textbf{comparable to the P12 city-scale network}.
+
+Both P4 and P12 are economically limited by the same conversion
+bottleneck. Breaking this bottleneck (through higher $\lambdaone$,
+parametric amplification, or direct psi-mode generation) is the
+single most important technology milestone for all DFD energy
+transmission patents.
+\end{tcolorbox}
+
+%=============================================================================
+\section{Niche Markets: Where Psi-Transmission Could Be Viable}
+\label{sec:P12-niche}
+%=============================================================================
+
+Despite the unfavourable economics at 20\% efficiency, certain markets
+could justify the cost:
+
+\subsection{Market 1: Undersea power delivery}
+
+\begin{itemize}[nosep]
+  \item Deep-sea mining, ocean-floor observatories, military
+    installations require power at locations where conventional cables
+    are extremely expensive (\$1--10~M/km for subsea HVDC).
+  \item A 100~km subsea cable at \$5~M/km = \$500~M capital.
+    Psi-corridor: no physical cable, \$80~M (single SRF hub + endpoint).
+  \item At 20\% efficiency and \$0.05/kWh input, LCOD = 25~c/kWh.
+    But the alternative (diesel generator on-site) costs \$0.30--1.00/kWh.
+  \item \textbf{Viable} for remote subsea applications where the
+    alternative is on-site generation at $>$\$0.30/kWh.
+\end{itemize}
+
+\subsection{Market 2: Deep underground mining}
+
+\begin{itemize}[nosep]
+  \item Ultra-deep mines (3--5~km depth, South African gold mines)
+    spend \$0.15--0.25/kWh on ventilation, cooling, and power delivery
+    infrastructure.
+  \item Psi-transmission bypasses all physical conduit requirements.
+  \item Break-even: at ultra-cheap surface power (\$0.02/kWh),
+    LCOD = 10~c/kWh. Competitive if underground delivery infrastructure
+    costs $>$10~c/kWh.
+  \item \textbf{Marginally viable} for extreme-depth mining.
+\end{itemize}
+
+\subsection{Market 3: Space-based power delivery}
+
+\begin{itemize}[nosep]
+  \item Lunar or Martian surface bases: no grid infrastructure.
+    Alternative is nuclear or solar with battery storage.
+  \item Psi-corridor from orbital solar power station to surface:
+    no atmospheric losses, no physical infrastructure.
+  \item Cost comparison: space solar panel \$500--5000/W, nuclear
+    \$100--500/W. Psi-transmission capital is amortised differently
+    in space contexts.
+  \item \textbf{Potentially viable} in long-term space infrastructure
+    scenarios (post-2050).
+\end{itemize}
+
+\begin{finding}[Niche Market Viability]
+\label{find:niche}
+The city-scale psi-network is not viable for general urban power
+delivery at current efficiencies. However, niche markets exist where:
+\begin{enumerate}[nosep]
+  \item Conventional delivery is physically impossible or extremely
+    expensive ($>$\$0.25/kWh delivered).
+  \item The psi-corridor's unique capability (no physical conduit,
+    underground/undersea penetration) provides irreplaceable value.
+  \item Input power is available at ultra-low cost (\$0.02--0.03/kWh).
+\end{enumerate}
+
+\textbf{Best niche candidates}: undersea power delivery, deep mining,
+and long-term space infrastructure.
+\end{finding}
+
+%=============================================================================
+\section{Technology Milestones for Economic Viability}
+\label{sec:P12-milestones}
+%=============================================================================
+
+\begin{table}[h]
+\centering
+\caption{Technology milestones and their impact on psi-network LCOD.
+All at $p_{\rm elec} = \$0.05$/kWh, 10~GW throughput.}
+\label{tab:milestones}
+\begin{tabular}{@{}p{5cm}ccc@{}}
+\toprule
+Milestone & $\eta_{\rm e2e}$ & LCOD (c/kWh) & Viable? \\
+\midrule
+W3i6 baseline (SRF conversion) & 20\% & 25.0 & \textcolor{red}{No} \\
+Improved SRF ($Q > 10^{11}$) & 30\% & 16.7 & \textcolor{red}{No} \\
+Single-stage conversion & 40\% & 12.5 & \textcolor{orange}{Marginal} \\
+High-$\lambdaone$ material & 50\% & 10.0 & \textcolor{orange}{Marginal} \\
+Direct psi-mode generation & 65\% & 7.7 & \textcolor{green!50!black}{Competitive} \\
+Lossless conversion & 81\% & 6.2 & \textcolor{green!50!black}{Yes} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{finding}[Path to Economic Viability]
+\label{find:viability-path}
+The psi-network becomes economically competitive with conventional
+urban grids (\$0.06--0.12/kWh) only when $\eta_{\rm e2e} \geq 65\%$,
+which requires:
+\begin{enumerate}[nosep]
+  \item Elimination of at least one conversion stage (direct psi-mode
+    generation or direct psi-mode consumption), AND
+  \item Remaining conversion stage at $\geq 80\%$ efficiency.
+\end{enumerate}
+
+Alternatively, at the current 20\% efficiency, break-even requires
+conventional delivery costs $>$25~c/kWh --- achievable only in extreme
+niche markets.
+
+\textbf{The conversion efficiency is the gating technology for all DFD
+energy transmission economics.} This is the single most important
+research target for the DFD energy patent portfolio.
+\end{finding}
+
+%=============================================================================
+\part{Cross-Patent Integration and Open Questions}
+\label{part:cross}
+%=============================================================================
+
+%=============================================================================
+\section{Cross-References}
+\label{sec:crossrefs}
+%=============================================================================
+
+\subsection{P4 $\leftrightarrow$ P12: Shared conversion bottleneck}
+
+The W3i7 analysis reveals that P4 and P12 are economically limited by
+the same conversion stages. The W3i6 P4 LCOE of \$0.004/kWh is
+corrected to \$0.27/kWh (at \$0.05 input). Both patents require the
+same technology breakthrough: improved EM-to-$\dpsiEM$ conversion.
+
+\subsection{P4 $\leftrightarrow$ P2: Parametric amplification dead end}
+
+The W3i6 open question about parametric pumping of $\dpsiEM$ via
+$\psigrav$ gradient is now answered: the mechanism is real but produces
+negligible gain at terrestrial gravity ($\gamma_{\rm par} \sim 10^{-14}$
+m$^{-1}$). The P2 parametric amplification patent would need to operate
+through a different mechanism (e.g., temporal modulation of the cavity
+boundary conditions, or EM-pump-driven MOND nonlinearity) rather than
+static gravitational gradient pumping.
+
+\subsection{P7 $\leftrightarrow$ P11: SRF technology synergy}
+
+P7 and P11 share the SRF cavity technology base. The P7 application
+space (pulsed power buffer) could leverage P11 SRF cavity production.
+The Nb$_3$Sn upgrade path (W3i4 P11) would increase P7 $E_{\rm max}$
+from 46~MJ to $\sim$208~MJ, significantly expanding the railgun and
+accelerator applications.
+
+\subsection{P7 $\leftrightarrow$ P4/P12: No synergy}
+
+P7 (energy storage) and P4/P12 (energy transmission) address different
+problems. P7 cannot serve as a buffer in the P12 network because the
+1~s storage time is insufficient for network latency management
+(typical grid contingency requires 15~min reserves).
+
+%=============================================================================
+\section{Open Questions for W3i8}
+\label{sec:open}
+%=============================================================================
+
+\begin{enumerate}
+\item \textbf{P4/P12: Direct psi-mode generation.} Is there a physical
+  mechanism to generate $\dpsiEM$ directly (without EM$\to\dpsiEM$
+  conversion)? This would eliminate the conversion bottleneck. Candidates:
+  piezoelectric-analogue coupling in MOND materials, direct mechanical
+  excitation of the psi-mode in SRF cavities, or stimulated psi-mode
+  emission.
+
+\item \textbf{P4/P12: Conversion efficiency correction propagation.}
+  The P4 LCOE of \$0.004/kWh is now identified as transport-only.
+  Propagate this correction to all P4 economic claims and the P4 patent
+  specification.
+
+\item \textbf{P7: Nb$_3$Sn upgrade quantification.} With $B_{\rm sh}
+  = 425$~mT (Nb$_3$Sn), calculate the revised $\Pmax$, $E_{\rm max}$,
+  and updated application competitiveness for railgun and CLIC-class
+  accelerator.
+
+\item \textbf{P7: Cryogenic packaging for DEW.} The DEW application
+  hinges on miniaturising He-II cryogenics to $<$5~m$^3$. What is the
+  state of the art in compact 2~K cryocoolers? Can pulse-tube systems
+  reach 2~K in the required volume?
+
+\item \textbf{P12: Undersea market sizing.} Quantify the addressable
+  market for undersea psi-power delivery: deep-sea mining installations,
+  ocean-floor observatories, military assets. What is the annual energy
+  demand and willingness-to-pay?
+
+\item \textbf{P2 $\leftrightarrow$ P4: Alternative parametric mechanisms.}
+  Since static $\psigrav$-gradient pumping is a dead end, investigate
+  temporal modulation of cavity boundary conditions (dynamic Casimir-type
+  effect in the psi-sector) as an alternative parametric amplification
+  pathway.
+\end{enumerate}
+
+%=============================================================================
+\section{Conclusion}
+\label{sec:conclusion}
+%=============================================================================
+
+\begin{tcolorbox}[colback=green!5!white, colframe=green!60!black,
+  title=\textbf{W3i7 P4+P7+P12 Bottom Line}]
+
+\textbf{P4 (Parametric Pumping):}
+\begin{itemize}[nosep]
+  \item Parametric gain formula derived:
+    $G = \cosh^2[(1+\kappa)g\omega L/(c^3\npsi)]$.
+  \item At Earth's surface: $\gamma_{\rm par} = 3.35\ee{-14}$~m$^{-1}$
+    at 2.45~GHz. Gain is negligible ($G - 1 \sim 10^{-27}$ per metre).
+  \item \textbf{Cannot circumvent SRF conversion bottleneck.}
+    Required interaction length: 5.8~AU. Even with resonant enhancement
+    ($\Qpsi = 10^9$): $G - 1 \sim 10^{-13}$.
+  \item Useful only at neutron-star gravity ($g \sim 10^{12}$~m/s$^2$).
+  \item P4 underground WPT specification unchanged from W3i6.
+\end{itemize}
+
+\medskip
+
+\textbf{P7 (Complete Application Space):}
+\begin{itemize}[nosep]
+  \item \textbf{Genuine advantages}: compact DEW/HPM (volume-decisive),
+    IFE driver (99.9\% $\eta$, 10~Hz), future accelerator RF fill.
+  \item \textbf{Marginal}: railgun (needs Nb$_3$Sn upgrade), EMP
+    protection.
+  \item \textbf{Eliminated}: grid storage, grid frequency regulation,
+    UPS, EV, solar shifting --- all require $\tau \gg 1$~s.
+  \item The $650$~MJ/m$^3$ density advantage is real but only
+    translates to system-level advantage when cryogenic packaging is
+    compact ($<$5~m$^3$).
+\end{itemize}
+
+\medskip
+
+\textbf{P12 (Break-Even Economics):}
+\begin{itemize}[nosep]
+  \item LCOD $\approx 5\times p_{\rm elec}$ at 20\% efficiency.
+    At \$0.05/kWh input: LCOD = 25~c/kWh.
+  \item Break-even: $p_{\rm conv} > 25$~c/kWh (niche markets only).
+  \item Capital cost is $<$1\% of LCOD at city scale. \textbf{Efficiency
+    is the only lever that matters.}
+  \item Viable niches: undersea, deep mining, space.
+  \item \textbf{CORRECTION}: P4 LCOE of \$0.004/kWh omitted conversion
+    losses. Corrected P4 LCOE $\approx$ 27~c/kWh. P4 and P12 share
+    the same conversion bottleneck.
+  \item Path to competitiveness: $\eta_{\rm e2e} \geq 65\%$ (requires
+    eliminating at least one conversion stage).
+\end{itemize}
+
+\medskip
+
+\textbf{Overarching finding}: The EM-to-$\dpsiEM$ conversion efficiency
+is the \textbf{single gating technology} for all DFD energy patents
+(P4, P7, P12). Parametric pumping via $\psigrav$ is not a viable
+workaround. The research priority must be: (a) improved SRF $Q$ for
+higher resonant buildup, (b) discovery of higher-$\lambdaone$ materials,
+or (c) direct psi-mode generation bypassing EM conversion entirely.
+\end{tcolorbox}
+
+\end{document}

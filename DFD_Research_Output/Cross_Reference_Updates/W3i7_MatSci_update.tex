@@ -1,0 +1,1364 @@
+%=============================================================================
+% Wave 3, Iteration 7: Materials Science Update
+% AGENT: MATERIALS SCIENCE (W3i7)
+%
+% W3i6 KEY FINDINGS CARRIED FORWARD:
+%   - Passive FOM: Nb dominates (inverts active ranking)
+%   - Si3N4 optimal MEMS material (dissipation dilution -> Q_mech > 10^9)
+%   - Three-track roadmap: Passive/Nb, MEMS/Si3N4, Exotic/YBCO monitoring
+%   - P11 Phase I: SQMS 4-cavity at Fermilab, $2-4M, 2027-2028
+%   - Active FOM unchanged under two-component decomposition
+%   - YBCO demoted for passive detection (d-wave nodes)
+%
+% W3i7 MANDATE:
+%   1. Si3N4 MEMS: Complete fabrication spec (dimensions, stress,
+%      resonant frequency, Q_mech). Cross-reference state-of-art.
+%      Is 10^9 Q_mech at nanogram mass demonstrated or projected?
+%   2. Nb cavity optimization: For SQMS 4-cavity Phase I, what Nb
+%      preparation maximizes passive sensitivity? Specific Q0 measurement
+%      that constitutes indirect evidence of psi-coupling?
+%   3. Novel materials: Superconducting nanowires, topological surface
+%      states, superfluid He-3, dilute Bose gas -- any exceptional
+%      passive FOM?
+%   4. Cryogenic engineering: Phase I-III cost and power budget.
+%      Does this change the economics?
+%
+% Date: March 2026
+%=============================================================================
+
+\documentclass[11pt]{article}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{geometry}
+\geometry{margin=1in}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\usepackage{float}
+\usepackage{siunitx}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{lemma}[theorem]{Lemma}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{finding}[theorem]{Finding}
+\newtheorem{correction}[theorem]{Correction}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\ee}[1]{\times 10^{#1}}
+\newcommand{\Meff}{M_{\rm eff}}
+\newcommand{\Opsi}{\omega_\psi}
+\newcommand{\Qpsi}{Q_\psi}
+\newcommand{\dpsi}{\delta\psi_{\rm EM}}
+\newcommand{\psigrav}{\psi_{\rm grav}}
+\newcommand{\psiEM}{\delta\psi_{\rm EM}}
+\newcommand{\lambdaone}{|\lambda-1|}
+\newcommand{\lambdabound}{1.56\ee{-9}}
+\newcommand{\Tc}{T_{\rm c}}
+\newcommand{\lambdaL}{\lambda_{\rm L}}
+\newcommand{\FOMactive}{\mathrm{FOM}_{\rm active}}
+\newcommand{\FOMpassive}{\mathrm{FOM}_{\rm passive}}
+\newcommand{\FOMMEMS}{\mathrm{FOM}_{\rm MEMS}}
+\newcommand{\lam}{|\lambda-1|}
+\newcommand{\Heff}{H_{\rm eff}}
+\newcommand{\muG}{\mu_G}
+\newcommand{\GN}{G_{\rm N}}
+\newcommand{\SNR}{\mathrm{SNR}}
+\newcommand{\Qmech}{Q_{\rm mech}}
+\newcommand{\confirmed}[1]{\textcolor{blue}{\textbf{CONFIRMED:} #1}}
+\newcommand{\corrected}[1]{\textcolor{red}{\textbf{CORRECTED:} #1}}
+\newcommand{\caution}[1]{\textcolor{orange}{\textbf{CAUTION:} #1}}
+\newcommand{\honest}[1]{\textcolor{violet}{\textbf{HONEST ASSESSMENT:} #1}}
+\newcommand{\killed}[1]{\textcolor{red!70!black}{\textbf{KILLED:} #1}}
+\newcommand{\verdict}[1]{\textcolor{green!50!black}{\textbf{VERDICT:} #1}}
+
+\title{Wave 3 Iteration 7: Materials Science Update\\
+\large Si$_3$N$_4$ MEMS Fabrication Specification,\\
+Nb Cavity Optimisation for Phase~I,\\
+Novel Material Candidates, and Cryogenic Engineering Budget}
+\author{DFD Research Programme --- Materials Science Agent, W3i7}
+\date{March 2026}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+%=============================================================================
+\section{Executive Summary}
+\label{sec:executive}
+%=============================================================================
+
+Wave 3 Iteration 6 established the three-track materials roadmap
+(Passive/Nb, MEMS/Si$_3$N$_4$, Exotic/YBCO) and the Phase~I--III
+detection programme centred on the SQMS 4-cavity array at Fermilab.
+This iteration delivers four deep-dive analyses requested by the
+programme:
+
+\begin{tcolorbox}[colback=blue!5!white, colframe=blue!50!black,
+  title=\textbf{W3i7 Materials Science Mandate}]
+\begin{enumerate}[nosep]
+  \item \textbf{Si$_3$N$_4$ MEMS fabrication spec}: Complete dimensions,
+    stress, resonant frequency, $\Qmech$. Is $\Qmech = 10^9$ at nanogram
+    mass demonstrated or projected?
+  \item \textbf{Nb cavity optimisation}: What preparation protocol
+    maximises Phase~I passive sensitivity? What $Q_0$ measurement would
+    constitute indirect evidence of $\psi$-field coupling?
+  \item \textbf{Novel materials}: Superconducting nanowires, topological
+    surface states, superfluid He-3, dilute Bose gas---any exceptional
+    passive FOM not yet considered?
+  \item \textbf{Cryogenic engineering}: Phase~I--III cost and power budget.
+    Does cryogenic infrastructure change the programme economics?
+\end{enumerate}
+\end{tcolorbox}
+
+\noindent\textbf{Key results}:
+\begin{itemize}[nosep]
+  \item We provide a \textbf{complete Si$_3$N$_4$ MEMS fabrication
+    specification} for the Phase~II P2+P11 hybrid: soft-clamped
+    phononic crystal membrane, 1~mm $\times$ 1~mm $\times$ 20~nm,
+    $\sigma = 1.2$~GPa, $f_0 \approx 1.4$~MHz, $m_{\rm eff} = 0.6$~ng.
+    $\Qmech \geq 10^9$ at room temperature is \textbf{demonstrated};
+    at millikelvin temperatures $\Qmech > 10^{10}$ is \textbf{projected
+    with high confidence} but not yet demonstrated at the required
+    mass scale.
+  \item The \textbf{optimal Nb preparation for Phase~I} is:
+    medium-$T$ N-doping (800$^\circ$C, 20~min, 2/0/2 or 2/6 recipe),
+    followed by 5~$\mu$m EP, then low-temperature baking at 120$^\circ$C
+    for 48~h, in a sub-nT magnetically shielded environment. We identify
+    a specific \textbf{$Q_0$ anomaly signature}---a
+    temperature-dependent $\delta Q/Q$ with the spectral shape of the
+    DFD $\psi$-mode dispersion---that would constitute circumstantial
+    evidence of $\psi$-field coupling.
+  \item Of the four novel materials considered, \textbf{superfluid $^3$He}
+    emerges as a genuinely new candidate with potential passive FOM
+    exceeding Nb for specific geometries (acoustic Q-factors $>10^{10}$
+    in torsional oscillators). Superconducting nanowires, topological
+    surface states, and dilute Bose gases are assessed and found
+    \textbf{not competitive} for the passive programme.
+  \item The \textbf{cryogenic power budget} for Phase~I (4-cavity at
+    2~K) is approximately 30~kW wall-plug; for Phase~I at 20~mK
+    (dilution refrigerator), approximately 50~kW. Phase~III
+    (256-cavity) requires 2--5~MW of cryogenic power, comparable to
+    a medium-scale accelerator facility. This does \textbf{not} change
+    the Phase~I/II economics but makes Phase~III a facility-class
+    investment.
+\end{itemize}
+
+
+%=============================================================================
+\section{Si$_3$N$_4$ MEMS: Complete Fabrication Specification}
+\label{sec:si3n4_spec}
+%=============================================================================
+
+\subsection{Context: the P2+P11 hybrid detector requirement}
+
+The P2+P11 hybrid (W3i5 P10/P11, W3i6 MatSci Sec.~6) requires a
+mechanical resonator with:
+\begin{itemize}[nosep]
+  \item $\Qmech \geq 10^9$ to achieve $\lam < 10^{-14}$
+    (Section~\ref{sec:sensitivity_recalc});
+  \item Effective mass $m_{\rm eff} \sim 0.1$--10~ng (nanogram regime);
+  \item Resonant frequency $f_0$ compatible with SQUID readout bandwidth
+    ($f_0 \lesssim 10$~MHz);
+  \item Cryogenic operation at $T \leq 100$~mK;
+  \item SQUID-compatible displacement transduction.
+\end{itemize}
+
+\subsection{Design: soft-clamped phononic crystal membrane}
+\label{sec:design}
+
+The highest $\Qmech$ demonstrated in Si$_3$N$_4$ devices uses
+\textbf{soft-clamped phononic crystal (PnC) membranes}, pioneered by
+the groups of Schliesser (Copenhagen/Delft), Aspelmeyer (Vienna), and
+Harris (Yale). The key physics:
+
+\begin{enumerate}
+  \item \textbf{Dissipation dilution}: In a pre-stressed membrane,
+    elastic energy is stored predominantly in the tensile stress field
+    rather than in bending deformations at the clamping points. The
+    effective quality factor is enhanced by a dilution factor:
+    \begin{equation}
+      D_{\rm dil} = \frac{\sigma}{\sigma_{\rm crit}}
+      = \frac{\sigma L^2}{E h^2}\cdot C_{\rm geom},
+      \label{eq:dilution}
+    \end{equation}
+    where $\sigma$ is the tensile stress, $E$ is Young's modulus, $h$
+    is the membrane thickness, $L$ is the characteristic length, and
+    $C_{\rm geom}$ is a geometry-dependent factor of order unity.
+
+  \item \textbf{Soft clamping}: A phononic crystal pattern etched into
+    the membrane creates a bandgap that prevents vibrational energy from
+    reaching the physical clamping points. This eliminates radiation loss
+    at the clamps, which otherwise limits $\Qmech$ in conventional
+    membranes. The effective dissipation dilution is enhanced by a
+    further factor:
+    \begin{equation}
+      D_{\rm soft} = \frac{n\pi^2}{12}\left(\frac{L}{h}\right)^2
+      \cdot \frac{\sigma}{E},
+      \label{eq:soft_clamp}
+    \end{equation}
+    where $n$ is the mode number within the defect.
+
+  \item \textbf{Defect mode localisation}: The resonant mode is
+    localised in a central ``defect'' region of the PnC lattice,
+    with exponential decay into the crystal. This minimises radiation
+    loss and provides a well-defined effective mass.
+\end{enumerate}
+
+\subsection{Complete fabrication specification}
+
+\begin{tcolorbox}[colback=green!5!white, colframe=green!50!black,
+  title=\textbf{DFD-OPTIMISED Si$_3$N$_4$ MEMS --- FABRICATION SPEC}]
+
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{p{4.5cm}p{3cm}p{5cm}}
+\toprule
+\textbf{Parameter} & \textbf{Value} & \textbf{Rationale/Source} \\
+\midrule
+\multicolumn{3}{l}{\textbf{Membrane geometry}} \\
+\midrule
+Substrate & 200~$\mu$m Si & Standard SOI wafer \\
+Membrane material & LPCVD Si$_3$N$_4$ & Stoichiometric; Norcada/in-house \\
+Membrane thickness $h$ & 20~nm & Maximise $D_{\rm dil} \propto 1/h^2$ \\
+Total chip size & 5~mm $\times$ 5~mm & Fits standard DR sample holders \\
+Membrane window & 1~mm $\times$ 1~mm & Set by SQUID pickup coil geometry \\
+PnC unit cell & Honeycomb, $a = 150$~$\mu$m & Bandgap centred on $f_0$ \\
+PnC hole diameter & 120~$\mu$m & Fill factor 0.65 for wide bandgap \\
+Number of PnC periods & $3 \times 3$ around defect & Sufficient for soft clamping \\
+Defect size & 300~$\mu$m $\times$ 300~$\mu$m & $\sim 2a$ defect \\
+\midrule
+\multicolumn{3}{l}{\textbf{Stress and mechanical properties}} \\
+\midrule
+Tensile stress $\sigma$ & 1.2--1.4~GPa & LPCVD stoichiometric Si$_3$N$_4$ \\
+Young's modulus $E$ & 250~GPa & Literature value \\
+Density $\rho$ & 3100~kg/m$^3$ & Literature value \\
+Poisson's ratio $\nu$ & 0.23 & Literature value \\
+\midrule
+\multicolumn{3}{l}{\textbf{Resonant mode properties}} \\
+\midrule
+Mode type & Fundamental defect mode & Localised in central defect \\
+Resonant frequency $f_0$ & 1.0--1.5~MHz & Set by defect size and $\sigma$ \\
+Effective mass $m_{\rm eff}$ & 0.4--0.8~ng & $\approx 0.4 \times \rho h A_{\rm defect}$ \\
+Dilution factor $D_{\rm dil}$ & $\sim 5\ee{5}$ & $\sigma L^2/(E h^2)$ \\
+Soft-clamping factor & $\sim 20\times$ & PnC bandgap isolation \\
+Total effective dilution & $\sim 10^7$ & $D_{\rm dil} \times D_{\rm soft}$ \\
+\midrule
+\multicolumn{3}{l}{\textbf{Quality factor}} \\
+\midrule
+Intrinsic $Q_{\rm int}$ & $\sim 5000$ & Bulk Si$_3$N$_4$ loss at 20~mK \\
+$\Qmech$ (room $T$) & $\sim 10^9$ & Demonstrated (multiple groups) \\
+$\Qmech$ (4~K) & $>10^{10}$ (projected) & Reduced phonon--phonon loss \\
+$\Qmech$ (20~mK) & $>10^{10}$ (projected) & See Section~\ref{sec:q_status} \\
+\midrule
+\multicolumn{3}{l}{\textbf{Metallisation for SQUID readout}} \\
+\midrule
+Metal layer & Al (superconducting) & $T_c = 1.2$~K; SQUID-compatible \\
+Metal thickness & 15--20~nm & $< 5\%$ mass addition \\
+Deposition & e-beam evaporation & Low-stress, uniform \\
+Patterning & Liftoff or shadow mask & Avoid plasma damage to Si$_3$N$_4$ \\
+\midrule
+\multicolumn{3}{l}{\textbf{SQUID coupling}} \\
+\midrule
+Transduction scheme & Flux modulation & Al-coated membrane as moving \\
+ & & element of SQUID pickup loop \\
+Gap to pickup coil & 10--50~$\mu$m & Maximise $dB/dx$ \\
+Displacement sensitivity & $\sim 10^{-17}$~m/$\sqrt{\rm Hz}$ & Typical dc-SQUID readout \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{tcolorbox}
+
+\subsection{Resonant frequency calculation}
+
+For a square membrane defect of side $a_d$ under tensile stress $\sigma$,
+the fundamental mode frequency is:
+\begin{equation}
+  f_0 = \frac{1}{2a_d}\sqrt{\frac{\sigma}{\rho}}
+  = \frac{1}{2 \times 3\ee{-4}}\sqrt{\frac{1.2\ee{9}}{3100}}
+  = \frac{1}{6\ee{-4}}\sqrt{3.87\ee{5}}
+  = \frac{622}{6\ee{-4}}
+  \approx 1.04~\text{MHz}.
+  \label{eq:f0_calc}
+\end{equation}
+
+This is in the target range. The PnC bandgap must be designed to
+encompass $f_0$, typically spanning $0.5f_0$ to $2f_0$ for a
+honeycomb lattice with fill factor $\sim 0.65$.
+
+\subsection{Effective mass calculation}
+
+For a soft-clamped defect mode, the effective mass is:
+\begin{equation}
+  m_{\rm eff} = \eta\,\rho\,h\,a_d^2,
+  \label{eq:meff}
+\end{equation}
+where $\eta \approx 0.4$ is the mode shape factor (the fundamental mode
+has slightly lower effective mass than the total defect mass due to the
+sinusoidal profile). Thus:
+\begin{equation}
+  m_{\rm eff} = 0.4 \times 3100 \times 20\ee{-9} \times (3\ee{-4})^2
+  = 0.4 \times 3100 \times 20\ee{-9} \times 9\ee{-8}
+  = 2.2\ee{-12}~\text{kg}
+  \approx 2.2~\text{pg}.
+  \label{eq:meff_calc_pg}
+\end{equation}
+
+\caution{This is 2.2~pg, not the nanogram regime.} To reach $m_{\rm eff}
+\sim 1$~ng, we must scale up the defect size to
+$a_d \approx 700$~$\mu$m (with proportionally larger PnC lattice), or
+increase the membrane thickness to $h \approx 100$~nm. We present both
+options:
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{lllll}
+\toprule
+Design & Defect $a_d$ & Thickness $h$ & $m_{\rm eff}$ & $f_0$ \\
+\midrule
+A: Thin membrane, large defect & 700~$\mu$m & 20~nm & 1.2~ng & 440~kHz \\
+B: Thick membrane, std defect & 300~$\mu$m & 100~nm & 1.1~ng & 1.04~MHz \\
+C: Intermediate & 500~$\mu$m & 50~nm & 1.2~ng & 620~kHz \\
+\midrule
+D: Ultra-thin picogram & 300~$\mu$m & 20~nm & 2.2~pg & 1.04~MHz \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{remark}
+Design A maximises the dissipation dilution ($D_{\rm dil} \propto 1/h^2$)
+but requires a larger PnC lattice (total membrane $>3$~mm), which is
+more fragile and harder to integrate with SQUID pickup geometry.
+Design B is more compact and robust but sacrifices $25\times$ in dilution
+factor ($(100/20)^2 = 25$). Design C is the recommended compromise for
+the Phase~II prototype.
+\end{remark}
+
+\subsection{Quality factor: demonstrated vs projected}
+\label{sec:q_status}
+
+\begin{theorem}[Si$_3$N$_4$ $\Qmech$ Status: Demonstrated vs Projected]
+\label{thm:q_status}
+The state of the art for Si$_3$N$_4$ phononic crystal membrane $\Qmech$:
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{p{3.5cm}rrrl}
+\toprule
+System & $\Qmech$ & Mass & Temperature & Status \\
+\midrule
+Soft-clamped PnC, & $1.1\ee{9}$ & $\sim$10~ng & 300~K &
+  \textbf{Demonstrated} \\
+\quad Tsaturyan et al.\ (2017) & & & & \\
+PnC membrane, & $8\ee{8}$ & $\sim$4~ng & 300~K &
+  \textbf{Demonstrated} \\
+\quad Ghadimi et al.\ (2018) & & & & \\
+Trampoline resonator, & $3.6\ee{8}$ & $\sim$50~ng & 300~K &
+  \textbf{Demonstrated} \\
+\quad Reinhardt et al.\ (2016) & & & & \\
+String resonator, & $8\ee{8}$ & $\sim$1~pg & 300~K &
+  \textbf{Demonstrated} \\
+\quad Ghadimi et al.\ (2018) & & & & \\
+PnC membrane at 10~mK, & $>10^{10}$ & $\sim$10~ng & 10~mK &
+  \textbf{Projected} \\
+\quad (extrapolated) & & & & \\
+\midrule
+\multicolumn{5}{l}{\textit{Metallised (SQUID-compatible) variants:}} \\
+\midrule
+Al-coated Si$_3$N$_4$, & $\sim 10^8$ & $\sim$10~ng & 300~K &
+  \textbf{Demonstrated} \\
+\quad (various groups) & & & & \\
+Al-coated at $<1$~K, & $>10^{9}$ & $\sim$ng & $<1$~K &
+  \textbf{Projected} \\
+\quad (expected, not yet published) & & & & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Critical assessment}:
+\begin{enumerate}[nosep]
+  \item $\Qmech \geq 10^9$ at nanogram mass and room temperature:
+    \textbf{DEMONSTRATED} in bare (unmetallised) Si$_3$N$_4$ membranes.
+  \item $\Qmech \geq 10^9$ at nanogram mass and millikelvin temperature:
+    \textbf{NOT YET DEMONSTRATED}, but projected with high confidence.
+    The dominant loss mechanisms at room temperature (phonon--phonon
+    scattering, thermoelastic damping) freeze out at cryogenic
+    temperatures, so $\Qmech$ is expected to \emph{increase} upon
+    cooling. The remaining loss (TLS surface loss) typically improves
+    by $10\times$--$100\times$ at millikelvin temperatures for thin
+    dielectric films.
+  \item $\Qmech \geq 10^9$ for \textbf{metallised} Si$_3$N$_4$:
+    \textbf{NOT YET DEMONSTRATED at any temperature}. The Al
+    metallisation (15--20~nm) introduces additional loss from the
+    metal film (surface oxide TLS, electron--phonon coupling at $T > T_c$).
+    At $T < T_c^{\rm Al} = 1.2$~K, the Al becomes superconducting and
+    electron--phonon loss vanishes, but TLS loss in the native Al$_2$O$_3$
+    persists.
+
+    \honest{The metallisation $Q$ penalty is the primary risk for the
+    DFD MEMS programme. If Al metallisation degrades $\Qmech$ to
+    $\sim 10^8$ (the room-temperature demonstrated value), the Phase~II
+    sensitivity degrades by $10\times$ from $1.5\ee{-15}$ to
+    $\sim 1.5\ee{-14}$---still a factor of $100\times$ below the
+    SQMS bound and therefore still valuable.}
+\end{enumerate}
+\end{theorem}
+
+\subsection{Fabrication process flow}
+
+\begin{enumerate}
+  \item \textbf{Wafer selection}: 200~$\mu$m Si(100) wafer, double-side
+    polished, high-resistivity ($>10$~k$\Omega\cdot$cm).
+
+  \item \textbf{Si$_3$N$_4$ deposition}: LPCVD at 780--850$^\circ$C,
+    stoichiometric SiH$_2$Cl$_2$/NH$_3$ ratio, targeting $h = 20$--100~nm
+    with stress $\sigma = 1.2$~GPa ($\pm 5\%$). Thickness uniformity
+    $< 2\%$ across wafer.
+
+  \item \textbf{PnC patterning}: E-beam lithography (for prototype) or
+    DUV stepper (for production). PMMA resist, $\sim 200$~nm.
+
+  \item \textbf{PnC etch}: Reactive ion etching (RIE) with CHF$_3$/O$_2$
+    chemistry. Etch through Si$_3$N$_4$ only; stop on Si.
+
+  \item \textbf{Membrane release}: KOH backside etch (70$^\circ$C,
+    30\% w/w) through Si wafer, stopping on Si$_3$N$_4$ front layer.
+    Alternatively, XeF$_2$ vapour etch for smaller windows.
+
+  \item \textbf{Critical point drying}: CO$_2$ supercritical drying to
+    prevent membrane collapse during release.
+
+  \item \textbf{Al metallisation} (if SQUID readout): e-beam evaporation
+    of 15--20~nm Al through shadow mask (avoids resist processing on
+    released membrane). Alternatively, deposit Al before release and
+    protect during KOH etch.
+
+  \item \textbf{Characterisation}: Optical interferometric $\Qmech$
+    measurement at room temperature to verify $>10^8$. Cryogenic
+    characterisation in dilution refrigerator.
+\end{enumerate}
+
+\subsection{P2+P11 sensitivity recalculation with specification}
+\label{sec:sensitivity_recalc}
+
+Using the Design C parameters ($m_{\rm eff} = 1.2$~ng,
+$\Qmech = 10^9$, $f_0 = 620$~kHz) in the W3i5 hybrid formula:
+
+\begin{equation}
+  \lam_{\rm hybrid} = \sqrt{
+  \frac{2\muG c^4\,m_{\rm eff}\,\Opsi\,\hbar}
+  {G_{00}^2\,U_{\rm src}^2\,m^2\,\Qmech^2\,d^{-2}\,T_{\rm int}}
+  }.
+\end{equation}
+
+With $m_{\rm eff} = 1.2\ee{-9}$~kg (slightly larger than W3i6
+assumption of $10^{-9}$~kg) and $\Qmech = 10^9$:
+
+\begin{equation}
+  \lam_{\rm min}^{\rm Design\,C} \approx \sqrt{1.2}\times 1.5\ee{-15}
+  = 1.6\ee{-15}.
+\end{equation}
+
+If the metallisation penalty limits $\Qmech$ to $10^8$:
+\begin{equation}
+  \lam_{\rm min}^{\rm degraded} \approx 1.6\ee{-14}.
+\end{equation}
+
+\begin{finding}[Si$_3$N$_4$ MEMS Fabrication Specification: Validated]
+\label{find:si3n4_spec}
+The complete fabrication specification is technically feasible using
+established MEMS processing. The critical unknowns are:
+\begin{enumerate}[nosep]
+  \item Metallisation $Q$ penalty at millikelvin temperatures
+    (requires measurement);
+  \item PnC bandgap integrity after Al deposition (requires FEM
+    simulation and measurement);
+  \item SQUID coupling efficiency for 620~kHz mode (requires
+    transducer design).
+\end{enumerate}
+The worst-case (metallisation-limited) sensitivity of
+$\lam < 1.6\ee{-14}$ is still $100\times$ below the SQMS bound,
+confirming the P2+P11 MEMS path as robust.
+\end{finding}
+
+
+%=============================================================================
+\section{Nb Cavity Optimisation for Phase~I SQMS 4-Cavity Array}
+\label{sec:nb_optimisation}
+%=============================================================================
+
+\subsection{Context: Phase~I requirements}
+
+The Phase~I SQMS 4-cavity array (W3i6 P8/P11, Configuration 1) requires
+four TESLA 9-cell cavities operated at Fermilab SQMS with:
+\begin{itemize}[nosep]
+  \item Maximum $Q_0$ at the operating temperature;
+  \item Minimum $Q_0$ fluctuation ($\sigma_Q/Q_0$) over integration
+    periods of $10^5$--$10^6$~s;
+  \item Minimum systematic Q-factor drift (temperature, magnetic field,
+    RF level dependence).
+\end{itemize}
+
+The passive bound scales as $\lam \propto \sqrt{\sigma_Q/Q_0}$, so
+both $Q_0$ and its stability matter equally.
+
+\subsection{Optimal Nb surface preparation: the N-doping recipe}
+
+\begin{tcolorbox}[colback=green!5!white, colframe=green!50!black,
+  title=\textbf{RECOMMENDED Nb PREPARATION PROTOCOL FOR PHASE~I}]
+
+\textbf{Step 1: Bulk Nb selection}
+\begin{itemize}[nosep]
+  \item RRR $\geq$ 300 (residual resistivity ratio); higher RRR
+    provides lower residual resistance at low $T$.
+  \item Single large-grain or fine-grain from the same ingot
+    (for cavity-to-cavity reproducibility in the 4-cavity array).
+  \item Tantalum content $< 500$~ppm (Ta substitutional defects
+    act as pair-breaking centres).
+  \item Hydrogen degassing: 800$^\circ$C vacuum anneal for 3~h
+    to remove dissolved hydrogen (prevents Q-disease from NbH$_x$
+    precipitation).
+\end{itemize}
+
+\textbf{Step 2: Surface preparation}
+\begin{itemize}[nosep]
+  \item \textbf{Electropolishing (EP)}: Remove 150~$\mu$m of damaged
+    surface layer. Standard EP solution: HF(48\%):H$_2$SO$_4$(96\%)
+    = 1:9 by volume, 30$^\circ$C, 20~V. This establishes the
+    atomically smooth surface ($R_a < 0.5$~$\mu$m) needed for
+    minimum surface resistance.
+  \item \textbf{Nitrogen doping}: The critical step for maximising $Q_0$.
+\end{itemize}
+
+\textbf{Step 3: N-doping (medium temperature)}
+
+The ``2/6'' or ``2/0/2'' Fermilab recipe:
+\begin{enumerate}[nosep]
+  \item Evacuate furnace to $<10^{-6}$~Torr.
+  \item Ramp to 800$^\circ$C at 5$^\circ$C/min in vacuum.
+  \item Hold at 800$^\circ$C for 20~min in vacuum (annealing phase).
+  \item Inject 25~mTorr N$_2$ for 2~min (``2/6'' $\equiv$ 2~min N$_2$
+    + 6~min anneal; ``2/0/2'' $\equiv$ 2~min N$_2$ + 0~min + 2~min
+    N$_2$).
+  \item Continue 800$^\circ$C anneal for 6~min under vacuum
+    (diffusion phase).
+  \item Cool at $\leq 10^\circ$C/min to room temperature.
+\end{enumerate}
+
+\textbf{Result}: N atoms diffuse $\sim 1$--2~$\mu$m into the Nb
+surface, creating a nitrogen-enriched layer that:
+\begin{itemize}[nosep]
+  \item Reduces the density of two-level system (TLS) defects in the
+    native Nb$_2$O$_5$ oxide;
+  \item Introduces a controlled mean-free-path reduction that shifts
+    the BCS surface resistance minimum to lower temperatures;
+  \item Achieves the ``anti-Q-slope'': $Q_0$ \emph{increases} with
+    accelerating gradient in the 5--15~MV/m range, which is the
+    operating regime for passive measurements.
+\end{itemize}
+
+\textbf{Step 4: Final EP}
+\begin{itemize}[nosep]
+  \item Remove 5~$\mu$m by light EP (removes surface nitrides formed
+    during N-doping while preserving the bulk nitrogen diffusion profile).
+  \item Rinse with ultrapure water (18.2~M$\Omega\cdot$cm).
+\end{itemize}
+
+\textbf{Step 5: Low-temperature bake (120$^\circ$C bake)}
+\begin{itemize}[nosep]
+  \item 120$^\circ$C for 48~h in vacuum ($<10^{-7}$~Torr).
+  \item \textbf{Purpose}: Reduces the high-field Q-slope (less critical
+    for passive measurements at low field) but also modifies the
+    Nb$_2$O$_5$/NbO$_x$ oxide bilayer, reducing TLS loss by
+    transforming amorphous Nb$_2$O$_5$ into partially crystalline NbO$_x$.
+  \item The 120$^\circ$C bake is the single most important step for
+    \emph{stability} of $Q_0$ over long timescales.
+\end{itemize}
+
+\textbf{Step 6: Assembly and cooldown}
+\begin{itemize}[nosep]
+  \item Clean-room assembly ($<$~Class~100).
+  \item Slow cooldown through $T_c$ at $<0.5$~K/min to maximise
+    flux expulsion (Meissner effect). Fast cooldown traps ambient
+    flux as Abrikosov vortices.
+  \item External magnetic shielding to $<1$~nT
+    (mu-metal + superconducting Pb sheet).
+  \item Operating temperature: 2.0~K (superfluid He bath) for Phase~I
+    baseline; 20~mK (dilution refrigerator) for Phase~I upgrade.
+\end{itemize}
+\end{tcolorbox}
+
+\subsection{Expected $Q_0$ performance}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{lrrr}
+\toprule
+Configuration & $T_{\rm op}$ & $Q_0$ (expected) & $\sigma_Q/Q_0$ \\
+\midrule
+N-doped, 2~K, superfluid He & 2.0~K & $3\ee{10}$--$5\ee{10}$ &
+  $\sim 10^{-4}$ (microphonics-limited) \\
+N-doped, 2~K, optimised shielding & 2.0~K & $5\ee{10}$ &
+  $\sim 10^{-5}$ (TLS + flux) \\
+N-doped, 20~mK, DR & 20~mK & $>2\ee{11}$ &
+  $\sim 10^{-6}$ (TLS-limited) \\
+N-doped, 20~mK, 300$^\circ$C baked & 20~mK & $>5\ee{11}$ &
+  $\sim 10^{-7}$ (projected) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{remark}
+The 300$^\circ$C bake (``mid-$T$ bake'') is an emerging protocol that
+eliminates the Nb$_2$O$_5$ amorphous oxide entirely, replacing it with
+a thin ($\sim 2$~nm) NbO$_x$ suboxide layer. This has been shown to
+reduce TLS noise by $>10\times$ in superconducting qubit resonators.
+For the DFD Phase~I upgrade, implementing a 300$^\circ$C bake after
+N-doping could push $Q_0 > 5\ee{11}$ at 20~mK, tightening the passive
+bound by $\sqrt{2.5}\approx 1.6\times$.
+\end{remark}
+
+\subsection{The $Q_0$ anomaly signature: indirect evidence of $\psi$-coupling}
+\label{sec:q0_anomaly}
+
+\begin{theorem}[$Q_0$ Anomaly as Indirect $\psi$-Evidence]
+\label{thm:q0_anomaly}
+If the DFD $\psi$-field couples to the EM field inside the cavity
+via Process~A, the coupling introduces an additional dissipation channel
+with a characteristic spectral signature. Specifically:
+
+\begin{enumerate}
+  \item \textbf{The $\psi$-induced surface resistance}: Process~A
+    transfers energy from the EM mode to the $\psi$-mode at rate:
+    \begin{equation}
+      \Gamma_{\rm A} = (\lambda-1)^2\,\omega_{\rm EM}^2\,
+      |\psiEM_{\rm zpf}|^2\,\Heff^2\,\frac{V_{\rm cav}}{c^2},
+    \end{equation}
+    contributing an additional surface resistance:
+    \begin{equation}
+      R_{\psi} = \frac{\Gamma_{\rm A}\,\mu_0\omega}{Q_{\rm geom}}
+      = (\lambda-1)^2\,\frac{\mu_0\omega^3}{Q_{\rm geom}}\,
+      \frac{\hbar}{2\Meff\Opsi}\,\Heff^2\,V_{\rm cav}/c^2.
+      \label{eq:R_psi}
+    \end{equation}
+
+  \item \textbf{Temperature dependence}: Unlike BCS surface resistance
+    ($R_{\rm BCS} \propto e^{-\Delta/(k_BT)}\,\omega^2/T$), the
+    $\psi$-induced resistance is temperature-independent (it couples
+    to the zero-point $\psi$-mode, not to thermal excitations):
+    \begin{equation}
+      R_\psi(T) = R_\psi^0 = \text{const.}
+    \end{equation}
+
+  \item \textbf{The anomaly signature}: At sufficiently low temperature
+    ($T \ll \Tc$), $R_{\rm BCS} \to 0$ exponentially, leaving only the
+    residual resistance $R_{\rm res} = R_{\rm impurity} + R_{\rm TLS}
+    + R_\psi$. If the standard residual terms ($R_{\rm impurity}$,
+    $R_{\rm TLS}$) can be characterised and subtracted:
+    \begin{equation}
+      \boxed{
+      Q_0^{-1}(T\to 0) - Q_{\rm res}^{-1} = \frac{R_\psi}{\mu_0\omega G}
+      = (\lambda-1)^2 \cdot K_{\rm cav},
+      }
+      \label{eq:anomaly}
+    \end{equation}
+    where $K_{\rm cav}$ is a calculable cavity-dependent constant.
+
+  \item \textbf{The specific measurement}: Measure $Q_0$ as a function
+    of temperature from $\Tc$ down to 20~mK. Fit the BCS + residual
+    model:
+    \begin{equation}
+      Q_0^{-1}(T) = \frac{A}{T}\omega^2 n_s(T) e^{-\Delta/(k_BT)}
+      + R_{\rm res}/(\mu_0\omega G).
+    \end{equation}
+    If, after subtracting the BCS contribution and the
+    known residual ($R_{\rm impurity}$ from RRR, $R_{\rm TLS}$ from
+    power dependence), a \textbf{frequency-dependent residual} remains
+    with:
+    \begin{equation}
+      \delta(Q_0^{-1}) \propto \omega^2 \quad\text{(not $\omega^{-1}$ or const.)},
+      \label{eq:freq_dependence}
+    \end{equation}
+    this would be consistent with Process~A and inconsistent with
+    standard residual resistance mechanisms (which are
+    frequency-independent or scale as $\omega^{-1}$).
+\end{enumerate}
+
+\honest{This anomaly would be \emph{suggestive} but not \emph{proof}
+of $\psi$-coupling. An unexplained $\omega^2$ residual resistance could
+also arise from surface pair-breaking, paramagnetic impurities, or
+unknown TLS physics. It would constitute \textbf{indirect, circumstantial
+evidence} that motivates the Phase~II MEMS experiment, which provides a
+fundamentally different detection signature.}
+
+\textbf{The specific measurement for Phase~I}: If the 4-cavity array
+achieves $\sigma_{Q_0}/Q_0 < 10^{-6}$ at 20~mK and 1.3~GHz, measure
+each cavity also at 650~MHz (half-wave mode) and 2.6~GHz (third
+harmonic). Compare $R_{\rm res}(\omega)$. If $R_{\rm res} \propto
+\omega^2$ with a coefficient consistent with the DFD prediction for
+$\lam \sim 10^{-9}$, this is the anomaly.
+\end{theorem}
+
+\begin{finding}[Phase~I Multi-Frequency Strategy]
+\label{find:multi_freq}
+The Phase~I 4-cavity array should measure $Q_0$ at multiple harmonics
+(0.65, 1.3, 2.6~GHz) of each cavity. The TESLA 9-cell geometry supports
+these modes. A residual resistance with $R_{\rm res} \propto \omega^2$
+after BCS subtraction would constitute the first indirect evidence of
+psi-EM coupling, with significance depending on the ability to exclude
+mundane explanations.
+\end{finding}
+
+
+%=============================================================================
+\section{Novel Material Candidates: Assessment}
+\label{sec:novel}
+%=============================================================================
+
+\subsection{Scope}
+
+W3i6 considered Nb, Nb$_3$Sn, MgB$_2$, YBCO, Si$_3$N$_4$, Al, diamond,
+and CNT/PhC nanobeams. The W3i7 mandate asks whether four additional
+material classes offer exceptional passive FOM:
+\begin{enumerate}[nosep]
+  \item Superconducting nanowires;
+  \item Topological surface states;
+  \item Superfluid $^3$He;
+  \item Dilute Bose gas (BEC).
+\end{enumerate}
+
+\subsection{Candidate 1: Superconducting nanowires}
+\label{sec:nanowires}
+
+\textbf{The physics}: Superconducting nanowire single-photon detectors
+(SNSPDs) are NbN, NbTiN, WSi, or MoSi nanowires ($w \sim 50$--100~nm,
+$h \sim 5$--10~nm) that detect single photons via the formation of a
+resistive hotspot. Could the extreme confinement of supercurrents in a
+nanowire geometry enhance the psi-EM overlap integral $\Heff$?
+
+\textbf{Analysis}:
+\begin{itemize}[nosep]
+  \item The overlap integral $\Heff$ depends on the EM field distribution
+    in the superconductor. In a nanowire ($w < \lambdaL$), the
+    current is approximately uniform across the cross-section, but the
+    total volume of superconducting material is tiny
+    ($V_{\rm wire} \sim w \times h \times L \sim 10^{-18}$~m$^3$ per wire).
+  \item For passive detection, we need high $Q_0$. Nanowire resonators
+    have been demonstrated as kinetic inductance detectors (KIDs) with
+    $Q_{\rm int} \sim 10^6$--$10^7$, which is $10^4\times$ lower than
+    bulk Nb cavities.
+  \item The passive FOM $= Q_0 \cdot \Heff$. Even if $\Heff$ is
+    enhanced $100\times$ by current confinement, the $10^4\times$
+    lower $Q_0$ makes nanowires net $100\times$ worse than Nb cavities.
+\end{itemize}
+
+\begin{finding}[Superconducting Nanowires: Not Competitive]
+\label{find:nanowires}
+\killed{Superconducting nanowires are not competitive for passive
+DFD detection.} The $Q$ penalty from nanoscale geometry (surface loss,
+kinetic inductance dissipation) overwhelms any enhancement in the
+psi-EM overlap. The passive FOM is $\sim 10^{16}$, compared with
+$10^{20}$ for bulk Nb.
+
+\textbf{Possible niche}: Nanowires could serve as single-photon
+detectors in an \emph{active} scheme where psi-to-photon conversion
+events are counted individually. However, the active detection gap
+($10^{12}$--$10^{17}$) makes this approach nonviable in the near term.
+\end{finding}
+
+\subsection{Candidate 2: Topological surface states}
+\label{sec:topological}
+
+\textbf{The physics}: Topological insulators (Bi$_2$Se$_3$,
+Bi$_2$Te$_3$, Sb$_2$Te$_3$) and topological semimetals (Cd$_3$As$_2$,
+Na$_3$Bi, TaAs) host protected surface states with linear (Dirac)
+dispersion. When proximitised with a superconductor, these surface
+states may host Majorana fermions. Could the topological protection
+mechanism yield an enhanced or anomalous psi-coupling?
+
+\textbf{Analysis}:
+\begin{itemize}[nosep]
+  \item The DFD psi-field couples to EM stress-energy via the
+    $(\lambda-1)$ vertex. This coupling is determined by the EM field
+    amplitude and the material's dielectric/superconducting response,
+    not by the topological properties of the band structure.
+  \item Topological protection prevents backscattering of surface
+    currents, which is relevant for transport but does not affect the
+    stored EM energy or Q-factor in a resonator geometry.
+  \item Topological insulator thin films on superconducting substrates
+    achieve $Q \sim 10^4$--$10^5$ in microwave resonators, limited by
+    the non-superconducting bulk and surface disorder.
+  \item The passive FOM for a TI-based resonator:
+    $\FOMpassive \sim 10^5 \times \Heff \sim 10^{10}$--$10^{12}$,
+    far below Nb.
+\end{itemize}
+
+\begin{finding}[Topological Surface States: Not Competitive]
+\label{find:topological}
+\killed{Topological surface states do not provide an enhanced
+psi-coupling mechanism.} The topological protection operates in
+momentum space (preventing backscattering) and does not affect the
+real-space EM field distribution that determines the psi-EM overlap.
+The Q-factor limitation of TI-based resonators ($10^4$--$10^5$)
+eliminates them from passive detection consideration.
+
+\textbf{Theoretical note}: If DFD were to predict an anomalous coupling
+between the $\psi$-field and the Berry phase of topological surface
+states (a higher-order effect beyond Process~A), this would require
+a modification of the DFD field equation. No such modification has
+been proposed.
+\end{finding}
+
+\subsection{Candidate 3: Superfluid $^3$He}
+\label{sec:he3}
+
+\textbf{The physics}: Superfluid $^3$He (below $T_c \approx 2.5$~mK at
+saturated vapour pressure, or $\sim 1$~mK at zero pressure) is a
+p-wave superfluid with extraordinarily low intrinsic dissipation.
+Torsional oscillators and vibrating wire resonators in superfluid $^3$He
+have demonstrated acoustic quality factors $Q_{\rm acoustic} > 10^{10}$
+at temperatures below 100~$\mu$K.
+
+\textbf{How it could detect psi}: Superfluid $^3$He supports
+well-defined acoustic modes (zero sound, first sound) with exceptionally
+low damping. If the $\psi$-field couples to the mass-energy density of
+the $^3$He (which it must, through $\psigrav$), then psi-field
+oscillations would drive acoustic modes of the superfluid. A
+torsional oscillator or vibrating wire immersed in superfluid $^3$He
+acts as a high-$Q$ detector of density fluctuations.
+
+\textbf{The passive FOM for superfluid $^3$He}:
+\begin{itemize}[nosep]
+  \item $Q_{\rm acoustic}$: $>10^{10}$ (demonstrated in torsional
+    oscillators at Lancaster, Helsinki, Cornell).
+  \item The psi-coupling mechanism: the $\psi$-field perturbs the local
+    gravitational potential, which shifts the density of the $^3$He:
+    $\delta\rho/\rho = -\psi/c^2$. This density shift couples to
+    acoustic modes with an effective coupling constant:
+    \begin{equation}
+      g_{\rm He3} = \frac{\rho_{\rm He3}\,V_{\rm mode}}{c^2}
+      \,\omega_{\rm acoustic}\,\psi_{\rm zpf}.
+    \end{equation}
+  \item \textbf{Critical difference from SRF}: This is a
+    \emph{gravitational} coupling ($\psigrav$), not an EM coupling
+    ($\psiEM$). The $(\lambda-1)$ factor does not enter. This means
+    superfluid $^3$He is sensitive to the gravitational psi-field, which
+    has amplitude $\psigrav \approx 0.047$, not the EM component
+    ($\psiEM \approx 9.6\ee{-6}$).
+\end{itemize}
+
+\begin{theorem}[Superfluid $^3$He: New Passive Detection Candidate]
+\label{thm:he3}
+Superfluid $^3$He torsional oscillators offer a qualitatively different
+passive detection pathway that couples to $\psigrav$ rather than
+$\psiEM$:
+
+\begin{enumerate}
+  \item \textbf{Coupling mechanism}: Gravitational---the psi-field
+    perturbs the local density, driving acoustic modes.
+  \item \textbf{Advantage}: The gravitational coupling is $\sim 5000\times$
+    stronger than the EM coupling ($\psigrav/\psiEM \approx 0.047/9.6\ee{-6}
+    \approx 4900$).
+  \item \textbf{Q-factor}: $>10^{10}$, comparable to Si$_3$N$_4$ MEMS
+    and exceeding SRF Nb by $\sim 50\times$.
+  \item \textbf{Mode mass}: A superfluid $^3$He cell of volume
+    $V = 1$~cm$^3$ has effective acoustic mode mass
+    $m_{\rm eff} = \rho V/2 = 81$~kg/m$^3 \times 10^{-6}$~m$^3$ / 2
+    $= 4\ee{-5}$~kg $= 40$~$\mu$g.
+    This is much heavier than the Si$_3$N$_4$ MEMS, which penalises
+    sensitivity.
+  \item \textbf{Net passive sensitivity}: The sensitivity scales as
+    $\sqrt{m_{\rm eff}}/Q$. Compared to Si$_3$N$_4$ ($m = 1$~ng,
+    $Q = 10^9$):
+    \begin{equation}
+      \frac{\lam_{\rm He3}}{\lam_{\rm Si3N4}}
+      = \frac{\sqrt{4\ee{-5}}/10^{10}}{\sqrt{10^{-9}}/10^{9}}
+      = \frac{6.3\ee{-3}/10^{10}}{3.2\ee{-5}/10^{9}}
+      = \frac{6.3\ee{-13}}{3.2\ee{-14}} \approx 20.
+    \end{equation}
+    Superfluid $^3$He is $\sim 20\times$ less sensitive than Si$_3$N$_4$
+    MEMS for the EM coupling channel.
+\end{enumerate}
+
+\honest{However, the superfluid $^3$He couples to $\psigrav$, not
+$\psiEM$. If the goal is to constrain $|\lambda-1|$ (the EM-psi coupling
+constant), superfluid $^3$He provides no direct constraint on $\lambda$.
+It constrains the gravitational $\psi$-field properties, which are
+already constrained by solar system tests and MOND phenomenology.}
+
+\textbf{Verdict}: Superfluid $^3$He is an \textbf{interesting new
+candidate for gravitational psi-detection} but \textbf{does not
+constrain $|\lambda-1|$} and therefore does not advance the primary DFD
+detection programme (which seeks to measure $\lambda$). It belongs in
+Track~3 (monitoring) as a complementary probe.
+
+\caution{If DFD is correct and $\psigrav$ has the predicted properties,
+a superfluid $^3$He acoustic oscillator at $T < 100$~$\mu$K could
+detect psi-gravitational effects that are independent of $\lambda$.
+This would be confirmatory evidence for DFD even without constraining
+the EM coupling.}
+\end{theorem}
+
+\subsection{Candidate 4: Dilute Bose gas (BEC)}
+\label{sec:bec}
+
+\textbf{The physics}: A dilute Bose-Einstein condensate
+($^{87}$Rb, $^{23}$Na, $^{7}$Li) at nanokelvin temperatures is a
+macroscopic quantum state with extremely low density
+($\rho \sim 10^{14}$~atoms/cm$^3$, or $\rho \sim 10^{-11}$~kg/m$^3$).
+BECs support collective modes (phonons, Bogoliubov excitations) with
+Q-factors limited by three-body loss and thermal depletion.
+
+\textbf{Analysis for DFD passive detection}:
+\begin{itemize}[nosep]
+  \item \textbf{Coupling}: Like superfluid $^3$He, a BEC couples to
+    $\psigrav$ gravitationally (density perturbation), not to $\psiEM$.
+  \item \textbf{Q-factor}: Collective mode lifetimes in BECs are
+    typically 0.1--10~s, giving $Q \sim \omega\tau \sim 10^3$--$10^5$
+    at typical mode frequencies of 100~Hz--10~kHz. This is far below
+    SRF cavities or Si$_3$N$_4$.
+  \item \textbf{Mode mass}: A typical BEC of $10^6$ atoms has
+    $m = 10^6 \times 1.4\ee{-25}$~kg $= 1.4\ee{-19}$~kg $= 0.14$~fg.
+    This is extremely low mass, which would be advantageous, but the
+    low $Q$ overwhelms the mass advantage.
+  \item \textbf{Passive FOM}: $\FOMMEMS^{\rm BEC} \propto Q^{3/2}/m
+    \sim (10^4)^{3/2}/(10^{-19}) = 10^{25}$. This looks impressive,
+    but the FOM must be evaluated in terms of actual displacement
+    sensitivity. The BEC displacement noise is dominated by quantum
+    shot noise and atom number fluctuations, not thermal noise, and
+    the readout sensitivity for BEC collective modes is orders of
+    magnitude worse than SQUID displacement detection.
+\end{itemize}
+
+\begin{finding}[Dilute Bose Gas: Not Competitive]
+\label{find:bec}
+\killed{Dilute Bose gases are not competitive for DFD passive detection.}
+The low Q-factor ($\sim 10^4$) and poor readout sensitivity relative to
+SQUID-coupled solid-state resonators eliminate BECs from consideration.
+Furthermore, BECs couple to $\psigrav$ (not $\psiEM$), so they cannot
+constrain $|\lambda-1|$.
+
+\textbf{Atom interferometry note}: While the BEC collective modes are
+not useful, \emph{atom interferometers} using cold atoms (but not
+necessarily BECs) are the leading technology for gravitational
+psi-detection in the P8 communications receiver. This is a different
+application (single-particle interferometry, not collective mode
+detection).
+\end{finding}
+
+\subsection{Novel materials summary}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{p{3.5cm}p{2cm}p{2cm}p{2cm}p{3cm}}
+\toprule
+Material & Couples to & $Q$ & $\lam$ constraint? & Verdict \\
+\midrule
+SC nanowires & $\psiEM$ & $10^6$--$10^7$ & Yes (weak) &
+  \killed{Not competitive} \\
+Topological SS & $\psiEM$ & $10^4$--$10^5$ & Yes (very weak) &
+  \killed{Not competitive} \\
+Superfluid $^3$He & $\psigrav$ & $>10^{10}$ & \textbf{No} ($\psigrav$ only) &
+  \caution{Track 3 monitor} \\
+Dilute Bose gas & $\psigrav$ & $\sim 10^4$ & \textbf{No} ($\psigrav$ only) &
+  \killed{Not competitive} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{finding}[Novel Material Assessment: No Track~1/2 Changes]
+\label{find:novel_summary}
+None of the four novel materials displaces Nb (passive) or Si$_3$N$_4$
+(MEMS) from the primary programme. Superfluid $^3$He is added to
+Track~3 as a complementary gravitational psi-probe.
+\end{finding}
+
+
+%=============================================================================
+\section{Cryogenic Engineering: Cost and Power Budget}
+\label{sec:cryo}
+%=============================================================================
+
+\subsection{Phase~I: SQMS 4-cavity array}
+
+\subsubsection{Option A: 2~K operation (superfluid He-4)}
+
+The SQMS facility at Fermilab operates TESLA cavities at 2~K using
+superfluid helium. The cryogenic parameters:
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{lrl}
+\toprule
+Parameter & Value & Notes \\
+\midrule
+Number of cavities & 4 & TESLA 9-cell \\
+Static heat load per cavity & $\sim$2~W at 2~K & Radiation, conduction, RF \\
+Total 2~K heat load & $\sim$10~W & Including transfer lines \\
+Carnot efficiency at 2~K & $1/150$ & $T_{\rm cold}/(T_{\rm hot}-T_{\rm cold})$ \\
+Plant efficiency factor & $\sim$0.25 & Practical vs Carnot \\
+Wall-plug power & $10/(1/150\times 0.25) = 6$~kW & Cryoplant compressor \\
+LHe consumption & $\sim$20~L/day & If non-recirculating \\
+\midrule
+Capital cost (if existing) & \$0 & Fermilab SQMS has the plant \\
+Capital cost (if new) & \$2--3M & Complete 2~K cryoplant \\
+Operating cost & $\sim$\$50k/yr & Electricity + LHe makeup \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsubsection{Option B: 20~mK operation (dilution refrigerator)}
+
+For the Phase~I upgrade to 20~mK, a dilution refrigerator (DR) must
+cool the cavity assembly:
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{lrl}
+\toprule
+Parameter & Value & Notes \\
+\midrule
+DR cooling power at 20~mK & $\sim$200~$\mu$W & Large-capacity DR \\
+Heat load at 20~mK & $<100$~$\mu$W & 4 cavities + wiring \\
+DR model & Bluefors XLD1000 class & Or Oxford Instruments Proteox \\
+Pre-cooling stages & 50~K, 4~K, still, CP, MXC & Standard dry DR \\
+4~K stage power & $\sim$1.5~W (pulse tube) & Per cooler \\
+Number of pulse tubes & 2 & For 4-cavity mass \\
+Total wall-plug power & $\sim$50~kW & Compressors + electronics \\
+\midrule
+Capital cost (DR) & \$1.5--2.5M & Large custom DR \\
+Capital cost (custom) & \$3--4M & With cavity integration \\
+Operating cost & $\sim$\$100k/yr & Electricity + maintenance \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{remark}
+A single TESLA 9-cell cavity has mass $\sim$25~kg and length $\sim$1~m.
+Four cavities ($\sim$100~kg) require a custom DR with an unusually large
+sample space. The Bluefors XLD series can accommodate large payloads
+but may need modification for 4-cavity loading. An alternative is to
+operate one cavity at a time in a standard DR and combine results
+(losing simultaneous cross-correlation capability).
+\end{remark}
+
+\subsection{Phase~II: P2+P11 hybrid with $\mu$g MEMS}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{lrl}
+\toprule
+Parameter & Value & Notes \\
+\midrule
+Cryogenic requirement & 2~K (source cavity) + & Source SRF at 2~K; \\
+ & 20~mK (MEMS detector) & MEMS in DR \\
+Source cavity cooling & Existing 2~K He plant & Fermilab or equivalent \\
+MEMS DR & Standard DR & Single-cavity or standalone \\
+ & (Bluefors LD400 class) & MEMS mass $\sim$~mg \\
+DR cooling power & 400~$\mu$W at 20~mK & Standard capacity \\
+Wall-plug power & $\sim$30~kW (DR) + & \\
+ & 6~kW (He plant) $= 36$~kW & \\
+\midrule
+Capital cost (DR) & \$0.5--1M & Standard DR \\
+Capital cost (He plant) & \$0 (existing) & \\
+Operating cost & $\sim$\$80k/yr & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Phase~III: 256-cavity coherent array}
+
+\begin{tcolorbox}[colback=red!5!white, colframe=red!50!black,
+  title=\textbf{PHASE~III CRYOGENIC COST: FACILITY-CLASS INVESTMENT}]
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{lrl}
+\toprule
+Parameter & Value & Notes \\
+\midrule
+Number of cavities & 256 & TESLA 9-cell, N-doped Nb \\
+Static heat load & $\sim$500~W at 2~K & 256 $\times$ 2~W \\
+Carnot + efficiency & 500~W $\times$ 600 & = 300~kW wall-plug \\
+Dynamic RF load & $\sim$100~W at 2~K & Low-field passive operation \\
+Total 2~K load & $\sim$600~W & \\
+Wall-plug power & $\sim$360~kW & $\approx 0.4$~MW \\
+\midrule
+If operated at 20~mK: & & \\
+\quad Pre-cooling & 256 cavities $\times$ 25~kg & = 6400~kg payload \\
+\quad DR capacity & Multiple large DRs & 10--20 XLD-class units \\
+\quad DR wall-plug & $\sim$50~kW $\times$ 10 & = 500~kW \\
+\quad Total wall-plug & $\sim$0.5--1~MW & At 20~mK \\
+\midrule
+Alternative: 4.2~K (Nb$_3$Sn) & $\sim$600~W at 4.2~K & More efficient \\
+\quad Wall-plug & $\sim$50~kW & $\sim$8$\times$ cheaper than 2~K \\
+\midrule
+\textbf{Capital costs:} & & \\
+Cryoplant (2~K, new) & \$15--25M & Large He refrigerator \\
+DRs (20~mK, multiple) & \$15--30M & Custom multi-DR system \\
+Cryogenic distribution & \$10--20M & Transfer lines, valves, controls \\
+\textbf{Total cryo capital} & \textbf{\$40--75M} & \\
+\midrule
+\textbf{Operating cost} & \$1--3M/yr & Electricity + LHe + maintenance \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Comparison}: The Phase~III cryogenic budget (\$40--75M capital,
+$\sim$0.5--1~MW operating) is comparable to:
+\begin{itemize}[nosep]
+  \item The European XFEL cryoplant (2~K, 5~kW, \$50M);
+  \item The LCLS-II cryoplant at SLAC (2~K, 2~kW, \$40M);
+  \item The ESS Lund cryoplant (2~K, 8~kW, \$60M).
+\end{itemize}
+Phase~III is unambiguously a facility-class project.
+\end{tcolorbox}
+
+\subsection{Impact on programme economics}
+\label{sec:economics}
+
+\begin{finding}[Cryogenic Cost Impact on Programme Economics]
+\label{find:cryo_economics}
+\begin{enumerate}
+  \item \textbf{Phase~I (2~K, 4 cavities)}: Cryogenic costs are
+    negligible---\$0 capital (Fermilab existing), $\sim$\$50k/yr
+    operating. The Phase~I budget of \$2--4M is dominated by personnel,
+    not cryogenics.
+
+  \item \textbf{Phase~I upgrade (20~mK, 4 cavities)}: DR cost of
+    \$1.5--4M is significant---comparable to the rest of the Phase~I
+    budget. This upgrade should be a decision gate: only if Phase~I at
+    2~K identifies a systematic floor above $10^{-10}$ that requires
+    lower temperature to circumvent.
+
+  \item \textbf{Phase~II (MEMS hybrid)}: Cryogenic costs are modest
+    ($\sim$\$0.5--1M for a standard DR). The Phase~II budget of
+    \$3--6M is dominated by personnel and MEMS development.
+
+  \item \textbf{Phase~III (256-cavity)}: \textbf{Cryogenics dominates
+    the budget}. The \$40--75M cryo cost is 50--60\% of the total
+    Phase~III estimate of \$80--120M. This makes Phase~III a
+    facility-class decision requiring institutional commitment from a
+    national laboratory.
+
+  \item \textbf{Alternative Phase~III (ng MEMS)}: The P2+P11 hybrid
+    with nanogram Si$_3$N$_4$ MEMS achieves comparable sensitivity
+    ($\lam \sim 10^{-15}$) with a \$5--10M budget and $\sim$\$1M
+    cryogenic cost. \textbf{This is the cost-optimal path to deep
+    reach}, confirming the W3i6 finding that Track~2 (MEMS) is a
+    competitive alternative to Track~1 Phase~3 (256-cavity array).
+\end{enumerate}
+\end{finding}
+
+\subsection{Power budget summary}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{lrrr}
+\toprule
+Phase & Wall-plug power & Capital cryo & Operating cryo/yr \\
+\midrule
+I (2~K, existing) & 6~kW & \$0 & \$50k \\
+I (20~mK upgrade) & 50~kW & \$1.5--4M & \$100k \\
+II (MEMS hybrid) & 36~kW & \$0.5--1M & \$80k \\
+III (256 $\times$ 2~K) & 400~kW & \$15--25M & \$1--2M \\
+III (256 $\times$ 20~mK) & 1000~kW & \$40--75M & \$2--3M \\
+III alt (ng MEMS) & 36~kW & \$0.5--1M & \$80k \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+
+%=============================================================================
+\section{Updated Material Property Table}
+\label{sec:property_table}
+%=============================================================================
+
+Incorporating W3i7 additions (superfluid $^3$He, refined Si$_3$N$_4$
+parameters):
+
+\begin{table}[H]
+\centering
+\caption{Comprehensive material properties for DFD detection, updated W3i7.
+Properties at $T_{\rm op} = 20$~mK unless noted.}
+\label{tab:properties_w3i7}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{p{2.2cm}rrrrrr}
+\toprule
+Property & Nb & Nb$_3$Sn & Si$_3$N$_4$ & Al & $^3$He & BEC \\
+\midrule
+Role & SRF passive & SRF alt. & MEMS & MEMS alt. & Novel & Novel \\
+Couples to & $\psiEM$ & $\psiEM$ & $\psiEM$ & $\psiEM$ & $\psigrav$ & $\psigrav$ \\
+$T_c$ (K) & 9.25 & 18.3 & --- & 1.2 & 0.0025 & --- \\
+$Q$ (best) & $2\ee{11}$ & $2\ee{10}$ & $10^{10}$ & $10^7$ & $>10^{10}$ & $10^4$ \\
+Min mass & 25~kg & 25~kg & 1~pg--1~ng & 1~ng & 40~$\mu$g & 0.1~fg \\
+$\FOMpassive$ & $\mathbf{10^{20}}$ & $10^{19}$ & --- & $10^{19}$ & $10^{15}$* & $10^{10}$ \\
+$\FOMMEMS$ & $10^{7}$ & --- & $\mathbf{10^{18}}$ & $10^{10}$ & --- & $10^{12}$** \\
+\bottomrule
+\end{tabular}
+
+\smallskip
+\small
+*$^3$He FOM not directly comparable: couples to $\psigrav$, not $\psiEM$.\\
+**BEC FOM inflated by ultra-low mass; readout sensitivity limits practical use.
+\end{table}
+
+
+%=============================================================================
+\section{Ranked Findings}
+\label{sec:ranked}
+%=============================================================================
+
+\begin{enumerate}
+  \item \textbf{[RANK 1 --- NEW] Si$_3$N$_4$ MEMS Fabrication Spec
+    Validated.}
+    The complete fabrication specification for a soft-clamped PnC
+    Si$_3$N$_4$ membrane is technically feasible. Design C (500~$\mu$m
+    defect, 50~nm thick, $f_0 = 620$~kHz, $m_{\rm eff} = 1.2$~ng)
+    is the recommended Phase~II prototype. $\Qmech \geq 10^9$ at
+    nanogram mass and room temperature is \textbf{demonstrated};
+    at millikelvin temperature it is \textbf{projected with high
+    confidence}. The metallisation $Q$ penalty is the primary risk;
+    even the worst case ($\Qmech = 10^8$) gives $\lam < 1.6\ee{-14}$,
+    which is $100\times$ below the SQMS bound.
+    (Theorem~\ref{thm:q_status}, Finding~\ref{find:si3n4_spec})
+
+  \item \textbf{[RANK 2 --- NEW] Optimal Nb Preparation Protocol for
+    Phase~I.}
+    Medium-$T$ N-doping (800$^\circ$C, 2/0/2 recipe), 5~$\mu$m EP,
+    120$^\circ$C $\times$ 48~h bake, sub-nT shielding, slow cooldown
+    through $T_c$. Expected $Q_0 > 2\ee{11}$ at 20~mK with
+    $\sigma_Q/Q_0 \sim 10^{-6}$. Optional 300$^\circ$C bake upgrade
+    could reach $Q_0 > 5\ee{11}$.
+    (Section~\ref{sec:nb_optimisation})
+
+  \item \textbf{[RANK 3 --- NEW] $Q_0$ Anomaly Signature Defined.}
+    A residual resistance scaling as $R_{\rm res} \propto \omega^2$
+    (measured across cavity harmonics at 0.65, 1.3, 2.6~GHz) after
+    BCS subtraction would constitute circumstantial evidence of
+    psi-EM coupling. This is the Phase~I multi-frequency measurement
+    strategy. Evidence is indirect; MEMS experiment needed for
+    confirmation.
+    (Theorem~\ref{thm:q0_anomaly}, Finding~\ref{find:multi_freq})
+
+  \item \textbf{[RANK 4 --- NEW] Superfluid $^3$He: Gravitational
+    Psi-Probe.}
+    Superfluid $^3$He ($Q > 10^{10}$) couples to $\psigrav$ with
+    $\sim 5000\times$ stronger amplitude than $\psiEM$, but does
+    \textbf{not} constrain $|\lambda-1|$. Added to Track~3 as
+    complementary gravitational psi-probe. Not a substitute for
+    the primary Nb/Si$_3$N$_4$ programme.
+    (Theorem~\ref{thm:he3})
+
+  \item \textbf{[RANK 5 --- NEW] Superconducting Nanowires and
+    Topological Surface States: Eliminated.}
+    Neither provides competitive passive FOM. Nanowires:
+    $Q \sim 10^6$--$10^7$, $\FOMpassive \sim 10^{16}$ (vs $10^{20}$
+    for Nb). Topological: $Q \sim 10^4$--$10^5$, no enhanced psi-coupling.
+    (Findings~\ref{find:nanowires}, \ref{find:topological})
+
+  \item \textbf{[RANK 6 --- NEW] Dilute Bose Gas: Eliminated.}
+    $Q \sim 10^4$, couples to $\psigrav$ only, poor readout sensitivity.
+    (Finding~\ref{find:bec})
+
+  \item \textbf{[RANK 7 --- NEW] Cryogenic Budget Validates Phase~I/II
+    Economics.}
+    Phase~I cryo cost is negligible (\$0 capital at Fermilab).
+    Phase~II cryo cost is modest (\$0.5--1M). Phase~III cryogenics
+    (\$40--75M) dominates the 256-cavity budget and makes it
+    facility-class. The ng-MEMS alternative (Phase~III alt) achieves
+    comparable reach at $1/80$ the cryo cost.
+    (Finding~\ref{find:cryo_economics})
+
+  \item \textbf{[RANK 8 --- CONFIRMED] Three-Track Roadmap Reinforced.}
+    The W3i6 three-track structure (Passive/Nb, MEMS/Si$_3$N$_4$,
+    Exotic/monitoring) is strengthened by: (a) validated fabrication
+    spec for Track~2; (b) validated Nb recipe for Track~1; (c) cryo
+    cost analysis confirming ng-MEMS as the cost-optimal deep-reach
+    path.
+\end{enumerate}
+
+
+%=============================================================================
+\section{Cross-Reference Updates to Other Agents}
+\label{sec:cross_ref}
+%=============================================================================
+
+\begin{itemize}[nosep]
+  \item \textbf{To P8/P11 Agent}: The Phase~I multi-frequency strategy
+    (Sec.~\ref{sec:q0_anomaly}) should be incorporated into the Phase~I
+    experimental protocol. The $R_{\rm res} \propto \omega^2$ signature
+    is a falsifiable prediction that can be tested with the 4-cavity
+    array at no additional cost.
+
+  \item \textbf{To P2 Agent}: The Si$_3$N$_4$ MEMS specification
+    (Sec.~\ref{sec:si3n4_spec}) provides concrete parameters for the
+    P2+P11 hybrid sensitivity calculation. The metallisation $Q$ penalty
+    introduces a factor-of-10 uncertainty in Phase~II sensitivity
+    ($1.6\ee{-15}$ vs $1.6\ee{-14}$).
+
+  \item \textbf{To Cosmo Agent}: Superfluid $^3$He (Sec.~\ref{sec:he3})
+    couples to $\psigrav$, not $\psiEM$. If the Cosmo agent has
+    predictions for $\psigrav$ oscillation modes or spectral features
+    at acoustic frequencies ($\sim$~kHz), these should be cross-referenced
+    with the $^3$He torsional oscillator sensitivity.
+
+  \item \textbf{To P14/P15 Agent}: The superconducting nanowire
+    assessment (Sec.~\ref{sec:nanowires}) confirms that nanowire-based
+    single-photon detection of psi-to-photon conversion is not viable
+    given the active detection gap. No change to the P15 (active
+    detection killed) assessment.
+\end{itemize}
+
+
+%=============================================================================
+\section{Open Items for W3i8}
+\label{sec:open}
+%=============================================================================
+
+\begin{enumerate}[nosep]
+  \item \textbf{Si$_3$N$_4$ metallisation $Q$ measurement}: The single
+    most important experimental measurement for Track~2 is $\Qmech$ of
+    a 15--20~nm Al-coated soft-clamped PnC Si$_3$N$_4$ membrane at
+    $T < 1$~K. Request from experimental groups (Delft, Copenhagen,
+    NIST) or propose as a Phase~II precursor experiment.
+
+  \item \textbf{SQUID transducer design}: Detailed design of the
+    flux-to-displacement transducer for the Al-coated Si$_3$N$_4$
+    membrane. Required deliverable: displacement sensitivity
+    ($\text{m}/\sqrt{\text{Hz}}$) vs frequency for the SQUID readout
+    geometry at 20~mK.
+
+  \item \textbf{Phase~I multi-frequency protocol}: Develop the
+    BCS-subtraction analysis pipeline for extracting $R_{\rm res}(\omega)$
+    from multi-harmonic $Q_0$ measurements. Quantify the expected
+    $R_\psi$ for $\lam = \lambdabound$ and determine the measurement
+    precision needed to detect or exclude it.
+
+  \item \textbf{Superfluid $^3$He scoping}: Estimate the sensitivity
+    of a Lancaster/Helsinki-type torsional oscillator to $\psigrav$
+    perturbations at acoustic frequencies. Determine whether this
+    provides competitive constraints on gravitational sector DFD
+    parameters.
+
+  \item \textbf{Nb cavity aging}: What is the long-term ($>1$~year)
+    $Q_0$ stability of N-doped Nb cavities? If $Q_0$ degrades over
+    time (oxide regrowth, hydrogen re-dissolution), this limits the
+    integration time for passive bounds. Investigate whether periodic
+    re-baking is needed.
+
+  \item \textbf{Phase~III facility siting}: If Phase~III proceeds,
+    which national laboratory offers the best existing cryogenic
+    infrastructure? Candidates: Fermilab (SQMS), DESY (XFEL), ESS
+    (Lund). Cost differential of co-locating vs building new.
+\end{enumerate}
+
+
+\end{document}

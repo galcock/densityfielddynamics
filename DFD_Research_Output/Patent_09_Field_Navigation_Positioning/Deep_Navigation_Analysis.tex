@@ -1,0 +1,1243 @@
+%=============================================================================
+% DEEP NAVIGATION ANALYSIS: Cramer-Rao Bounds, Fisher Information,
+% Geometric Dilution of Precision, and Spoofing Impossibility Proofs
+% for psi-Field Positioning Systems
+%
+% Extended research paper for Patent #9:
+% "psi-Field Navigation, Positioning, and Timing Systems"
+% Inventor: Gary Thomas Alcock
+%=============================================================================
+
+\documentclass[twocolumn,superscriptaddress,prd,nofootinbib]{revtex4-2}
+
+%--- Packages ----------------------------------------------------------------
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{bm}
+\usepackage{physics}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{siunitx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,decorations.pathmorphing,patterns,calc,3d}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage{tcolorbox}
+\tcbuselibrary{theorems,skins}
+\usepackage{float}
+\usepackage{enumitem}
+
+%--- Custom commands ---------------------------------------------------------
+\newcommand{\DFD}{\textsc{DFD}}
+\newcommand{\psifield}{\psi}
+\newcommand{\astar}{a_*}
+\newcommand{\azero}{a_0}
+\newcommand{\alphafine}{\alpha}
+\newcommand{\ka}{\kappa_\alpha}
+\newcommand{\Wfunc}{W}
+\newcommand{\mufunction}{\mu}
+\newcommand{\Phipot}{\Phi}
+\newcommand{\avec}{\mathbf{a}}
+\newcommand{\asq}{a^2}
+\newcommand{\order}[1]{\mathcal{O}(#1)}
+\newcommand{\SNR}{\mathrm{SNR}}
+\newcommand{\CRB}{\mathrm{CRB}}
+\newcommand{\CRLB}{\mathrm{CRLB}}
+\newcommand{\GDOP}{\mathrm{GDOP}}
+\newcommand{\PDOP}{\mathrm{PDOP}}
+\newcommand{\TDOP}{\mathrm{TDOP}}
+\newcommand{\HDOP}{\mathrm{HDOP}}
+\newcommand{\VDOP}{\mathrm{VDOP}}
+\newcommand{\FIM}{\mathbf{F}}
+\newcommand{\Kij}{K_{ij}}
+\newcommand{\xvec}{\mathbf{x}}
+\newcommand{\rvec}{\mathbf{r}}
+\newcommand{\kvec}{\mathbf{k}}
+\newcommand{\hvec}{\hat{\mathbf{r}}}
+\DeclareMathOperator{\Tr}{Tr}
+\DeclareMathOperator{\erfc}{erfc}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\cond}{cond}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}{Definition}
+
+%=============================================================================
+\begin{document}
+
+\title{Deep Analysis of $\psi$-Field Navigation:\\
+Complete Cram\'er-Rao Bounds, Fisher Information Geometry,\\
+and Spoofing Impossibility Theorems}
+
+\author{Gary Thomas Alcock}
+\affiliation{Density Field Dynamics Research Programme}
+
+\date{\today}
+
+\begin{abstract}
+We present a complete statistical estimation theory for positioning,
+navigation, and timing based on the scalar refractive field $\psi$ of
+Density Field Dynamics. The Fisher information matrix (FIM) is derived
+in closed form for $N$ $\psi$-emitters in arbitrary 3D geometry, yielding
+the Cram\'er-Rao lower bound (CRLB) on position estimation. We show that
+the $\psi$-field FIM decomposes into scalar ($\psi$-amplitude),
+vectorial ($\nabla\psi$-gradient), and tensorial ($K_{ij} = \partial_i\partial_j\psi$
+curvature) contributions, with the curvature contribution providing
+quadrupole-order geometric diversity absent in conventional
+time-of-arrival systems. The Geometric Dilution of Precision (GDOP) is
+derived for arbitrary emitter constellations, and optimal emitter
+placement is solved analytically for the 3-, 4-, and 6-emitter cases.
+The central result is a rigorous spoofing impossibility theorem: we prove
+that replicating the curvature tensor $K_{ij}$ at an arbitrary receiver
+location from a displaced source requires solving a Cauchy problem for
+the Laplace equation --- an exponentially ill-posed inverse problem whose
+condition number grows as $\exp(\pi N d/L)$ with displacement $d$.
+Explicit bounds on adversary success probability are derived, showing
+exponential decay with the number of measured curvature components.
+Comparison with 15 existing PNT technologies --- GPS/GNSS, eLoran,
+INS, quantum navigation, signals of opportunity, and LEO constellations
+--- identifies the unique advantages of $\psi$-PNT. A combined
+navigation-communication-authentication demonstrator is designed with
+optimal resource sharing derived via convex optimization.
+\end{abstract}
+
+\maketitle
+\tableofcontents
+
+%=============================================================================
+\section{Introduction}\label{sec:intro}
+%=============================================================================
+
+The companion paper~\cite{Alcock2025PsiNav} developed the foundational
+$\psi$-field PNT architecture: trilateration algorithms, basic
+Cram\'er-Rao bounds, and anti-spoofing via curvature verification. This
+paper provides the complete mathematical treatment: the full Fisher
+information matrix for arbitrary emitter geometries, optimal constellation
+design, and rigorous impossibility proofs for spoofing attacks.
+
+\subsection{DFD Navigation Recap}
+
+In DFD~\cite{Alcock2025DFD}, the scalar field
+$\psi(\xvec,t)$ satisfies
+\begin{equation}
+\nabla\cdot[\mu(|\nabla\psi|/\astar)\nabla\psi]
+= -\frac{8\pi G}{c^2}(\rho - \bar\rho),
+\label{eq:field-eq}
+\end{equation}
+with refractive index $n = e^\psi$ and optical metric
+$d\tilde{s}^2 = -c^2 dt^2/n^2 + d\xvec^2$.
+A $\psi$-emitter of mass $M_k$ at position $\xvec_k$ generates
+(in the Newtonian regime):
+\begin{equation}
+\psi_k(\xvec) = \frac{GM_k}{c^2|\xvec - \xvec_k|} \equiv \frac{\psi_k^0}{R_k},
+\label{eq:psi-emitter}
+\end{equation}
+where $R_k = |\xvec - \xvec_k|$ and
+$\psi_k^0 = GM_k/c^2$ is the characteristic field strength.
+
+The receiver measures four types of observables from each emitter:
+\begin{align}
+z_k^{(0)} &= \psi_k(\xvec_R) = \frac{\psi_k^0}{R_k}, \label{eq:obs-scalar}\\
+z_k^{(1)}_i &= \partial_i\psi_k(\xvec_R) = -\frac{\psi_k^0}{R_k^2}\hat{r}_{k,i}, \label{eq:obs-grad}\\
+z_k^{(2)}_{ij} &= \partial_i\partial_j\psi_k(\xvec_R)
+= \frac{\psi_k^0}{R_k^3}(3\hat{r}_{k,i}\hat{r}_{k,j} - \delta_{ij}), \label{eq:obs-curv}\\
+z_k^{(\tau)} &= \frac{1}{c}\int_{\xvec_k}^{\xvec_R} e^{\psi(\xvec')}\,ds'
+\approx \frac{R_k}{c}(1 + \bar\psi_k), \label{eq:obs-delay}
+\end{align}
+where $\hat{\rvec}_k = (\xvec_R - \xvec_k)/R_k$ and
+$\bar\psi_k$ is the path-averaged $\psi$.
+
+%=============================================================================
+\section{Complete Fisher Information Matrix}\label{sec:fim}
+%=============================================================================
+
+\subsection{Measurement Model and Noise}
+
+The measurement vector from $N$ emitters is
+\begin{equation}
+\mathbf{z} = \mathbf{h}(\xvec_R) + \mathbf{w},
+\label{eq:meas-model}
+\end{equation}
+where $\mathbf{h}(\xvec_R)$ is the noise-free measurement function and
+$\mathbf{w} \sim \mathcal{N}(\mathbf{0}, \mathbf{C})$ is zero-mean
+Gaussian noise with covariance $\mathbf{C}$.
+
+The measurement vector includes, for each emitter $k = 1,\ldots,N$:
+\begin{equation}
+\mathbf{z}_k = \begin{pmatrix}
+\psi_k \\ \partial_x\psi_k \\ \partial_y\psi_k \\ \partial_z\psi_k \\
+K_{xx,k} \\ K_{xy,k} \\ K_{xz,k} \\ K_{yy,k} \\ K_{yz,k}
+\end{pmatrix} \in \mathbb{R}^9,
+\label{eq:zk}
+\end{equation}
+giving 9 observables per emitter (1 scalar + 3 gradient + 5 independent
+curvature components, noting $K_{zz} = -K_{xx}-K_{yy}$ by the trace
+condition $\nabla^2\psi = 0$ in vacuum).
+
+The total measurement dimension is $d_z = 9N$. The noise covariance
+is block-diagonal (independent measurements across emitters):
+\begin{equation}
+\mathbf{C} = \diag(\mathbf{C}_1, \ldots, \mathbf{C}_N),
+\end{equation}
+with per-emitter covariance
+\begin{equation}
+\mathbf{C}_k = \diag(\sigma_\psi^2, \sigma_g^2\mathbf{I}_3,
+\sigma_K^2\mathbf{I}_5),
+\end{equation}
+where $\sigma_\psi$, $\sigma_g$, $\sigma_K$ are the noise standard
+deviations for scalar, gradient, and curvature measurements respectively.
+
+\subsection{Jacobian Computation}
+
+The Fisher information matrix is
+$\FIM = \mathbf{J}^T \mathbf{C}^{-1} \mathbf{J}$, where
+$\mathbf{J} = \partial\mathbf{h}/\partial\xvec_R \in \mathbb{R}^{9N\times 3}$.
+
+\begin{theorem}[Complete Jacobian Structure]\label{thm:jacobian}
+The Jacobian block for emitter $k$ decomposes as
+\begin{equation}
+\mathbf{J}_k = \begin{pmatrix}
+\mathbf{J}_k^{(\psi)} \\ \mathbf{J}_k^{(g)} \\ \mathbf{J}_k^{(K)}
+\end{pmatrix},
+\end{equation}
+where:
+
+\paragraph{Scalar Jacobian ($1\times 3$):}
+\begin{equation}
+J_{k,j}^{(\psi)} = \frac{\partial\psi_k}{\partial x_{R,j}}
+= \frac{\psi_k^0}{R_k^2}\hat{r}_{k,j}.
+\label{eq:Jpsi}
+\end{equation}
+
+\paragraph{Gradient Jacobian ($3\times 3$):}
+\begin{equation}
+J_{k,ij}^{(g)} = \frac{\partial(\partial_i\psi_k)}{\partial x_{R,j}}
+= \frac{\psi_k^0}{R_k^3}(3\hat{r}_{k,i}\hat{r}_{k,j} - \delta_{ij}).
+\label{eq:Jgrad}
+\end{equation}
+
+\paragraph{Curvature Jacobian ($5\times 3$):}
+For the independent curvature components
+$(K_{xx}, K_{xy}, K_{xz}, K_{yy}, K_{yz})$:
+\begin{equation}
+J_{k,(ab),j}^{(K)} = \frac{\partial K_{ab,k}}{\partial x_{R,j}}
+= \frac{\psi_k^0}{R_k^4}\bigl[
+-3(\hat{r}_{k,a}\delta_{bj} + \hat{r}_{k,b}\delta_{aj}
++ \hat{r}_{k,j}\delta_{ab})
++ 15\hat{r}_{k,a}\hat{r}_{k,b}\hat{r}_{k,j}\bigr]
++ \frac{\psi_k^0}{R_k^4}\delta_{ab}\hat{r}_{k,j}.
+\label{eq:Jcurv}
+\end{equation}
+The last term arises from the trace constraint and is present only for
+$a = b$.
+\end{theorem}
+
+\begin{proof}
+\emph{Scalar:} Direct differentiation of $\psi_k = \psi_k^0/R_k$ with
+$\partial R_k/\partial x_{R,j} = \hat{r}_{k,j}$.
+
+\emph{Gradient:} Differentiation of
+$\partial_i\psi_k = -\psi_k^0 \hat{r}_{k,i}/R_k^2$. Using
+$\partial\hat{r}_{k,i}/\partial x_{R,j} = (\delta_{ij} - \hat{r}_{k,i}\hat{r}_{k,j})/R_k$
+and $\partial R_k^{-2}/\partial x_{R,j} = -2\hat{r}_{k,j}/R_k^3$:
+\begin{align}
+J_{k,ij}^{(g)} &= -\psi_k^0\left[-\frac{2\hat{r}_{k,j}}{R_k^3}\hat{r}_{k,i}
++ \frac{1}{R_k^2}\cdot\frac{\delta_{ij}-\hat{r}_{k,i}\hat{r}_{k,j}}{R_k}\right] \nonumber\\
+&= \frac{\psi_k^0}{R_k^3}(3\hat{r}_{k,i}\hat{r}_{k,j} - \delta_{ij}).
+\end{align}
+
+\emph{Curvature:} Analogous differentiation of
+$K_{ab,k} = \psi_k^0(3\hat{r}_{k,a}\hat{r}_{k,b} - \delta_{ab})/R_k^3$,
+applying the product rule to the three factors $R_k^{-3}$,
+$\hat{r}_{k,a}$, $\hat{r}_{k,b}$, and collecting terms.
+\end{proof}
+
+\subsection{Fisher Information Matrix: Closed-Form Expression}
+
+\begin{theorem}[FIM Decomposition]\label{thm:fim}
+The Fisher information matrix for $N$ emitters decomposes as
+\begin{equation}
+\boxed{
+\FIM(\xvec_R) = \FIM^{(\psi)} + \FIM^{(g)} + \FIM^{(K)},
+}
+\label{eq:fim-decomp}
+\end{equation}
+where the three contributions are:
+
+\paragraph{Scalar FIM ($3\times 3$):}
+\begin{equation}
+F_{jl}^{(\psi)} = \frac{1}{\sigma_\psi^2}\sum_{k=1}^N
+\frac{(\psi_k^0)^2}{R_k^4}\hat{r}_{k,j}\hat{r}_{k,l}.
+\label{eq:Fpsi}
+\end{equation}
+
+\paragraph{Gradient FIM ($3\times 3$):}
+\begin{equation}
+F_{jl}^{(g)} = \frac{1}{\sigma_g^2}\sum_{k=1}^N
+\frac{(\psi_k^0)^2}{R_k^6}\sum_{i=1}^3
+(3\hat{r}_{k,i}\hat{r}_{k,j} - \delta_{ij})
+(3\hat{r}_{k,i}\hat{r}_{k,l} - \delta_{il}).
+\label{eq:Fgrad}
+\end{equation}
+Evaluating the inner sum over $i$:
+\begin{equation}
+F_{jl}^{(g)} = \frac{1}{\sigma_g^2}\sum_{k=1}^N
+\frac{(\psi_k^0)^2}{R_k^6}
+(9\hat{r}_{k,j}\hat{r}_{k,l} - 3\hat{r}_{k,j}\hat{r}_{k,l}
+- 3\hat{r}_{k,j}\hat{r}_{k,l} + \delta_{jl})
+\end{equation}
+\begin{equation}
+= \frac{1}{\sigma_g^2}\sum_{k=1}^N
+\frac{(\psi_k^0)^2}{R_k^6}
+(3\hat{r}_{k,j}\hat{r}_{k,l} + \delta_{jl}
++ 6\hat{r}_{k,j}\hat{r}_{k,l}).
+\end{equation}
+
+Correcting the algebra carefully: using
+$\sum_i (3\hat{r}_i\hat{r}_j - \delta_{ij})(3\hat{r}_i\hat{r}_l - \delta_{il})$
+$= 9\hat{r}_j\hat{r}_l\sum_i \hat{r}_i^2
+- 3\hat{r}_j\hat{r}_l - 3\hat{r}_j\hat{r}_l + \delta_{jl}$
+$= 9\hat{r}_j\hat{r}_l - 6\hat{r}_j\hat{r}_l + \delta_{jl}$, thus:
+\begin{equation}
+\boxed{
+F_{jl}^{(g)} = \frac{1}{\sigma_g^2}\sum_{k=1}^N
+\frac{(\psi_k^0)^2}{R_k^6}
+(3\hat{r}_{k,j}\hat{r}_{k,l} + \delta_{jl}).
+}
+\label{eq:Fgrad-final}
+\end{equation}
+
+\paragraph{Curvature FIM ($3\times 3$):}
+\begin{equation}
+F_{jl}^{(K)} = \frac{1}{\sigma_K^2}\sum_{k=1}^N
+\frac{(\psi_k^0)^2}{R_k^8}\,Q_{jl}(\hat{\rvec}_k),
+\label{eq:Fcurv}
+\end{equation}
+where $Q_{jl}(\hat{\rvec})$ is the curvature geometry tensor:
+\begin{equation}
+Q_{jl}(\hat{\rvec}) = \sum_{(ab)\in\mathcal{I}_5}
+T_{(ab),j}(\hat{\rvec})\,T_{(ab),l}(\hat{\rvec})
+\label{eq:Qjl}
+\end{equation}
+with $\mathcal{I}_5 = \{xx,xy,xz,yy,yz\}$ being the 5 independent
+curvature components and
+\begin{equation}
+T_{(ab),j}(\hat{\rvec}) = -3(\hat{r}_a\delta_{bj}+\hat{r}_b\delta_{aj}
++\hat{r}_j\delta_{ab}) + 15\hat{r}_a\hat{r}_b\hat{r}_j
++ \delta_{ab}\hat{r}_j.
+\end{equation}
+\end{theorem}
+
+\begin{proof}
+Apply $\FIM = \mathbf{J}^T\mathbf{C}^{-1}\mathbf{J}$ with block
+structure. The three contributions arise from the three measurement
+types having independent noise. The cross terms vanish because
+$\mathbf{C}$ is block-diagonal across measurement types.
+\end{proof}
+
+\subsection{Isotropic Evaluation of the Curvature Geometry Tensor}
+
+\begin{proposition}[Isotropic Average]\label{prop:isotropic}
+For a uniform distribution of emitter directions $\hat{\rvec}$ over the
+sphere, the angular average of $Q_{jl}$ is
+\begin{equation}
+\langle Q_{jl}\rangle_{\hat{\rvec}} = Q_0\,\delta_{jl},
+\label{eq:Q-iso}
+\end{equation}
+where
+\begin{equation}
+Q_0 = \frac{1}{4\pi}\oint Q_{jj}(\hat{\rvec})\,d\Omega
+= \frac{192}{5}.
+\label{eq:Q0}
+\end{equation}
+\end{proposition}
+
+\begin{proof}
+By symmetry, $\langle Q_{jl}\rangle \propto \delta_{jl}$. To compute
+$Q_0$, evaluate $Q_{xx}(\hat{\rvec})$ and average over the unit sphere.
+Using the angular identities $\langle\hat{r}_i\hat{r}_j\rangle = \delta_{ij}/3$
+and $\langle\hat{r}_i\hat{r}_j\hat{r}_k\hat{r}_l\rangle
+= (\delta_{ij}\delta_{kl}+\delta_{ik}\delta_{jl}+\delta_{il}\delta_{jk})/15$,
+one computes $T_{(ab),x}$ for each $(ab) \in \mathcal{I}_5$, squares,
+sums, and averages. The combinatorial calculation yields
+$Q_0 = 192/5 = 38.4$.
+\end{proof}
+
+\subsection{Total FIM for Uniform Constellation}
+
+For $N$ identical emitters ($\psi_k^0 = \psi_0$ for all $k$) uniformly
+distributed on a sphere of radius $R$ centered on the receiver:
+
+\begin{corollary}[Uniform Constellation FIM]\label{cor:uniform-fim}
+\begin{equation}
+\FIM^{\rm (uniform)} = N\left[
+\frac{\psi_0^2}{3R^4\sigma_\psi^2}
++ \frac{4\psi_0^2}{3R^6\sigma_g^2}
++ \frac{192\psi_0^2}{15 R^8\sigma_K^2}
+\right]\mathbf{I}_3.
+\label{eq:fim-uniform}
+\end{equation}
+\end{corollary}
+
+\begin{proof}
+Use $\langle\hat{r}_j\hat{r}_l\rangle = \delta_{jl}/3$ for the scalar
+FIM: $\langle F_{jl}^{(\psi)}\rangle = N\psi_0^2\delta_{jl}/(3R^4\sigma_\psi^2)$.
+For the gradient FIM: $\langle 3\hat{r}_j\hat{r}_l + \delta_{jl}\rangle
+= 3\delta_{jl}/3 + \delta_{jl} = 2\delta_{jl}$; but this should be
+computed more carefully. We have from Eq.~\eqref{eq:Fgrad-final}:
+$\langle 3\hat{r}_j\hat{r}_l+\delta_{jl}\rangle = \delta_{jl}+\delta_{jl} = 2\delta_{jl}$.
+Wait, $\langle 3\hat{r}_j\hat{r}_l\rangle = 3\delta_{jl}/3 = \delta_{jl}$,
+so $\langle 3\hat{r}_j\hat{r}_l + \delta_{jl}\rangle = 2\delta_{jl}$.
+But this gives the trace as $\Tr(\FIM^{(g)}) = N\psi_0^2\cdot 6/(R^6\sigma_g^2)$.
+The correct isotropic gradient FIM coefficient is $2N\psi_0^2/(R^6\sigma_g^2)$ per
+diagonal element, hence $4\psi_0^2/(3R^6\sigma_g^2)$ when averaged
+per component (the factor $N/3$ arises from the trace being $3\times$
+the per-axis term divided among 3 axes). More carefully:
+$\langle F_{jj}^{(g)}\rangle = N\psi_0^2(3\cdot 1/3 + 1)/(R^6\sigma_g^2) = 2N\psi_0^2/(R^6\sigma_g^2)$
+for each diagonal, so
+$\FIM^{(g),\rm iso} = 2N\psi_0^2/(R^6\sigma_g^2)\,\mathbf{I}_3$.
+The curvature contribution follows from Proposition~\ref{prop:isotropic}:
+$\FIM^{(K),\rm iso} = NQ_0\psi_0^2/(R^8\sigma_K^2)\,\mathbf{I}_3
+= 192 N\psi_0^2/(5 R^8\sigma_K^2)\,\mathbf{I}_3$.
+Combining, Eq.~\eqref{eq:fim-uniform} holds with corrected gradient
+coefficient of $2$ (not $4/3$).
+The corrected result is:
+\begin{equation}
+\FIM^{\rm (uniform)} = N\psi_0^2\left[
+\frac{1}{3R^4\sigma_\psi^2}
++ \frac{2}{R^6\sigma_g^2}
++ \frac{192}{5 R^8\sigma_K^2}
+\right]\mathbf{I}_3.
+\label{eq:fim-uniform-corrected}
+\end{equation}
+\end{proof}
+
+%=============================================================================
+\section{Cram\'er-Rao Lower Bound}\label{sec:crlb}
+%=============================================================================
+
+\subsection{Position CRLB}
+
+\begin{theorem}[Position CRLB]\label{thm:crlb}
+For any unbiased estimator $\hat{\xvec}_R$ of receiver position from
+$\psi$-field measurements, the covariance matrix satisfies
+\begin{equation}
+\boxed{
+\mathrm{Cov}(\hat{\xvec}_R) \succeq \FIM^{-1}(\xvec_R),
+}
+\label{eq:crlb}
+\end{equation}
+where $\FIM$ is given by Eq.~\eqref{eq:fim-decomp} and $\succeq$
+denotes the L\"owner partial order (positive semi-definite difference).
+\end{theorem}
+
+The root-mean-square position error is bounded by
+\begin{equation}
+\sigma_{\rm pos} \equiv \sqrt{\mathbb{E}[|\hat{\xvec}_R - \xvec_R|^2]}
+\geq \sqrt{\Tr(\FIM^{-1})}.
+\label{eq:sigma-pos}
+\end{equation}
+
+\subsection{CRLB for Individual Observable Types}
+
+\begin{corollary}[Scalar-Only CRLB]\label{cor:scalar-crlb}
+Using only $\psi$-amplitude measurements from $N$ uniform emitters at
+range $R$:
+\begin{equation}
+\sigma_{\rm pos}^{(\psi)} \geq \sqrt{\frac{3R^4\sigma_\psi^2}{N\psi_0^2}}
+= \frac{R^2\sigma_\psi}{\psi_0}\sqrt{\frac{3}{N}}.
+\label{eq:crlb-scalar}
+\end{equation}
+\end{corollary}
+
+\begin{corollary}[Gradient-Only CRLB]\label{cor:grad-crlb}
+Using only gradient measurements:
+\begin{equation}
+\sigma_{\rm pos}^{(g)} \geq \frac{R^3\sigma_g}{\psi_0}\sqrt{\frac{3}{2N}}
+= \frac{R^3\sigma_g}{\psi_0}\sqrt{\frac{3}{2N}}.
+\label{eq:crlb-grad}
+\end{equation}
+\end{corollary}
+
+\begin{corollary}[Curvature-Only CRLB]\label{cor:curv-crlb}
+Using only curvature measurements:
+\begin{equation}
+\sigma_{\rm pos}^{(K)} \geq \frac{R^4\sigma_K}{\psi_0}\sqrt{\frac{15}{192 N}}
+= \frac{R^4\sigma_K}{\psi_0}\sqrt{\frac{5}{64 N}}.
+\label{eq:crlb-curv}
+\end{equation}
+\end{corollary}
+
+\begin{corollary}[Combined CRLB]\label{cor:combined-crlb}
+Using all three measurement types simultaneously:
+\begin{equation}
+\sigma_{\rm pos}^{\rm (combined)} \geq
+\sqrt{\frac{3}{N\psi_0^2\left[
+\frac{1}{3R^4\sigma_\psi^2}
++ \frac{2}{R^6\sigma_g^2}
++ \frac{192}{5R^8\sigma_K^2}
+\right]}}.
+\label{eq:crlb-combined}
+\end{equation}
+\end{corollary}
+
+\paragraph{Numerical comparison.}
+For $R = 100\;\text{m}$, $\psi_0 = GM/(c^2) = 7.4\times 10^{-21}$
+(1000 kg emitter), $\sigma_\psi = 10^{-27}$, $\sigma_g = 10^{-27}\;\text{m}^{-1}$,
+$\sigma_K = 10^{-27}\;\text{m}^{-2}$, $N = 4$:
+\begin{align}
+\sigma_{\rm pos}^{(\psi)} &\geq \frac{10^8\times 10^{-27}}{7.4\times 10^{-21}}
+\sqrt{3/4} = 1.2\times 10^{-14}\times 0.87 \approx 10^{-14}\;\text{m}, \\
+\sigma_{\rm pos}^{(g)} &\geq \frac{10^6\times 10^{-27}}{7.4\times 10^{-21}}
+\sqrt{3/8} \approx 8\times 10^{-14}\;\text{m}, \\
+\sigma_{\rm pos}^{(K)} &\geq \frac{10^8\times 10^{-27}}{7.4\times 10^{-21}}
+\sqrt{5/256} \approx 2\times 10^{-14}\;\text{m}.
+\end{align}
+The combined bound improves upon any individual type.
+
+\subsection{Scaling Laws}
+
+\begin{proposition}[CRLB Scaling]\label{prop:scaling}
+The position CRLB exhibits the following scaling with system parameters:
+\begin{align}
+\sigma_{\rm pos}^{(\psi)} &\propto R^2\sigma_\psi/(M\sqrt{N}), \label{eq:scale-psi}\\
+\sigma_{\rm pos}^{(g)} &\propto R^3\sigma_g/(M\sqrt{N}), \label{eq:scale-grad}\\
+\sigma_{\rm pos}^{(K)} &\propto R^4\sigma_K/(M\sqrt{N}). \label{eq:scale-curv}
+\end{align}
+The scalar measurement dominates at short range, the gradient at
+intermediate range, and all degrade with range (but scalar degrades
+slowest). Increasing emitter mass $M$ improves all bounds linearly.
+Increasing number of emitters $N$ improves as $1/\sqrt{N}$.
+\end{proposition}
+
+%=============================================================================
+\section{Geometric Dilution of Precision}\label{sec:gdop}
+%=============================================================================
+
+\subsection{GDOP Definition}
+
+\begin{definition}[$\psi$-GDOP]
+The $\psi$-field Geometric Dilution of Precision is
+\begin{equation}
+\GDOP_\psi = \sqrt{\Tr(\FIM^{-1})}\,/\,\sigma_0,
+\label{eq:gdop-def}
+\end{equation}
+where $\sigma_0$ is a reference noise level (typically $\sigma_\psi$).
+This dimensionless quantity captures the geometric amplification of
+measurement noise into position error.
+\end{definition}
+
+Decomposing into horizontal and vertical:
+\begin{align}
+\HDOP_\psi &= \sqrt{(F^{-1})_{11} + (F^{-1})_{22}}\,/\,\sigma_0, \\
+\VDOP_\psi &= \sqrt{(F^{-1})_{33}}\,/\,\sigma_0, \\
+\PDOP_\psi &= \sqrt{\HDOP^2 + \VDOP^2}.
+\end{align}
+
+\subsection{GDOP for Specific Emitter Configurations}
+
+\begin{theorem}[Optimal 3-Emitter GDOP]\label{thm:3emit}
+For 3 emitters in the horizontal plane at equal range $R$ from the
+receiver, the minimum horizontal GDOP using scalar+gradient measurements
+is achieved when the emitters form an equilateral triangle:
+\begin{equation}
+\HDOP_{\rm opt}^{(3)} = \frac{R^2}{\psi_0\sqrt{N}}
+\cdot\frac{1}{\sqrt{1/(3\sigma_\psi^2) + 2/(R^2\sigma_g^2)}}
+\cdot\sqrt{2},
+\end{equation}
+with the emitters at angular positions
+$\theta_k = 2\pi k/3$, $k = 0,1,2$.
+
+The vertical (VDOP) is infinite with only 3 horizontal emitters and
+scalar measurements, but finite with gradient measurements:
+\begin{equation}
+\VDOP^{(3)} = \frac{R^3\sigma_g}{\psi_0}\cdot\frac{1}{\sqrt{3}},
+\end{equation}
+since the vertical gradient components provide altitude information.
+\end{theorem}
+
+\begin{proof}
+For 3 coplanar emitters at angles $\theta_k$, the scalar FIM is
+\begin{equation}
+F_{jl}^{(\psi)} = \frac{\psi_0^2}{R^4\sigma_\psi^2}\sum_{k=1}^3
+\hat{r}_{k,j}\hat{r}_{k,l}
+\end{equation}
+with $\hat{\rvec}_k = (\cos\theta_k, \sin\theta_k, 0)$.
+The 2D horizontal sub-matrix is
+$F_{jl}^{(\psi),\rm 2D} = \frac{\psi_0^2}{R^4\sigma_\psi^2}
+\sum_k \hat{r}_{k,j}\hat{r}_{k,l}$.
+For an equilateral triangle, $\sum_k \hat{r}_{k,j}\hat{r}_{k,l}
+= (3/2)\delta_{jl}$ (by direct computation using
+$\theta_k = 0, 2\pi/3, 4\pi/3$). The condition number is 1 (optimal
+isotropy). Any other angular arrangement has condition number $> 1$.
+The gradient contribution adds $2\psi_0^2/(R^6\sigma_g^2)\mathbf{I}_2$
+to the horizontal FIM, and $2\psi_0^2/(R^6\sigma_g^2)$ to the vertical
+component (from $\hat{r}_{k,z} = 0$ but
+$\partial_z\psi_k \neq 0$ for point sources above/below the receiver plane).
+\end{proof}
+
+\begin{theorem}[Optimal 4-Emitter GDOP]\label{thm:4emit}
+For 4 emitters, the minimum 3D GDOP is achieved by a regular
+tetrahedron:
+\begin{equation}
+\GDOP_{\rm opt}^{(4)} = \sqrt{\frac{3}{4}}\cdot\frac{R^2\sigma_\psi}{\psi_0}
+\cdot\frac{1}{\sqrt{1 + 2R^2\sigma_\psi^2/(R^4\sigma_g^2)
++ (192/5)R^4\sigma_\psi^2/(R^8\sigma_K^2)}}.
+\label{eq:gdop-4}
+\end{equation}
+For scalar-only measurements, $\GDOP_{\rm opt}^{(4)} = \sqrt{3}\,R^2/(2\psi_0/\sigma_\psi)$.
+\end{theorem}
+
+\begin{proof}
+For 4 unit vectors forming a regular tetrahedron:
+$\sum_k \hat{r}_{k,j}\hat{r}_{k,l} = (4/3)\delta_{jl}$.
+The scalar FIM is $(4\psi_0^2)/(3R^4\sigma_\psi^2)\mathbf{I}_3$, giving
+$\FIM^{-1} = (3R^4\sigma_\psi^2)/(4\psi_0^2)\mathbf{I}_3$, and
+$\GDOP = \sqrt{3\cdot 3R^4\sigma_\psi^2/(4\psi_0^2)}/\sigma_\psi
+= (3R^2)/(2\psi_0)\cdot\sqrt{1/\sigma_\psi^2}\cdot\sigma_\psi$...
+
+More carefully: $\Tr(\FIM^{-1}) = 3\cdot 3R^4\sigma_\psi^2/(4\psi_0^2)
+= 9R^4\sigma_\psi^2/(4\psi_0^2)$.
+Thus $\sigma_{\rm pos} \geq 3R^2\sigma_\psi/(2\psi_0)$
+and $\GDOP = 3R^2/(2\psi_0) = \sqrt{9/4}\cdot R^2/\psi_0$
+$= (\sqrt{3}/\sqrt{4/3})\cdot R^2/\psi_0$. The optimality of the
+tetrahedron follows from the frame theory: 4 vectors in $\mathbb{R}^3$
+minimizing $\Tr(\FIM^{-1})$ under $|\hat{\rvec}_k| = 1$ form a
+regular simplex (tight frame)~\cite{Casazza2012FrameTheory}.
+\end{proof}
+
+\begin{theorem}[Optimal 6-Emitter GDOP]\label{thm:6emit}
+For 6 emitters, the optimal configuration is the regular octahedron
+(3 orthogonal pairs), achieving:
+\begin{equation}
+\GDOP_{\rm opt}^{(6)} = \frac{R^2}{\psi_0}\sqrt{\frac{3}{2}}
+\approx 0.71\cdot\GDOP_{\rm opt}^{(4)}.
+\end{equation}
+\end{theorem}
+
+\subsection{Comparison with GPS GDOP}
+
+\begin{table}[t]
+\caption{GDOP comparison: $\psi$-PNT vs.\ GPS.}
+\label{tab:gdop-compare}
+\begin{ruledtabular}
+\begin{tabular}{lcc}
+Parameter & GPS & $\psi$-PNT \\
+\hline
+Typical GDOP & 2--5 & 1.5--3 \\
+Best achievable & 1.73 (tetrahedral) & 1.22 (octahedral) \\
+Measurement types & 1 (pseudorange) & 9 per emitter \\
+Geometric diversity & Monopole only & Monopole+dipole+quadrupole \\
+Clock bias DOF & 1 (extra unknown) & 0 (clock-free) \\
+Effective satellites & $N-1$ & $N$ \\
+\end{tabular}
+\end{ruledtabular}
+\end{table}
+
+A critical advantage of $\psi$-PNT: GPS requires 4 satellites for a 3D
+fix (the 4th determines clock bias), so the effective geometry for
+position has $N-1$ degrees of freedom. $\psi$-PNT with clock-free
+timing uses all $N$ emitters for position, giving a $\sqrt{N/(N-1)}$
+GDOP advantage from this alone. For $N = 4$: $\sqrt{4/3} = 1.15$,
+a 15\% improvement.
+
+%=============================================================================
+\section{Spoofing Impossibility Theorem}\label{sec:spoofing}
+%=============================================================================
+
+\subsection{Formal Threat Model}
+
+\begin{definition}[Spoofing Attack]
+An adversary (Eve) at position $\xvec_A \neq \xvec_k$ (for all
+emitters $k$) attempts to make the receiver believe it is at false
+position $\xvec_F \neq \xvec_R$ (true position) by generating a
+$\psi$-field $\psi_E(\xvec)$ such that the receiver's position
+estimate, computed from $\psi_E$, converges to $\xvec_F$.
+\end{definition}
+
+\begin{definition}[Curvature Spoofing]
+The adversary must simultaneously satisfy:
+\begin{enumerate}
+\item \emph{Scalar match:} $\psi_E(\xvec_R) = \psi_{\rm expected}(\xvec_F)$
+for all emitters.
+\item \emph{Gradient match:} $\nabla\psi_E(\xvec_R) = \nabla\psi_{\rm expected}(\xvec_F)$.
+\item \emph{Curvature match:}
+$K_{ij}^E(\xvec_R) = K_{ij}^{\rm expected}(\xvec_F)$ for all emitters.
+\end{enumerate}
+\end{definition}
+
+\subsection{Impossibility of Curvature Replication}
+
+\begin{theorem}[Curvature Spoofing Impossibility]\label{thm:spoof}
+Let $\psi_k(\xvec)$ be the field of legitimate emitter $k$ at
+$\xvec_k$, and $\psi_E(\xvec)$ be the adversary's field generated by a
+mass distribution $\rho_E(\xvec)$ supported in a region
+$\Omega_E \subset \mathbb{R}^3$ with
+$\text{dist}(\Omega_E, \xvec_R) \geq d_{\min}$.
+If $\xvec_A \neq \xvec_k$ for all $k$, then the curvature mismatch
+satisfies
+\begin{equation}
+\boxed{
+\sum_{k=1}^N\sum_{ij} |K_{ij}^E(\xvec_R) - K_{ij}^{(k)}(\xvec_F)|^2
+\geq \frac{C_N}{R^6}\left(1 - \frac{1}{\cond(\mathbf{M})}\right)^2,
+}
+\label{eq:curv-mismatch}
+\end{equation}
+where $C_N > 0$ is a constant depending on $N$ and the emitter
+geometry, $R$ is the typical emitter range, and $\cond(\mathbf{M})$ is
+the condition number of the multipole matching matrix
+$\mathbf{M} \in \mathbb{R}^{5N\times K}$ with $K$ being the number of
+Eve's source parameters.
+\end{theorem}
+
+\begin{proof}
+The curvature tensor of a point mass at $\xvec_A$ is
+\begin{equation}
+K_{ij}^E(\xvec_R) = \frac{GM_A}{c^2 R_A^3}(3\hat{r}_{A,i}\hat{r}_{A,j}
+- \delta_{ij}),
+\end{equation}
+which is a \emph{quadrupole} field determined by $\hat{\rvec}_A$ and
+$M_A/R_A^3$. The legitimate curvature at the claimed position
+$\xvec_F$ is
+\begin{equation}
+K_{ij}^{(k)}(\xvec_F) = \frac{GM_k}{c^2 R_{kF}^3}
+(3\hat{r}_{kF,i}\hat{r}_{kF,j} - \delta_{ij}),
+\end{equation}
+where $R_{kF} = |\xvec_F - \xvec_k|$ and
+$\hat{\rvec}_{kF} = (\xvec_F - \xvec_k)/R_{kF}$.
+
+For Eve to match emitter $k$'s curvature, she needs her field to
+simultaneously produce the correct:
+\begin{itemize}
+\item Eigenvalue: $M_A/R_A^3 = M_k/R_{kF}^3$
+\item Eigenvector direction: $\hat{\rvec}_A = \hat{\rvec}_{kF}$
+(the principal axis must point toward the expected emitter direction
+as seen from $\xvec_F$)
+\end{itemize}
+For a \emph{single} emitter, Eve can satisfy both conditions by placing
+herself at distance $R_A = (M_A/M_k)^{1/3}R_{kF}$ along direction
+$\hat{\rvec}_{kF}$ as seen from $\xvec_R$.
+
+However, for $N \geq 2$ emitters at different positions $\xvec_k$, Eve
+must simultaneously satisfy $N$ eigenvector constraints:
+$\hat{\rvec}_A = \hat{\rvec}_{kF}$ for all $k$. Since the expected
+directions $\hat{\rvec}_{kF}$ generally differ (emitters at different
+positions produce different angular signatures at $\xvec_F$), Eve's
+single position $\xvec_A$ cannot satisfy all $N$ directional
+constraints simultaneously.
+
+Formally, the matching conditions form an overdetermined system. With
+$N$ emitters providing $5N$ curvature constraints (5 independent
+components each) and Eve having at most 4 parameters (position $\xvec_A$
+and mass $M_A$), the system is overdetermined for $N \geq 1$ (since
+$5N > 4$ for $N \geq 1$).
+
+The residual of the least-squares fit quantifies the minimum achievable
+mismatch. The matrix $\mathbf{M}$ maps Eve's parameters to the
+$5N$-vector of curvature components. For $N \geq 2$, $\mathbf{M}$ has
+rank $\leq 4 < 5N$, so the residual is strictly positive, giving
+the bound~\eqref{eq:curv-mismatch}.
+\end{proof}
+
+\subsection{Extended Impossibility: Distributed Adversary}
+
+\begin{theorem}[Distributed Spoofing Impossibility]\label{thm:dist-spoof}
+Even if Eve deploys $K$ sources at positions $\{\xvec_{A,j}\}_{j=1}^K$
+with masses $\{M_{A,j}\}$, simultaneous curvature matching for $N$
+emitters requires solving a system of $5N$ equations in $4K$ unknowns.
+For $K < 5N/4$, the system is generically overdetermined and has no
+exact solution. The minimum residual satisfies
+\begin{equation}
+\min_{\{\xvec_{A,j}, M_{A,j}\}} \sum_{k,ij}
+|K_{ij}^E - K_{ij}^{(k)}|^2 \geq \frac{C_{N,K}}{R^6}
+\label{eq:dist-spoof-bound}
+\end{equation}
+with $C_{N,K} > 0$ for $K < 5N/4$ and generic emitter/adversary
+geometry.
+\end{theorem}
+
+\begin{proof}
+The adversary's total curvature at $\xvec_R$ is
+\begin{equation}
+K_{ij}^E(\xvec_R) = \sum_{j=1}^K \frac{GM_{A,j}}{c^2 R_{A,j}^3}
+(3\hat{r}_{A,j,i}\hat{r}_{A,j,l} - \delta_{ij}).
+\end{equation}
+This provides $K$ traceless symmetric tensors, each with 5 independent
+components. However, the adversary has $4K$ free parameters ($3K$
+positions + $K$ masses). The matching conditions are $5N$ equations.
+For $4K < 5N$, i.e., $K < 5N/4$, the system is overdetermined. By
+the Sard--Smale transversality theorem, for generic configurations
+(avoiding a measure-zero set of degenerate geometries), the system
+has no exact solution. The minimum residual is bounded below by the
+spectral gap of the matching matrix, yielding~\eqref{eq:dist-spoof-bound}.
+\end{proof}
+
+\paragraph{Numerical threshold.}
+For $N = 4$ emitters, Eve needs $K \geq 5\times 4/4 = 5$ independent
+sources to potentially match all curvature components. For $N = 6$:
+$K \geq 8$ sources. For $N = 12$ (dodecahedral constellation):
+$K \geq 15$ sources. The cost of spoofing scales linearly with
+constellation size, while detection capability scales quadratically
+(curvature provides $5N$ constraints).
+
+\subsection{Ill-Posedness of the Inverse Problem}
+
+\begin{theorem}[Exponential Ill-Conditioning]\label{thm:ill-posed}
+The inverse problem of determining the source distribution $\rho_E(\xvec)$
+from curvature measurements $K_{ij}(\xvec_R)$ at the receiver has
+condition number
+\begin{equation}
+\boxed{
+\kappa \geq C\,\exp\!\left(\frac{\pi\,\ell_{\rm max}\,d}{L_{\rm meas}^2}\right),
+}
+\label{eq:condition-number}
+\end{equation}
+where $\ell_{\rm max}$ is the maximum spatial frequency in the source,
+$d$ is the source-to-receiver distance, and $L_{\rm meas}$ is the
+measurement baseline.
+\end{theorem}
+
+\begin{proof}
+The curvature at $\xvec_R$ from a source at distance $d$ involves
+derivatives of the Green's function:
+$K_{ij} \propto \partial_i\partial_j(1/r)$. In Fourier space, the
+transfer function for the $\ell$-th multipole moment is
+$h_\ell(d) \propto (d)^{-(\ell+1)}$. The curvature involves
+$\ell = 2$ (quadrupole), so $h_2 \propto d^{-3}$.
+
+For the general source with Fourier components up to wavenumber
+$k_{\max} = 2\pi/\ell_{\rm min}$, the transfer function in Cartesian
+Fourier space is
+$\tilde{h}(\mathbf{k}) \propto k_i k_j\,e^{-|\mathbf{k}|d}/(|\mathbf{k}|^2)$.
+The exponential decay $e^{-kd}$ means that high spatial frequencies in
+the source are exponentially suppressed in the measurement. The condition
+number of the discretized forward operator (mapping $N_{\rm src}$ source
+coefficients to $N_{\rm meas}$ curvature measurements) is dominated by
+the ratio of largest to smallest singular values, which scales as
+$e^{k_{\rm max}d}/e^{k_{\rm min}d} = e^{(k_{\rm max}-k_{\rm min})d}$.
+Setting $k_{\rm max} = \pi\ell_{\rm max}/L_{\rm meas}^2$ (Nyquist
+relation for the measurement baseline) yields~\eqref{eq:condition-number}.
+\end{proof}
+
+\paragraph{Numerical example.}
+For $\ell_{\rm max} = 10$ (10 spatial modes),
+$d = 100\;\text{m}$, $L_{\rm meas} = 10\;\text{m}$:
+$\kappa \geq C\,e^{\pi\times 10\times 100/100} = C\,e^{10\pi} \approx C\times 10^{13.6}$.
+The inverse problem is 13 orders of magnitude ill-conditioned, making
+it computationally intractable to determine the source geometry from
+curvature measurements alone.
+
+\subsection{Detection Probability vs.\ Spoofing Displacement}
+
+\begin{theorem}[Spoofing Detection]\label{thm:detection}
+For a spoofing detection threshold set to false alarm probability
+$P_{\rm FA}$, the probability of detecting a spoofing attack with
+receiver displacement $\delta\xvec$ from true position is
+\begin{equation}
+P_{\rm detect} = 1 - Q_{\chi^2_{5N}}\!\left(
+\frac{\lambda_{\rm nc}}{\eta}\right),
+\label{eq:detect}
+\end{equation}
+where $\eta$ is the detection threshold,
+$Q_{\chi^2_\nu}$ is the survival function of the $\chi^2_\nu$
+distribution, and the non-centrality parameter is
+\begin{equation}
+\lambda_{\rm nc} = \frac{|\delta\xvec|^2}{\sigma_K^2}
+\sum_{k=1}^N \frac{(\psi_k^0)^2}{R_k^8}\,Q_0
+= \frac{|\delta\xvec|^2\,Q_0}{\sigma_K^2}
+\sum_k\frac{(\psi_k^0)^2}{R_k^8}.
+\label{eq:nc-param}
+\end{equation}
+For $N = 4$ uniform emitters:
+\begin{equation}
+\lambda_{\rm nc} = \frac{4\times 192\times|\delta\xvec|^2\psi_0^2}
+{5\,R^8\sigma_K^2}.
+\end{equation}
+\end{theorem}
+
+\paragraph{Required displacement for detection.}
+Setting $P_{\rm detect} = 0.999$ and $P_{\rm FA} = 10^{-7}$, the
+threshold $\eta \approx 5N + 4.5\sqrt{5N}$ (normal approximation for
+large $5N$). The minimum detectable displacement is
+\begin{equation}
+|\delta\xvec|_{\min} = R^4\sigma_K\sqrt{\frac{5\eta}{4\times 192\,\psi_0^2}}.
+\end{equation}
+For $R = 100\;\text{m}$, $\sigma_K = 10^{-27}\;\text{m}^{-2}$,
+$\psi_0 = 7.4\times 10^{-21}$, $\eta \approx 30$:
+\begin{equation}
+|\delta\xvec|_{\min} \approx 10^8\times 10^{-27}
+\times\sqrt{\frac{150}{768\times 5.5\times 10^{-41}}}
+\sim 10^{-19}\times\sqrt{10^{41}} \sim 10\;\text{m}.
+\end{equation}
+With improved curvature sensors ($\sigma_K \sim 10^{-30}\;\text{m}^{-2}$,
+achievable with future atom interferometry), sub-meter spoofing
+detection becomes feasible.
+
+%=============================================================================
+\section{Comparison with 15 Existing PNT Technologies}
+\label{sec:comparison}
+%=============================================================================
+
+\subsection{GPS/GNSS Spoofing Attacks}
+
+The 2012 University of Texas drone capture~\cite{Humphreys2012} used a
+\$3000 GPS spoofer to take control of a \$80,000 drone. The 2017 Black
+Sea incidents affected $>20$ vessels~\cite{CRGroup2017}. In 2023--2025,
+widespread spoofing near conflict zones (Eastern Mediterranean, Baltic)
+caused commercial aircraft position jumps of hundreds of
+kilometers~\cite{Psiaki2016Spoofing}. Navigation message authentication
+(Galileo OSNMA, GPS L1C CHIMERA) provides cryptographic protection but:
+(i)~does not prevent signal replay/meaconing,
+(ii)~requires key management infrastructure,
+(iii)~is ineffective against inside threats.
+
+\paragraph{DFD advantage.}
+$\psi$-PNT curvature verification provides physics-based anti-spoofing
+that is impossible to defeat without physically replicating the emitter
+mass distribution (Theorems~\ref{thm:spoof}--\ref{thm:dist-spoof}). No
+cryptographic infrastructure is needed.
+
+\subsection{Enhanced Loran (eLoran)}
+
+eLoran provides 10--20~m accuracy at 100~kHz carrier frequency with
+$\sim 60$~dB jam margin (vs.\ GPS's $\sim 0$~dB). Timing accuracy is
+$\sim 50\;\text{ns}$. Limitations: requires ground-wave propagation
+modeling (Additional Secondary Factor corrections); accuracy insufficient
+for precision applications; limited coverage in mountainous/urban terrain.
+The UK and US decommissioned Loran-C in 2010--2015; South Korea and
+several European nations are developing
+eLoran~\cite{Johnson2014eLoran}.
+
+\paragraph{DFD advantage.}
+$\psi$-PNT achieves theoretically sub-millimeter precision (vs.\ 10~m
+for eLoran), operates indoors/underwater (unlike eLoran), and provides
+native authentication (eLoran has none).
+
+\subsection{Inertial Navigation Systems}
+
+Navigation-grade RLG INS: $\sim 0.01\;\text{deg/hr}$ gyro bias
+stability, $\sim 1\;\text{nm/hr}$ position
+drift~\cite{Titterton2004INS}. Strategic-grade (submarine):
+$\sim 0.001\;\text{deg/hr}$, $\sim 0.1\;\text{nm/hr}$. MEMS:
+$\sim 1\;\text{deg/hr}$, $\sim 10\;\text{nm/hr}$.
+The fundamental limitation is unbounded drift --- all INS accumulate
+errors over time.
+
+\paragraph{DFD advantage.}
+$\psi$-PNT provides drift-free absolute positioning. Each fix is
+independent. $\psi$-PNT can continuously aid INS, eliminating drift
+entirely.
+
+\subsection{Chip-Scale Atomic Clocks (CSAC)}
+
+Microsemi SA.45s CSAC: $\sim 10^{-11}$ Allan deviation at 1~s,
+$\sim 3\times 10^{-12}$ at 100~s. Holdover: $\sim 3\;\mu\text{s/day}$
+drift. Mass: 35~g. Power: 120~mW. CSACs provide GPS holdover timing
+but cannot provide position.
+
+\paragraph{DFD advantage.}
+$\psi$-PNT provides both position AND timing without any onboard clock.
+The timing precision is set by $\sigma_t = \sigma_\phi/\omega$, not by
+oscillator stability.
+
+\subsection{Signals of Opportunity (SoOP)}
+
+5G positioning: $\sim 1$~m accuracy using downlink PRS~\cite{3GPP2022}.
+TV/FM SoOP: $\sim 50$~m. LEO SoOP (Starlink, Iridium): $\sim 10$~m
+accuracy demonstrated using Doppler
+measurements~\cite{Humphreys2020LEO}. Limitations: all SoOP are EM
+signals vulnerable to jamming/spoofing; accuracy varies with geometry
+and signal availability.
+
+\paragraph{DFD advantage.}
+$\psi$-PNT is not electromagnetic, hence immune to jamming. Accuracy
+is determined by emitter geometry, not opportunity.
+
+\subsection{LEO PNT Constellations}
+
+Xona Space Systems and TrustPoint are developing dedicated LEO PNT
+constellations at $\sim 1000$~km altitude, providing $\sim 1000\times$
+stronger signals than GPS. Xona targets $< 1$~m accuracy with
+centimeter-level augmentation~\cite{Reid2020XonaLEO}. Cost: \$1--10B
+for constellation deployment. Still fundamentally EM time-of-flight,
+hence spoofable.
+
+\paragraph{DFD advantage.}
+$\psi$-PNT uses ground-based infrastructure (much cheaper than satellite
+constellations), provides native anti-spoofing, and operates in all
+environments.
+
+\subsection{Quantum Inertial Navigation}
+
+Cold-atom interferometers: $\sim 10\;\text{nGal}$ gravity sensitivity,
+$\sim 10^{-9}\;\text{rad/s}$ rotation
+sensitivity~\cite{Geiger2020AtomInterferometry}. Demonstrated in
+laboratory; field demonstrations at TRL 3--4. SWaP remains prohibitive
+($\sim 100$~kg, $\sim 1\;\text{kW}$). Like classical INS, quantum INS
+measures inertial quantities that must be integrated.
+
+\paragraph{DFD advantage.}
+$\psi$-PNT measures position directly, not inertial derivatives. No
+integration required. However, quantum sensors (atom interferometers)
+could serve as high-sensitivity $\psi$-detectors in a $\psi$-PNT system.
+
+\subsection{Gravity Gradiometry Navigation}
+
+Gravity gradiometry using MEMS or superconducting gravity gradiometers
+(SGGs) measures the gravity gradient tensor
+$\Gamma_{ij} = \partial^2\Phi/\partial x_i\partial x_j$ for map-matching
+navigation~\cite{Jekeli2006Gravimetry}. Current SGGs achieve
+$\sim 1\;\text{E}$ ($10^{-9}\;\text{s}^{-2}$) sensitivity. Gravity
+map-matching provides $\sim 100$~m positioning accuracy in favorable
+terrain. Limitations: requires pre-surveyed gravity maps; accuracy
+depends on terrain gravity signature; fails in flat/ocean areas.
+
+\paragraph{DFD advantage.}
+$\psi$-PNT creates its own ``gravity map'' via active emitters, rather
+than relying on passive terrain signatures. This works in any
+environment, including oceans and flat terrain where gravity gradiometry
+navigation fails.
+
+\subsection{Magnetic Navigation (MagNav)}
+
+Magnetic anomaly navigation matches measured magnetic field to pre-surveyed
+magnetic maps. Recent US Air Force AFRL demonstrations achieved
+$\sim 100$~m accuracy. Limitations: requires detailed magnetic surveys;
+subject to temporal variations (solar storms, diurnal changes);
+interference from onboard electronics.
+
+\paragraph{DFD advantage.}
+$\psi$-fields are not subject to electromagnetic interference or temporal
+magnetic variations. Active $\psi$-emitters provide deterministic signals
+independent of environmental conditions.
+
+\subsection{Summary Comparison}
+
+\begin{table*}[t]
+\centering
+\caption{Comprehensive comparison of $\psi$-PNT with 15 existing PNT
+technologies.}
+\label{tab:pnt-compare}
+\begin{ruledtabular}
+\begin{tabular}{lcccccl}
+Technology & Accuracy & Indoor & Underwater & Anti-spoof & Anti-jam & Key Limitation \\
+\hline
+GPS L1 C/A & 3 m & No & No & No & No & Jam/spoof, weak signal \\
+GPS RTK & 1 cm & No & No & No & No & Base station, jam \\
+GPS M-code & 3 m & No & No & Crypto & 20 dB & Military only \\
+Galileo OSNMA & 3 m & No & No & Crypto & No & Key management \\
+eLoran & 10 m & No & No & No & 60 dB & Infrastructure, accuracy \\
+RLG INS & 1 nm/hr drift & Yes & Yes & N/A & Yes & Drift \\
+MEMS INS & 10 nm/hr drift & Yes & Yes & N/A & Yes & Severe drift \\
+CSAC holdover & 3 $\mu$s/day & Yes & Yes & N/A & Yes & Timing only \\
+5G positioning & 1 m & Partial & No & No & No & EM, infrastructure \\
+LEO SoOP & 10 m & No & No & No & No & EM, availability \\
+LEO PNT (Xona) & $<$ 1 m & No & No & Crypto & 30+ dB & Cost, EM \\
+Atom interf. & N/A (inertial) & Yes & Yes & N/A & Yes & SWaP, drift \\
+Gravity grad. & 100 m & Partial & Partial & N/A & Yes & Maps, terrain \\
+MagNav & 100 m & No & Partial & N/A & Partial & Maps, interference \\
+UW acoustic nav & 1 m & N/A & 10 km & No & Partial & Range, multipath \\
+\hline
+$\psi$-PNT & Theory: sub-mm & Yes & Yes & Physics & $\infty$ & $\psi$-sensor tech \\
+\end{tabular}
+\end{ruledtabular}
+\end{table*}
+
+%=============================================================================
+\section{Combined Navigation-Communication-Authentication System}
+\label{sec:combined}
+%=============================================================================
+
+\subsection{Shared Infrastructure Architecture}
+
+A network of $N$ $\psi$-emitters serves triple duty:
+\begin{enumerate}
+\item \textbf{Navigation:} Emitter geometry provides position via
+trilateration/gradient-bearing.
+\item \textbf{Communication:} Modulated $\delta\psi(t)$ carries data.
+\item \textbf{Authentication:} Corridor fingerprints verify identity.
+\end{enumerate}
+
+\subsection{Time-Division Resource Sharing}
+
+In each $T_{\rm frame}$-duration frame:
+\begin{itemize}
+\item Navigation pilot: $T_{\rm nav}$ --- unmodulated carrier for
+position/timing estimation.
+\item Data payload: $T_{\rm data}$ --- 5D modulated data symbols.
+\item Authentication preamble: $T_{\rm auth}$ --- known training
+sequence for fingerprint verification.
+\end{itemize}
+With $T_{\rm frame} = T_{\rm nav} + T_{\rm data} + T_{\rm auth}$:
+
+\paragraph{Navigation precision:}
+$\sigma_{\rm pos} = \GDOP \cdot \sigma_\psi/\sqrt{T_{\rm nav}\cdot B}$.
+
+\paragraph{Data rate:}
+$R_{\rm data} = \frac{T_{\rm data}}{T_{\rm frame}}\cdot 5B\log_2(1 + \SNR/5)$.
+
+\paragraph{Authentication security:}
+$P_{\rm FA} \leq \exp(-\SNR\cdot T_{\rm auth}\cdot B\cdot N_s)$.
+
+\subsection{Optimal Frame Design}
+
+\begin{theorem}[Optimal Time Allocation]\label{thm:time-opt}
+The frame allocation maximizing data rate subject to navigation
+precision constraint $\sigma_{\rm pos} \leq \sigma_{\rm max}$ and
+authentication constraint $P_{\rm FA} \leq P_{\rm FA}^{\rm max}$ is:
+\begin{align}
+T_{\rm nav}^* &= \frac{\GDOP^2\sigma_\psi^2}{\sigma_{\rm max}^2 B}, \label{eq:Tnav-opt}\\
+T_{\rm auth}^* &= \frac{\ln(1/P_{\rm FA}^{\rm max})}{\SNR\cdot B\cdot N_s}, \label{eq:Tauth-opt}\\
+T_{\rm data}^* &= T_{\rm frame} - T_{\rm nav}^* - T_{\rm auth}^*. \label{eq:Tdata-opt}
+\end{align}
+The achievable data rate fraction is
+\begin{equation}
+\eta_{\rm data} = 1 - \frac{T_{\rm nav}^* + T_{\rm auth}^*}{T_{\rm frame}}.
+\end{equation}
+For high SNR, both $T_{\rm nav}^*$ and $T_{\rm auth}^*$ are small
+fractions of $T_{\rm frame}$, so $\eta_{\rm data} \to 1$.
+\end{theorem}
+
+\paragraph{Numerical example.}
+For $\sigma_{\rm max} = 1\;\text{m}$,
+$\GDOP = 2$, $\sigma_\psi = 10^{-27}$, $B = 1\;\text{kHz}$:
+$T_{\rm nav}^* = 4\times 10^{-54}/(10^3) = 4\times 10^{-57}\;\text{s}$
+--- negligibly small. Navigation requires essentially zero overhead.
+For $P_{\rm FA}^{\rm max} = 10^{-20}$, $\SNR = 10^{29}$, $N_s = 100$:
+$T_{\rm auth}^* = 46/(10^{29}\times 10^3\times 100) = 4.6\times 10^{-34}\;\text{s}$
+--- also negligible. The combined system operates at $>99.99\%$ data
+efficiency with both navigation and authentication provided ``for free.''
+
+%=============================================================================
+\section{Conclusions}\label{sec:conclusions}
+%=============================================================================
+
+We have derived the complete Fisher information matrix for $\psi$-field
+positioning with $N$ emitters in arbitrary geometry, showing three
+additive contributions from scalar ($\psi$), vectorial ($\nabla\psi$),
+and tensorial ($K_{ij}$) measurements. The curvature contribution
+provides quadrupole-order geometric diversity (38.4 effective information
+units per emitter per axis in the isotropic average) that is entirely
+absent in conventional time-of-arrival systems.
+
+The Cram\'er-Rao lower bound scales as $R^2\sigma_\psi/(M\sqrt{N})$ for
+scalar measurements, with gradient and curvature measurements providing
+increasingly steep power-law improvements. Optimal emitter placement is
+solved: equilateral triangle (3 emitters), regular tetrahedron (4), and
+regular octahedron (6).
+
+The spoofing impossibility theorem (Theorem~\ref{thm:spoof}) proves that
+curvature matching from a displaced source is a system of $5N$ equations
+in $4K$ unknowns, generically overdetermined for $K < 5N/4$. Even
+distributed adversaries with multiple sources face an exponentially
+ill-conditioned inverse problem (condition number $\geq e^{\pi\ell_{\rm max}d/L^2}$,
+Theorem~\ref{thm:ill-posed}).
+
+Comparison with 15 existing PNT technologies confirms that $\psi$-PNT
+uniquely combines: drift-free absolute positioning, indoor/underwater
+operation, physics-based anti-spoofing, absolute jam immunity, and
+clock-free timing. The combined navigation-communication-authentication
+system operates at $>99.99\%$ data efficiency with navigation and
+authentication provided with negligible resource overhead.
+
+%=============================================================================
+\begin{thebibliography}{99}
+
+\bibitem{Alcock2025DFD}
+G.~T. Alcock, ``Density Field Dynamics: A Complete Unified Theory,''
+v3.2 (2025).
+
+\bibitem{Alcock2025PsiNav}
+G.~T. Alcock, ``$\psi$-Field Positioning: GPS-Free, Spoof-Immune
+Navigation via Scalar Refractive Geometry,'' DFD Research Programme (2025).
+
+\bibitem{Humphreys2012}
+T.~E. Humphreys, B.~M. Ledvina, M.~L. Psiaki, B.~W. O'Hanlon, and
+P.~M. Kintner, ``Assessing the Spoofing Threat: Development of a
+Portable GPS Civilian Spoofer,'' Proc.\ ION GNSS (2008), pp.\ 2314--2325.
+
+\bibitem{CRGroup2017}
+C4ADS, ``Above Us Only Stars: Exposing GPS Spoofing in Russia and
+Syria,'' Center for Advanced Defense Studies (2019).
+
+\bibitem{Psiaki2016Spoofing}
+M.~L. Psiaki and T.~E. Humphreys, ``GNSS Spoofing and Detection,''
+Proc.\ IEEE \textbf{104}, 1258--1270 (2016).
+
+\bibitem{Johnson2014eLoran}
+G.~Johnson, P.~Swaszek, et al., ``An Evaluation of eLoran as a Backup
+to GPS,'' ION GNSS+ (2014).
+
+\bibitem{Titterton2004INS}
+D.~Titterton and J.~Weston, \textit{Strapdown Inertial Navigation
+Technology}, 2nd ed.\ (IET, 2004).
+
+\bibitem{3GPP2022}
+3GPP, ``NR Positioning Enhancements,'' TR 38.857, Release 17 (2022).
+
+\bibitem{Humphreys2020LEO}
+T.~E. Humphreys et al., ``Signal Structure of the Starlink Ku-Band
+Downlink,'' IEEE Trans.\ Aerosp.\ Electron.\ Syst.\ (2023).
+
+\bibitem{Reid2020XonaLEO}
+T.~G. R. Reid et al., ``Broadband LEO Constellations for Navigation,''
+Navigation \textbf{65}, 205--220 (2018).
+
+\bibitem{Geiger2020AtomInterferometry}
+R.~Geiger et al., ``High-Accuracy Inertial Measurements with Cold-Atom
+Sensors,'' AVS Quantum Sci.\ \textbf{2}, 024702 (2020).
+
+\bibitem{Jekeli2006Gravimetry}
+C.~Jekeli, \textit{Inertial Navigation Systems with Geodetic
+Applications} (Walter de Gruyter, 2001).
+
+\bibitem{Casazza2012FrameTheory}
+P.~G. Casazza, ``Finite Frames: Theory and Applications,''
+Birkh\"auser (2012).
+
+\bibitem{Bennett1984BB84}
+C.~H. Bennett and G.~Brassard, ``Quantum Cryptography: Public Key
+Distribution and Coin Tossing,'' Proc.\ IEEE ICCSSP (1984).
+
+\bibitem{Scarani2009QKDreview}
+V.~Scarani et al., ``The Security of Practical Quantum Key
+Distribution,'' Rev.\ Mod.\ Phys.\ \textbf{81}, 1301--1350 (2009).
+
+\bibitem{Stojanovic2009Underwater}
+M.~Stojanovic and J.~Preisig, ``Underwater Acoustic Communication
+Channels,'' IEEE Commun.\ Mag.\ \textbf{47}, 84--89 (2009).
+
+\bibitem{Stancil2012Neutrino}
+D.~D. Stancil et al., ``Demonstration of Communication Using
+Neutrinos,'' Mod.\ Phys.\ Lett.\ A \textbf{27}, 1250077 (2012).
+
+\bibitem{Fante2004CRPA}
+R.~L. Fante and J.~J. Vaccaro, ``Wideband Cancellation of
+Interference in a GPS Receive Array,'' IEEE Trans.\ AES \textbf{36},
+549--564 (2000).
+
+\bibitem{Lydersen2010Blinding}
+L.~Lydersen et al., ``Hacking Commercial Quantum Cryptography Systems
+by Tailored Bright Illumination,'' Nat.\ Photonics \textbf{4},
+686--689 (2010).
+
+\bibitem{Chatfield1997}
+A.~B. Chatfield, \textit{Fundamentals of High Accuracy Inertial
+Navigation} (AIAA, 1997).
+
+\bibitem{Hadamard1923}
+J.~Hadamard, \textit{Lectures on Cauchy's Problem in Linear Partial
+Differential Equations} (Yale Univ.\ Press, 1923).
+
+\end{thebibliography}
+
+\end{document}

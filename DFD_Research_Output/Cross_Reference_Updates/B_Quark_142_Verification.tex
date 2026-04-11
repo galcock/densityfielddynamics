@@ -1,0 +1,430 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsfonts,amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
+
+\newcommand{\CP}{\mathbb{CP}}
+\newcommand{\as}{\alpha_s}
+\newcommand{\Nf}{N_f}
+\newcommand{\Nc}{N_c}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\definecolor{pass}{RGB}{0,120,0}
+\definecolor{fail}{RGB}{180,0,0}
+\definecolor{warn}{RGB}{180,120,0}
+
+\begin{document}
+
+\title{Rigorous Verification of $A_b = 1/42$:\\
+Does $1/(\Nf \times b_0)$ Follow from QCD Running?}
+
+\author{DFD Research Audit}
+
+\date{23 March 2026}
+
+\maketitle
+
+\begin{abstract}
+We rigorously verify the claim in the DFD v67 mass dictionary that
+$A_b = 1/42 = 1/(\Nf \times b_0)$ with $\Nf = 6$ and
+$b_0 = (11\Nc - 2\Nf)/3 = 7$.  The arithmetic factorization is confirmed.
+However, numerical computation of the actual 1-loop QCD mass running from
+$M_P$ to $m_b$ yields a ratio of $\approx 3.8$--$3.9$ (i.e., the running
+mass \emph{increases} by a factor of $\sim 4$ from Planck to $m_b$ scale),
+not a suppression of $1/42 \approx 0.024$.  The value $A_b = 1/42$ is the
+\emph{measured} $b$-quark Yukawa coupling $m_b/(v/\sqrt{2}) = 4180/174100
+= 1/41.65 \approx 1/42$, expressed via QCD parameters through pattern
+identification.  It is not derived from the QCD renormalization group.
+Similarly, $A_s = 6/7 = \Nf/b_0$ is an empirical fit accurate to $0.03\%$,
+not a running ratio.  Both are \textbf{pattern-level} inputs, not
+theorem-grade derivations.
+\end{abstract}
+
+\tableofcontents
+
+%==========================================================================
+\section{The Claim Under Examination}
+\label{sec:claim}
+%==========================================================================
+
+The DFD v67 charged-fermion mass dictionary uses the master formula
+\begin{equation}\label{eq:master}
+m_f = A_f \,\alpha^{n_f}\, \frac{v}{\sqrt{2}}\,,
+\end{equation}
+with the down-type quark prefactors organized via a ``QCD running operator''
+\begin{equation}\label{eq:Qd}
+Q_d = \mathrm{diag}\!\left(1,\;\frac{6}{7},\;\frac{1}{42}\right)
+\quad\text{on}\quad \mathcal{H}_{\mathrm{gen}}\,.
+\end{equation}
+
+The claimed derivation is:
+\begin{itemize}
+\item $b_0 = (11\Nc - 2\Nf)/3$ is the 1-loop QCD $\beta$-function coefficient.
+\item With $\Nc = 3$, $\Nf = 6$: $b_0 = (33 - 12)/3 = 21/3 = 7$.
+\item The $b$-quark entry: $Q_d[3,3] = 1/(\Nf \times b_0) = 1/(6 \times 7) = 1/42$.
+\item The $s$-quark entry: $Q_d[2,2] = \Nf/b_0 = 6/7$.
+\item The $d$-quark entry: $Q_d[1,1] = 1$ (no running modification).
+\end{itemize}
+
+\noindent\textbf{Questions to resolve:}
+\begin{enumerate}
+\item Is the arithmetic $b_0 = 7$ correct? (\S\ref{sec:arithmetic})
+\item Is $A_b = 1/42$ derivable from 1-loop QCD mass running? (\S\ref{sec:running})
+\item What does the numerical QCD running actually give? (\S\ref{sec:numerical})
+\item What is the actual origin of $1/42$? (\S\ref{sec:origin})
+\item Same analysis for $A_s = 6/7$. (\S\ref{sec:strange})
+\item Is $\alpha_s$ at the relevant scales predicted by DFD or taken as external input? (\S\ref{sec:external})
+\end{enumerate}
+
+%==========================================================================
+\section{Arithmetic Verification of $b_0 = 7$}
+\label{sec:arithmetic}
+%==========================================================================
+
+\textcolor{pass}{\textbf{PASS.}}
+
+The 1-loop QCD $\beta$-function coefficient in the standard convention is
+\begin{equation}
+b_0 = \frac{11\Nc - 2\Nf}{3}\,.
+\end{equation}
+
+With $\Nc = 3$ (QCD color gauge group $SU(3)$) and $\Nf = 6$ (all six
+quark flavors active):
+\begin{equation}
+b_0 = \frac{11 \times 3 - 2 \times 6}{3} = \frac{33 - 12}{3} = \frac{21}{3} = 7\,.
+\end{equation}
+
+Therefore $\Nf \times b_0 = 6 \times 7 = 42$, confirming
+\begin{equation}
+\frac{1}{\Nf \times b_0} = \frac{1}{42}\,.
+\end{equation}
+
+\begin{remark}[Convention note]
+Some references define $\beta_0 = (11\Nc - 2\Nf)/(12\pi)$ or
+$\beta_0 = (11\Nc - 2\Nf)$, absorbing factors of $4\pi$ differently.
+The DFD convention $b_0 = (11\Nc - 2\Nf)/3$ matches the most common
+textbook convention (Peskin--Schroeder, PDG).  With this convention,
+the 1-loop running coupling is
+\[
+\as(\mu) = \frac{\as(\mu_0)}{1 + \frac{b_0}{2\pi}\,\as(\mu_0)\,\ln(\mu/\mu_0)}\,.
+\]
+\end{remark}
+
+\begin{remark}[$\Nf = 6$ assumption]
+The choice $\Nf = 6$ means all six quarks are treated as active.
+In standard QCD, $\Nf = 6$ applies only above the top threshold
+$\mu > m_t \approx 173$~GeV.  At the $b$-quark scale ($\mu \sim 4$~GeV),
+only $\Nf = 5$ flavors are active ($b_0 = 23/3$).  This is a
+\textbf{physically questionable} choice if $b_0 = 7$ is meant to describe
+running at the $b$ scale, but numerologically convenient.
+\end{remark}
+
+%==========================================================================
+\section{The Standard QCD Mass Running Formula}
+\label{sec:running}
+%==========================================================================
+
+The 1-loop running of quark masses in QCD (in the $\overline{\mathrm{MS}}$ scheme) is
+\begin{equation}\label{eq:mass-running}
+\frac{m(\mu_1)}{m(\mu_2)} = \left[\frac{\as(\mu_1)}{\as(\mu_2)}\right]^{d_0}\,,
+\qquad
+d_0 = \frac{\gamma_0}{2b_0}\,,
+\end{equation}
+where:
+\begin{itemize}
+\item $\gamma_0 = 8$ is the 1-loop quark mass anomalous dimension (universal in QCD),
+\item $b_0 = (11\Nc - 2\Nf)/3$ is the 1-loop $\beta$-function coefficient.
+\end{itemize}
+
+For $\Nf = 6$: $d_0 = 8/(2 \times 7) = 4/7 \approx 0.571$.
+
+For $\Nf = 5$: $d_0 = 8/(2 \times 23/3) = 12/23 \approx 0.522$.
+
+\subsection{What the running ratio would need to be}
+
+For $A_b = 1/42$ to be a running ratio, we would need
+\begin{equation}
+\left[\frac{\as(m_b)}{\as(M_P)}\right]^{4/7} = \frac{1}{42} \approx 0.0238\,.
+\end{equation}
+
+This requires
+\begin{equation}
+\frac{\as(m_b)}{\as(M_P)} = \left(\frac{1}{42}\right)^{7/4} = 42^{-7/4} \approx 1.4 \times 10^{-3}\,,
+\end{equation}
+i.e., $\as(M_P)/\as(m_b) \sim 700$.  Since $\as(m_b) \approx 0.21$ and
+$\as(M_P) \approx 0.019$, the actual ratio is $\as(m_b)/\as(M_P) \approx 11$,
+nowhere near the required $\sim 700$.
+
+\textcolor{fail}{\textbf{FAIL: The QCD running cannot produce $1/42$.}}
+
+%==========================================================================
+\section{Numerical Computation of QCD Mass Running}
+\label{sec:numerical}
+%==========================================================================
+
+\subsection{Running $\as$ from $M_Z$ to $M_P$ and $m_b$}
+
+Starting from $\as(M_Z) = 0.1179$ (PDG 2024), using 1-loop running with
+flavor thresholds:
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+Scale $\mu$ & $\Nf$ & $\as(\mu)$ & Method \\
+\midrule
+$m_b = 4.18$~GeV & 5 & 0.2118 & Run down from $M_Z$ \\
+$M_Z = 91.19$~GeV & 5 & 0.1179 & Input (PDG) \\
+$m_t = 172.8$~GeV & 5 & 0.1080 & Run up from $M_Z$ \\
+$M_P = 1.22 \times 10^{19}$~GeV & 6 & 0.0191 & Run up from $m_t$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Mass running ratio $m(m_b)/m(M_P)$}
+
+\subsubsection{Naive: $\Nf = 6$ throughout (as DFD implicitly assumes)}
+
+\begin{equation}
+\frac{m(m_b)}{m(M_P)} = \left[\frac{\as(m_b)}{\as(M_P)}\right]^{4/7}
+= \left[\frac{0.2118}{0.0192}\right]^{4/7} \approx \mathbf{3.94}\,.
+\end{equation}
+
+\subsubsection{Proper: with flavor threshold at $m_t$}
+
+\begin{equation}
+\frac{m(m_b)}{m(M_P)} =
+\underbrace{\left[\frac{\as(m_b)}{\as(m_t)}\right]^{12/23}}_{\approx\,1.42}
+\times
+\underbrace{\left[\frac{\as(m_t)}{\as(M_P)}\right]^{4/7}}_{\approx\,2.69}
+\approx \mathbf{3.83}\,.
+\end{equation}
+
+\subsection{Summary of running results}
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+Quantity & Value & Compare to $1/42$ \\
+\midrule
+$m(m_b)/m(M_P)$ (naive, $\Nf=6$) & 3.94 & $\times\, 166$ too large \\
+$m(m_b)/m(M_P)$ (proper, thresholds) & 3.83 & $\times\, 161$ too large \\
+$1/42$ & 0.0238 & --- \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The QCD mass running from $M_P$ to $m_b$ \emph{increases} the mass
+by a factor of $\sim 4$ (due to the growing $\as$), not a suppression by 42.
+The running and the claimed value differ by two orders of magnitude.
+
+\textcolor{fail}{\textbf{VERDICT: $A_b = 1/42$ is NOT the QCD mass running
+ratio from $M_P$ to $m_b$.}}
+
+%==========================================================================
+\section{The Actual Origin of $1/42$}
+\label{sec:origin}
+%==========================================================================
+
+\subsection{$1/42$ is the measured Yukawa coupling}
+
+With $n_b = 0$, the mass formula reduces to
+\begin{equation}
+m_b = A_b \times \frac{v}{\sqrt{2}} = A_b \times 174.1\;\text{GeV}\,.
+\end{equation}
+
+Solving for $A_b$:
+\begin{equation}
+A_b = \frac{m_b}{v/\sqrt{2}} = \frac{4.180}{174.1} = 0.02401 = \frac{1}{41.65} \approx \frac{1}{42}\,.
+\end{equation}
+
+The value $1/42$ is simply the \textbf{measured $b$-quark Yukawa coupling}
+(up to the $\sqrt{2}$ convention), rounded to the nearest integer denominator.
+The error is
+\begin{equation}
+\frac{1/42 - 1/41.65}{1/41.65} = \frac{41.65 - 42}{42} = -0.83\%\,.
+\end{equation}
+
+\subsection{The factorization $42 = \Nf \times b_0$ is numerological}
+
+The decomposition $42 = 6 \times 7$ where $6 = \Nf$ and
+$7 = (11\Nc - 2\Nf)/3$ is algebraically valid.  However:
+\begin{enumerate}
+\item No RG equation produces $1/(\Nf \cdot b_0)$ as a mass ratio or
+  Yukawa coupling at any scale.
+\item The standard QCD mass running gives a completely different value
+  ($\sim 3.8$, not $1/42$).
+\item The source files (see \texttt{Af\_Derivation\_Trace.tex},
+  \S\S\,8--9) explicitly classify this as ``pattern-level, not
+  theorem-grade.''
+\item The \texttt{Af\_RIGOROUS\_COMPUTATION.py} audit script marks $Q_d$
+  entries as ``pattern identifications, not derived from RG flow.''
+\end{enumerate}
+
+\subsection{Could there be an indirect path through DFD-specific RG?}
+
+One might hypothesize that DFD modifies the running (e.g., via the
+density field coupling), producing a non-standard RG flow.  However:
+\begin{itemize}
+\item No such modified RG has been derived in any DFD document.
+\item The v67 dictionary and Appendix~K explicitly cite standard QCD
+  parameters $\Nf$ and $b_0$, not DFD-modified ones.
+\item If the running were DFD-modified, $b_0 = 7$ (the standard QCD value)
+  would not be the correct coefficient.
+\end{itemize}
+
+%==========================================================================
+\section{Verification of $A_s = 6/7 = \Nf/b_0$}
+\label{sec:strange}
+%==========================================================================
+
+The strange quark has $n_s = 3/2$, so
+\begin{equation}
+A_s = \frac{m_s}{\alpha^{3/2}\,(v/\sqrt{2})} = \frac{93\;\text{MeV}}{(1/137.036)^{3/2} \times 174100\;\text{MeV}}
+= \frac{93}{108.53} = 0.8569\,.
+\end{equation}
+
+Comparing to $\Nf/b_0 = 6/7 = 0.8571$: match to $0.03\%$.
+
+As with $A_b$, this is the \textbf{measured mass ratio} expressed via QCD
+parameters.  The QCD running from $M_P$ to $m_s$ does not produce $6/7$;
+it gives a factor of $\sim 4$--5 (similar to the $b$ quark, with additional
+threshold effects from $c$ and $b$).
+
+\subsection{The $Q_d$ pattern structure}
+
+The three entries form a suggestive but unexplained pattern:
+\begin{align}
+Q_d[1,1] &= 1 \quad (\text{identity, no modification})\,, \\
+Q_d[2,2] &= \frac{\Nf}{b_0} = \frac{6}{7}\,, \\
+Q_d[3,3] &= \frac{1}{\Nf \cdot b_0} = \frac{1}{42}\,.
+\end{align}
+
+The ratio between consecutive entries is
+\begin{equation}
+\frac{Q_d[2,2]}{Q_d[1,1]} = \frac{6}{7}\,,\qquad
+\frac{Q_d[3,3]}{Q_d[2,2]} = \frac{1/42}{6/7} = \frac{1}{36} = \frac{1}{\Nf^2}\,.
+\end{equation}
+
+This means the jump from gen~2 to gen~3 is $1/\Nf^2 = 1/36$, while from
+gen~1 to gen~2 it is $\Nf/b_0 = 6/7$.  These are structurally different
+ratios, arguing against a uniform running mechanism.
+
+%==========================================================================
+\section{Is $\as$ at the Relevant Scales Predicted by DFD?}
+\label{sec:external}
+%==========================================================================
+
+\textcolor{warn}{\textbf{CRITICAL POINT:}} The DFD framework derives the
+\emph{fine-structure constant} $\alpha = 1/137.036$ from the Chern--Simons
+level sum with $k_{\max} = 60$.  However, the QCD coupling $\as$ is a
+\textbf{separate coupling constant} with its own RG flow.
+
+\begin{itemize}
+\item DFD does \textbf{not} derive $\as$ at any scale from microsector
+  geometry.
+\item DFD does \textbf{not} derive the QCD $\beta$-function; $b_0 = 7$ is
+  standard perturbative QCD.
+\item The mass dictionary uses $\alpha$ (QED), not $\as$ (QCD), in the
+  exponent $\alpha^{n_f}$.
+\end{itemize}
+
+If $A_b = 1/42$ were genuinely derived from QCD running, it would require
+$\as$ at two scales as input.  Since DFD does not predict $\as$, this would
+constitute \textbf{external SM input}, not a prediction from the microsector.
+
+However, as shown in \S\ref{sec:numerical}, $1/42$ does not come from QCD
+running at all, so this question is moot: $Q_d$ is an empirical operator,
+not a derived one.
+
+%==========================================================================
+\section{Comparison: Model A vs Model B for the $b$ Quark}
+\label{sec:models}
+%==========================================================================
+
+Two parametrizations exist in the DFD literature:
+
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+Model & $n_b$ & $A_b$ & $m_b^{(\text{pred})}$ & Error \\
+\midrule
+v67 (Model A) & 0 & $1/42$ & $(1/42) \times 174.1 = 4145$~MeV & $-0.83\%$ \\
+Bundle (Model B) & 1 & $\pi$ & $\pi \times (1/137.036) \times 174100 = 3991$~MeV & $-4.51\%$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Model~A is 5.4$\times$ more accurate but uses $A_b = 1/42$ as an empirical
+input.  Model~B is geometrically derived ($\pi$ from $S^3$ color integration)
+but less accurate.
+
+The resolution proposed in \texttt{B\_Quark\_Exponent\_Derivation.tex} is
+``color-connected vertex saturation'' (Path~4): 3rd-generation quarks have
+$n_f \to n_f - 1$ due to color saturation, giving $n_b = 0$ while
+$A_b = 1/42$ arises from the $S^3$ color integration at the saturated vertex.
+This is physically motivated but not yet rigorously derived.
+
+%==========================================================================
+\section{Conclusions}
+\label{sec:conclusions}
+%==========================================================================
+
+\begin{enumerate}
+
+\item \textcolor{pass}{\textbf{Arithmetic: CONFIRMED.}}
+$b_0 = (11 \times 3 - 2 \times 6)/3 = 7$ and $1/(\Nf \times b_0) = 1/42$.
+
+\item \textcolor{fail}{\textbf{QCD running derivation: FAILS.}}
+The 1-loop QCD mass running from $M_P$ to $m_b$ gives $m(m_b)/m(M_P) \approx 3.8$--$3.9$,
+not $1/42 \approx 0.024$.  These differ by a factor of $\sim 160$.
+
+\item \textcolor{warn}{\textbf{True origin: empirical Yukawa coupling.}}
+$A_b = 1/42 \approx m_b/(v/\sqrt{2}) = 4180/174100$.  The factorization
+$42 = \Nf \times b_0$ is a numerological coincidence involving QCD
+parameters, not a derived result.
+
+\item \textcolor{warn}{\textbf{Similarly: $A_s = 6/7$ is empirical.}}
+$A_s = \Nf/b_0 = 6/7 \approx m_s/(\alpha^{3/2}\,v/\sqrt{2})$, matching to
+$0.03\%$.  Again a pattern identification, not a running ratio.
+
+\item \textcolor{warn}{\textbf{Classification: pattern-level input.}}
+The $Q_d$ operator entries are among the \textbf{least rigorously derived}
+components of the v67 dictionary.  They are empirical fits expressed in QCD
+language.  The Af derivation trace audit classifies them as ``pattern-level,
+not theorem-grade.''
+
+\item \textbf{What would be needed for a genuine derivation:}
+\begin{itemize}
+\item An explicit RG computation (within DFD or standard QCD) showing that
+  the down-type Yukawa coupling, when run from the Planck scale to the
+  weak/quark scale with all threshold corrections, yields exactly $\Nf/b_0$
+  for gen~2 and $1/(\Nf \cdot b_0)$ for gen~3.
+\item Alternatively: a microsector operator derivation showing that $Q_d$
+  emerges from $A_5$ or $\CP^2$ geometry with entries involving $b_0$.
+\item Neither exists in the current DFD corpus.
+\end{itemize}
+
+\end{enumerate}
+
+\subsection*{Bottom line for the mass dictionary}
+
+$A_b = 1/42$ produces an excellent prediction ($-0.83\%$ error) and has a
+striking decomposition in QCD parameters.  But calling it a ``QCD running
+factor'' is \textbf{misleading}.  It is an empirical input that \emph{happens}
+to factorize as $1/(\Nf \times b_0)$.  Whether this coincidence has a deeper
+origin is an open question.
+
+\end{document}

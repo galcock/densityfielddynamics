@@ -1,0 +1,385 @@
+%=============================================================================
+% APPENDIX V: EXTENDED PHENOMENOLOGY AND NUMERICAL METHODS
+% Wide binaries, external field effect, FEM implementation
+%=============================================================================
+
+\section{Extended Phenomenology and Numerical Methods}\label{app:extended-phenom}
+
+This appendix addresses three areas that complete the DFD phenomenological 
+framework: the external field effect (EFE), wide binary predictions, and 
+numerical implementation via finite element methods.
+
+%-----------------------------------------------------------------------------
+\subsection{The External Field Effect (EFE)}\label{app:efe}
+%-----------------------------------------------------------------------------
+
+In nonlinear theories like DFD, the internal dynamics of a subsystem depend 
+on its external gravitational environment. This \emph{external field effect} 
+(EFE) arises from the nonlinearity of the field equation.
+
+\subsubsection{Physical Origin}
+
+The DFD field equation
+\begin{equation}
+\nabla \cdot \bigl[\mu(|\nabla\psi|/a_\star)\nabla\psi\bigr] = -\frac{8\pi G}{c^2}\rho
+\end{equation}
+is nonlinear in $\nabla\psi$. For a subsystem (e.g., a dwarf galaxy) embedded 
+in an external field (e.g., a host galaxy), the total gradient is:
+\begin{equation}
+|\nabla\psi_{\mathrm{tot}}| = |\nabla\psi_{\mathrm{int}} + \nabla\psi_{\mathrm{ext}}|.
+\end{equation}
+
+When $|\nabla\psi_{\mathrm{ext}}| \gg a_\star/c^2$ but $|\nabla\psi_{\mathrm{int}}| \ll a_\star/c^2$, 
+the total gradient may exceed the crossover scale even if internal accelerations 
+are in the deep-field regime. This ``Newtonianizes'' the internal dynamics.
+
+\subsubsection{Quantitative Formulation}
+
+Define the dimensionless acceleration ratios:
+\begin{align}
+x_{\mathrm{int}} &= \frac{c^2|\nabla\psi_{\mathrm{int}}|}{2a_0}, \\
+x_{\mathrm{ext}} &= \frac{c^2|\nabla\psi_{\mathrm{ext}}|}{2a_0}, \\
+x_{\mathrm{tot}} &= \frac{c^2|\nabla\psi_{\mathrm{int}} + \nabla\psi_{\mathrm{ext}}|}{2a_0}.
+\end{align}
+
+The effective $\mu$-function argument becomes $x_{\mathrm{tot}}$, not $x_{\mathrm{int}}$:
+\begin{equation}
+\mu_{\mathrm{eff}} = \mu(x_{\mathrm{tot}}) = \frac{x_{\mathrm{tot}}}{1 + x_{\mathrm{tot}}}.
+\end{equation}
+
+\paragraph{Limiting cases.}
+\begin{itemize}
+\item \textbf{Isolated system} ($x_{\mathrm{ext}} \to 0$): $\mu_{\mathrm{eff}} = \mu(x_{\mathrm{int}})$, 
+standard DFD dynamics.
+\item \textbf{Strong external field} ($x_{\mathrm{ext}} \gg 1$, $x_{\mathrm{ext}} \gg x_{\mathrm{int}}$): 
+$\mu_{\mathrm{eff}} \approx 1$, Newtonian dynamics restored.
+\item \textbf{Aligned fields}: Maximum enhancement when $\nabla\psi_{\mathrm{int}} \parallel \nabla\psi_{\mathrm{ext}}$.
+\item \textbf{Opposed fields}: Partial cancellation possible.
+\end{itemize}
+
+\subsubsection{Observational Signatures}
+
+\begin{table}[h]
+\centering
+\caption{External field effect predictions for Milky Way satellites.}\label{tab:efe-predictions}
+\begin{tabular}{lccc}
+\toprule
+Satellite & $g_{\mathrm{ext}}$ (m/s$^2$) & $x_{\mathrm{ext}}$ & EFE suppression \\
+\midrule
+Fornax & $2 \times 10^{-11}$ & 0.17 & Mild (15\%) \\
+Sculptor & $3 \times 10^{-11}$ & 0.25 & Moderate (20\%) \\
+Draco & $5 \times 10^{-11}$ & 0.42 & Significant (30\%) \\
+Crater II & $1 \times 10^{-11}$ & 0.08 & Weak (8\%) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The EFE predicts that satellites at smaller galactocentric radii (higher 
+$g_{\mathrm{ext}}$) show \emph{less} enhanced dynamics than isolated dwarfs 
+with similar internal properties.
+
+\paragraph{Falsification criterion.}
+If dwarf satellites uniformly show enhanced dynamics independent of their 
+position relative to the Milky Way, the EFE mechanism (and hence DFD's 
+nonlinear structure) would be falsified.
+
+%-----------------------------------------------------------------------------
+\subsection{Wide Binary Predictions}\label{app:wide-binaries}
+%-----------------------------------------------------------------------------
+
+Wide stellar binaries with separations $s \gtrsim 5000$ AU probe the 
+low-acceleration regime where DFD deviates from Newtonian gravity.
+
+\subsubsection{The Crossover Scale}
+
+For a binary with total mass $M$ and separation $s$, the internal acceleration is:
+\begin{equation}
+a_{\mathrm{int}} = \frac{GM}{s^2}.
+\end{equation}
+
+The crossover to deep-field behavior occurs when $a_{\mathrm{int}} \sim a_0$:
+\begin{equation}
+s_{\mathrm{cross}} = \sqrt{\frac{GM}{a_0}} \approx 7000\,\mathrm{AU} \times \left(\frac{M}{M_\odot}\right)^{1/2}.
+\end{equation}
+
+For solar-mass binaries, $s_{\mathrm{cross}} \approx 7000$ AU.
+
+\subsubsection{Predicted Velocity Anomaly}
+
+In the deep-field regime ($s \gg s_{\mathrm{cross}}$), the orbital velocity is enhanced:
+\begin{equation}
+v_{\mathrm{DFD}} = (GMa_0)^{1/4} = v_{\mathrm{Newton}} \times \left(\frac{s}{s_{\mathrm{cross}}}\right)^{1/2}.
+\end{equation}
+
+The velocity ratio relative to Newtonian prediction:
+\begin{equation}
+\frac{v_{\mathrm{DFD}}}{v_{\mathrm{Newton}}} = \sqrt{\frac{a_{\mathrm{Newton}}}{a_0} + 1} \approx 
+\begin{cases}
+1 & s \ll s_{\mathrm{cross}}, \\
+\sqrt{s/s_{\mathrm{cross}}} & s \gg s_{\mathrm{cross}}.
+\end{cases}
+\end{equation}
+
+\begin{table}[h]
+\centering
+\caption{DFD predictions for wide binary velocity anomalies.}\label{tab:wide-binary}
+\begin{tabular}{lccc}
+\toprule
+Separation (AU) & $a_{\mathrm{int}}/a_0$ & $v_{\mathrm{DFD}}/v_{\mathrm{Newton}}$ & Observable effect \\
+\midrule
+1000 & 50 & 1.01 & Negligible \\
+3000 & 5.6 & 1.08 & 8\% enhancement \\
+7000 & 1.0 & 1.22 & 22\% enhancement \\
+10000 & 0.5 & 1.37 & 37\% enhancement \\
+20000 & 0.13 & 1.73 & 73\% enhancement \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{GAIA DR3 Constraints}
+
+Recent analyses of GAIA DR3 wide binary data show conflicting results:
+\begin{itemize}
+\item Some analyses report enhanced relative velocities consistent with 
+MOND-like dynamics at $s > 5000$ AU~\cite{Chae2023}.
+\item Other analyses find no significant deviation from Newtonian 
+predictions~\cite{Banik2024}.
+\end{itemize}
+
+\paragraph{DFD interpretation.}
+The EFE complicates wide binary tests: binaries in regions of higher 
+galactic acceleration ($g_{\mathrm{gal}} \gtrsim a_0$) are partially 
+Newtonianized. A definitive test requires:
+\begin{itemize}
+\item Selection of binaries in low-$g_{\mathrm{gal}}$ environments.
+\item Proper treatment of projection effects and orbital phase.
+\item Statistical comparison with DFD predictions including EFE.
+\end{itemize}
+
+\paragraph{Falsification criterion.}
+If wide binaries in isolated, low-acceleration environments show 
+strictly Newtonian dynamics at $s > 10000$ AU, DFD's deep-field 
+prediction would be falsified.
+
+%-----------------------------------------------------------------------------
+\subsection{Finite Element Implementation}\label{app:fem}
+%-----------------------------------------------------------------------------
+
+The DFD field equation is directly implementable via finite element methods 
+(FEM). We outline the key elements for numerical solution.
+
+\subsubsection{Weak Form for FEM}
+
+The weak formulation~\eqref{eq:weak-form-U} translates directly to FEM assembly:
+\begin{equation}
+\sum_e \int_{\Omega_e} \mu(|\nabla\psi_h|)\nabla\psi_h \cdot \nabla v_h\,dx 
+= \sum_e \int_{\Omega_e} f\,v_h\,dx,
+\end{equation}
+where $\psi_h, v_h$ are finite element approximations on mesh elements $\Omega_e$.
+
+\subsubsection{Newton Iteration for Nonlinearity}
+
+The nonlinear system is solved via Newton iteration. The Jacobian matrix is:
+\begin{equation}
+J_{ij}(\nabla\psi) = \mu(|\nabla\psi|)\delta_{ij} + \mu'(|\nabla\psi|)\frac{\partial_i\psi\,\partial_j\psi}{|\nabla\psi|}.
+\end{equation}
+
+For $\mu(s) = s/(1+s)$:
+\begin{equation}
+\mu'(s) = \frac{1}{(1+s)^2}.
+\end{equation}
+
+\paragraph{Regularization at small gradients.}
+At $|\nabla\psi| \to 0$, the Jacobian may become ill-conditioned. A standard 
+remedy is regularization:
+\begin{equation}
+|\nabla\psi| \to \sqrt{|\nabla\psi|^2 + \epsilon^2},
+\end{equation}
+with $\epsilon \sim 10^{-10}$ in dimensionless units.
+
+\subsubsection{Mesh Refinement Strategy}
+
+The deep-field regime features steep gradients near sources. Adaptive mesh 
+refinement (AMR) is recommended:
+\begin{itemize}
+\item Refine where $|\nabla\psi|$ changes rapidly (gradient indicator).
+\item Refine near crossover radius $r_\star = \sqrt{GM/a_\star}$.
+\item Use logarithmic radial spacing for exterior domains.
+\end{itemize}
+
+\subsubsection{Boundary Conditions}
+
+\paragraph{Dirichlet (fixed $\psi$).}
+\begin{equation}
+\psi|_{\Gamma_D} = \psi_D.
+\end{equation}
+Used for outer boundaries with known asymptotic value.
+
+\paragraph{Neumann (fixed flux).}
+\begin{equation}
+\mu(|\nabla\psi|)\nabla\psi \cdot \hat{n}|_{\Gamma_N} = g_N.
+\end{equation}
+Used for symmetry planes or specified matter flux.
+
+\paragraph{Robin (mixed).}
+\begin{equation}
+\mu(|\nabla\psi|)\nabla\psi \cdot \hat{n} + \kappa(\psi - \psi_\infty) = 0.
+\end{equation}
+Used for approximate radiation conditions at finite boundaries.
+
+\subsubsection{Convergence Verification}
+
+For code verification, use the analytic deep-field solution:
+\begin{equation}
+\psi(r) = \psi_0 - B\ln(r/r_0), \quad B = \frac{2}{c^2}\sqrt{GMa_\star}.
+\end{equation}
+
+Richardson extrapolation on mesh sequences should yield:
+\begin{equation}
+\|\psi_h - \psi_{\mathrm{exact}}\|_{L^2} = \mathcal{O}(h^{p+1}),
+\end{equation}
+where $p$ is the polynomial order of the elements.
+
+\begin{tcolorbox}[colback=blue!5!white, colframe=blue!50!black, title=FEM Implementation Checklist]
+\begin{enumerate}[nosep]
+\item Assemble weak form with $\mu(|\nabla\psi|)\nabla\psi$ flux
+\item Newton iteration with analytic Jacobian
+\item Regularize $|\nabla\psi|$ at small values
+\item Adaptive mesh refinement near crossover
+\item Verify against analytic deep-field solution
+\item Richardson extrapolation for convergence rate
+\end{enumerate}
+\end{tcolorbox}
+
+%-----------------------------------------------------------------------------
+\subsection{Matter Power Spectrum from $\psi$-Screen}\label{app:power-spectrum}
+%-----------------------------------------------------------------------------
+
+The $\psi$-screen formalism (Section~\ref{sec:psi-tomography}) predicts 
+modifications to the matter power spectrum $P(k)$.
+
+\subsubsection{Scale-Dependent $\psi$ Perturbations}
+
+Density perturbations $\delta\rho$ source $\delta\psi$ via the linearized 
+field equation:
+\begin{equation}
+\nabla^2\delta\psi = -\frac{8\pi G}{c^2}\delta\rho.
+\end{equation}
+
+In Fourier space:
+\begin{equation}
+\delta\tilde{\psi}(k) = \frac{8\pi G}{c^2 k^2}\delta\tilde{\rho}(k).
+\end{equation}
+
+The $\psi$-perturbation power spectrum is:
+\begin{equation}
+P_\psi(k) = \left(\frac{8\pi G}{c^2 k^2}\right)^2 P_\rho(k).
+\end{equation}
+
+\subsubsection{Observational Signatures}
+
+The $\psi$-screen affects:
+\begin{itemize}
+\item \textbf{CMB lensing:} Modified convergence $\kappa$ from $\psi$-gradients.
+\item \textbf{Galaxy clustering:} Scale-dependent bias from $\psi$-density correlation.
+\item \textbf{Weak lensing:} Modified shear-density relation.
+\end{itemize}
+
+These effects are degenerate with dark matter at leading order but 
+distinguishable through their scale dependence and cross-correlations.
+
+%-----------------------------------------------------------------------------
+\subsection{Cooper-Pair Mass Anomaly from $A_5$ Pair Space}\label{app:cooper-pair}
+%-----------------------------------------------------------------------------
+
+The Cooper-pair mass in niobium, measured by Tate \textit{et al.}
+(1989) via the London moment, exceeds $2m_e$ by
+$\delta = 92 \pm 21$~ppm---a $4.4\sigma$ anomaly unexplained for
+36~years~\cite{AlcockCooperPair2026}.  Within the $A_5$ microsector, each electron's generation
+quantum number lives in the fundamental $V^*$ ($\dim V^* = 3$).
+The pair tensor product decomposes as
+$V^* \otimes V^* = S^2(V^*) \oplus \Lambda^2(V^*)$ with
+$S^2(V^*) = \mathbf{1} \oplus \mathbf{5}$ and
+$\Lambda^2(V^*) = \mathbf{3}$.
+
+Two pairing-symmetry selection rules follow:
+\begin{enumerate}
+\item \textbf{Angular cancellation:} the quintet $\mathbf{5}$
+  exchange channel couples maximally to $s$-wave condensates
+  (isotropic gap) but vanishes for $d$-wave condensates
+  ($\int_0^{2\pi} \cos 2\phi\,d\phi/(2\pi) = 0$).
+\item \textbf{Representation orthogonality:} spin-triplet ($p$-wave)
+  pairs live in $\Lambda^2(V^*) = \mathbf{3}$, orthogonal to the
+  quintet by $A_5$ representation theory alone.
+\end{enumerate}
+The conjectured coefficient is
+$\delta = \sqrt{3}\,\alpha^2 = 92.23$~ppm (0.01$\sigma$ match),
+with $\sqrt{3} = \sqrt{N_{\rm gen}}$ from incoherent amplitude
+addition of three generation channels and $\alpha^2$ from the
+$\psi$--EM vertex structure.  This prediction is universal for
+$s$-wave superconductors and zero for $d$-wave and $p$-wave
+materials---a distinction testable by multi-material London-moment
+measurements at $\leq 20$~ppm precision.
+
+%-----------------------------------------------------------------------------
+\subsection{EM--Gravity Cross-Term: Gravitational Weight Anomaly}\label{app:weight-anomaly}
+%-----------------------------------------------------------------------------
+
+The DFD stress tensor contains a cross term between $\psi_{\rm grav}$
+and the above-threshold EM contribution $\delta\psi_{\rm EM} =
+\kappa_G(\eta - \eta_c)\Theta$, yielding a fractional weight anomaly
+for a device of mass $m$ carrying EM energy $U_{\rm EM}$ above
+threshold:
+\begin{equation}\label{eq:weight-anomaly}
+\frac{\Delta w}{w} = \kappa_G \cdot \frac{U_{\rm EM}}{mc^2}
+= \frac{3}{8\alpha} \cdot \frac{U_{\rm EM}}{mc^2}\,.
+\end{equation}
+For a 10\,T superconducting magnet ($U_{\rm EM} = 40$\,kJ,
+$m = 10$\,kg): $\Delta w/w = 2.3 \times 10^{-12}$.
+Next-generation atom-interferometric gravimeters approach
+$10^{-12}$--$10^{-13}$, placing this prediction at the edge of
+sensitivity.  The signature is distinctive: the effect scales as
+$B^2 V/(2\mu_0 mc^2) \times 3/(8\alpha)$, with the $\alpha$-dependence
+as the smoking gun.  A null control at $\eta < \eta_c$ (higher
+ambient pressure) eliminates conventional systematics.
+
+%-----------------------------------------------------------------------------
+\subsection{Summary}\label{app:extended-summary}
+%-----------------------------------------------------------------------------
+
+\begin{tcolorbox}[colback=green!5!white, colframe=green!60!black, title=Extended Phenomenology Summary]
+\textbf{External Field Effect:}
+\begin{itemize}[nosep]
+\item Nonlinear $\mu$-function causes environmental dependence
+\item Satellites in strong external fields are Newtonianized
+\item Testable via dwarf galaxy velocity dispersions vs. position
+\end{itemize}
+
+\textbf{Wide Binaries:}
+\begin{itemize}[nosep]
+\item Crossover at $s_{\mathrm{cross}} \sim 7000$ AU for solar-mass binaries
+\item 20--70\% velocity enhancement predicted for $s > 10000$ AU
+\item EFE complicates interpretation; requires low-$g_{\mathrm{gal}}$ samples
+\end{itemize}
+
+\textbf{Cooper-Pair Mass Anomaly (\S\ref{app:cooper-pair}):}
+\begin{itemize}[nosep]
+\item Prediction: $\delta = \sqrt{3}\,\alpha^2 = 92.23$\,ppm (universal for $s$-wave)
+\item Two selection rules: $d$-wave $\to$ 0 (angular cancellation), $p$-wave $\to$ 0 (representation orthogonality)
+\item Test: multi-material London-moment measurement at $\leq 20$\,ppm
+\end{itemize}
+
+\textbf{EM--Gravity Weight Anomaly (\S\ref{app:weight-anomaly}):}
+\begin{itemize}[nosep]
+\item Prediction: $\Delta w/w = (3/8\alpha) \cdot U_{\rm EM}/(mc^2) \approx 2.3\times10^{-12}$ for 10\,T magnet
+\item Test: next-generation atom gravimeters at $10^{-12}$--$10^{-13}$
+\end{itemize}
+
+\textbf{Numerical Methods:}
+\begin{itemize}[nosep]
+\item Standard FEM with Newton iteration for nonlinearity
+\item Regularization needed at small $|\nabla\psi|$
+\item Adaptive mesh refinement near crossover scale
+\item Verification against analytic deep-field solution
+\end{itemize}
+\end{tcolorbox}

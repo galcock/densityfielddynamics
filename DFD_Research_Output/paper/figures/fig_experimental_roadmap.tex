@@ -1,0 +1,162 @@
+% fig_experimental_roadmap.tex - Timeline/Gantt chart
+% Standalone compilation: pdflatex fig_experimental_roadmap.tex
+\documentclass[tikz,border=5pt]{standalone}
+\usepackage{tikz}
+\usepackage{amsmath}
+\usetikzlibrary{arrows.meta,calc,positioning}
+
+\begin{document}
+\begin{tikzpicture}[
+    >=Stealth,
+    every node/.style={font=\footnotesize\sffamily},
+    phase/.style={
+        draw=#1!70!black, thick, fill=#1!25,
+        minimum height=0.9cm, inner sep=4pt,
+        font=\scriptsize\sffamily,
+    },
+    gate/.style={
+        diamond, draw=red!70!black, fill=red!15,
+        minimum size=0.6cm, inner sep=1pt,
+        font=\tiny\sffamily\bfseries,
+    },
+    trl/.style={
+        draw=black!40, fill=black!8, rounded corners=2pt,
+        minimum height=0.5cm, inner sep=3pt,
+        font=\tiny\sffamily,
+    },
+    costlabel/.style={
+        font=\tiny\sffamily, text=black!60,
+    },
+]
+
+\definecolor{p0}{RGB}{100,140,200}
+\definecolor{p1}{RGB}{60,150,130}
+\definecolor{p2}{RGB}{180,160,50}
+\definecolor{p3}{RGB}{200,120,40}
+\definecolor{p4}{RGB}{180,70,70}
+\definecolor{p5}{RGB}{130,60,160}
+
+% ============================================================
+% TIME AXIS
+% ============================================================
+\def\yearscale{1.8}  % cm per year
+\def\ystart{0}
+\def\yend{-8.5}
+
+% Year markers
+\foreach \yr in {0,1,...,15} {
+    \draw[black!20, thin] ({\yr*\yearscale},0.5) -- ({\yr*\yearscale},\yend-0.3);
+    \node[above, font=\tiny\sffamily, black!50] at ({\yr*\yearscale},0.5) {Yr \yr};
+}
+
+% Time axis line
+\draw[->, black!60, thick] (0,0.3) -- ({15.5*\yearscale},0.3);
+\node[right, font=\scriptsize\sffamily] at ({15.5*\yearscale},0.3) {Time};
+
+% ============================================================
+% PHASE BARS
+% ============================================================
+
+% Phase 0: Theoretical validation (Year 0-1)
+\node[phase=p0, minimum width={1*\yearscale cm}, anchor=west]
+    (ph0) at (0,{-1}) {Phase 0: Theory};
+\node[left, font=\tiny\sffamily, p0!80!black, align=right] at (-0.1,-1)
+    {Theoretical\\validation};
+
+% Phase 1: Tabletop experiments (Year 1-3)
+\node[phase=p1, minimum width={2*\yearscale cm}, anchor=west]
+    (ph1) at ({1*\yearscale},{-2.2}) {Phase 1: Tabletop};
+\node[left, font=\tiny\sffamily, p1!80!black, align=right] at (-0.1,-2.2)
+    {Proof-of-concept\\experiments};
+
+% Phase 2: Scaled prototype (Year 3-6)
+\node[phase=p2, minimum width={3*\yearscale cm}, anchor=west]
+    (ph2) at ({3*\yearscale},{-3.4}) {Phase 2: Scaled Prototype};
+\node[left, font=\tiny\sffamily, p2!80!black, align=right] at (-0.1,-3.4)
+    {1\,m prototype\\measurable force};
+
+% Phase 3: Engineering demonstrator (Year 6-9)
+\node[phase=p3, minimum width={3*\yearscale cm}, anchor=west]
+    (ph3) at ({6*\yearscale},{-4.6}) {Phase 3: Eng.\ Demonstrator};
+\node[left, font=\tiny\sffamily, p3!80!black, align=right] at (-0.1,-4.6)
+    {3\,m full system\\with power plant};
+
+% Phase 4: Flight test (Year 9-12)
+\node[phase=p4, minimum width={3*\yearscale cm}, anchor=west]
+    (ph4) at ({9*\yearscale},{-5.8}) {Phase 4: Flight Test};
+\node[left, font=\tiny\sffamily, p4!80!black, align=right] at (-0.1,-5.8)
+    {Orbital demo\\uncrewed};
+
+% Phase 5: Operational vehicle (Year 12-15+)
+\node[phase=p5, minimum width={3*\yearscale cm}, anchor=west]
+    (ph5) at ({12*\yearscale},{-7}) {Phase 5: Operational Vehicle};
+\node[left, font=\tiny\sffamily, p5!80!black, align=right] at (-0.1,-7)
+    {10\,m crewed\\vehicle};
+
+% ============================================================
+% DECISION GATES
+% ============================================================
+
+\node[gate] (g1) at ({1*\yearscale},-1.6) {G1};
+\node[gate] (g2) at ({3*\yearscale},-2.8) {G2};
+\node[gate] (g3) at ({6*\yearscale},-4.0) {G3};
+\node[gate] (g4) at ({9*\yearscale},-5.2) {G4};
+\node[gate] (g5) at ({12*\yearscale},-6.4) {G5};
+
+% Gate labels
+\node[right, font=\tiny\sffamily, red!60!black] at (g1.east) {Theory confirmed?};
+\node[right, font=\tiny\sffamily, red!60!black] at (g2.east) {Force detected?};
+\node[right, font=\tiny\sffamily, red!60!black] at (g3.east) {Thrust $>$ 1\,N?};
+\node[right, font=\tiny\sffamily, red!60!black] at (g4.east) {Orbit demo OK?};
+\node[right, font=\tiny\sffamily, red!60!black] at (g5.east) {Flight certified?};
+
+% ============================================================
+% TRL LEVELS (right side)
+% ============================================================
+\def\trlX{16.5}
+
+\node[trl] at ({\trlX*\yearscale/\yearscale},-1) {TRL 1--2};
+\node[trl] at ({\trlX*\yearscale/\yearscale},-2.2) {TRL 3--4};
+\node[trl] at ({\trlX*\yearscale/\yearscale},-3.4) {TRL 4--5};
+\node[trl] at ({\trlX*\yearscale/\yearscale},-4.6) {TRL 5--6};
+\node[trl] at ({\trlX*\yearscale/\yearscale},-5.8) {TRL 7--8};
+\node[trl] at ({\trlX*\yearscale/\yearscale},-7) {TRL 9};
+
+% ============================================================
+% COST ESTIMATES (below bars)
+% ============================================================
+
+\node[costlabel] at ({0.5*\yearscale},-1.7) {\$2M};
+\node[costlabel] at ({2*\yearscale},-2.9) {\$20M};
+\node[costlabel] at ({4.5*\yearscale},-4.1) {\$200M};
+\node[costlabel] at ({7.5*\yearscale},-5.3) {\$1B};
+\node[costlabel] at ({10.5*\yearscale},-6.5) {\$5B};
+\node[costlabel] at ({13.5*\yearscale},-7.7) {\$20B};
+
+% Cumulative cost
+\node[font=\scriptsize\sffamily\bfseries, black!50, anchor=west] at ({15.5*\yearscale},-8.2)
+    {Cumulative: $\sim$\$26B};
+
+% ============================================================
+% LEGEND
+% ============================================================
+\begin{scope}[xshift=1cm, yshift=-9.5cm]
+    \node[gate, minimum size=0.4cm] at (0,0) {};
+    \node[right, font=\tiny\sffamily] at (0.4,0) {Decision gate (Go/No-Go)};
+
+    \fill[p0!25] (3,-.15) rectangle (3.6,0.15);
+    \draw[p0!70!black, thick] (3,-.15) rectangle (3.6,0.15);
+    \node[right, font=\tiny\sffamily] at (3.7,0) {Development phase};
+
+    \node[trl, minimum size=0.3cm] at (7,0) {TRL};
+    \node[right, font=\tiny\sffamily] at (7.5,0) {Technology readiness level};
+\end{scope}
+
+% ============================================================
+% TITLE
+% ============================================================
+\node[font=\normalsize\sffamily\bfseries, anchor=south] at ({7.5*\yearscale},1.2)
+    {Experimental Roadmap --- Psi-Bubble Propulsion Development};
+
+\end{tikzpicture}
+\end{document}
