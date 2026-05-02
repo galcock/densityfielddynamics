@@ -16,7 +16,7 @@ Gary Alcock1
 1
 
 Independent Researcher, Los Angeles, CA, USA∗
-(Dated: April 22, 2026)
+(Dated: May 2, 2026)
 
 In Density Field Dynamics (DFD), the parameter λ introduced in Appendix R of the unified
 paper controls whether laboratory electromagnetic fields can pump the scalar field ψ at frequency
@@ -601,6 +601,7 @@ could instead indicate activation of the κ channel. Distinguishing the two requ
 the direct-drive cavity test.
 The present theorem therefore does not overturn Appendix R. It establishes the null baseline for one of Appendix R’s coupling channels, conditional on the others
 being inactive or held fixed.
+
 E.
 
 δξ : Beyond-baseline dimension-5 operator
@@ -614,6 +615,7 @@ Lemma exhibits the full ψ-dependence of the minimal action, and it contains no 
 Any nonzero ξ is therefore a beyond-baseline operator.
 δξ is the channel corresponding to dilaton-type coupling familiar from scalar-tensor gravity and stringtheoretic dilaton models. Measuring δξ separately from
 δκ , δQ , and δgeom is a genuinely new experimental question: it would constrain the presence of a dimension-5
+
 coupling not required by the DFD postulates P1 and P2
 alone.
 F.
@@ -621,7 +623,6 @@ F.
 Experimental isolation protocol
 
 To separate the five channels in Eq. (24), an experimental program would include:
-
 1. Q-scaling series to isolate δQ (scales as 1/Q, other
 channels do not);
 2. Geometry and mode-content variation to map
@@ -664,10 +665,6 @@ clarifies what a nonzero inferred λeff would and would not
 imply. This is a narrower claim than “pure DFD predicts
 λ = 1 exactly,” which our earlier framing sometimes suggested. The narrower claim is what the minimal-sector
 action actually supports.
-
-ACKNOWLEDGMENTS
-
-The author thanks Claude (Anthropic) for computational and analytical assistance.
 
 6
 

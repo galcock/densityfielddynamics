@@ -39,6 +39,8 @@ DFD proves Mach’s principle. DFD rejects Mach 9 at the ontological level but r
 correspondence at the level of observables: the operationally preferred frame, the ψ rest frame, is
 dynamically determined by cosmic matter, while the flat-R3 kinematic substrate remains absolute.
 
+CONTENTS
+
 I. Introduction
 
 2
@@ -59,48 +61,13 @@ A. The cosmic origin of a⋆
 B. Numerical check
 
 3
-
-G. Mach 6: inertial mass from global matter
-H. Mach 7: no space without matter
-I. Mach 8: Ω = 4πGρ̄/3H 2 is of order unity
-J. Mach 9: no absolute elements
-K. Mach 10: unobservability of rigid motions
-L. Summary
-
 3
 3
 4
 4
-
-VI. The preferred-frame question
-A. The ψ rest frame as a dynamical object
-B. Comparison with absolute-space theories
-C. Residual absolute content
-
-7
-7
-8
-8
-
 4
 4
 5
-
-VII. Comparison with Brans–Dicke
-
-8
-
-VIII. Empirical Machian predictions
-A. Redshift evolution of a⋆
-B. Environment-dependent inertia
-C. Wide binaries: supporting example, not
-headline falsifier
-
-8
-8
-9
-
-CONTENTS
 
 V. Bondi–Samuel taxonomy
 5
@@ -120,6 +87,13 @@ F. Mach 5: zero total energy-momentum
 
 ∗ gary@gtacompanies.com
 
+G. Mach 6: inertial mass from global matter
+H. Mach 7: no space without matter
+I. Mach 8: Ω = 4πGρ̄/3H 2 is of order unity
+J. Mach 9: no absolute elements
+K. Mach 10: unobservability of rigid motions
+L. Summary
+
 6
 6
 6
@@ -127,6 +101,29 @@ F. Mach 5: zero total energy-momentum
 7
 7
 
+VI. The preferred-frame question
+A. The ψ rest frame as a dynamical object
+B. Comparison with absolute-space theories
+C. Residual absolute content
+
+7
+7
+8
+8
+
+VII. Comparison with Brans–Dicke
+
+8
+
+VIII. Empirical Machian predictions
+A. Redshift evolution of a⋆
+B. Environment-dependent inertia
+C. Wide binaries: supporting example, not
+headline falsifier
+
+8
+8
+9
 10
 
 IX. Falsifiers
@@ -134,10 +131,6 @@ IX. Falsifiers
 10
 
 X. Conclusion
-
-11
-
-Acknowledgments
 
 11
 
@@ -1261,19 +1254,6 @@ quadrupole, DFD’s Machian reading would be in tension.
 F4. Direct dark matter detection. A new particle
 
 11
-consistent with CDM phenomenology would collapse the
-entire DFD explanatory program, including the Machian
-reading. This is a global falsifier of DFD, not specific to
-the Machian content.
-F5. H0 and a⋆ evolve differently. If independent
-measurements of H(z) and a⋆ (z) show inconsistent evolution, the program-grade promotion Eq. (23) fails. This
-is a refinement of F1 and is the cleanest quantitative test
-of the Machian structural identity in its epoch-by-epoch
-form.
-
-X.
-
-CONCLUSION
 
 Density Field Dynamics contains an operationally
 Machian sector. The Newtonian-limit gravitational response is an explicit linear functional of the cosmic density fluctuation (Theorem III.1), realizing Mach 3 in
@@ -1286,30 +1266,10 @@ inertial response consistent with Mach 3 at the phenomenological level. DFD sati
 Mach 10 rigorously, partially satisfies Mach 1, Mach 2,
 and Mach 6, and fails Mach 4, Mach 5, Mach 7, and
 Mach 9. The failure on Mach 9 is real: flat R3 is absolute as a substrate. The defense (Section VI) is that the
+
 operationally meaningful frame, the ψ rest frame, is dynamically determined by cosmic matter. This is weaker
 than relationalism but stronger than GR’s Machian content.
 We have been explicit throughout about what is
-
-[1] E. Mach, The Science of Mechanics: A Critical and Historical Account of Its Development, Open Court, Chicago
-(1893).
-[2] A. Einstein, Prinzipielles zur allgemeinen Relativitätstheorie, Ann. Phys. 360, 241 (1918).
-[3] H. Bondi, Cosmology, Cambridge University Press
-(1952).
-[4] J. B. Barbour and B. Bertotti, Mach’s principle and the
-structure of dynamical theories, Proc. R. Soc. London A
-382, 295 (1982).
-[5] J. B. Barbour, Absolute or Relative Motion?, Vol. 1,
-Cambridge University Press (1989).
-[6] D. W. Sciama, On the origin of inertia, Mon. Not. R.
-Astron. Soc. 113, 34 (1953).
-[7] C. Brans and R. H. Dicke, Mach’s principle and a relativistic theory of gravitation, Phys. Rev. 124, 925 (1961).
-[8] J. A. Wheeler, Mach’s principle as boundary condition
-for Einstein’s equations, in Gravitation and Relativity,
-H.-Y. Chiu and W. F. Hoffmann, eds., Benjamin, New
-York (1964).
-[9] G. Alcock, Density Field Dynamics:
-A Complete Unified Theory, v3.4, Zenodo (April 2026),
-
 theorem-grade and what is program-grade.
 Theorem III.1 is theorem-grade.
 The
@@ -1336,14 +1296,29 @@ theory with a flat substrate, a matter-sourced refractive
 field, and a derived galactic transition scale can honestly
 give.
 
-ACKNOWLEDGMENTS
-
-The author thanks the DFD collaboration audit process for extensive critical review. This paper was developed using Claude (Anthropic) as a calculation and
-drafting partner; all physical claims, derivations, and interpretations are the author’s responsibility.
-
+[1] E. Mach, The Science of Mechanics: A Critical and Historical Account of Its Development, Open Court, Chicago
+(1893).
+[2] A. Einstein, Prinzipielles zur allgemeinen Relativitätstheorie, Ann. Phys. 360, 241 (1918).
+[3] H. Bondi, Cosmology, Cambridge University Press
+(1952).
+[4] J. B. Barbour and B. Bertotti, Mach’s principle and the
+structure of dynamical theories, Proc. R. Soc. London A
+382, 295 (1982).
+[5] J. B. Barbour, Absolute or Relative Motion?, Vol. 1,
+Cambridge University Press (1989).
+[6] D. W. Sciama, On the origin of inertia, Mon. Not. R.
+Astron. Soc. 113, 34 (1953).
+[7] C. Brans and R. H. Dicke, Mach’s principle and a relativistic theory of gravitation, Phys. Rev. 124, 925 (1961).
+[8] J. A. Wheeler, Mach’s principle as boundary condition
+for Einstein’s equations, in Gravitation and Relativity,
+H.-Y. Chiu and W. F. Hoffmann, eds., Benjamin, New
+York (1964).
+[9] G. Alcock, Density Field Dynamics:
+A Complete Unified Theory, v3.4, Zenodo (April 2026),
 doi:10.5281/zenodo.18066593 (concept DOI, alwayslatest).
 [10] J. Bekenstein and M. Milgrom, Does the missing mass
 problem signal the breakdown of Newtonian gravity?, Astrophys. J. 286, 7 (1984).
+
 [11] M. Milgrom, A modification of the Newtonian dynamics
 as a possible alternative to the hidden mass hypothesis,
 Astrophys. J. 270, 365 (1983).
@@ -1360,8 +1335,6 @@ acceleration relation in rotationally supported galaxies,
 Phys. Rev. Lett. 117, 201101 (2016).
 [16] F. Lelli, S. S. McGaugh, and J. M. Schombert, SPARC:
 Mass models for 175 disk galaxies with Spitzer photometry and accurate rotation curves, Astron. J. 152, 157
-
-12
 (2016).
 [17] B. Famaey and S. S. McGaugh, Modified Newtonian
 Dynamics (MOND): Observational Phenomenology and
@@ -1372,6 +1345,22 @@ galaxies according to MOND, Astrophys. J. Lett. 571,
 L81 (2002).
 [19] A. de Graaff et al., A remarkably high-mass, rotating
 galaxy at z ≈ 7 observed with JWST, arXiv:2404.05683
+
+consistent with CDM phenomenology would collapse the
+entire DFD explanatory program, including the Machian
+reading. This is a global falsifier of DFD, not specific to
+the Machian content.
+F5. H0 and a⋆ evolve differently. If independent
+measurements of H(z) and a⋆ (z) show inconsistent evolution, the program-grade promotion Eq. (23) fails. This
+is a refinement of F1 and is the cleanest quantitative test
+of the Machian structural identity in its epoch-by-epoch
+form.
+
+X.
+
+CONCLUSION
+
+12
 (2024).
 [20] H. Übler et al., GA-NIFS: JWST/NIRSpec IFU observations of a redshift z ≈ 5.6 galaxy revealing fast rotation,
 arXiv:2312.03589 (2024).
@@ -1381,10 +1370,10 @@ DESI
 2024
 results,
 arXiv:2404.03002 (2024).
-
 [22] I. Banik, C. Pittordis, W. Sutherland, B. Famaey, R.
 Ibata, S. Mieske, and H. Zhao, Strong constraints on
 the gravitational law from Gaia DR3 wide binaries, Mon.
+
 Not. R. Astron. Soc. 527, 4573 (2024).
 [23] C. Pittordis and W. Sutherland, Wide binaries from Gaia
 EDR3: preference for GR over MOND?, Open J. Astrophys. 6, 4 (2023).

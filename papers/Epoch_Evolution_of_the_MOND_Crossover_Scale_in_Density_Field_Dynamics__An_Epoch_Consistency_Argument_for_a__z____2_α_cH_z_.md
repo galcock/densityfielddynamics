@@ -16,7 +16,7 @@ Gary Alcock1
 1
 
 Independent Researcher, Los Angeles, CA, USA∗
-(Dated: April 22, 2026)
+(Dated: May 2, 2026)
 
 We argue that within Density √
 Field Dynamics (DFD), the MOND crossover acceleration evolves
@@ -525,11 +525,16 @@ surveys optimized for rotation-curve extraction (rather
 than opportunistic spectroscopy) would resolve the test
 at 5σ within ∼ 3–5 years.
 
+[1] M. Milgrom, “A modification of the Newtonian dynamics
+as a possible alternative to the hidden mass hypothesis,”
+Astrophys. J. 270, 365 (1983).
+[2] G. Alcock, “Density Field Dynamics: A Complete Unified
+
 VIII.
 
 SUMMARY
 
-consistency rule already used in v3.4 Section XIX.D to
+Under the DFD postulates and the conditionaluniqueness Proposition 4 (equivalently, under the epochconsistency rule already used in v3.4 Section XIX.D to
 promote GℏH 2 /c5 = α57 from present-epoch to allepoch form), the MOND crossover
 √ acceleration at cosmic epoch z satisfies a⋆ (z) = 2 α cH(z). The argument extends the z = 0 variational-stationarity derivation of [2] (Theorem N.14) to arbitrary epoch, using only
 the epoch-invariant topological coefficients ka = 3/(8α)
@@ -547,17 +552,6 @@ by a factor H(1)/H0 ≈ 1.79 relative to the present-epoch
 value. Observation of a frozen a⋆ at high z would falsify
 the result; observation of evolution tracking H(z) would
 support it.
-
-ACKNOWLEDGMENTS
-
-Under the DFD postulates and the conditionaluniqueness Proposition 4 (equivalently, under the epoch-
-
-The author thanks Claude (Anthropic) for computational and analytical assistance.
-
-[1] M. Milgrom, “A modification of the Newtonian dynamics
-as a possible alternative to the hidden mass hypothesis,”
-Astrophys. J. 270, 365 (1983).
-[2] G. Alcock, “Density Field Dynamics: A Complete Unified
 
 Theory,” v3.4, Zenodo (2026).
 [3] D. W. Sciama, “On the origin of inertia,” Mon. Not. R. Astron. Soc. 113, 34 (1953).
