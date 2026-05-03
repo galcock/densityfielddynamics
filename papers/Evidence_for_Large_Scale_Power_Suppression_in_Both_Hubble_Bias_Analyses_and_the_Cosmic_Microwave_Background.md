@@ -1,5 +1,6 @@
 ---
 source_pdf: Evidence_for_Large_Scale_Power_Suppression_in_Both_Hubble_Bias_Analyses_and_the_Cosmic_Microwave_Background.pdf
+title: "Consistent Large-Scale Power Suppression in Hubble Bias Analyses and the CMB: Evidence for a"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

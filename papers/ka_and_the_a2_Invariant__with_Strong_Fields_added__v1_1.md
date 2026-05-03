@@ -1,5 +1,6 @@
 ---
 source_pdf: ka_and_the_a2_Invariant__with_Strong_Fields_added__v1_1.pdf
+title: "ka and the a2 Invariant:"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

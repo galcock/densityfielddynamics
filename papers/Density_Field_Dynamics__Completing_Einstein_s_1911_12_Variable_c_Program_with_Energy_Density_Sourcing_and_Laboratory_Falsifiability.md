@@ -1,5 +1,6 @@
 ---
 source_pdf: Density_Field_Dynamics__Completing_Einstein_s_1911_12_Variable_c_Program_with_Energy_Density_Sourcing_and_Laboratory_Falsifiability.pdf
+title: "Density Field Dynamics: Completing Einstein’s 1911–12 Variable-c Program with"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

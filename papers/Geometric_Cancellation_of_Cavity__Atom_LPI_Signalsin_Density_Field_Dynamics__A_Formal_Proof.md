@@ -1,5 +1,6 @@
 ---
 source_pdf: Geometric_Cancellation_of_Cavity__Atom_LPI_Signalsin_Density_Field_Dynamics__A_Formal_Proof.pdf
+title: "Geometric Cancellation of Cavity–Atom LPI Signals"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

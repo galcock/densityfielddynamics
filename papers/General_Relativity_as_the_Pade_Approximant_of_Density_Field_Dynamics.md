@@ -1,5 +1,6 @@
 ---
 source_pdf: General_Relativity_as_the_Pade_Approximant_of_Density_Field_Dynamics.pdf
+title: "General Relativity as the Padé Approximant of Density Field Dynamics:"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

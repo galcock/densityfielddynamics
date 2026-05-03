@@ -1,5 +1,6 @@
 ---
 source_pdf: Strong_Fields_and_Gravitational_Waves_in_Density_Field_Dynamics__From_Optical_First_Principles_to_Quantitative_Tests.pdf
+title: "Strong Fields and Gravitational Waves in Density Field Dynamics:"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

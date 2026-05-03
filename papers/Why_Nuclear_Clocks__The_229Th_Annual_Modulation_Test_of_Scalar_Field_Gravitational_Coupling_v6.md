@@ -1,5 +1,6 @@
 ---
 source_pdf: Why_Nuclear_Clocks__The_229Th_Annual_Modulation_Test_of_Scalar_Field_Gravitational_Coupling_v6.pdf
+title: "Why Nuclear Clocks: The 229Th Annual Modulation Test of"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

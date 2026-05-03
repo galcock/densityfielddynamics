@@ -1,5 +1,6 @@
 ---
 source_pdf: DFD_Gravity_is_Light.pdf
+title: "Gravity is Light"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

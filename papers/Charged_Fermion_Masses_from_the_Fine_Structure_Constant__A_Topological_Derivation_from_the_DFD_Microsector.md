@@ -1,5 +1,6 @@
 ---
 source_pdf: Charged_Fermion_Masses_from_the_Fine_Structure_Constant__A_Topological_Derivation_from_the_DFD_Microsector.pdf
+title: "Charged Fermion Masses from the Fine-Structure Constant:"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

@@ -1,5 +1,6 @@
 ---
 source_pdf: Epoch_Evolution_of_the_MOND_Crossover_Scale_in_Density_Field_Dynamics__An_Epoch_Consistency_Argument_for_a__z____2_α_cH_z_.pdf
+title: "Epoch Evolution of the MOND Crossover Scale in Density"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

@@ -1,5 +1,6 @@
 ---
 source_pdf: Uniqueness_of_the_Internal_Manifold_Deriving_CP_S_from_Vacuum_Axioms_in_Density_Field_Dynamics.pdf
+title: "Uniqueness of the Internal Manifold:"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

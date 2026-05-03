@@ -1,5 +1,6 @@
 ---
 source_pdf: Sector_Resolved_Test_of_Local_Position_Invariance_with_Co_Located_Cavity__Atom_Frequency_Ratios.pdf
+title: "Sector-Resolved Test of Local Position Invariance with Co-Located Cavity–Atom"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

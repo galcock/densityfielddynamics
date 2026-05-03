@@ -1,5 +1,6 @@
 ---
 source_pdf: A_Sharp__Testable_Slope_Prediction_for_a_Sector_Resolved_Cavity__Atom_LPI_Test.pdf
+title: "A Sharp, Testable Slope Prediction for a Sector-Resolved Cavity–Atom"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

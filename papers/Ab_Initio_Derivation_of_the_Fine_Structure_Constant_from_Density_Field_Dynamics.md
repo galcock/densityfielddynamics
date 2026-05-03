@@ -1,5 +1,6 @@
 ---
 source_pdf: Ab_Initio_Derivation_of_the_Fine_Structure_Constant_from_Density_Field_Dynamics.pdf
+title: "Ab Initio Derivation of the Fine Structure Constant"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

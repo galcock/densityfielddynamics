@@ -1,5 +1,6 @@
 ---
 source_pdf: Density_Field_Dynamics_and_the_c_Field__A_Three_Dimensional__Time_Emergent_Dynamics_for_Gravity_and_Cosmology.pdf
+title: "Density Field Dynamics and the c-Field:"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

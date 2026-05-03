@@ -1,5 +1,6 @@
 ---
 source_pdf: Testing_Nuclear_Decay_Constancy_under_Gravitational_Potential__A_Precision_Proposal_Inspired_by_Scalar_Optical_Metric_Dynamics.pdf
+title: "Testing Nuclear Decay Constancy under Gravitational Potential: A Precision"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

@@ -1,5 +1,6 @@
 ---
 source_pdf: Density_Field_Dynamics_as_the_Minimal__Testable_Origin_of_the_Standard_Model_Gauge_Structure.pdf
+title: "Emergent SU (3) × SU (2) × U (1) from a Scalar Optical Medium:"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

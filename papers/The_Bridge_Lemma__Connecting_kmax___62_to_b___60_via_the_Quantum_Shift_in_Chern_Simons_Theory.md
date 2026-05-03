@@ -1,5 +1,6 @@
 ---
 source_pdf: The_Bridge_Lemma__Connecting_kmax___62_to_b___60_via_the_Quantum_Shift_in_Chern_Simons_Theory.pdf
+title: "The Bridge Lemma: Connecting kmax = 62 to b = 60"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

@@ -1,5 +1,6 @@
 ---
 source_pdf: Two_Numerical_Relations_Linking_the_Fine_Structure_Constant_to_Gravitational_Phenomenology.pdf
+title: "Two Numerical Relations Linking the Fine-Structure Constant"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

@@ -1,5 +1,6 @@
 ---
 source_pdf: Solar_locked_differential_modulation_between_cavity_and_atomic_clocks_in_ROCIT_data_DFD.pdf
+title: "Solar-Locked Differential in Cavity–Atom Frequency Ratios:"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

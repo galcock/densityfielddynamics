@@ -1,5 +1,6 @@
 ---
 source_pdf: LPI_Advanced.pdf
+title: "Completing the Local Position Invariance Test Suite:"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

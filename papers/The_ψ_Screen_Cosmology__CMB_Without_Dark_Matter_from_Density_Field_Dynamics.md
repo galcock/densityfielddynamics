@@ -1,5 +1,6 @@
 ---
 source_pdf: The_ψ_Screen_Cosmology__CMB_Without_Dark_Matter_from_Density_Field_Dynamics.pdf
+title: "The ψ-Screen Cosmology:"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

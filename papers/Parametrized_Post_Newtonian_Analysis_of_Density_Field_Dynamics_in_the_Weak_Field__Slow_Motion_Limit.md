@@ -1,5 +1,6 @@
 ---
 source_pdf: Parametrized_Post_Newtonian_Analysis_of_Density_Field_Dynamics_in_the_Weak_Field__Slow_Motion_Limit.pdf
+title: "Parametrized Post-Newtonian Analysis of Density Field Dynamics"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

@@ -1,5 +1,6 @@
 ---
 source_pdf: The_Physical_Origin_of_the_Refractive_Field_in_Density_Field_Dynamics__Gravity_as_Electromagnetic_Vacuum_Loading.pdf
+title: "The Physical Origin of the Refractive Field in Density Field Dynamics: Gravity as"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

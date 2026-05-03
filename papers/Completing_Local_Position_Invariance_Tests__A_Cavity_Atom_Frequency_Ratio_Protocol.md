@@ -1,5 +1,6 @@
 ---
 source_pdf: Completing_Local_Position_Invariance_Tests__A_Cavity_Atom_Frequency_Ratio_Protocol.pdf
+title: "Completing Local Position Invariance Tests:"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

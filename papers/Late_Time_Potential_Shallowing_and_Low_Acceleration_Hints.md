@@ -1,5 +1,6 @@
 ---
 source_pdf: Late_Time_Potential_Shallowing_and_Low_Acceleration_Hints.pdf
+title: "Late-Time Potential Shallowing and Low-Acceleration"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

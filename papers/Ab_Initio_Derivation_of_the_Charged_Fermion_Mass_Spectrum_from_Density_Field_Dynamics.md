@@ -1,5 +1,6 @@
 ---
 source_pdf: Ab_Initio_Derivation_of_the_Charged_Fermion_Mass_Spectrum_from_Density_Field_Dynamics.pdf
+title: "Ab Initio Derivation of the Charged Fermion Mass Spectrum"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

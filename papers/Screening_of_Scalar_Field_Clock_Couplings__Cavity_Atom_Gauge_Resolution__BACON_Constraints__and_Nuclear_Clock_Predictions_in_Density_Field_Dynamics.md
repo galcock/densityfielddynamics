@@ -1,5 +1,6 @@
 ---
 source_pdf: Screening_of_Scalar_Field_Clock_Couplings__Cavity_Atom_Gauge_Resolution__BACON_Constraints__and_Nuclear_Clock_Predictions_in_Density_Field_Dynamics.pdf
+title: "Screening of Scalar-Field Clock Couplings:"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

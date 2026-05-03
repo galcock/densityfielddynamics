@@ -1,5 +1,6 @@
 ---
 source_pdf: The_DFD_Standard_Model__A_Geometric_Origin_for_α__Fermion_Masses__and_Quark_Mixing.pdf
+title: "The DFD Standard Model:"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

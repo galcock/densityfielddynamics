@@ -1,5 +1,6 @@
 ---
 source_pdf: Density_Field_Dynamics__Unified_Derivations__Sectoral_Tests__and_Experimental_Roadmap.pdf
+title: "Density Field Dynamics: Unified"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

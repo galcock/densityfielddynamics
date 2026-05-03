@@ -1,5 +1,6 @@
 ---
 source_pdf: Constitutive_Derivation_of_Tensor_Gravitational_Radiation_from_CP_2___S3_Spectral_Geometry_in_Density_Field_Dynamics.pdf
+title: "Constitutive Derivation of Tensor Gravitational Radiation"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

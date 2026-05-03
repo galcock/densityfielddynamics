@@ -1,5 +1,6 @@
 ---
 source_pdf: Density_Field_Dynamics_Resolves_the_Penrose_Superposition_Paradox.pdf
+title: "Density Field Dynamics Resolves the Penrose Superposition Paradox"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

@@ -1,5 +1,6 @@
 ---
 source_pdf: DFD_Cover_Letter.pdf
+title: "Cover Letter / Preface: Why Density Field Dynamics is"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

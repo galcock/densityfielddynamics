@@ -1,5 +1,6 @@
 ---
 source_pdf: Induced_Newtons_Constant_within_Density_Field_Dynamics.pdf
+title: "Induced Newton’s Constant within Density Field"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

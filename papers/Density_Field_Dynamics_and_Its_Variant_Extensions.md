@@ -1,5 +1,6 @@
 ---
 source_pdf: Density_Field_Dynamics_and_Its_Variant_Extensions.pdf
+title: "Density Field Dynamics and Its Variant Extensions:"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

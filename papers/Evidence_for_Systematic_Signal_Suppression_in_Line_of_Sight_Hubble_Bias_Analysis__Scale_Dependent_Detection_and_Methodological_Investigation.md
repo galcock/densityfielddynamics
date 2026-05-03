@@ -1,5 +1,6 @@
 ---
 source_pdf: Evidence_for_Systematic_Signal_Suppression_in_Line_of_Sight_Hubble_Bias_Analysis__Scale_Dependent_Detection_and_Methodological_Investigation.pdf
+title: "Evidence for Systematic Signal Suppression in Line-of-Sight Hubble Bias Analysis:"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

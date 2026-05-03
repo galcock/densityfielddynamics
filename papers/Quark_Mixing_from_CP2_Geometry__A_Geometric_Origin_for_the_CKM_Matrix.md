@@ -1,5 +1,6 @@
 ---
 source_pdf: Quark_Mixing_from_CP2_Geometry__A_Geometric_Origin_for_the_CKM_Matrix.pdf
+title: "Quark Mixing from CP2 Geometry:"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

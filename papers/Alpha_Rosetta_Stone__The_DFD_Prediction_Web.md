@@ -1,5 +1,6 @@
 ---
 source_pdf: Alpha_Rosetta_Stone__The_DFD_Prediction_Web.pdf
+title: "The Alpha Rosetta Stone"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

@@ -1,5 +1,6 @@
 ---
 source_pdf: dfd_neutrino_paper_v7_s2_seesaw_closure.pdf
+title: "A Closed-Form Neutrino Sector from DFD v3.5: TBM Geometry, a"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

@@ -1,5 +1,6 @@
 ---
 source_pdf: Falsifiable_Experimental_Signatures_of_Density_Field_Dynamics.pdf
+title: "Falsifiable Experimental Signatures of Density Field Dynamics:"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

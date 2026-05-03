@@ -1,5 +1,6 @@
 ---
 source_pdf: Density_Field_Dynamics__A_Complete_Unified_Theory__v3_3.pdf
+title: "Density Field Dynamics: A Complete Unified Theory"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

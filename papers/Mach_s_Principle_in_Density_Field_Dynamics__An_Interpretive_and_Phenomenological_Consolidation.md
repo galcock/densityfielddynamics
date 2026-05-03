@@ -1,5 +1,6 @@
 ---
 source_pdf: Mach_s_Principle_in_Density_Field_Dynamics__An_Interpretive_and_Phenomenological_Consolidation.pdf
+title: "Mach’s Principle in Density Field Dynamics:"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

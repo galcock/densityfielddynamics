@@ -1,5 +1,6 @@
 ---
 source_pdf: Solar_Locked_Differential_in_Ion_Neutral_Optical_Frequency_Ratios__Empirical_Evidence_for_a_Reproducible_Heliocentric_Phase_Modulation.pdf
+title: "Solar-Locked Differential in Ion–Neutral Optical Frequency Ratios:"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

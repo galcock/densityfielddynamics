@@ -1,5 +1,6 @@
 ---
 source_pdf: Tree_Level_No_Drive_Theorem_for_the_Minimal_Optical_Metric_EM_Sector_in_Density_Field_Dynamics__λbare___1_from_the_Pure_Gauge_Invariant_Action.pdf
+title: "Tree-Level No-Drive Theorem for the Minimal Optical-Metric EM Sector in Density"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

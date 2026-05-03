@@ -1,5 +1,6 @@
 ---
 source_pdf: Unexplained_Bright__Dim_Intensity_Asymmetries_in_SOHO_and_UVCS.pdf
+title: "Draft version September 30, 2025"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

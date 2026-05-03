@@ -1,5 +1,6 @@
 ---
 source_pdf: Sector_Resolved_Measurement_in_a_Scalar_Refractive_Gravity_Framework.pdf
+title: "Sector-Resolved Measurement in a Scalar Refractive Gravity Framework:"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

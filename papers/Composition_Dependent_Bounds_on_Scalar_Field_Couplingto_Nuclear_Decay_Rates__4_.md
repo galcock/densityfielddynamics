@@ -1,5 +1,6 @@
 ---
 source_pdf: Composition_Dependent_Bounds_on_Scalar_Field_Couplingto_Nuclear_Decay_Rates__4_.pdf
+title: "Composition-Dependent Bounds on Scalar-Field Coupling"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

@@ -1,5 +1,6 @@
 ---
 source_pdf: Optical__Metric_Scalar_Phenomenology_and_a_Decisive_Cavity__Atom_LPI_Test.pdf
+title: "Optical-Metric Scalar Phenomenology and a Decisive Cavity-Atom LPI Test:"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

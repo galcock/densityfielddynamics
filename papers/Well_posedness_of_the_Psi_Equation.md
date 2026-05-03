@@ -1,5 +1,6 @@
 ---
 source_pdf: Well_posedness_of_the_Psi_Equation.pdf
+title: "WELL-POSEDNESS AND BOUNDARY VALUE PROBLEMS FOR A CLASS"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

@@ -1,5 +1,6 @@
 ---
 source_pdf: Pairing_Symmetry_Selection_Rule_for_the_Cooper_Pair_Mass_Anomaly_from_Internal_Space_Topology_v2.pdf
+title: "Pairing-Symmetry Selection Rules for the Cooper-Pair Mass Anomaly"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

@@ -1,5 +1,6 @@
 ---
 source_pdf: Density_Field_Dynamics__Scalar_Refractive_Gravity__Quantum_Resolution__and_Dual_Sector_Electrodynamics.pdf
+title: "Density Field Dynamics: Scalar Refractive Gravity, Quantum Resolution, and"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

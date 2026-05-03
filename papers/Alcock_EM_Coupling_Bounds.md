@@ -1,5 +1,6 @@
 ---
 source_pdf: Alcock_EM_Coupling_Bounds.pdf
+title: "Accidental and Intentional Constraints on an EM→ ψ Back–Reaction"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

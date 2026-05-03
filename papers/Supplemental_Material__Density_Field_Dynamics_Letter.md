@@ -1,5 +1,6 @@
 ---
 source_pdf: Supplemental_Material__Density_Field_Dynamics_Letter.pdf
+title: "Supplemental Material"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)

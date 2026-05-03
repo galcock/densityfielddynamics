@@ -1,5 +1,6 @@
 ---
 source_pdf: Matter_Wave_Interferometry_Tests_of_Density_Field_Dynamics.pdf
+title: "Matter-Wave Interferometry Tests of Density Field Dynamics"
 site: https://densityfielddynamics.com/
 author: Gary Alcock
 framework: Density Field Dynamics (DFD)
